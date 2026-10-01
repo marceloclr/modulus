@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plantas humanizadas · estudo preliminar v2</title>
+<style>
+:root{--ink:#2F333A;--soft:#5d6168;--bg:#FBFAF7;--line:#dcd8cf}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI",system-ui,sans-serif}
+header{max-width:1180px;margin:auto;padding:28px 20px 8px}
+h1{font:600 1.7rem/1.2 "Palatino Linotype",Palatino,Georgia,serif;margin:0 0 6px}
+header p{margin:0;color:var(--soft);max-width:70ch}
+main{max-width:1180px;margin:auto;padding:16px 20px 40px;display:grid;gap:20px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:#fff;border:1px solid var(--line);border-top:5px solid var(--ac);border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
+.card figure{margin:0;background:var(--tint);padding:10px}
+.card img{width:100%;height:auto;display:block;cursor:zoom-in}
+.body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;gap:8px}
+h2{font:600 1.15rem "Palatino Linotype",Palatino,Georgia,serif;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--tint);border:1px solid var(--ac);border-radius:3px;padding:1px 8px;font-size:.82rem}
+ul{margin:0;padding-left:18px;color:var(--soft);font-size:.9rem}
+.acts{display:flex;gap:8px;margin-top:auto;padding-top:6px}
+.btn{font:inherit;font-size:.85rem;text-decoration:none;color:var(--ink);border:1px solid var(--ac);background:#fff;border-radius:4px;padding:5px 12px}
+.btn:hover,.btn:focus-visible{background:var(--tint);outline:2px solid var(--ac);outline-offset:1px}
+[data-tip]{position:relative}
+[data-tip]:hover::after,[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;left:0;bottom:calc(100% + 6px);z-index:5;width:max-content;max-width:260px;background:var(--ink);color:#fff;font-size:.78rem;line-height:1.4;padding:6px 9px;border-radius:4px;white-space:normal}
+.a{--ac:#7FA39B;--tint:#E3EEEC}.b{--ac:#8F8FB5;--tint:#E7E7F0}.c{--ac:#B89E72;--tint:#F3EBDD}.d{--ac:#B98C7A;--tint:#F2E3DC}
+footer{max-width:1180px;margin:auto;padding:0 20px 32px;color:var(--soft);font-size:.85rem}
+</style>
+</head>
+<body>
+<header>
+<h1>Plantas humanizadas da residência térrea simétrica</h1>
+<p>Estudo preliminar para clima quente e úmido (ZB8, Ceará): suítes a nascente, sala de pé-direito elevado, torres extratoras e ventilação cruzada. Quatro alternativas, versão 2, na escala de 30 px por metro.</p>
+</header>
+<main>
+<article class="card a"><figure><a href="planta_A_v2.svg" target="_blank" data-tip="Abre a planta vetorial em nova aba, com zoom sem perda"><img src="planta_A_v2.svg" onerror="this.onerror=null;this.src='planta_A_v2.png'" alt="Planta humanizada da opção A"></a></figure>
+<div class="body"><h2>Opção A · compacta</h2>
+<div class="chips"><span class="chip" tabindex="0" data-tip="Largura Wb = 2 × 2,90 + 1,20 = 7,00 m; comprimento L = 1,80 + 4,20 + 3,00 + 6,00 + 5,00 + 2,00 = 22,00 m">7,00 × 22,00 m</span><span class="chip" tabindex="0" data-tip="Área fechada = 7,00 × (20,00 − 1,80) = 127,40 m²">127,40 m² fechados</span></div>
+<ul><li>Rede na varanda frontal; churrasqueira, varal e mesa ao fundo</li><li>Sapateira no vestíbulo e armários de closet com 0,55 m</li><li>Box de canto com porta de correr</li></ul>
+<div class="acts"><a class="btn" href="planta_A_v2.svg" target="_blank" data-tip="Abre o SVG em nova aba para ampliar">Ampliar</a><a class="btn" href="planta_A_v2.png" download data-tip="Salva a versão PNG (1600 px), ideal para celular">Baixar PNG</a></div></div></article>
+<article class="card b"><figure><a href="planta_B_v2.svg" target="_blank" data-tip="Abre a planta vetorial em nova aba, com zoom sem perda"><img src="planta_B_v2.svg" onerror="this.onerror=null;this.src='planta_B_v2.png'" alt="Planta humanizada da opção B"></a></figure>
+<div class="body"><h2>Opção B · simetria transversal</h2>
+<div class="chips"><span class="chip" tabindex="0" data-tip="Casa 7,00 × 22,00 m com eixo de simetria em y = 11,00; suítes nas extremidades sul e norte">7,00 × 22,00 m</span><span class="chip" tabindex="0" data-tip="Área fechada = 7,00 × (20,20 − 1,80) = 128,80 m²">128,80 m² fechados</span></div>
+<ul><li>Lavanderia com máquina e tanque junto à cozinha</li><li>Ex-área de serviço convertida em despensa com prateleiras</li><li>Churrasqueira, varal e mesa na varanda norte</li></ul>
+<div class="acts"><a class="btn" href="planta_B_v2.svg" target="_blank" data-tip="Abre o SVG em nova aba para ampliar">Ampliar</a><a class="btn" href="planta_B_v2.png" download data-tip="Salva a versão PNG (1600 px), ideal para celular">Baixar PNG</a></div></div></article>
+<article class="card c"><figure><a href="planta_C_v2.svg" target="_blank" data-tip="Abre a planta vetorial em nova aba, com zoom sem perda"><img src="planta_C_v2.svg" onerror="this.onerror=null;this.src='planta_C_v2.png'" alt="Planta humanizada da opção C"></a></figure>
+<div class="body"><h2>Opção C · intermediária</h2>
+<div class="chips"><span class="chip" tabindex="0" data-tip="Largura Wb = 2 × 4,00 + 1,20 = 9,20 m; comprimento L = 1,80 + 5,00 + 3,00 + 5,50 + 4,50 + 2,00 = 21,80 m">9,20 × 21,80 m</span><span class="chip" tabindex="0" data-tip="Área fechada = 9,20 × (19,80 − 1,80) = 165,60 m²">165,60 m² fechados</span></div>
+<ul><li>Bancada dupla com duas cubas no banho</li><li>Escrivaninha sob a janela lateral dos quartos</li><li>Rede, churrasqueira, varal, mesa externa e sapateira</li></ul>
+<div class="acts"><a class="btn" href="planta_C_v2.svg" target="_blank" data-tip="Abre o SVG em nova aba para ampliar">Ampliar</a><a class="btn" href="planta_C_v2.png" download data-tip="Salva a versão PNG (1600 px), ideal para celular">Baixar PNG</a></div></div></article>
+<article class="card d"><figure><a href="planta_D_v2.svg" target="_blank" data-tip="Abre a planta vetorial em nova aba, com zoom sem perda"><img src="planta_D_v2.svg" onerror="this.onerror=null;this.src='planta_D_v2.png'" alt="Planta humanizada da opção D"></a></figure>
+<div class="body"><h2>Opção D · ampla</h2>
+<div class="chips"><span class="chip" tabindex="0" data-tip="Largura Wb = 2 × 5,00 + 1,20 = 11,20 m; comprimento L = 1,80 + 5,00 + 3,00 + 5,50 + 4,50 + 2,00 = 21,80 m">11,20 × 21,80 m</span><span class="chip" tabindex="0" data-tip="Área fechada = 11,20 × (19,80 − 1,80) = 201,60 m²">201,60 m² fechados</span></div>
+<ul><li>Closet com armários nos dois lados e corredor de 1,30 m</li><li>Bancada dupla de 1,80 m no banho</li><li>Escrivaninha sob a janela lateral dos quartos</li></ul>
+<div class="acts"><a class="btn" href="planta_D_v2.svg" target="_blank" data-tip="Abre o SVG em nova aba para ampliar">Ampliar</a><a class="btn" href="planta_D_v2.png" download data-tip="Salva a versão PNG (1600 px), ideal para celular">Baixar PNG</a></div></div></article>
+</main>
+<footer>Mantenha esta página na mesma pasta dos arquivos SVG e PNG. Se o navegador não exibir o SVG, a imagem PNG é carregada automaticamente.</footer>
+</body>
+</html>
