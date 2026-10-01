@@ -1761,7 +1761,7 @@ function showTip(el){var t=el.getAttribute('data-tip'); if(!t) return; tip.textC
   var r=el.getBoundingClientRect(),tw=tip.offsetWidth,th=tip.offsetHeight;
   var left=Math.max(8,Math.min(window.innerWidth-tw-8,r.left+r.width/2-tw/2)),top=r.bottom+8;
   if(top+th>window.innerHeight-8) top=r.top-th-8;
-  if(body.classList.contains('sb-collapsed')&&el.classList.contains('grp-head')){left=r.right+10; top=r.top+r.height/2-th/2;}
+  if(el.closest('#sb')&&r.right+10+tw<=window.innerWidth-8){left=r.right+10; top=Math.max(8,Math.min(window.innerHeight-th-8,r.top+r.height/2-th/2));}
   tip.style.left=left+'px'; tip.style.top=top+'px';}
 function hideTip(){tip.classList.remove('on');}
 document.addEventListener('mouseover',function(e){var el=e.target.closest&&e.target.closest('[data-tip]'); if(el) showTip(el);});
