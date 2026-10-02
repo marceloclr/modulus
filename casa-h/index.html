@@ -1,45 +1,147 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Casa em H</title>
-<style>
-:root{--bg:#FBFAF7;--fg:#2F333A;--mut:#5d6168;--line:#E2DFD6;--acc:#8C6A2F}
-@media (prefers-color-scheme:dark){:root{--bg:#1d1f23;--fg:#E8E6E1;--mut:#A8ABB2;--line:#34373d;--acc:#C9A56B}}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 "Inter","Segoe UI",Helvetica,Arial,sans-serif}
-main{max-width:1100px;margin:0 auto;padding:24px 16px 48px}
-h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.05rem;margin:28px 0 8px}
-p,li{color:var(--mut)}figure{margin:16px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#FBFAF7}
-figure img{display:block;width:100%;height:auto}
-.acts a{display:inline-block;margin:0 8px 8px 0;padding:6px 12px;border:1px solid var(--line);border-radius:6px;color:var(--acc);text-decoration:none}
-table{border-collapse:collapse;width:100%;max-width:560px}td{padding:4px 8px;border-bottom:1px solid var(--line)}td:last-child{text-align:right}
-</style>
+<meta name="description" content="Estudo preliminar de casa térrea em H com três suítes, ala social e ligação pela cozinha e pela área de serviço.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/base.js"></script>
 </head>
 <body>
-<main>
-<h1>Casa em H · proposta v1</h1>
-<p>Ala íntima com três suítes, ala social e ligação entre elas pela cozinha e pela área de serviço. Casa de 18,80 × 19,00 m, com 244,28 m² de área fechada e 263,48 m² com a varanda gourmet.</p>
-<figure><a href="planta_H_v1.svg" target="_blank" rel="noopener"><img src="planta_H_v1.svg" onerror="this.onerror=null;this.src='planta_H_v1.png'" alt="Planta humanizada da casa em H com três suítes, escritório, estar, jantar, cozinha e serviço"></a></figure>
-<div class="acts"><a href="planta_H_v1.svg" target="_blank" rel="noopener">Ampliar (SVG)</a><a href="planta_H_v1.png" download>Baixar PNG</a></div>
+<header class="bar">
+  <div class="bar-in">
+    <a class="back" href="../" data-tip="Volta para a lista de projetos">← Projetos</a>
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+      <div class="crumb"><span class="chip" style="--c:var(--slate)">Casa em H</span><span class="sec">Proposta v1</span></div>
+    </div>
+    <button class="btn" id="themeBtn" type="button" data-tip="Alterna entre o tema claro e o escuro. A escolha fica guardada neste navegador">Tema escuro</button>
+  </div>
+</header>
 
-<h2>Organização</h2>
-<ul>
-<li><strong>Ala íntima:</strong> três suítes com quarto de 4,00 × 5,00 m. O banho fica na fachada externa, com janela, e o closet fica voltado para dentro do terreno. A master tem banho de 2,80 × 3,00 m e closet de 3,40 × 3,00 m. As suítes 1 e 2 têm os banhos encostados, para concentrar a hidráulica.</li>
-<li><strong>Ala social:</strong> começa pelo escritório. O banho social reversível tem uma porta para o vestíbulo e outra para o escritório, que assim pode servir de quarto de hóspedes. Em seguida vêm a sala de estar e a sala de jantar, com a varanda gourmet na ponta.</li>
-<li><strong>Ligação:</strong> cozinha (4,00 × 3,60 m), aberta para o jantar, e área de serviço (2,60 × 3,60 m), junto à ala íntima, com saída para o pátio posterior. Uma galeria envidraçada de 1,20 m liga as alas sem passar pela cozinha.</li>
-<li><strong>Pátios:</strong> o de entrada (6,60 × 11,00 m) e o posterior, aberto para o quintal, ventilam as duas alas pelos dois lados.</li>
-</ul>
+<main class="page">
+<section class="panel" style="--c:var(--slate)">
+  <div class="hero">
+    <div>
+      <p class="kicker">Planta humanizada, versão 1, outubro de 2026</p>
+      <h1>Casa em H</h1>
+      <p class="lede">Duas alas paralelas, uma íntima e outra social, unidas pela cozinha e pela área de serviço. Os dois pátios ventilam todos os ambientes pelos dois lados.</p>
+    </div>
+    <div class="carimbo" aria-label="Ficha técnica">
+      <div class="title">Ficha técnica</div>
+      <div class="row"><div class="cell"><span class="k">Tipo</span><span class="v">Térrea, planta em H</span></div><div class="cell"><span class="k">Fase</span><span class="v">Estudo preliminar</span></div></div>
+      <div class="row"><div class="cell"><span class="k">Casa</span><span class="v">18,80 × 19,00 m</span></div><div class="cell"><span class="k">Quartos</span><span class="v">3 suítes de 4,00 × 5,00 m</span></div></div>
+      <div class="row"><div class="cell"><span class="k">Área fechada</span><span class="v">244,28 m²</span></div><div class="cell"><span class="k">Com varanda</span><span class="v">263,48 m²</span></div></div>
+      <div class="row"><div class="cell"><span class="k">Terreno mínimo</span><span class="v">21,80 × 27,00 m</span></div><div class="cell"><span class="k">Responsável técnico</span><span class="v">A definir</span></div></div>
+    </div>
+  </div>
 
-<h2>Terreno mínimo</h2>
-<table>
-<tr><td>Casa</td><td>18,80 × 19,00 m</td></tr>
-<tr><td>Recuos adotados como hipótese</td><td>frente 5,00 · laterais 1,50 · fundo 3,00 m</td></tr>
-<tr><td><strong>Terreno mínimo</strong></td><td><strong>21,80 × 27,00 m = 588,60 m²</strong></td></tr>
-<tr><td>Terreno recomendado</td><td>22,00 × 30,00 m = 660,00 m²</td></tr>
-<tr><td>Ocupação no terreno recomendado</td><td>39,92 %</td></tr>
-</table>
-<p>Os recuos e a taxa de ocupação precisam ser confirmados na lei de uso e ocupação do solo do município e da zona do terreno.</p>
+  <div class="stats">
+    <div class="stat" style="--c:var(--patina)"><div class="k">Suítes</div><div class="v">3</div></div>
+    <div class="stat" style="--c:var(--slate)"><div class="k">Área fechada</div><div class="v">244,28 m²</div></div>
+    <div class="stat" style="--c:var(--moss)"><div class="k">Pátios</div><div class="v">2</div></div>
+    <div class="stat" style="--c:var(--brass)"><div class="k">Ocupação (22 × 30)</div><div class="v">39,9 %</div></div>
+  </div>
+
+  <figure class="figure hum">
+    <div class="fig-tools">
+      <a class="btn" href="planta_H_v1.svg" target="_blank" rel="noopener" data-tip="Abre a planta vetorial em nova aba, com zoom sem perda">Ampliar</a>
+      <a class="btn" href="planta_H_v1.png" download data-tip="Salva a versão PNG, ideal para celular">Baixar PNG</a>
+    </div>
+    <a href="planta_H_v1.svg" target="_blank" rel="noopener"><img style="max-width:980px" src="planta_H_v1.svg" onerror="this.onerror=null;this.src='planta_H_v1.png'" alt="Planta humanizada da casa em H com três suítes, escritório, estar, jantar, cozinha e serviço"></a>
+    <figcaption>Planta humanizada, versão 1. A rua fica no topo do desenho.</figcaption>
+  </figure>
+
+  <div class="grid2">
+    <div class="card tint" style="--c:var(--patina)">
+      <h3>Ala íntima</h3>
+      <ul class="clean" style="--c:var(--patina)">
+        <li>Três suítes com quarto de 4,00 × 5,00 m.</li>
+        <li>O banho fica na fachada externa, com janela; o closet fica voltado para dentro do terreno.</li>
+        <li>A master tem banho de 2,80 × 3,00 m e closet de 3,40 × 3,00 m.</li>
+        <li>Os banhos das suítes 1 e 2 são encostados, o que concentra a hidráulica.</li>
+        <li>Circulação de 1,20 m com janelas para o pátio de entrada e rouparia no fim.</li>
+      </ul>
+    </div>
+    <div class="card tint" style="--c:var(--slate)">
+      <h3>Ala social</h3>
+      <ul class="clean" style="--c:var(--slate)">
+        <li>Entrada pelo vestíbulo, ao lado do escritório (3,80 × 4,20 m).</li>
+        <li>Banho social reversível com porta para o vestíbulo e para o escritório, que pode servir de quarto de hóspedes.</li>
+        <li>Sala de estar (6,00 × 5,00 m), sala de jantar (6,00 × 4,80 m) e, na ponta, varanda gourmet.</li>
+      </ul>
+    </div>
+    <div class="card tint" style="--c:var(--brass)">
+      <h3>Ligação entre as alas</h3>
+      <ul class="clean" style="--c:var(--brass)">
+        <li>Cozinha de 4,00 × 3,60 m, aberta para o jantar e para a galeria.</li>
+        <li>Área de serviço de 2,60 × 3,60 m junto à ala íntima, com saída para o pátio posterior.</li>
+        <li>Galeria envidraçada de 1,20 m: liga as alas sem passar pela cozinha.</li>
+      </ul>
+    </div>
+    <div class="card tint" style="--c:var(--moss)">
+      <h3>Pátios</h3>
+      <ul class="clean" style="--c:var(--moss)">
+        <li>Pátio de entrada de 6,60 × 11,00 m, jardim entre as alas.</li>
+        <li>Pátio posterior aberto para o quintal, com acesso pelo serviço.</li>
+        <li>As duas alas têm janelas para fora e para os pátios, com ventilação cruzada.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 style="margin-top:12px">Quadro de áreas</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Ambiente</th><th class="n">Medidas</th><th class="n">Área</th></tr></thead>
+    <tbody>
+      <tr class="zone"><td colspan="3"><span class="tag t-suite">Ala íntima</span></td></tr>
+      <tr><td>Suítes 1 e 2 (quarto)</td><td class="n">4,00 × 5,00 m</td><td class="n">20,00 m² cada</td></tr>
+      <tr><td>Suíte master (quarto)</td><td class="n">4,00 × 5,00 m</td><td class="n">20,00 m²</td></tr>
+      <tr><td>Banho das suítes 1 e 2</td><td class="n">2,60 × 2,00 m</td><td class="n">5,20 m² cada</td></tr>
+      <tr><td>Closet das suítes 1 e 2</td><td class="n">2,40 × 2,00 m</td><td class="n">4,80 m² cada</td></tr>
+      <tr><td>Banho master</td><td class="n">2,80 × 3,00 m</td><td class="n">8,40 m²</td></tr>
+      <tr><td>Closet master</td><td class="n">3,40 × 3,00 m</td><td class="n">10,20 m²</td></tr>
+      <tr class="zone"><td colspan="3"><span class="tag t-social">Social</span></td></tr>
+      <tr><td>Vestíbulo</td><td class="n">2,20 × 6,00 m</td><td class="n">13,20 m²</td></tr>
+      <tr><td>Escritório</td><td class="n">3,80 × 4,20 m</td><td class="n">15,96 m²</td></tr>
+      <tr><td>Sala de estar</td><td class="n">6,00 × 5,00 m</td><td class="n">30,00 m²</td></tr>
+      <tr><td>Sala de jantar</td><td class="n">6,00 × 4,80 m</td><td class="n">28,80 m²</td></tr>
+      <tr><td>Cozinha</td><td class="n">4,00 × 3,60 m</td><td class="n">14,40 m²</td></tr>
+      <tr class="zone"><td colspan="3"><span class="tag t-apoio">Apoio e circulação</span></td></tr>
+      <tr><td>Banho social reversível</td><td class="n">3,80 × 1,80 m</td><td class="n">6,84 m²</td></tr>
+      <tr><td>Área de serviço</td><td class="n">2,60 × 3,60 m</td><td class="n">9,36 m²</td></tr>
+      <tr><td>Circulação íntima, galeria e rouparia</td><td class="n">—</td><td class="n">27,12 m²</td></tr>
+      <tr class="total"><td>Área fechada (projeção)</td><td class="n"></td><td class="n">244,28 m²</td></tr>
+      <tr><td><span class="tag t-var">Varanda gourmet</span></td><td class="n">6,00 × 3,20 m</td><td class="n">19,20 m²</td></tr>
+      <tr class="total"><td>Total construído</td><td class="n"></td><td class="n">263,48 m²</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Terreno mínimo</h2>
+  <div class="tbl-wrap"><table>
+    <tbody>
+      <tr><td>Casa</td><td class="n">18,80 × 19,00 m</td></tr>
+      <tr><td>Recuos adotados como hipótese</td><td class="n">frente 5,00 · laterais 1,50 · fundo 3,00 m</td></tr>
+      <tr class="total"><td>Terreno mínimo</td><td class="n">21,80 × 27,00 m = 588,60 m²</td></tr>
+      <tr><td>Terreno recomendado</td><td class="n">22,00 × 30,00 m = 660,00 m²</td></tr>
+      <tr><td>Ocupação no terreno recomendado</td><td class="n">39,92 %</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="card tint" style="--c:var(--rust)">
+    <h3>Pendências e verificações</h3>
+    <ul class="clean" style="--c:var(--rust)">
+      <li>Confirmar os recuos, a taxa de ocupação e a taxa de permeabilidade na lei de uso e ocupação do solo do município.</li>
+      <li>Definir a orientação do terreno: hoje a rua está no topo do desenho, sem estudo de sol.</li>
+      <li>Verificar a acessibilidade (NBR 9050) do banho social e das rotas, como foi feito na casa simétrica.</li>
+      <li>Escolher se a suíte master ganha quarto maior ou varanda privativa.</li>
+    </ul>
+  </div>
+</section>
 </main>
+<footer><div>Estudo conceitual de 2 de outubro de 2026. Medidas pelo eixo das paredes; desenho em escala gráfica, sem valor de projeto executivo.</div></footer>
 </body>
 </html>
