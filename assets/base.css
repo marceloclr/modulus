@@ -288,3 +288,4 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .atalho span{color:var(--ink-2);font-size:14.5px}
 .atalho .go{margin-top:6px;color:var(--c);font-weight:500}
 @media (prefers-reduced-motion:reduce){.atalho{transition:none}.atalho:hover{transform:none}}
+.btn.prim{background:var(--graphite);color:var(--bg);border-color:var(--graphite)}

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "casa-simetrica",
+    "titulo": "Residência simétrica do nascente",
+    "resumo": "Casa térrea espelhada, em quatro opções, com duas suítes voltadas para o sol da manhã, sala alta e torres extratoras.",
+    "url": "casa-simetrica/",
+    "thumb": "casa-simetrica/planta_A_v2_norte.svg",
+    "formato": "Bloco único",
+    "pavimentos": "Térrea",
+    "quartos": 2,
+    "suites": 2,
+    "casa": "7,00 × 22,65 a 11,20 × 21,80 m",
+    "area": 133.35,
+    "areaMax": 201.6,
+    "loteFrente": 10,
+    "loteFundo": 30,
+    "cor": "var(--patina)"
+  },
+  {
+    "id": "casa-h",
+    "titulo": "Casa em H",
+    "resumo": "Ala íntima com três suítes, ala social com escritório e banho reversível, e ligação pela cozinha e pela área de serviço.",
+    "url": "casa-h/",
+    "thumb": "casa-h/planta_H_v1.svg",
+    "formato": "H",
+    "pavimentos": "Térrea",
+    "quartos": 3,
+    "suites": 3,
+    "casa": "18,80 × 19,00 m",
+    "area": 244.28,
+    "loteFrente": 21.8,
+    "loteFundo": 27,
+    "cor": "var(--slate)"
+  }
+]

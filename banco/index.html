@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Banco de projetos</title>
+<meta name="description" content="Estudos de plantas publicados e plantas salvas no gerador.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/base.js"></script>
+<style>
+.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin:0 0 22px;box-shadow:var(--shadow)}
+.filtros label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink-3)}
+.filtros input,.filtros select{font:500 13.5px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:0}
+.filtros input[type=search]{width:220px}
+.filtros input[type=number]{width:96px}
+.filtros input:focus-visible,.filtros select:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
+@media (max-width:560px){.filtros label{flex:1 1 40%}.filtros input[type=search]{width:100%}.filtros input[type=number]{width:100%}}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:8px 0 14px}
+.sec-h h2{margin:0}
+.sec-h .acts{display:flex;gap:6px;flex-wrap:wrap}
+.proj .thumb svg{width:100%;height:100%}
+.proj .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.proj .acts .btn{padding:7px 10px;font-size:12.5px}
+.proj.salvo{cursor:default}
+.proj.salvo:hover{transform:none}
+.vazio{color:var(--ink-3);font-size:14.5px;background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--radius);padding:22px;text-align:center}
+.nome-edit{font:500 18px 'IBM Plex Serif',Georgia,serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 8px;width:100%}
+</style>
+</head>
+<body data-nav="banco" data-root="../">
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+      <div class="crumb"><span class="chip" style="--c:var(--patina)">Banco</span><span class="sec">Projetos prontos</span></div>
+    </div>
+    <button class="btn" id="themeBtn" type="button" data-tip="Alterna entre o tema claro e o escuro. A escolha fica guardada neste navegador">Tema escuro</button>
+  </div>
+</header>
+
+<main class="page">
+  <section class="panel" style="--c:var(--patina)">
+    <div class="panel-head">
+      <p class="eyebrow">Banco de projetos</p>
+      <h1 style="font-size:clamp(26px,4vw,36px)">Projetos prontos</h1>
+      <p>Estudos publicados e as plantas que você salvou no gerador. As plantas salvas ficam guardadas neste navegador; para levar a outro computador, exporte o JSON.</p>
+    </div>
+
+    <form class="filtros" id="filtros" role="search" onsubmit="return false">
+      <label>Buscar<input type="search" name="q" placeholder="Nome ou descrição"></label>
+      <label>Formato<select name="formato"><option value="">Todos</option><option value="Bloco">Bloco único</option><option value="L">Em L</option><option value="U">Em U</option><option value="H">Em H</option></select></label>
+      <label>Pavimentos<select name="pav"><option value="">Todos</option><option value="Térrea">Térrea</option><option value="Sobrado">Sobrado</option></select></label>
+      <label>Quartos (mín.)<input type="number" name="quartos" min="0" max="8" step="1" placeholder="0"></label>
+      <label>Frente do meu lote (m)<input type="number" name="frente" min="0" max="80" step="0.5" placeholder="qualquer"></label>
+    </form>
+
+    <div class="sec-h"><h2>Estudos publicados</h2></div>
+    <div class="projs" id="estudos"></div>
+
+    <div class="sec-h" style="margin-top:30px">
+      <h2>Salvos neste navegador</h2>
+      <div class="acts">
+        <a class="btn" href="../gerador/" data-tip="Abre o gerador para criar e salvar uma planta">Nova planta</a>
+        <button class="btn" type="button" id="exportarTudo" data-tip="Baixa todas as plantas salvas em um arquivo JSON">Exportar tudo</button>
+        <label class="btn" data-tip="Adiciona plantas de um arquivo JSON exportado antes">Importar<input type="file" id="importar" accept="application/json,.json" hidden></label>
+      </div>
+    </div>
+    <div class="projs" id="salvos"></div>
+  </section>
+</main>
+<footer><div>Estudos conceituais, sem valor de projeto executivo. As plantas salvas ficam apenas neste navegador.</div></footer>
+
+<script src="../gerador/motor.js"></script>
+<script src="../gerador/desenho.js"></script>
+<script>
+(function(){
+'use strict';
+const f2 = Motor.f2, CHAVE = 'plantas-banco';
+const filtros = document.getElementById('filtros');
+let estudos = [];
+
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function ler(){ try{ const l = JSON.parse(localStorage.getItem(CHAVE)||'[]'); return Array.isArray(l) ? l : []; }catch(e){ return []; } }
+function gravar(l){ try{ localStorage.setItem(CHAVE, JSON.stringify(l)); return true; }catch(e){ return false; } }
+function codifica(d){ return btoa(unescape(encodeURIComponent(JSON.stringify(d)))); }
+function baixar(nome, texto){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([texto], {type:'application/json'})); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
+
+function filtro(){
+  const d = Object.fromEntries(new FormData(filtros));
+  return {q: (d.q||'').trim().toLowerCase(), formato: d.formato||'', pav: d.pav||'', quartos: +d.quartos||0, frente: +d.frente||0};
+}
+function passa(f, o){
+  if(f.q && !(o.titulo + ' ' + (o.resumo||'')).toLowerCase().includes(f.q)) return false;
+  if(f.formato && !o.formato.includes(f.formato)) return false;
+  if(f.pav && o.pavimentos !== f.pav) return false;
+  if(f.quartos && o.quartos < f.quartos) return false;
+  if(f.frente && o.loteFrente > f.frente + 0.001) return false;
+  return true;
+}
+
+function renderEstudos(){
+  const f = filtro();
+  const lista = estudos.filter(e => passa(f, e));
+  document.getElementById('estudos').innerHTML = lista.length ? lista.map(e => `
+    <a class="proj" href="../${esc(e.url)}" style="--c:${esc(e.cor||'var(--brass)')}">
+      <div class="thumb"><img src="../${esc(e.thumb)}" alt="Miniatura da planta: ${esc(e.titulo)}" loading="lazy"></div>
+      <div class="body">
+        <h2>${esc(e.titulo)}</h2>
+        <p>${esc(e.resumo)}</p>
+        <dl><dt>Formato</dt><dd>${esc(e.formato)} · ${esc(e.pavimentos)}</dd><dt>Quartos</dt><dd>${e.quartos} (${e.suites} suítes)</dd><dt>Casa</dt><dd>${esc(e.casa)}</dd><dt>Área fechada</dt><dd>${f2(e.area)}${e.areaMax ? ' a ' + f2(e.areaMax) : ''} m²</dd><dt>Lote mínimo</dt><dd>${f2(e.loteFrente)} × ${f2(e.loteFundo)} m</dd></dl>
+        <span class="go">Abrir o estudo →</span>
+      </div>
+    </a>`).join('') : '<p class="vazio">Nenhum estudo publicado atende aos filtros.</p>';
+}
+
+function miniatura(item){
+  try{
+    const r = Motor.gerar(item.programa);
+    let v = r.variantes[Math.min(item.variante||0, r.variantes.length-1)];
+    if(!v) return '';
+    if(item.espelhada) v = Desenho.espelha(v);
+    const pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo'));
+    return Desenho.planta(v, pi, {titulo: item.nome, sub: v.tipologia});
+  }catch(e){ return ''; }
+}
+
+function renderSalvos(){
+  const f = filtro();
+  const todos = ler();
+  const lista = todos.filter(it => passa(f, {titulo: it.nome, resumo: it.resumo.formato, formato: it.resumo.formato, pavimentos: it.resumo.pavimentos, quartos: it.resumo.quartos, loteFrente: it.programa.frente}));
+  const alvo = document.getElementById('salvos');
+  if(!todos.length){ alvo.innerHTML = '<p class="vazio">Nenhuma planta salva ainda. No gerador, use “Salvar no banco”.</p>'; return; }
+  if(!lista.length){ alvo.innerHTML = '<p class="vazio">Nenhuma planta salva atende aos filtros.</p>'; return; }
+  alvo.innerHTML = lista.map(it => {
+    const r = it.resumo, p = it.programa;
+    const link = `../gerador/#q=${codifica(p)}&v=${it.variante||0}&e=${it.espelhada?1:0}`;
+    return `<article class="proj salvo" style="--c:var(--brass)" data-id="${esc(it.id)}">
+      <div class="thumb">${miniatura(it)}</div>
+      <div class="body">
+        <h2 class="nome">${esc(it.nome)}</h2>
+        <dl><dt>Formato</dt><dd>${esc(r.formato)} · ${esc(r.pavimentos)}${r.subsolo ? ' com subsolo' : ''}</dd><dt>Quartos</dt><dd>${r.quartos} (${r.suites} suítes)</dd><dt>Casa</dt><dd>${f2(r.W)} × ${f2(r.D)} m · ${f2(r.area)} m²</dd><dt>Lote</dt><dd>${f2(p.frente)} × ${f2(p.fundo)} m</dd><dt>Salvo em</dt><dd>${new Date(it.data).toLocaleDateString('pt-BR')}</dd></dl>
+        <div class="acts">
+          <a class="btn prim" href="${link}">Abrir no gerador</a>
+          <button class="btn" type="button" data-acao="renomear">Renomear</button>
+          <button class="btn" type="button" data-acao="exportar">Exportar</button>
+          <button class="btn" type="button" data-acao="excluir">Excluir</button>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+document.getElementById('salvos').addEventListener('click', e => {
+  const b = e.target.closest('[data-acao]'); if(!b) return;
+  const card = b.closest('[data-id]'), id = card.dataset.id, lista = ler(), it = lista.find(x => x.id===id); if(!it) return;
+  const acao = b.dataset.acao;
+  if(acao==='exportar') baixar(`planta-${id}.json`, JSON.stringify([it], null, 2));
+  if(acao==='excluir'){
+    if(b.dataset.confirma){ gravar(lista.filter(x => x.id!==id)); renderSalvos(); }
+    else { b.dataset.confirma = '1'; b.textContent = 'Confirmar exclusão'; setTimeout(() => { if(b.isConnected){ delete b.dataset.confirma; b.textContent = 'Excluir'; } }, 3000); }
+  }
+  if(acao==='renomear'){
+    const h = card.querySelector('.nome');
+    if(b.dataset.editando){ const v = card.querySelector('.nome-edit').value.trim(); if(v){ it.nome = v; gravar(lista); } renderSalvos(); return; }
+    b.dataset.editando = '1'; b.textContent = 'Salvar nome';
+    h.innerHTML = `<input class="nome-edit" value="${esc(it.nome)}" maxlength="80" aria-label="Novo nome">`;
+    const inp = h.querySelector('input'); inp.focus(); inp.select();
+    inp.addEventListener('keydown', ev => { if(ev.key==='Enter') b.click(); if(ev.key==='Escape') renderSalvos(); });
+  }
+});
+document.getElementById('exportarTudo').addEventListener('click', () => baixar('banco-de-plantas.json', JSON.stringify(ler(), null, 2)));
+document.getElementById('importar').addEventListener('change', e => {
+  const f = e.target.files[0]; if(!f) return;
+  f.text().then(t => {
+    try{
+      let novos = JSON.parse(t); if(!Array.isArray(novos)) novos = [novos];
+      novos = novos.filter(x => x && x.programa && x.resumo);
+      const lista = ler(), ids = new Set(lista.map(x => x.id));
+      for(const n of novos){ if(ids.has(n.id)) n.id = n.id + Math.random().toString(36).slice(2,6); lista.unshift(n); }
+      gravar(lista); renderSalvos();
+    }catch(err){ document.getElementById('salvos').insertAdjacentHTML('afterbegin', '<p class="warn">Arquivo inválido.</p>'); }
+  });
+  e.target.value = '';
+});
+filtros.addEventListener('input', () => { renderEstudos(); renderSalvos(); });
+
+fetch('../assets/projetos.json').then(r => r.json()).then(l => { estudos = l; renderEstudos(); })
+  .catch(() => { document.getElementById('estudos').innerHTML = '<p class="vazio">Não foi possível carregar a lista de estudos.</p>'; });
+renderSalvos();
+})();
+</script>
+</body>
+</html>

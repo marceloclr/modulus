@@ -333,7 +333,7 @@ function linear(q, P, W, modo, opts){
     pav.push({nome:'Superior', salas: sup});
   }
   if(q.subsolo) pav.unshift(subsolo(q, W, Dt, cxA, escRect, av));
-  return {tipologia: modo==='duplo'?'Linear, corredor central':modo==='simples'?'Linear, corredor lateral':'Em L',
+  return {tipologia: modo==='duplo'?'Bloco único, corredor central':modo==='simples'?'Bloco único, corredor lateral':'Em L',
     W:r2(W), D:r2(Dt), pav, avisos:av, escada:esc, garagemDentro:vagasDentro, Dter: typeof Dter!=='undefined'?Dter:null, Lsup: typeof Lsup!=='undefined'?Lsup:null,
     cotasY:[0, yS, yA, yI, Dt].filter((v,i,a)=>a.indexOf(v)===i)};
 }

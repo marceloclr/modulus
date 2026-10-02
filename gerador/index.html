@@ -16,7 +16,6 @@
 .gen .panel{display:block;max-width:1100px}
 .form-acts{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
 .form-acts .btn{padding:8px 10px}
-.btn.prim{background:var(--graphite);color:var(--bg);border-color:var(--graphite)}
 .fld:has(select){grid-template-columns:minmax(0,1fr) 168px}
 .fld small{grid-column:1/-1;color:var(--ink-3);font-size:11.5px;margin-top:-2px}
 .lote-wrap{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
@@ -24,6 +23,9 @@
 @media (max-width:760px){.lote-wrap{grid-template-columns:minmax(0,1fr)}}
 .score{display:inline-block;min-width:34px;text-align:center;font-size:12px;padding:3px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);margin-left:6px}
 .btn[aria-pressed="true"] .score{background:transparent;color:inherit;border-color:currentColor}
+.salvar-banco{display:inline-flex;gap:6px;flex-wrap:wrap}
+.salvar-banco input{font:500 13px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:180px}
+.salvar-banco input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .vtab{flex-direction:column;align-items:flex-start;gap:2px;line-height:1.25}
 .vtab small{font-size:11.5px;color:inherit;opacity:.8;font-weight:400}
 @media (max-width:899px){
@@ -127,6 +129,7 @@
         <button class="btn" type="button" id="espelhar" aria-pressed="false" data-tip="Inverte a planta da esquerda para a direita">Espelhar</button>
         <button class="btn" type="button" id="baixarSvg" data-tip="Baixa o pavimento atual em SVG">Baixar SVG</button>
         <button class="btn" type="button" id="baixarPng" data-tip="Baixa o pavimento atual em PNG (2×)">Baixar PNG</button>
+        <span class="salvar-banco"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto para o banco" maxlength="80"><button class="btn prim" type="button" id="salvarBanco" data-tip="Guarda esta variante no banco de projetos deste navegador">Salvar no banco</button></span>
       </div>
       <div class="plan-box" id="plan"></div>
       <div id="avisos"></div>
@@ -148,7 +151,7 @@
         <div class="card tint" style="--c:var(--patina)">
           <h3>Zoneamento</h3>
           <ul class="clean" style="--c:var(--patina)">
-            <li><strong>Linear:</strong> faixa social na frente (garagem, salas), faixa de apoio no meio (cozinha, serviço, banhos) e faixa íntima no fundo, com corredor central ou lateral.</li>
+            <li><strong>Bloco único:</strong> faixa social na frente (garagem, salas), faixa de apoio no meio (cozinha, serviço, banhos) e faixa íntima no fundo, com corredor central ou lateral.</li>
             <li><strong>Em L:</strong> social e apoio na frente; ala íntima numa tira lateral, liberando quintal.</li>
             <li><strong>Em H:</strong> ala íntima e ala social paralelas, ligadas por cozinha, serviço e galeria (lotes largos, térrea).</li>
             <li><strong>Sobrado:</strong> social e serviço no térreo, quartos no superior; a escada fica na mesma posição em todos os pavimentos.</li>
@@ -208,10 +211,13 @@ function gerar(){
   const d = lerForm();
   res = Motor.gerar(d);
   vi = 0; pi = Math.max(0, res.variantes[0] ? res.variantes[0].pav.findIndex(p => p.nome==='Térreo') : 0);
-  try{ history.replaceState(null, '', '#q=' + codifica(Motor.normaliza(d))); }catch(e){}
+  if(inicial){ vi = Math.min(inicial.v||0, Math.max(0, res.variantes.length-1)); esp = !!inicial.e; document.getElementById('espelhar').setAttribute('aria-pressed', esp);
+    const v = res.variantes[vi]; if(v) pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo')); inicial = null; }
+  atualizaHash();
   render();
 }
 
+function atualizaHash(){ try{ history.replaceState(null, '', '#q=' + codifica(Motor.normaliza(lerForm())) + '&v=' + vi + '&e=' + (esp?1:0)); }catch(e){} }
 function variante(){ const v = res.variantes[vi]; return v && esp ? Desenho.espelha(v) : v; }
 
 function render(){
@@ -277,9 +283,21 @@ document.getElementById('carregar').addEventListener('change', e => {
   f.text().then(t => { try{ preencher(Object.assign({}, Motor.PADRAO, JSON.parse(t))); gerar(); }catch(err){ document.getElementById('avisosGerais').innerHTML = '<div class="warn">Arquivo inválido.</div>'; } });
   e.target.value = '';
 });
-document.getElementById('vtabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if(!b) return; vi = +b.dataset.v; const v = res.variantes[vi]; pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo')); render(); });
+document.getElementById('vtabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if(!b) return; vi = +b.dataset.v; const v = res.variantes[vi]; pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo')); atualizaHash(); render(); });
 document.getElementById('ptabs').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if(!b) return; pi = +b.dataset.p; render(); });
-document.getElementById('espelhar').addEventListener('click', function(){ esp = !esp; this.setAttribute('aria-pressed', esp); render(); });
+document.getElementById('espelhar').addEventListener('click', function(){ esp = !esp; this.setAttribute('aria-pressed', esp); atualizaHash(); render(); });
+document.getElementById('salvarBanco').addEventListener('click', function(){
+  const v = res && res.variantes[vi]; if(!v) return;
+  const campo = document.getElementById('nomeBanco');
+  const nome = campo.value.trim() || (v.tipologia + ' · ' + res.entrada.quartos + ' quartos · lote ' + f2(res.entrada.frente) + ' × ' + f2(res.entrada.fundo));
+  const item = {id: Date.now().toString(36), nome, data: new Date().toISOString(), programa: Motor.normaliza(lerForm()), variante: vi, espelhada: esp,
+    resumo: {formato: v.tipologia, W: v.W, D: v.D, area: v.quadro.fechada, quartos: res.entrada.quartos, suites: res.entrada.suites, pavimentos: res.entrada.tipo==='sobrado' ? 'Sobrado' : 'Térrea', subsolo: res.entrada.subsolo, score: v.score}};
+  let lista = []; try{ lista = JSON.parse(localStorage.getItem('plantas-banco')||'[]'); }catch(e){}
+  lista.unshift(item);
+  try{ localStorage.setItem('plantas-banco', JSON.stringify(lista)); this.textContent = 'Salvo no banco'; campo.value = ''; }
+  catch(e){ this.textContent = 'Não foi possível salvar'; }
+  setTimeout(() => this.textContent = 'Salvar no banco', 2000);
+});
 document.getElementById('baixarSvg').addEventListener('click', () => baixar(nomeArq('svg'), new Blob([Desenho.planta(variante(), pi)], {type:'image/svg+xml'})));
 document.getElementById('baixarPng').addEventListener('click', () => {
   const svg = Desenho.planta(variante(), pi), m = svg.match(/width="(\d+)" height="(\d+)"/);
@@ -289,6 +307,7 @@ document.getElementById('baixarPng').addEventListener('click', () => {
 });
 
 const hq = (location.hash.match(/q=([^&]+)/)||[])[1];
+let inicial = {v: +((location.hash.match(/[#&]v=(\d+)/)||[])[1]||0), e: (location.hash.match(/[#&]e=(\d)/)||[])[1]==='1'};
 preencher(Object.assign({}, Motor.PADRAO, hq ? decodifica(hq) || {} : {}));
 gerar();
 })();
