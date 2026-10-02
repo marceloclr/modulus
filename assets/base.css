@@ -289,3 +289,26 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .atalho .go{margin-top:6px;color:var(--c);font-weight:500}
 @media (prefers-reduced-motion:reduce){.atalho{transition:none}.atalho:hover{transform:none}}
 .btn.prim{background:var(--graphite);color:var(--bg);border-color:var(--graphite)}
+
+/* Marca GerPlantas */
+.brand-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);flex:none}
+.brand-logo img{width:28px;height:28px;display:block}
+.wordmark{font:600 18px/1 'IBM Plex Serif',Georgia,serif;letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
+.wordmark b{font-weight:600;color:var(--brass)}
+@media (max-width:420px){.wordmark{display:none}}
+
+/* Zonas da planta: cores fortes e distintas (mesma paleta do desenho) */
+:root{--z-intimo-f:#CDE9D8;--z-intimo-s:#2E7D5B;--z-molhado-f:#CFE3F7;--z-molhado-s:#2F6FB0;--z-social-f:#E2D8F5;--z-social-s:#6A4FB3;--z-apoio-f:#F2E2BF;--z-apoio-s:#8A6219;--z-circ-f:#E4E6EA;--z-circ-s:#4B5563;--z-varanda-f:#F7D6C2;--z-varanda-s:#A8471F;--z-garagem-f:#D6D3CE;--z-garagem-s:#44403C;--z-patio-f:#D5E6C0;--z-patio-s:#4D6A2C}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--z-intimo-f:#173A2B;--z-intimo-s:#6FD3A3;--z-molhado-f:#16304A;--z-molhado-s:#7DB8F2;--z-social-f:#2A2147;--z-social-s:#B8A2F2;--z-apoio-f:#3A2E14;--z-apoio-s:#E6C27A;--z-circ-f:#2A2D33;--z-circ-s:#B6BCC6;--z-varanda-f:#3E2418;--z-varanda-s:#F0A37E;--z-garagem-f:#2E2C2A;--z-garagem-s:#CFCAC3;--z-patio-f:#25331A;--z-patio-s:#AFCF8A}}
+:root[data-theme="dark"]{--z-intimo-f:#173A2B;--z-intimo-s:#6FD3A3;--z-molhado-f:#16304A;--z-molhado-s:#7DB8F2;--z-social-f:#2A2147;--z-social-s:#B8A2F2;--z-apoio-f:#3A2E14;--z-apoio-s:#E6C27A;--z-circ-f:#2A2D33;--z-circ-s:#B6BCC6;--z-varanda-f:#3E2418;--z-varanda-s:#F0A37E;--z-garagem-f:#2E2C2A;--z-garagem-s:#CFCAC3;--z-patio-f:#25331A;--z-patio-s:#AFCF8A}
+.z-intimo{background:var(--z-intimo-f);border-color:var(--z-intimo-s);color:var(--z-intimo-s)}
+.z-molhado{background:var(--z-molhado-f);border-color:var(--z-molhado-s);color:var(--z-molhado-s)}
+.z-social{background:var(--z-social-f);border-color:var(--z-social-s);color:var(--z-social-s)}
+.z-apoio{background:var(--z-apoio-f);border-color:var(--z-apoio-s);color:var(--z-apoio-s)}
+.z-circ{background:var(--z-circ-f);border-color:var(--z-circ-s);color:var(--z-circ-s)}
+.z-varanda{background:var(--z-varanda-f);border-color:var(--z-varanda-s);color:var(--z-varanda-s)}
+.z-garagem{background:var(--z-garagem-f);border-color:var(--z-garagem-s);color:var(--z-garagem-s)}
+.z-patio{background:var(--z-patio-f);border-color:var(--z-patio-s);color:var(--z-patio-s)}
+.legenda-zonas{display:flex;flex-wrap:wrap;gap:8px 14px;margin:-4px 0 14px;font-size:13px;color:var(--ink-2)}
+.legenda-zonas span{display:inline-flex;align-items:center;gap:6px}
+.legenda-zonas i{width:14px;height:14px;border-radius:4px;border:1.5px solid;display:inline-block}

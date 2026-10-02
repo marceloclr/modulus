@@ -1,0 +1,7 @@
+# GerPlantas: marca, subsolo livre, sobrado por seções e rooftop (aprovado em 02/10/2026)
+
+1. Marca GerPlantas (logo SVG, favicon, nome no topo) e paleta de zonas mais contrastante (planta, implantação, etiquetas, tema escuro, legenda).
+2. Subsolo sem pilares no meio: o lance subsolo↔térreo fica na lateral ou no fundo (mesma posição nos dois andares); o lance térreo↔superior fica onde for melhor; elevador opcional, no mesmo prumo em todos os andares, junto ao lance do subsolo. Subsolo com manobra contínua de 5 m, escada no lugar de uma vaga, rampa no lado oposto, jardim de inverno fora da projeção (fundo) para luz e ventilação cruzada; pilares só no perímetro e entre vagas, nunca na manobra; aviso de laje protendida/viga de transição quando o vão passar do máximo.
+3. Sobrado em bloco único, L e U: superior correspondente (toda a projeção) ou parcial (seções escolhidas: bloco = frente/meio/fundo; L = frente/ala; U = frente/ala esquerda/ala direita); escolha do que vai para cima (quartos, suítes, escritório, sala de TV, lavanderia); o resto fica no térreo; partes sem cômodo em cima viram laje/terraço.
+4. Rooftop na térrea e no sobrado: área desejada e itens (deck, gourmet, banho, spa, área técnica), acesso pelo núcleo vertical, aba própria e quadro de áreas.
+5. Testes (sobrado L/U parcial e correspondente, rooftop térrea/sobrado, subsolo com elevador sem pilar na manobra, todos os formatos com subsolo), capturas, memória e relatório.

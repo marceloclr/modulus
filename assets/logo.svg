@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="GerPlantas">
+  <title>GerPlantas</title>
+  <rect width="64" height="64" rx="14" fill="#262A31"/>
+  <rect x="34.5" y="34.5" width="11" height="11" fill="#5FB08A"/>
+  <path d="M46 18H18V46H46V33H33" fill="none" stroke="#D9AE62" stroke-width="4.2" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M27 18h9" stroke="#262A31" stroke-width="3"/>
+  <path d="M27.5 18h8" stroke="#8FC1EB" stroke-width="1.6"/>
+  <path d="M33 33a7 7 0 0 1-7 7" fill="none" stroke="#D9AE62" stroke-width="1.4" stroke-dasharray="2 1.6"/>
+</svg>

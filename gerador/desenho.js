@@ -6,8 +6,8 @@
 const K = 30;
 const f2 = Motor.f2;
 const COR = {
-  intimo:['#E3EEEC','#93B3AC'], molhado:['#E1ECF2','#8FB0C4'], social:['#E7E7F0','#9C9CBD'], apoio:['#ECECE8','#ABAB9F'],
-  circ:['#EEF0F4','#A9AFBD'], varanda:['#F3EBDD','#C8B08A'], garagem:['#E9E6E1','#A39C90'], patio:['#E6ECDF','#9DB08C'],
+  intimo:['#CDE9D8','#2E7D5B'], molhado:['#CFE3F7','#2F6FB0'], social:['#E2D8F5','#6A4FB3'], apoio:['#F2E2BF','#9A6F22'],
+  circ:['#E4E6EA','#6B7280'], varanda:['#F7D6C2','#B4532A'], garagem:['#D6D3CE','#57534E'], patio:['#D5E6C0','#5E7D3A'],
 };
 const PISO = '#F4F2EC', PAREDE = '#2B2F36', JAN = '#4C86C6', PORTA = '#8C6A2F';
 const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
