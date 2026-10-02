@@ -64,7 +64,7 @@ const PADRAO = {
   supQuartos:-1, supEscritorio:false, supTv:false, supServico:false,
   rooftop:false, rtArea:40, rtDeck:true, rtGourmet:true, rtBanho:true, rtSpa:false, rtTecnica:true,
   subRecuos:'nenhum', permeab:20,
-  subsolo:false, subNivel:'meio', subGaragem:true, subLazer:false, inclinacao:20,
+  subsolo:false, subNivel:'meio', garagemLocal:'subsolo', vagasTerreo:1, subLazer:false, inclinacao:20,
 };
 
 function normaliza(p){
@@ -92,11 +92,16 @@ function normaliza(p){
   if(q.tipo!=='sobrado') q.tipo = 'terrea';
   if(!['auto','bloco','L','U','H'].includes(q.formato)) q.formato = 'auto';
   if(!['coberta','descoberta','nenhuma'].includes(q.garagem)) q.garagem = 'coberta';
-  if(q.vagas===0) q.garagem = 'nenhuma';
+  if(q.vagas===0 && !q.subsolo) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
   if(!['nenhum','lateraisFundo','todos'].includes(q.subRecuos)) q.subRecuos = 'nenhum';
   q.permeab = clamp(isNaN(+q.permeab) ? 20 : +q.permeab, 0, 80);
-  if(!q.subsolo){ q.subGaragem = false; }
+  // onde ficam as vagas: só no térreo, só no subsolo ou nos dois
+  if(!['terreo','subsolo','ambos'].includes(q.garagemLocal)) q.garagemLocal = (p && p.subGaragem===false) ? 'terreo' : 'subsolo';
+  if(!q.subsolo) q.garagemLocal = 'terreo';
+  q.vagasTerreo = clamp(Math.round(+q.vagasTerreo || 0), 0, 4);
+  q.subGaragem = q.subsolo && q.garagemLocal !== 'terreo';
+  q.vagasT = q.garagemLocal==='terreo' ? q.vagas : q.garagemLocal==='ambos' ? q.vagasTerreo : 0;
   return q;
 }
 
@@ -312,11 +317,11 @@ function linear(q, P, W, modo, opts){
   const terreo = [];
   // garagem coberta no térreo
   let vagasDentro = 0, Wg = 0;
-  if(q.garagem==='coberta' && !q.subGaragem && q.vagas>0){
-    vagasDentro = q.vagas;
+  if(q.garagem==='coberta' && q.vagasT>0){
+    vagasDentro = q.vagasT;
     while(vagasDentro>0 && W - vagasDentro*VAGA_L < 4.2) vagasDentro--;
     Wg = vagasDentro*VAGA_L;
-    if(vagasDentro < q.vagas) av.push(`Só ${vagasDentro} de ${q.vagas} vagas cabem cobertas na largura de ${f2(W)} m; as demais ficam descobertas no recuo frontal.`);
+    if(vagasDentro < q.vagasT) av.push(`Só ${vagasDentro} de ${q.vagasT} vagas do térreo cabem cobertas na largura de ${f2(W)} m; as demais ficam descobertas no recuo frontal.`);
   }
   // faixa social
   const socialItens = P.social.map(t => ({tipo:t, a:alvo(t,q)}));
@@ -491,7 +496,7 @@ function emH(q, P, W){
   const ws = r2(lq+0.6), wi = ws + C;
   let wsoc = 5.5;
   let vagasDentro = 0;
-  if(q.garagem==='coberta' && q.vagas>0){ vagasDentro = Math.min(q.vagas, 2); wsoc = Math.max(wsoc, vagasDentro*VAGA_L); if(vagasDentro<q.vagas) av.push(`Só ${vagasDentro} vagas cabem cobertas na ala social; as demais ficam no recuo frontal.`); }
+  if(q.garagem==='coberta' && q.vagasT>0){ vagasDentro = Math.min(q.vagasT, 2); wsoc = Math.max(wsoc, vagasDentro*VAGA_L); if(vagasDentro<q.vagasT) av.push(`Só ${vagasDentro} vagas cabem cobertas na ala social; as demais ficam no recuo frontal.`); }
   const wp = W - wi - wsoc;
   if(wp < 4.0) return null;
   const salas = [];
@@ -561,10 +566,10 @@ function emU(q, P, W){
   const wa = 3.2;
   // faixa social: escritório, TV, estar, jantar, cozinha e garagem coberta no fim (lado do apoio)
   let vagasDentro = 0, Wg = 0;
-  if(q.garagem==='coberta' && !q.subGaragem && q.vagas>0){
-    vagasDentro = q.vagas; while(vagasDentro>0 && W - vagasDentro*VAGA_L < 9) vagasDentro--;
+  if(q.garagem==='coberta' && q.vagasT>0){
+    vagasDentro = q.vagasT; while(vagasDentro>0 && W - vagasDentro*VAGA_L < 9) vagasDentro--;
     Wg = vagasDentro*VAGA_L;
-    if(vagasDentro < q.vagas) av.push(`Só ${vagasDentro} de ${q.vagas} vagas cabem cobertas na faixa da frente; as demais ficam no recuo frontal.`);
+    if(vagasDentro < q.vagasT) av.push(`Só ${vagasDentro} de ${q.vagasT} vagas cabem cobertas na faixa da frente; as demais ficam no recuo frontal.`);
   }
   const xR = W - Wg, xa = xR - wa, xg = xa - C;   // ala de apoio (sob a cozinha, ao lado da garagem) e sua galeria
   if(xg - wi < 3.0) return null;
@@ -626,8 +631,8 @@ function edicula(q){
   const esc = dois ? escada(q) : null;
   const De = r2(dois ? Math.max(4.5, esc.L + 0.4) : 4.0);
   const wDep = q.edDeposito ? 1.8 : 0, wBan = q.edBanho ? 1.6 : 0, wGou = q.edGourmet ? Math.max(3.6, r2(16/De)) : 0;
-  const wQua = (!dois && q.edQuarto) ? 3.2 : 0, wEsc = dois ? COL : 0;
-  const ter = [], sup = [], pT = [], pS = [], jT = [], jS = [], vT = [];
+  const wQua = (!dois && q.edQuarto) ? 3.2 : 0, wEsc = dois ? 1.0 : 0;
+  const ter = [], sup = [], pT = [], pS = [], jT = [], jS = [], vT = [], vS = [];
   let x = 0;
   const col = {};
   const ordem = dois ? ['dep','ban','gou','esc'] : ['dep','gou','ban','qua'];
@@ -643,19 +648,17 @@ function edicula(q){
   let escRect = null;
   if(dois){
     const e0 = col.esc[0], ey0 = r2((De - esc.L)/2);
-    escRect = {x0:r2(e0+C), y0:ey0, x1:r2(e0+COL), y1:r2(ey0+esc.L)};
-    ter.push(sala('hall', e0, 0, e0+C, De, {nome:'Passagem'}));
+    escRect = {x0:r2(e0), y0:ey0, x1:r2(e0+1.0), y1:r2(ey0+esc.L)};
     ter.push(sala('escada', escRect.x0, escRect.y0, escRect.x1, escRect.y1, {sobe:true, esc}));
-    if(escRect.y0 > 0.3) ter.push(sala('rouparia', e0+C, 0, e0+COL, escRect.y0, {nome:'Armário'}));
-    if(De - escRect.y1 > 0.3) ter.push(sala('rouparia', e0+C, escRect.y1, e0+COL, De, {nome:'Armário'}));
+    if(escRect.y0 > 0.3) ter.push(sala('rouparia', e0, 0, e0+1.0, escRect.y0, {nome:'Armário'}));
+    if(De - escRect.y1 > 0.3) ter.push(sala('rouparia', e0, escRect.y1, e0+1.0, De, {nome:'Armário'}));
     // superior: quarto sobre a gourmet, banho exatamente sobre o banho de baixo, terraço sobre o depósito
     if(col.dep) sup.push(sala('terraco', col.dep[0], 0, col.dep[1], De, {nome:'Terraço'}));
     if(col.ban) sup.push(sala('banhoSocial', col.ban[0], 0, col.ban[1], De, {nome:'Banho'}));
     sup.push(sala('quarto', col.gou[0], 0, col.gou[1], De, {nome:'Quarto de hóspedes'}));
-    sup.push(sala('hall', e0, 0, e0+C, De));
     sup.push(sala('escada', escRect.x0, escRect.y0, escRect.x1, escRect.y1, {desce:true, esc}));
-    if(escRect.y0 > 0.3) sup.push(sala('rouparia', e0+C, 0, e0+COL, escRect.y0, {nome:'Armário'}));
-    if(De - escRect.y1 > 0.3) sup.push(sala('rouparia', e0+C, escRect.y1, e0+COL, De, {nome:'Armário'}));
+    if(escRect.y0 > 0.3) sup.push(sala('rouparia', e0, 0, e0+1.0, escRect.y0, {nome:'Armário'}));
+    if(De - escRect.y1 > 0.3) sup.push(sala('rouparia', e0, escRect.y1, e0+1.0, De, {nome:'Armário'}));
   }
   // portas, vãos e janelas explícitos (frente da edícula em y = 0, voltada para a casa)
   const find = (L, t) => L.find(o => o.tipo===t);
@@ -672,15 +675,16 @@ function edicula(q){
   if(tDep) jT.push(jan(tDep, 'y1', true, 0.8));
   if(tQua) jT.push(jan(tQua, 'y1', false, 1.5));
   if(dois){
-    const hT = find(ter,'hall'); if(hT && tGou){ const sh = compartilhado(hT, tGou); if(sh) vT.push({o:sh.o, c:sh.c, t0:sh.t0, t1:sh.t1, livre:true, a:hT.id, b:tGou.id}); }
-    const sBan = find(sup,'banhoSocial'), sQua = find(sup,'quarto'), sHall = find(sup,'hall');
+    // a escada se abre direto para a gourmet e, em cima, para o quarto
+    const eT = find(ter,'escada'); if(eT && tGou){ const sh = compartilhado(eT, tGou); if(sh) vT.push({o:sh.o, c:sh.c, t0:sh.t0, t1:sh.t1, livre:true, a:eT.id, b:tGou.id}); }
+    const sBan = find(sup,'banhoSocial'), sQua = find(sup,'quarto'), eS = find(sup,'escada');
     if(sBan && sQua) lig(sup, 'banhoSocial', 'quarto', 0.7, pS);
-    if(sQua && sHall) lig(sup, 'quarto', 'hall', 0.8, pS);
+    if(eS && sQua){ const sh = compartilhado(eS, sQua); if(sh) vS.push({o:sh.o, c:sh.c, t0:sh.t0, t1:sh.t1, livre:true, a:eS.id, b:sQua.id}); }
     if(sBan) jS.push(jan(sBan, 'y1', true, 0.6));           // mesma prumada da janela do banho de baixo
     jS.push(jan(sQua, 'y0', false, 1.8)); jS.push(jan(sQua, 'y1', false, 1.2));
   }
   const pav = [{nome:'Edícula térreo', anexo:true, fixo:true, W, D:De, salas:ter, portas:pT, janelas:jT, vaos:vT}];
-  if(dois) pav.push({nome:'Edícula superior', anexo:true, fixo:true, W, D:De, salas:sup, portas:pS, janelas:jS, vaos:[]});
+  if(dois) pav.push({nome:'Edícula superior', anexo:true, fixo:true, W, D:De, salas:sup, portas:pS, janelas:jS, vaos:vS});
   return {W, D:De, pav, dois};
 }
 

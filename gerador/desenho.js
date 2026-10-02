@@ -206,7 +206,7 @@ function lote(v, q, res){
   for(const s of ter.salas){ const c = COR[s.zona]||COR.apoio;
     o.push(`<rect x="${X(v.x0+s.x0)}" y="${Y(v.y0+s.y0)}" width="${((s.x1-s.x0)*k).toFixed(1)}" height="${((s.y1-s.y0)*k).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width=".5"/>`); }
   // vagas descobertas no recuo frontal
-  const fora = q.garagem==='nenhuma' || q.subGaragem ? 0 : Math.max(0, q.vagas - (v.garagemDentro||0));
+  const fora = q.garagem==='nenhuma' ? 0 : Math.max(0, (q.vagasT||0) - (v.garagemDentro||0));
   if(fora>0){
     const n = Math.min(fora, Math.floor((q.frente-0.5)/2.5)), dy = Math.min(5, q.recFrente-0.2);
     for(let i=0;i<n;i++) o.push(`<rect x="${X(0.3+i*2.5)}" y="${Y(q.recFrente-dy)}" width="${2.4*k}" height="${dy*k}" fill="#E9E6E1" stroke="#A39C90" stroke-dasharray="2 2"><title>Vaga descoberta</title></rect>`);

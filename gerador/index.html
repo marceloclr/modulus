@@ -100,7 +100,6 @@
         <div id="subOps">
           <label class="fld">Nível do subsolo<select name="subNivel"><option value="meio">Semienterrado (1,40 m)</option><option value="inteiro">Enterrado</option></select></label>
           <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><small>Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</small></label>
-          <label class="chk"><input type="checkbox" name="subGaragem">Garagem no subsolo</label>
           <label class="chk"><input type="checkbox" name="subLazer">Salão de lazer</label>
           <label class="fld">Inclinação da rampa (%)<input type="number" name="inclinacao" min="8" max="25" step="1"></label>
           <label class="fld">Vão máximo sem pilar (m)<input type="number" name="vaoMax" min="5" max="20" step="0.5"><small>Pilares só no perímetro e entre vagas; a faixa de manobra fica sempre livre.</small></label>
@@ -127,7 +126,9 @@
       </fieldset>
 
       <fieldset class="fs"><legend>Garagem e áreas externas</legend>
-        <label class="fld">Vagas (mínimo)<input type="number" name="vagas" min="0" max="6" step="1"></label>
+        <label class="fld">Onde ficam as vagas<select name="garagemLocal"><option value="terreo">No térreo</option><option value="subsolo">Só no subsolo</option><option value="ambos">No subsolo e no térreo</option></select><small id="garNota">As opções com subsolo aparecem quando o subsolo está marcado.</small></label>
+        <label class="fld"><span id="vagasRot">Vagas</span><input type="number" name="vagas" min="0" max="20" step="1"></label>
+        <label class="fld" id="vagasTOps">Vagas no térreo<input type="number" name="vagasTerreo" min="0" max="4" step="1"></label>
         <label class="fld">Garagem<select name="garagem"><option value="coberta">Coberta, na casa</option><option value="descoberta">Descoberta, no recuo</option><option value="nenhuma">Sem garagem</option></select></label>
         <label class="chk"><input type="checkbox" name="varanda">Varanda frontal</label>
         <label class="chk"><input type="checkbox" name="gourmet">Varanda gourmet junto à casa</label>
@@ -261,6 +262,12 @@ function sincroniza(){
   const sob = (form.querySelector('input[name=tipo]:checked')||{}).value === 'sobrado';
   const fmt = form.elements.formato.value, chave = fmt==='U' ? 'U' : fmt==='L' ? 'L' : 'b';
   document.getElementById('supOps').hidden = !sob;
+  const sub = form.elements.subsolo.checked, gl = form.elements.garagemLocal;
+  gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
+  if(!sub) gl.value = 'terreo';
+  document.getElementById('garNota').hidden = sub;
+  document.getElementById('vagasRot').textContent = gl.value==='terreo' ? 'Vagas' : 'Vagas no subsolo (mínimo; o gerador põe quantas couberem)';
+  document.getElementById('vagasTOps').hidden = gl.value!=='ambos';
   document.getElementById('rtOps').hidden = !form.elements.rooftop.checked;
   document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';
   form.querySelectorAll('#secOps .chk').forEach(el => { el.hidden = fmt!=='auto' && !el.classList.contains('sec-' + chave); });
