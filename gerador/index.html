@@ -130,6 +130,7 @@
         <label class="fld" id="vagasTOps">Vagas no térreo<input type="number" name="vagasTerreo" min="0" max="4" step="1"></label>
         <label class="fld">Garagem<select name="garagem"><option value="coberta">Coberta, na casa</option><option value="descoberta">Descoberta, no recuo</option><option value="nenhuma">Sem garagem</option></select></label>
         <label class="chk"><input type="checkbox" name="varanda">Varanda frontal</label>
+        <label class="fld" id="varOps">Forma da varanda<select name="varandaForma"><option value="corrida">Corrida, em toda a fachada</option><option value="L">Em L, frente e lateral</option></select></label>
         <label class="chk"><input type="checkbox" name="gourmet">Varanda gourmet junto à casa</label>
       </fieldset>
 
@@ -261,6 +262,7 @@ function sincroniza(){
   const sob = (form.querySelector('input[name=tipo]:checked')||{}).value === 'sobrado';
   const fmt = form.elements.formato.value, chave = fmt==='U' ? 'U' : fmt==='L' ? 'L' : 'b';
   document.getElementById('supOps').hidden = !sob;
+  document.getElementById('varOps').hidden = !form.elements.varanda.checked;
   const sub = form.elements.subsolo.checked, gl = form.elements.garagemLocal;
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
   if(!sub) gl.value = 'terreo';

@@ -56,7 +56,7 @@ const PADRAO = {
   banhosSociais:1, lavabo:false,
   estar:true, jantar:true, tv:false, escritorio:false,
   cozinha:'aberta', servico:true, despensa:false,
-  vagas:2, garagem:'coberta', varanda:true, gourmet:false,
+  vagas:2, garagem:'coberta', varanda:true, varandaForma:'corrida', gourmet:false,
   gourmetDest:false, edicula:'nenhuma', edGourmet:true, edBanho:true, edDeposito:true, edQuarto:true,
   piscina:false, pisForma:'retangular', pisC:8, pisL:4, pisP:1.4, pisPrainha:false, afastAnexo:3, anexoFundo:true,
   elevador:false, vaoMax:10,
@@ -94,6 +94,7 @@ function normaliza(p){
   if(!['coberta','descoberta','nenhuma'].includes(q.garagem)) q.garagem = 'coberta';
   if(q.vagas===0 && !q.subsolo) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
+  if(q.varandaForma!=='L') q.varandaForma = 'corrida';
   if(!['nenhum','lateraisFundo','todos'].includes(q.subRecuos)) q.subRecuos = 'nenhum';
   q.permeab = clamp(isNaN(+q.permeab) ? 20 : +q.permeab, 0, 80);
   // onde ficam as vagas: só no térreo, só no subsolo ou nos dois
@@ -367,9 +368,11 @@ function linear(q, P, W, modo, opts){
   if(esc) Da = Math.max(Da, esc.L + 0.3);
   const yA = yS + Ds, yI = yA + Da;
   // monta faixa social
+  const vL = Dv>0 && q.varandaForma==='L' ? Dv : 0;          // perna lateral da varanda em L
   if(Dv>0) terreo.push(sala('varanda', Wg, 0, W, Dv));
+  if(vL) terreo.push(sala('varanda', W - vL, Dv, W, yA, {nome:'Varanda'}));
   if(Wg>0) terreo.push(sala('garagem', 0, 0, Wg, yA, {vagas:vagasDentro}));
-  terreo.push(...faixa(Wg, yS, W, yA, socialItens, 'x'));
+  terreo.push(...faixa(Wg, yS, W - vL, yA, socialItens, 'x'));
   // monta faixa de apoio
   let celNucleo = null;
   if(temNucleo){
@@ -458,8 +461,10 @@ function linear(q, P, W, modo, opts){
       // acima e abaixo da escada a coluna vira corredor, para os quartos do outro lado terem porta
       if(escRect.y0 - ys0 > 0.3) sup.push(sala('circ', cxA+C, ys0, cxA+COL, escRect.y0, {nome:'Hall íntimo'}));
       if(yCol - escRect.y1 > 0.3) sup.push(sala('circ', cxA+C, escRect.y1, cxA+COL, yCol, {nome:'Hall íntimo'}));
-      if(!ladoX0 && cxA > 0.05 && !comElev) sup.push(sala('rouparia', 0, ys0, cxA, ys1, {nome:'Armários'}));
-      if(ladoX1.x1 - ladoX1.x0 > 0.05 && ladoX1.x1 - ladoX1.x0 < 2.6) sup.push(sala('rouparia', ladoX1.x0, ys0, ladoX1.x1, yLim, {nome:'Armários'}));
+      // faixas estreitas demais para quartos viram terraço corrido ao longo do comprimento
+      const estreita = (a, b, y1) => sup.push(b - a >= 1.2 ? sala('terraco', a, ys0, b, y1, {nome:'Terraço'}) : sala('rouparia', a, ys0, b, y1, {nome:'Armários'}));
+      if(!ladoX0 && cxA > 0.05 && !comElev) estreita(0, cxA, ys1);
+      if(ladoX1.x1 - ladoX1.x0 > 0.05 && ladoX1.x1 - ladoX1.x0 < 2.6) estreita(ladoX1.x0, ladoX1.x1, yLim);
       if(comElev){
         for(const c of celNucleo.filter(c => c.tipo!=='escada')) sup.push(sala(c.tipo, c.x0, c.y0, c.x1, c.y1, {nucleo:true}));
         const e = celNucleo.find(c => c.tipo==='escada');
@@ -583,8 +588,10 @@ function emU(q, P, W){
   if(sobradoU && secU.frente) Ds = Math.max(Ds, 4.0 + C);   // quartos sobre a frente + corredor
   const yb = Dv + Ds;
   const salas = [];
+  const vLU = Dv>0 && q.varandaForma==='L' ? Dv : 0;
   if(Dv>0) salas.push(sala('varanda', 0, 0, W-Wg, Dv));
-  salas.push(...faixa(0, Dv, W-Wg, yb, itens, 'x'));
+  if(vLU) salas.push(sala('varanda', 0, Dv, vLU, yb, {nome:'Varanda'}));
+  salas.push(...faixa(vLU, Dv, W-Wg, yb, itens, 'x'));
   if(Wg>0) salas.push(sala('garagem', W-Wg, 0, W, yb, {vagas:vagasDentro}));
   // ala íntima à esquerda, corredor do lado do pátio; com subsolo, o núcleo abre a ala
   const temNucU = q.subsolo || sobradoU || q.rooftop;
@@ -944,40 +951,35 @@ function comRooftop(v, q){
   const Wr = x1 - x0, maxA = Wr * (ymax - ymin);
   let alvoA = clamp(q.rtArea, 12, 400);
   if(alvoA > maxA){ v.avisos.push(`Rooftop: a cobertura disponível tem ${f2(maxA)} m²; o rooftop foi limitado a esse tamanho.`); alvoA = maxA; }
-  let d = Math.max(by1 - by0, alvoA / Wr);
-  let ry0 = clamp(yc - d/2, ymin, ymax - d), ry1 = ry0 + d;
-  ry0 = Math.min(ry0, by0); ry1 = Math.max(ry1, by1);
+  const Hb = by1 - by0;                                        // linha da caixa de escada e dos itens
+  const dDeck = Math.max(0, alvoA / Wr - Hb);
+  const cabeAbaixo = ymax - by1 >= dDeck - 0.01, cabeAcima = by0 - ymin >= dDeck - 0.01;
+  const abaixo = cabeAbaixo || (!cabeAcima && ymax - by1 >= by0 - ymin);
+  const ry0 = abaixo ? by0 : Math.max(ymin, by0 - dDeck), ry1 = abaixo ? Math.min(ymax, by1 + dDeck) : by1;
   const salas = [];
   for(const c of caixa) salas.push(c.tipo==='escada' ? sala('escada', c.x0, c.y0, c.x1, c.y1, {desce:true, esc:E.esc, nucleo:E.nucleo}) : sala(c.tipo, c.x0, c.y0, c.x1, c.y1, c.tipo==='hall' ? {nome:'Caixa de escada'} : {}));
-  // em volta da caixa: acima/abaixo dela na mesma faixa vira deck; os lados recebem banho, técnica e gourmet
-  const lados = [{x0:x0, x1:bx0}, {x0:bx1, x1:x1}].filter(l => l.x1 - l.x0 > 0.5).sort((a,b) => (b.x1-b.x0)-(a.x1-a.x0));
-  if(by0 - ry0 > 0.3) salas.push(sala('terraco', bx0, ry0, bx1, by0, {nome:'Deck'}));
-  if(ry1 - by1 > 0.3) salas.push(sala('terraco', bx0, by1, bx1, ry1, {nome:'Deck'}));
+  // deck: uma faixa só, na largura toda do rooftop
+  if(abaixo && ry1 - by1 > 0.3) salas.push(sala('terraco', x0, by1, x1, ry1, {nome:'Deck'}));
+  if(!abaixo && by0 - ry0 > 0.3) salas.push(sala('terraco', x0, ry0, x1, by0, {nome:'Deck'}));
+  // itens na linha da caixa, a partir dela; o que sobrar da linha emenda no deck (em L)
   const itens = [];
   if(q.rtGourmet) itens.push({tipo:'gourmet', a:12.0, extra:{nome:'Gourmet coberto'}});
   if(q.rtBanho) itens.push({tipo:'banhoSocial', a:3.0, extra:{nome:'Banho'}});
   if(q.rtTecnica) itens.push({tipo:'deposito', a:4.0, extra:{nome:'Área técnica / caixa d’água'}});
-  const D = ry1 - ry0, Di = Math.min(D, 4.0);
+  const lados = [{x0:x0, x1:bx0, dir:-1}, {x0:bx1, x1:x1, dir:1}].filter(l => l.x1 - l.x0 > 0.3).sort((a,b) => (b.x1-b.x0)-(a.x1-a.x0));
   const fila = itens.slice();
-  lados.forEach(l => {
-    const daCaixa = Math.abs(l.x0 - bx1) < 0.01;        // lado à direita da caixa: cresce para a direita
-    const borda = daCaixa ? l.x0 : l.x1, fimX = daCaixa ? l.x1 : l.x0, dir = daCaixa ? 1 : -1;
-    let y = ry0;
-    while(y + 0.8 <= ry1 && fila.length){
-      const h = Math.min(Di, ry1 - y); let x = borda;
-      while(fila.length){
-        const it = fila[0], w = Math.max(TIPOS[it.tipo].lado || 1.2, it.a / h);
-        if(Math.abs(fimX - x) < w - 0.01 || h < (TIPOS[it.tipo].lado || 1.2) - 0.01) break;
-        salas.push(sala(it.tipo, dir>0 ? x : x - w, y, dir>0 ? x + w : x, y + h, it.extra)); x += dir*w; fila.shift();
-      }
-      if(Math.abs(fimX - x) > 0.3) salas.push(sala('terraco', Math.min(x, fimX), y, Math.max(x, fimX), y + h, {nome:'Deck'}));
-      y += h;
-      if(x === borda) break;                              // nada coube nesta linha
+  for(const l of lados){
+    let x = l.dir > 0 ? l.x0 : l.x1;
+    while(fila.length){
+      const it = fila[0], w = Math.max(TIPOS[it.tipo].lado || 1.2, it.a / Hb), resta = l.dir > 0 ? l.x1 - x : x - l.x0;
+      if(resta < w - 0.01) break;
+      salas.push(sala(it.tipo, l.dir > 0 ? x : x - w, by0, l.dir > 0 ? x + w : x, by1, it.extra)); x += l.dir*w; fila.shift();
     }
-    if(ry1 - y > 0.3) salas.push(sala('terraco', l.x0, y, l.x1, ry1, {nome:'Deck'}));
-  });
+    const a = l.dir > 0 ? x : l.x0, b = l.dir > 0 ? l.x1 : x;
+    if(b - a > 0.3) salas.push(sala('terraco', a, by0, b, by1, {nome:'Deck'}));
+  }
   for(const it of fila) v.avisos.push(`Rooftop: sem espaço para ${it.extra.nome.toLowerCase()} na área escolhida.`);
-  const pav = {nome:'Rooftop', salas, area:r2(Wr*D)};
+  const pav = {nome:'Rooftop', salas, area:r2(Wr*(ry1-ry0))};
   if(q.rtSpa){ const deck = salas.filter(s => s.tipo==='terraco').sort((a,b) => area(b)-area(a))[0];
     if(deck && Math.min(deck.x1-deck.x0, deck.y1-deck.y0) >= 2.4) pav.spa = {x:r2((deck.x0+deck.x1)/2), y:r2((deck.y0+deck.y1)/2), r:1.0};
     else v.avisos.push('Rooftop: o deck é estreito demais para o spa (precisa de 2,40 m).'); }
