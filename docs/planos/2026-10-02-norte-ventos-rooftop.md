@@ -1,0 +1,10 @@
+# Norte para cima, ventos, torre de calor e rooftop configurável (pedido em 02/10/2026, 12h35)
+
+Pedido do usuário: contraste entre o frame superior e o principal; rosa dos ventos sempre com o norte para cima — quem gira é a planta; ventos predominantes de leste/sudeste, com entradas e saídas posicionadas para fluxo cruzado; opção de torre de calor; todas as plantas (inclusive o subsolo) desenhadas sobre a implantação do terreno; no rooftop, a planta de baixo esmaecida para dar proporção; rooftop com variáveis de área, localização sobre o pavimento de baixo e elementos (área técnica, varanda gourmet, área da varanda, área do terraço…). Avaliar o uso da sessão e pausar antes de ser interrompido.
+
+## Etapas (um commit por etapa)
+1. **Paleta**: barra superior escura (grafite) com texto claro no tema claro, e mais clara que o fundo no tema escuro; menu e marca ajustados ao novo contraste.
+2. **Norte para cima e planta sobre o terreno**: cada pavimento (subsolo, térreo, superior, rooftop, edícula) desenhado dentro do lote, com divisas e recuos; o conjunto gira conforme a frente escolhida, para o norte ficar no topo; rosa dos ventos fixa (N para cima); rótulos sempre legíveis (sem ficar de cabeça para baixo); exportação SVG/PNG idem.
+3. **Rooftop configurável**: localização sobre o pavimento de baixo (frente, centro, fundo); áreas de área técnica, varanda gourmet coberta, varanda coberta e terraço descoberto (m²), banho e spa; planta do pavimento de baixo esmaecida sob o rooftop.
+4. **Ventos e torre de calor**: vento predominante de leste/sudeste desenhado em setas; cada pavimento precisa de aberturas na face de barlavento e na de sotavento (aviso e pontuação); entrada principal e saída de fundos em faces opostas, alinhadas com o vento sempre que possível (o gerador escolhe a variante espelhada que favorece o fluxo); opção "Torre de calor" (exaustão por efeito chaminé) no centro da área social, atravessando os pavimentos até a cobertura.
+5. Testes novos (rotação, aberturas a barlavento/sotavento, torre em prumo, rooftop com áreas pedidas), capturas, memória e relatório.
