@@ -8,7 +8,7 @@
 
 const C = 1.20;          // largura de circulação
 const COL = 2.20;        // coluna de circulação com escada reta (1,20 de passagem + 1,00 de escada)
-const VAGA_L = 2.60, VAGA_P = 5.20, MANOBRA = 5.00, RAMPA_L = 3.00;
+const VAGA_L = 2.60, VAGA_P = 5.20, MANOBRA = 5.00, RAMPA_L = 3.50;
 const r2 = n => Math.round(n*100)/100;
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
@@ -64,7 +64,7 @@ const PADRAO = {
   supQuartos:-1, supEscritorio:false, supTv:false, supServico:false,
   rooftop:false, rtArea:40, rtDeck:true, rtGourmet:true, rtBanho:true, rtSpa:false, rtTecnica:true,
   subRecuos:'nenhum', permeab:20,
-  subsolo:false, subNivel:'meio', subGaragem:true, subDeposito:true, subLazer:false, inclinacao:20,
+  subsolo:false, subNivel:'meio', subGaragem:true, subLazer:false, inclinacao:20,
 };
 
 function normaliza(p){
@@ -768,55 +768,73 @@ function subsolo(q, W0, D0, cel0, av){
   const nucleoEsq = nx0 < W/2;
   const rx0 = nucleoEsq ? W - RAMPA_L : 0, rx1 = rx0 + RAMPA_L;        // rampa no lado oposto ao núcleo
   salas.push(...copiaNucleo(cel, {sobe:true}));
-  // faixa de manobra: logo antes do núcleo (núcleo no início da fileira de vagas) ou logo depois dele
-  let yl = null;
-  if(q.subGaragem){
-    const obs0 = [{x0:nx0, y0:ny0, x1:nx1, y1:ny1}].concat(Lin > 0 ? [{x0:rx0, y0:0, x1:rx1, y1:Lin}] : []);
-    const cap = (y0, y1) => { let iv = [[0, W]]; for(const o of obs0.filter(o => o.y0 < y1-0.001 && o.y1 > y0+0.001)) iv = iv.flatMap(([m,n]) => { const t = []; if(o.x0 > m) t.push([m, Math.min(n,o.x0)]); if(o.x1 < n) t.push([Math.max(m,o.x1), n]); return t; });
-      return iv.reduce((t,[m,n]) => t + Math.floor((n-m+0.001)/2.5), 0); };
-    const cands = [];
-    if(ny0 - MANOBRA >= Lin - 0.001) cands.push(r2(ny0 - MANOBRA));      // núcleo no começo da fileira de vagas
-    cands.push(r2(Math.max(Lin, ny1)));                                     // manobra logo depois do núcleo
-    let melhor = null;
-    const limite = yF + q.fundo - q.recFrente - (fundoLivre ? 2.0 : Math.max(q.recFundo, 2.0));   // fundo do lote menos jardim (ou recuo de fundo)
-    for(const c of cands){
-      const n = Math.min(q.vagas, (c >= VAGA_P - 0.01 ? cap(c - VAGA_P, c) : 0) + cap(c + MANOBRA, c + MANOBRA + VAGA_P));
-      const prof = Math.max(D, c + MANOBRA + VAGA_P), cabe = prof <= limite + 0.01;
-      if(!melhor || (cabe && !melhor.cabe) || (cabe===melhor.cabe && (n > melhor.n || (n === melhor.n && prof < melhor.prof - 0.01)))) melhor = {c, n, prof, cabe};
-    }
-    if(!melhor.cabe) av.push(`Subsolo: a garagem precisa de ${f2(melhor.prof - yF + 2.0)} m a partir do recuo frontal, mais do que o lote permite com os recuos escolhidos.`);
-    yl = melhor.c;
-  }
-  const livres = [];
-  const obst = [{x0:nx0, y0:ny0, x1:nx1, y1:ny1}];
-  if(Lin > 0) obst.push({x0:rx0, y0:0, x1:rx1, y1:Lin});
-  if(Lin > 0) salas.push(sala('rampa', rx0, 0, rx1, Lin, {inclinacao:q.inclinacao}));
-  const corta = ex => {                               // intervalos livres em x
+  // ---------- garagem: o máximo de vagas de 3,00 × 5,00 m, manobra contínua e sem depósito ----------
+  const VW = 3.0, VP = 5.0;
+  const limite = yF + q.fundo - q.recFrente - (fundoLivre ? 2.0 : Math.max(q.recFundo, 2.0));   // fundo do lote menos jardim (ou recuo de fundo)
+  const obsN = {x0:nx0, y0:ny0, x1:nx1, y1:ny1};
+  const obsR = Lin > 0 ? {x0:rx0, y0:0, x1:rx1, y1:Lin} : null;
+  const ax0 = rx0, ax1 = rx1;                                   // corredor entre manobras, no lado da rampa
+  const corta = ex => {                                         // intervalos livres em x
     let iv = [[0, W]];
     for(const [a,b] of ex) iv = iv.flatMap(([m,n]) => { const o = []; if(a > m) o.push([m, Math.min(n,a)]); if(b < n) o.push([Math.max(m,b), n]); return o.filter(([u,w]) => w-u > 0.3); });
     return iv;
   };
-  let vagasOk = 0, Dsub = D;
-  const bandas = [];
-  if(yl !== null){
-    const yv = yl + MANOBRA;
-    if(yl >= VAGA_P - 0.01){ if(yl - VAGA_P > 0.3) bandas.push({y0:0, y1:yl-VAGA_P, t:'livre'}); bandas.push({y0:yl-VAGA_P, y1:yl, t:'vagas'}); }
-    else if(yl > 0.3) bandas.push({y0:0, y1:yl, t:'livre'});
-    bandas.push({y0:yl, y1:yv, t:'manobra'});
-    bandas.push({y0:yv, y1:yv+VAGA_P, t:'vagas'});
-    Dsub = Math.max(D, yv + VAGA_P, ny1);
-    if(Dsub > D + 0.01) av.push(`Subsolo avança ${f2(Dsub - D)} m além da projeção da casa, sob o quintal, para caber a fileira de vagas.`);
-    if(Dsub - (yv+VAGA_P) > 0.3) bandas.push({y0:yv+VAGA_P, y1:Dsub, t:'livre'});
-  } else bandas.push({y0:0, y1:D, t:'livre'});
-  for(const b of bandas){
+  // monta o plano de faixas para uma posição da primeira manobra
+  function plano(yl){
+    const f = [];
+    if(yl >= VP - 0.01){ if(yl - VP > 0.3) f.push({y0:0, y1:yl-VP, t:'livre'}); f.push({y0:yl-VP, y1:yl, t:'vagas', face:yl}); }
+    else if(yl > 0.3) f.push({y0:0, y1:yl, t:'livre'});
+    f.push({y0:yl, y1:yl+MANOBRA, t:'manobra'});
+    let y = yl + MANOBRA;
+    f.push({y0:y, y1:y+VP, t:'vagas', face:y}); y += VP;
+    const lim = q.subRecuos==='nenhum' ? Math.max(D, y) : Math.max(limite, y);
+    let corredor = null;
+    while(lim - y >= VP + MANOBRA - 0.01){                       // fileira de costas + nova manobra (+ fileira do outro lado)
+      f.push({y0:y, y1:y+VP, t:'vagas', face:y+VP}); y += VP;
+      f.push({y0:y, y1:y+MANOBRA, t:'manobra'});
+      corredor = {x0:ax0, x1:ax1, y0:yl+MANOBRA, y1:y};
+      y += MANOBRA;
+      if(lim - y >= VP - 0.01){ f.push({y0:y, y1:y+VP, t:'vagas', face:y}); y += VP; }
+    }
+    const fim = Math.max(D, y, ny1);
+    if(fim - y > 0.3) f.push({y0:y, y1:fim, t:'livre'});
+    return {f, fim, corredor};
+  }
+  const obstaculos = pl => [obsN].concat(obsR ? [obsR] : [], pl.corredor ? [pl.corredor] : []);
+  const contaVagas = pl => pl.f.filter(b => b.t==='vagas').reduce((t,b) => t + corta(obstaculos(pl).filter(o => o.y0 < b.y1-0.001 && o.y1 > b.y0+0.001).map(o => [o.x0, o.x1])).reduce((u,[m,n]) => u + Math.floor((n-m+0.001)/VW), 0), 0);
+  let yl = null, pl = null;
+  if(q.subGaragem){
+    const cands = [];
+    if(ny0 - MANOBRA >= Lin - 0.001) cands.push(r2(ny0 - MANOBRA));      // núcleo no começo da fileira de vagas
+    cands.push(r2(Math.max(Lin, ny1)));                                     // manobra logo depois do núcleo
+    let melhor = null;
+    for(const c of cands){
+      const p0 = plano(c), n = contaVagas(p0), cabe = p0.fim <= limite + 0.01;
+      if(!melhor || (cabe && !melhor.cabe) || (cabe===melhor.cabe && (n > melhor.n || (n === melhor.n && p0.fim < melhor.p0.fim - 0.01)))) melhor = {c, n, p0, cabe};
+    }
+    if(!melhor.cabe) av.push(`Subsolo: a garagem precisa de ${f2(melhor.p0.fim - yF + 2.0)} m a partir do recuo frontal, mais do que o lote permite com os recuos escolhidos.`);
+    yl = melhor.c; pl = melhor.p0;
+  } else pl = {f:[{y0:0, y1:D, t:'livre'}], fim:D, corredor:null};
+  if(obsR) salas.push(sala('rampa', rx0, 0, rx1, Lin, {inclinacao:q.inclinacao}));
+  if(pl.corredor) salas.push(sala('manobra', pl.corredor.x0, pl.corredor.y0, pl.corredor.x1, pl.corredor.y1, {nome:'Corredor de manobra'}));
+  const livres = [];
+  let vagasOk = 0;
+  const Dsub = pl.fim;
+  if(Dsub > D + 0.01) av.push(`Subsolo avança ${f2(Dsub - D)} m além da projeção da casa, sob o quintal, para caber mais vagas.`);
+  const obsT = obstaculos(pl);
+  for(const b of pl.f){
     if(b.t==='manobra'){ salas.push(sala('manobra', 0, b.y0, W, b.y1)); continue; }
-    const toca = obst.filter(o => o.y0 < b.y1-0.001 && o.y1 > b.y0+0.001);
+    const toca = obsT.filter(o => o.y0 < b.y1-0.001 && o.y1 > b.y0+0.001);
     if(b.t==='vagas'){
-      // obstáculos tirados na altura toda da fileira; as sobras acima/abaixo deles viram depósito
-      for(const o of toca){ if(o.y0 - b.y0 > 0.3) livres.push({x0:o.x0, y0:b.y0, x1:o.x1, y1:o.y0}); if(b.y1 - o.y1 > 0.3) livres.push({x0:o.x0, y0:o.y1, x1:o.x1, y1:b.y1}); }
-      for(const [a,c] of corta(toca.map(o => [o.x0, o.x1]))){ let x = a;
-        while(x + 2.5 <= c + 0.001 && vagasOk < q.vagas){ salas.push(sala('garagem', x, b.y0, x+2.5, b.y1, {nome:'Vaga '+(vagasOk+1), vaga:1})); x += 2.5; vagasOk++; }
-        if(c - x > 0.3) livres.push({x0:x, y0:b.y0, x1:c, y1:b.y1}); }
+      // obstáculos tirados na altura toda da fileira; sobras acima/abaixo deles viram área técnica
+      for(const o of toca){ if(o === pl.corredor) continue; if(o.y0 - b.y0 > 0.3) livres.push({x0:o.x0, y0:b.y0, x1:o.x1, y1:o.y0}); if(b.y1 - o.y1 > 0.3) livres.push({x0:o.x0, y0:o.y1, x1:o.x1, y1:b.y1}); }
+      for(const [a,c] of corta(toca.map(o => [o.x0, o.x1]))){
+        const n = Math.floor((c-a+0.001)/VW), sobra = (c-a) - n*VW;
+        let x = a;                                               // centraliza as vagas quando a sobra dá dois pedaços úteis
+        if(sobra > 0.6){ x = a + sobra/2; livres.push({x0:a, y0:b.y0, x1:a+sobra/2, y1:b.y1}); livres.push({x0:c-sobra/2, y0:b.y0, x1:c, y1:b.y1}); }
+        else if(sobra > 0.3) livres.push({x0:a + n*VW, y0:b.y0, x1:c, y1:b.y1});
+        for(let i=0;i<n;i++){ salas.push(sala('garagem', x, b.y0, x+VW, b.y1, {nome:'Vaga '+(vagasOk+1), vaga:1, face:b.face})); x += VW; vagasOk++; }
+      }
       continue;
     }
     // faixa livre: corta nos limites dos obstáculos
@@ -826,15 +844,16 @@ function subsolo(q, W0, D0, cel0, av){
       const cobre = toca.filter(o => o.y0 <= a+0.001 && o.y1 >= c-0.001);
       for(const [m,n] of corta(cobre.map(o => [o.x0, o.x1]))) livres.push({x0:m, y0:a, x1:n, y1:c}); }
   }
-  if(yl !== null && vagasOk < q.vagas) av.push(`Subsolo: cabem ${vagasOk} de ${q.vagas} vagas.`);
-  // depósito e lazer nos livres, do maior para o menor
+  if(yl !== null) av.push(vagasOk >= q.vagas ? `Subsolo: ${vagasOk} vagas de 3,00 × 5,00 m (mínimo pedido: ${q.vagas}).` : `Subsolo: cabem ${vagasOk} de ${q.vagas} vagas de 3,00 × 5,00 m.`);
+  // sobras: salão de lazer (se pedido) na maior; o resto é área técnica — o subsolo não tem depósito
   livres.sort((a,b) => (b.x1-b.x0)*(b.y1-b.y0) - (a.x1-a.x0)*(a.y1-a.y0));
-  const usos = []; if(q.subLazer) usos.push('lazer'); if(q.subDeposito) usos.push('deposito');
-  livres.forEach((r,i) => {
-    const pequeno = (r.x1-r.x0) < 1.5 || (r.y1-r.y0) < 1.5;
-    const t = usos[i] && !pequeno ? usos[i] : 'deposito';
-    salas.push(sala(t, r.x0, r.y0, r.x1, r.y1, (usos[i] && !pequeno) ? {} : {nome: pequeno ? 'Área técnica' : 'Depósito'}));
-  });
+  let lazerFeito = !q.subLazer;
+  for(const r of livres){
+    const ok = (r.x1-r.x0) >= 3.0 && (r.y1-r.y0) >= 3.0;
+    if(!lazerFeito && ok){ salas.push(sala('lazer', r.x0, r.y0, r.x1, r.y1)); lazerFeito = true; }
+    else salas.push(sala('deposito', r.x0, r.y0, r.x1, r.y1, {nome:'Área técnica'}));
+  }
+  if(!lazerFeito) av.push('Subsolo: não sobrou área para o salão de lazer; as vagas tiveram prioridade.');
   // jardim de inverno fora da projeção, no fundo: luz e saída de ar oposta à rampa
   const JD = 2.0;
   salas.push(sala('jardim', 0, Dsub, W, Dsub + JD));
@@ -846,39 +865,44 @@ function subsolo(q, W0, D0, cel0, av){
       av.push(`Subsolo enterrado: pátios ingleses de ${f2(pw)} m nas laterais e jardim de inverno no fundo, para luz e ventilação cruzada.`); }
     else av.push('Subsolo enterrado: jardim de inverno no fundo; a boca da rampa faz a entrada de ar na frente.');
   } else av.push('Subsolo semienterrado: janelas altas acima do terreno e jardim de inverno no fundo, oposto à rampa.');
-  // pilares: perímetro e linhas entre vagas, nunca na faixa de manobra
+  // pilares: perímetro e linhas entre vagas, nunca nas faixas de manobra nem no corredor
   const pil = [], vao = q.vaoMax || 10;
   const addPil = (x, y) => { if(!pil.some(p => Math.abs(p.x-x)<0.3 && Math.abs(p.y-y)<0.3)) pil.push({x:r2(x), y:r2(y)}); };
   const ao = (a, b, n) => { const k = Math.max(1, Math.ceil((b-a)/n)); return Array.from({length:k+1}, (_,i) => a + (b-a)*i/k); };
   for(const x of ao(0, W, vao)){ addPil(x, 0); addPil(x, Dsub); }
   for(const y of ao(0, Dsub, vao)){ addPil(0, y); addPil(W, y); }
   const linhasY = [];
+  const manobras = pl.f.filter(b => b.t==='manobra').concat(pl.corredor ? [Object.assign({t:'corredor'}, pl.corredor)] : []);
+  const noCorredor = (x, y) => pl.corredor && x > pl.corredor.x0 - 0.2 && x < pl.corredor.x1 + 0.2 && y > pl.corredor.y0 && y < pl.corredor.y1;
+  const naRampa = (x, y) => obsR && x > rx0 + 0.2 && x < rx1 - 0.2 && y < Lin;
   if(yl !== null){
+    // em cada fileira, pilares na frente voltada para a manobra, entre vagas (a cada duas vagas, 6 m)
     const vg = salas.filter(s => s.vaga);
-    const linha = (y, sel) => { const xs = new Set(); for(const s of vg.filter(sel)){ xs.add(s.x0); xs.add(s.x1); }
-      const ord = [...xs].sort((a,b)=>a-b); let ult = -99; for(const x of ord){ if(x - ult >= 4.9 || x===ord[ord.length-1]){ addPil(x, y); ult = x; } } if(ord.length) linhasY.push(y); };
-    linha(yl + MANOBRA + 0.15, s => s.y0 >= yl + MANOBRA - 0.01);
-    if(yl > 1.0 && !(yl >= VAGA_P - 0.01 && vg.some(s => s.y1 <= yl + 0.01))){
-      const xs = [...ao(0, W, 5), nx0, nx1].filter(x => !(Lin > 0 && x > rx0 + 0.2 && x < rx1 - 0.2));
-      for(const x of xs) addPil(x, yl - 0.15); linhasY.push(yl - 0.15);
+    for(const b of pl.f.filter(b => b.t==='vagas')){
+      const y = Math.abs(b.face - b.y0) < 0.01 ? b.y0 + 0.15 : b.y1 - 0.15;
+      const xs = new Set(); for(const s of vg.filter(s => s.y0 >= b.y0 - 0.01 && s.y1 <= b.y1 + 0.01)){ xs.add(s.x0); xs.add(s.x1); }
+      const ord = [...xs].sort((m,n)=>m-n); let ult = -99;
+      for(const x of ord){ if((x - ult >= 5.9 || x===ord[ord.length-1]) && !noCorredor(x, y)){ addPil(x, y); ult = x; } }
+      if(ord.length) linhasY.push(r2(y));
     }
-    if(yl >= VAGA_P - 0.01) linha(yl - 0.15, s => s.y1 <= yl + 0.01);
-    if(Dsub - (yl + MANOBRA + VAGA_P) > vao) linha(yl + MANOBRA + VAGA_P - 0.15, s => s.y0 >= yl + MANOBRA - 0.01);
+    if(yl > 1.0 && !pl.f.some(b => b.t==='vagas' && b.y1 <= yl + 0.01)){
+      for(const x of [...ao(0, W, 5), nx0, nx1]) if(!naRampa(x, yl - 0.15)) addPil(x, yl - 0.15);
+      linhasY.push(yl - 0.15);
+    }
   }
-  // completa linhas de pilares onde o vão passar do máximo, sem tocar na faixa de manobra
-  const fora = y => yl===null || y < yl - 0.1 || y > yl + MANOBRA + 0.1;
-  const xsLinha = ao(0, W, 5).filter(x => !(Lin > 0 && x > rx0 + 0.2 && x < rx1 - 0.2));
-  for(let guarda = 0; guarda < 8; guarda++){
+  // completa linhas onde o vão passar do máximo, fora das manobras e do miolo das vagas
+  const proib = pl.f.filter(b => b.t==='manobra').map(b => [b.y0 - 0.1, b.y1 + 0.1]).concat(pl.f.filter(b => b.t==='vagas').map(b => [b.y0 + 0.3, b.y1 - 0.3]));
+  const bordas = pl.f.filter(b => b.t==='vagas').flatMap(b => [b.y0 + 0.15, b.y1 - 0.15]);
+  for(let guarda = 0; guarda < 10; guarda++){
     const ys0 = [0, ...linhasY, Dsub].sort((a,b)=>a-b); let mexeu = false;
     for(let i=0;i<ys0.length-1;i++){ const a = ys0[i], b = ys0[i+1]; if(b - a <= vao + 0.01) continue;
-      // candidatos: meio do vão ou bordas das fileiras de vagas (nunca dentro de vaga ou da manobra)
-      const proib = yl===null ? [] : [[yl - 0.1, yl + MANOBRA + 0.1], [yl + MANOBRA + 0.3, yl + MANOBRA + VAGA_P - 0.3]].concat(yl >= VAGA_P - 0.01 ? [[yl - VAGA_P + 0.3, yl - 0.3]] : []);
       const ok = y => y > a + 0.5 && y < b - 0.5 && !proib.some(([m,n]) => y > m && y < n);
-      const cands = [(a+b)/2].concat(yl===null ? [] : [yl - 0.15, yl + MANOBRA + 0.15, yl + MANOBRA + VAGA_P - 0.15, yl - VAGA_P + 0.15]).filter(ok);
+      const cands = [(a+b)/2, ...bordas].filter(ok);
       if(!cands.length) continue;
       cands.sort((m,n) => Math.abs(m-(a+b)/2) - Math.abs(n-(a+b)/2));
       const y = cands[0];
-      for(const x of xsLinha) addPil(x, y); linhasY.push(r2(y)); mexeu = true; break; }
+      for(const x of ao(0, W, 5)) if(!naRampa(x, y) && !noCorredor(x, y)) addPil(x, y);
+      linhasY.push(r2(y)); mexeu = true; break; }
     if(!mexeu) break;
   }
   const ys = [0, ...linhasY, Dsub].sort((a,b)=>a-b);
@@ -886,8 +910,9 @@ function subsolo(q, W0, D0, cel0, av){
   if(maior > vao + 0.01) av.push(`Subsolo: vão de ${f2(maior)} m entre linhas de pilares; prever laje protendida ou viga de transição para manter a manobra livre.`);
   // volta para as coordenadas da casa
   const mv = o => { o.x0 = r2(o.x0 - xL); o.x1 = r2(o.x1 - xL); o.y0 = r2(o.y0 - yF); o.y1 = r2(o.y1 - yF); return o; };
-  salas.forEach(mv); pocos.forEach(mv); for(const pl of pil){ pl.x = r2(pl.x - xL); pl.y = r2(pl.y - yF); }
-  return {nome:'Subsolo', salas, dim:{x0:-xL, y0:-yF, W, D:Dsub}, recuos:q.subRecuos, pocos, pilares:pil, manobra: yl===null ? null : {y0:r2(yl-yF), y1:r2(yl+MANOBRA-yF)},
+  salas.forEach(mv); pocos.forEach(mv); for(const pp of pil){ pp.x = r2(pp.x - xL); pp.y = r2(pp.y - yF); }
+  const manobrasCasa = manobras.map(m => mv({x0: m.x0 !== undefined ? m.x0 : 0, x1: m.x1 !== undefined ? m.x1 : W, y0:m.y0, y1:m.y1}));
+  return {nome:'Subsolo', salas, dim:{x0:-xL, y0:-yF, W, D:Dsub}, recuos:q.subRecuos, pocos, pilares:pil, manobra: yl===null ? null : {y0:r2(yl-yF), y1:r2(yl+MANOBRA-yF)}, manobras: manobrasCasa,
     nucleo:mv({x0:nx0, y0:ny0, x1:nx1, y1:ny1}), rampa:{desnivel:h, L:Lr, Lin, Lout:r2(Lr-Lin), largura:RAMPA_L, inclinacao:q.inclinacao, x0:r2(rx0 - xL)}, vagas:vagasOk};
 }
 
@@ -1276,6 +1301,14 @@ function gerar(entrada){
   return {entrada:q, B, Dmax, variantes:escolhidas, loteMinimo:lm, avisos, escada: (q.tipo==='sobrado'||q.subsolo) ? escada(q) : null};
 }
 
+/* Profundidade necessária atrás da casa: recuo, anexos e o subsolo (com o jardim de inverno). */
+function atrasDe(v, q){
+  let t = Math.max(q.recFundo, q.anexoFundo ? v.anexoProf : v.anexoProf + q.recFundo);
+  const sub = v.pav.find(p => p.nome==='Subsolo');
+  if(sub) t = Math.max(t, sub.dim.y0 + sub.dim.D + 2.0 - v.D);
+  return t;
+}
+
 /* Menor terreno (frente × fundo) em que a melhor variante cabe sem violações de terreno. */
 function loteMinimo(q, P){
   let best = null;
@@ -1284,7 +1317,7 @@ function loteMinimo(q, P){
     for(const v of vs){
       const fr = r2(W + 2*q.recLat);
       comAnexos(v, Object.assign({}, q, {frente:fr, fundo:999}));
-      const atras = Math.max(q.recFundo, q.anexoFundo ? v.anexoProf : v.anexoProf + q.recFundo);
+      const atras = atrasDe(v, q);
       let fu = Math.ceil((v.D + q.recFrente + atras)*2)/2;
       const q2 = Object.assign({}, q, {frente:fr, fundo:fu});
       avalia(comAnexos(v, q2), q2);
@@ -1299,10 +1332,10 @@ function loteMinimo(q, P){
   let comFrente = null;
   const q9 = Object.assign({}, q, {fundo: 999});
   const vs = geraTodas(q, P, [r2(q.frente - 2*q.recLat)]).map(v => avalia(comAnexos(v, q9), q9));
-  const fundoDe = v => v.D + Math.max(q.recFundo, q.anexoFundo ? v.anexoProf : v.anexoProf + q.recFundo);
+  const fundoDe = v => v.D + atrasDe(v, q);
   const bons = vs.filter(v => v.score >= 70);
   (bons.length ? bons : vs).sort((a,b) => bons.length ? fundoDe(a)-fundoDe(b) : b.score-a.score);
-  if(vs.length){ const v = (bons.length ? bons : vs)[0]; const atras = Math.max(q.recFundo, q.anexoFundo ? v.anexoProf : v.anexoProf + q.recFundo);
+  if(vs.length){ const v = (bons.length ? bons : vs)[0]; const atras = atrasDe(v, q);
     comFrente = {frente:q.frente, fundo:r2(Math.ceil((v.D + q.recFrente + atras)*2)/2), tipologia:v.tipologia}; }
   return {minimo:best, comFrente};
 }
