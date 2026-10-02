@@ -21,6 +21,7 @@ function espelha(v){
     if(p.pocos) for(const s of p.pocos){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
     if(p.pilares) for(const pl of p.pilares) pl.x = fx(pl.x);
     if(p.nucleo){ const a = fx(p.nucleo.x1), b = fx(p.nucleo.x0); p.nucleo.x0 = a; p.nucleo.x1 = b; }
+    if(p.spa) p.spa.x = fx(p.spa.x);
     if(p.rampa && p.rampa.x0 !== undefined) p.rampa.x0 = +(W - p.rampa.x0 - p.rampa.largura).toFixed(2);
     for(const s of p.salas){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
     for(const k of ['portas','vaos','janelas']) for(const e of (p[k]||[])){
@@ -144,6 +145,8 @@ function planta(v, idx, op){
     if(d.entrada){ const mx = d.o==='h' ? (d.t0+d.t1)/2 : d.c, my = d.o==='h' ? d.c : (d.t0+d.t1)/2;
       o.push(`<text x="${X(mx)}" y="${Y(my) + (d.o==='h' ? -6 : 3)}" class="rn" style="font-size:6.4px;fill:${PORTA}">▼ ENTRADA</text>`); }
   }
+  // spa do rooftop
+  if(p.spa) o.push(`<circle cx="${X(p.spa.x)}" cy="${Y(p.spa.y)}" r="${p.spa.r*K}" fill="#CFE6F2" stroke="#4C86C6" stroke-width="1.2"><title>Spa</title></circle><text x="${X(p.spa.x)}" y="${Y(p.spa.y)+2.5}" class="rd" style="font-size:6.4px;font-weight:600">SPA</text>`);
   // pilares (subsolo)
   for(const pl of (p.pilares||[])) o.push(`<rect x="${(X(pl.x)-5.5).toFixed(1)}" y="${(Y(pl.y)-5.5).toFixed(1)}" width="11" height="11" fill="#111318" stroke="#FFFFFF" stroke-width="1.2"><title>Pilar</title></rect>`);
   if(p.manobra) o.push(`<text x="${X(W)-6}" y="${Y(p.manobra.y0)+10}" class="rd" style="font-size:6px;text-anchor:end;fill:#57534E">faixa de manobra livre, sem pilares</text>`);
@@ -207,6 +210,11 @@ function lote(v, q, res){
     const n = Math.min(fora, Math.floor((q.frente-0.5)/2.5)), dy = Math.min(5, q.recFrente-0.2);
     for(let i=0;i<n;i++) o.push(`<rect x="${X(0.3+i*2.5)}" y="${Y(q.recFrente-dy)}" width="${2.4*k}" height="${dy*k}" fill="#E9E6E1" stroke="#A39C90" stroke-dasharray="2 2"><title>Vaga descoberta</title></rect>`);
   }
+  const rt = v.pav.find(p => p.nome==='Rooftop');
+  if(rt){ const xs = rt.salas.map(s => [s.x0, s.x1]).flat(), ys = rt.salas.map(s => [s.y0, s.y1]).flat();
+    const a0 = Math.min(...xs), a1 = Math.max(...xs), b0 = Math.min(...ys), b1 = Math.max(...ys);
+    o.push(`<rect x="${X(v.x0+a0)}" y="${Y(v.y0+b0)}" width="${((a1-a0)*k).toFixed(1)}" height="${((b1-b0)*k).toFixed(1)}" fill="none" stroke="#B4532A" stroke-width="1.4" stroke-dasharray="4 2"><title>Rooftop ${f2(rt.area)} m²</title></rect>`);
+    o.push(`<text x="${X(v.x0+(a0+a1)/2)}" y="${Y(v.y0+b0)-3}" class="cota" style="fill:#B4532A">rooftop</text>`); }
   const sub = v.pav.find(p => p.nome==='Subsolo');
   if(sub) for(const pc of (sub.pocos||[])){ const ax0 = v.espelhada ? v.x0 + v.W - pc.x1 : v.x0 + pc.x0;
     o.push(`<rect x="${X(ax0)}" y="${Y(v.y0+pc.y0)}" width="${((pc.x1-pc.x0)*k).toFixed(1)}" height="${((pc.y1-pc.y0)*k).toFixed(1)}" fill="#D6E4CC" stroke="#5F7350" stroke-dasharray="2 2"><title>Pátio inglês do subsolo</title></rect>`); }

@@ -86,6 +86,14 @@
           <label class="chk"><input type="checkbox" name="supTv">Sala de TV / sala íntima</label>
           <label class="chk"><input type="checkbox" name="supServico">Lavanderia</label>
         </div>
+        <label class="chk"><input type="checkbox" name="rooftop">Rooftop (cobertura usável)</label>
+        <div id="rtOps">
+          <label class="fld">Área do rooftop (m²)<input type="number" name="rtArea" min="12" max="400" step="2"><small>Limitada à laje do último pavimento; a escada sobe empilhada até lá.</small></label>
+          <label class="chk"><input type="checkbox" name="rtGourmet">Gourmet coberto com churrasqueira</label>
+          <label class="chk"><input type="checkbox" name="rtBanho">Banho</label>
+          <label class="chk"><input type="checkbox" name="rtSpa">Spa</label>
+          <label class="chk"><input type="checkbox" name="rtTecnica">Área técnica / caixa d’água</label>
+        </div>
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
@@ -252,6 +260,7 @@ function sincroniza(){
   const sob = (form.querySelector('input[name=tipo]:checked')||{}).value === 'sobrado';
   const fmt = form.elements.formato.value, chave = fmt==='U' ? 'U' : fmt==='L' ? 'L' : 'b';
   document.getElementById('supOps').hidden = !sob;
+  document.getElementById('rtOps').hidden = !form.elements.rooftop.checked;
   document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';
   form.querySelectorAll('#secOps .chk').forEach(el => { el.hidden = fmt!=='auto' && !el.classList.contains('sec-' + chave); });
   form.querySelectorAll('#secOps .sec-txt').forEach(el => { el.textContent = el.dataset[chave.toLowerCase()] || el.dataset.b; });
