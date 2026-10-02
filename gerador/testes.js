@@ -22,6 +22,7 @@ const CASOS = {
   'L com subsolo, 16 × 34': {frente:16, fundo:34, formato:'L', quartos:3, suites:2, subsolo:true, vagas:2},
   'Subsolo nos recuos laterais e de fundo, 10 × 25': {frente:10, fundo:25, tipo:'sobrado', quartos:4, suites:2, subsolo:true, vagas:2, subRecuos:'lateraisFundo'},
   'Subsolo em todos os recuos, 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, subsolo:true, vagas:3, subRecuos:'todos', subLazer:true},
+  'Frente para o sul, torre de calor e rooftop no fundo, 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, orientacao:'S', torreCalor:true, rooftop:true, rtPos:'fundo', rtTerracoA:30, rtVarandaA:12},
   'Programa grande demais, 8 × 20': {frente:8, fundo:20, quartos:6, suites:6, tv:true, escritorio:true, vagas:3},
 };
 const E = 0.011;
@@ -82,6 +83,12 @@ function rodar(){
       if(c.formato && c.formato!=='auto' && c.subsolo && !v.pav.some(p => p.nome==='Subsolo')) erros.push(`${v.nome}: formato sem subsolo`);
       if(c.subRecuos && c.subRecuos!=='nenhum' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(!sb || sb.vagas < c.vagas) erros.push(`${v.nome}: subsolo com ${sb ? sb.vagas : 0} de ${c.vagas} vagas`); }
       if(c.subsolo && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(sb && sb.vagas > (c.vagas||2)) erros.push(`${v.nome}: subsolo com mais vagas que o pedido (custo)`); }
+      if(c.torreCalor && !v.torre) erros.push(`${v.nome}: sem torre de calor`);
+      const ter = v.pav.find(p => p.nome==='Térreo');
+      if(ter && !ter.portas.some(d => d.entrada)) erros.push(`${v.nome}: térreo sem entrada`);
+      if(c.orientacao && v===r.variantes[0] && ter && !ter.portas.some(d => d.saida)) erros.push(`${v.nome}: térreo sem saída de fundos`);
+      if(c.rooftop){ const rt = v.pav.find(p => p.nome==='Rooftop'); if(rt && !rt.base) erros.push(`${v.nome}: rooftop sem o pavimento de baixo esmaecido`);
+        if(rt && c.rtTerracoA && !rt.salas.some(s => s.nome==='Terraço')) erros.push(`${v.nome}: rooftop sem terraço`); }
       if(c.piscina && !(v.anexos||[]).some(a => a.tipo==='piscina')) erros.push(`${v.nome}: sem piscina`);
       for(const a of (v.anexos||[])) if(a.y0 < v.y0 + v.D - E) erros.push(`${v.nome}: anexo ${a.tipo} sobre a casa`);
       const an = (v.anexos||[]); for(let i=0;i<an.length;i++) for(let j=i+1;j<an.length;j++) if(sobrepoe(an[i], an[j])) erros.push(`${v.nome}: ${an[i].tipo} sobrepõe ${an[j].tipo}`);

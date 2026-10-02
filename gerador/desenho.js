@@ -61,6 +61,15 @@ function girado(conteudo, F, px0, py0, px1, py1, ox, oy){
   return {g:`<g class="${F ? 'halo' : ''}" transform="translate(${tx.toFixed(1)},${ty.toFixed(1)}) rotate(${F} ${cx.toFixed(1)} ${cy.toFixed(1)})">${textosLegiveis(conteudo, F)}</g>`, Wr, Hr};
 }
 
+/* Setas do vento predominante de leste/sudeste (sopra de 112,5°), atravessando o desenho. */
+function ventoSetas(xr, y0, H){
+  const ang = (112.5 + 180) * Math.PI/180, dx = Math.sin(ang), dy = -Math.cos(ang);
+  let g = '<g fill="none" stroke="#4C86C6" stroke-width="1.6" stroke-dasharray="6 4" opacity=".75">';
+  for(const k of [0.3, 0.5, 0.7]){ const x1 = xr + 8, y1 = y0 + H*k + 40, x2 = x1 + dx*70, y2 = y1 + dy*70;
+    g += `<path d="M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}"/><path d="M${(x2 - dx*8 + dy*5).toFixed(1)},${(y2 - dy*8 - dx*5).toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)} L${(x2 - dx*8 - dy*5).toFixed(1)},${(y2 - dy*8 + dx*5).toFixed(1)}" stroke-dasharray=""/>`; }
+  return g + `</g><text x="${(xr+20).toFixed(1)}" y="${(y0 + H*0.3 + 30).toFixed(1)}" style="font-size:6.6px;fill:#4C86C6;font-weight:600">vento L/SE</text>`;
+}
+
 /* Rosa dos ventos: a frente do terreno (topo do desenho) aponta para o rumo escolhido. */
 function rosa(cx, cy, R, rumo){
   const conhecido = rumo && Motor.RUMOS[rumo] !== undefined;
@@ -264,6 +273,9 @@ function planta(v, idx, op){
   const ys = (v.cotasY||[]).filter(y => y<=D+0.01);
   if(p.nome==='Térreo') for(let i=0;i<ys.length-1;i++) if(ys[i+1]-ys[i] > 0.6) cota(ys[i], ys[i+1], -0.75, f2(ys[i+1]-ys[i]), true);
 
+  if(v.torre && !p.anexo && p.nome!=='Subsolo'){ const t = v.torre;
+    o.push(`<rect x="${X(t.x0)}" y="${Y(t.y0)}" width="${((t.x1-t.x0)*K).toFixed(1)}" height="${((t.y1-t.y0)*K).toFixed(1)}" fill="#F2E3DC" fill-opacity="${p.nome==='Rooftop'?0.9:0.35}" stroke="#9A5B45" stroke-width="1.4" stroke-dasharray="${p.nome==='Rooftop'?'':'4 2'}"><title>Torre de calor (exaustão por efeito chaminé)</title></rect>`);
+    o.push(`<text x="${((X(t.x0)+X(t.x1))/2).toFixed(1)}" y="${(Y(t.y1)+8).toFixed(1)}" class="rd" style="font-size:6px;font-weight:600;fill:#9A5B45">TORRE DE CALOR</text>`); }
   const fora = [];
   const legY = () => 0;
   if(ehSub){ let lx = 0, ly = 0;
@@ -282,6 +294,7 @@ function planta(v, idx, op){
 <text x="20" y="46" class="st">${esc(sub)}${F ? ' · planta girada: norte para cima' : ''}</text>
 ${gg.g}
 ${rosa(LW - 62, 110, 26, rumoP)}
+${ventoSetas(20 + gg.Wr, 64, gg.Hr)}
 ${fora.length ? `<g transform="translate(20,${LH - 14})">${fora.join('')}</g>` : ''}
 </svg>`;
 }

@@ -48,6 +48,11 @@ const TIPOS = {
   jardim:       {nome:'Jardim de inverno', zona:'patio', aberto:1},
 };
 const FATOR = {compacto:0.85, medio:1, amplo:1.25};
+/* Vento predominante de leste/sudeste (de onde sopra, em graus). */
+const VENTO = 112.5;
+const difAng = (a, b) => { const d = Math.abs(((a - b) % 360 + 540) % 360 - 180); return d; };
+/* Rumo para onde aponta cada face da casa: y0 = frente; y1 = fundo; x1 = direita de quem olha para a rua; x0 = esquerda. */
+function rumoFace(lado, F, espelho){ const base = {y0:0, x1:90, y1:180, x0:270}[lado]; let a = base; if(espelho && (lado==='x0'||lado==='x1')) a = 360 - base; return (F + a) % 360; }
 /* Rumos da frente do terreno (graus no sentido horário a partir do norte). */
 const RUMOS = {N:0, NE:45, L:90, SE:135, S:180, SO:225, O:270, NO:315};
 const NOMES_RUMO = {N:'Norte', NE:'Nordeste', L:'Leste', SE:'Sudeste', S:'Sul', SO:'Sudoeste', O:'Oeste', NO:'Noroeste'};
@@ -66,6 +71,7 @@ const PADRAO = {
   elevador:false, vaoMax:10,
   supModo:'corresp', secFrente:true, secMeio:true, secFundo:true, secAlaE:true, secAlaD:false,
   supQuartos:-1, supEscritorio:false, supTv:false, supServico:false,
+  torreCalor:false,
   rooftop:false, rtPos:'centro', rtTecnicaA:4, rtGourmetA:12, rtVarandaA:10, rtTerracoA:20, rtBanho:true, rtSpa:false,
   subRecuos:'nenhum', permeab:20,
   subsolo:false, subNivel:'meio', garagemLocal:'subsolo', vagasTerreo:1, subLazer:false, inclinacao:20,
@@ -80,6 +86,7 @@ function normaliza(p){
   if(p && p.rtGourmet===false && p.rtGourmetA===undefined) q.rtGourmetA = 0;
   if(p && p.rtTecnica===false && p.rtTecnicaA===undefined) q.rtTecnicaA = 0;
   for(const k of ['rtTecnicaA','rtGourmetA','rtVarandaA','rtTerracoA']) q[k] = clamp(+q[k] || 0, 0, 300);
+  q.torreCalor = q.torreCalor===true||q.torreCalor==='true'||q.torreCalor==='on'||q.torreCalor===1;
   for(const k of ['secFrente','secMeio','secFundo','secAlaE','secAlaD','supEscritorio','supTv','supServico','rooftop','rtDeck','rtGourmet','rtBanho','rtSpa','rtTecnica']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   if(q.supModo!=='parcial') q.supModo = 'corresp';
   q.supQuartos = Math.round(+q.supQuartos); if(!(q.supQuartos >= 0) || q.supQuartos > q.quartos) q.supQuartos = q.quartos;
@@ -1169,6 +1176,18 @@ function aberturas(pav, q, ehTerreo){
       }
     }
   }
+  // saída de fundos: na face mais oposta à entrada, por cozinha, serviço, jantar ou gourmet
+  if(ehTerreo){
+    const ent = portas.find(p => p.entrada);
+    if(ent){
+      const fE = faceDe(ent, S), oposto = {y0:'y1', y1:'y0', x0:'x1', x1:'x0'}[fE];
+      const cands = S.filter(s => ['servico','cozinha','jantar','gourmet'].includes(s.tipo))
+        .flatMap(s => trechosExternos(s, S).filter(t => t.t1 - t.t0 >= 1.2).map(t => ({s, t, f: faceDe({o:t.o, c:t.c, t0:t.t0, t1:t.t1}, S)})));
+      cands.sort((a,b) => (a.f===oposto?0:a.f===fE?2:1) - (b.f===oposto?0:b.f===fE?2:1) || (b.t.t1-b.t.t0) - (a.t.t1-a.t.t0));
+      const c = cands[0];
+      if(c && c.f !== fE){ const m = (c.t.t0 + c.t.t1)/2; portas.push({o:c.t.o, c:c.t.c, t0:r2(m-0.45), t1:r2(m+0.45), sala:c.s.id, dentro:dentro(c.s, c.t), saida:true}); }
+    }
+  }
   // conectividade: a partir da entrada (térreo) ou da escada/hall (outros pavimentos)
   const ini = ehTerreo ? (portas.find(p=>p.entrada)||{}).sala : (S.find(s=>s.tipo==='escada')||S.find(s=>s.tipo==='hall')||{}).id;
   if(ini){
@@ -1233,6 +1252,27 @@ function aberturas(pav, q, ehTerreo){
 
   function larguraPorta(s){ return ['banhoSocial','lavabo','closet','despensa','rouparia','banhoSuite'].includes(s.tipo) ? 0.7 : s.tipo==='garagem' ? 0.9 : 0.8; }
 }
+function faceDe(e, S){
+  const m = (e.t0 + e.t1)/2, dentro = (x, y) => S.some(o => !TIPOS[o.tipo].aberto && x > o.x0 && x < o.x1 && y > o.y0 && y < o.y1);
+  if(e.o==='h') return dentro(m, e.c - 0.05) ? 'y1' : 'y0';
+  return dentro(e.c - 0.05, m) ? 'x1' : 'x0';
+}
+/* Ventilação cruzada pelo vento de L/SE: aberturas a barlavento e a sotavento em cada pavimento. */
+function avaliaVento(v, q, espelho){
+  const F = RUMOS[q.orientacao] !== undefined ? RUMOS[q.orientacao] : 0;
+  let pen = 0; const av = [];
+  for(const p of v.pav){
+    if(p.anexo || p.nome==='Subsolo' || p.nome==='Rooftop') continue;
+    let bar = 0, sot = 0;
+    for(const e of (p.janelas||[]).concat((p.portas||[]).filter(d => d.entrada || d.saida))){
+      const ang = rumoFace(faceDe(e, p.salas), F, espelho), d = difAng(ang, VENTO);
+      if(d <= 67.5) bar++; else if(d >= 112.5) sot++;
+    }
+    if(!bar){ pen += 8; av.push(`${p.nome}: sem aberturas na face que recebe o vento de leste/sudeste.`); }
+    if(!sot){ pen += 8; av.push(`${p.nome}: sem aberturas na face oposta ao vento; o ar não atravessa a casa.`); }
+  }
+  return {pen, av};
+}
 function rotulo(s){ return (s.nome || TIPOS[s.tipo].nome).toLowerCase(); }
 function dentro(s, t){ return t.o==='h' ? (Math.abs(t.c-s.y0)<0.001 ? 1 : -1) : (Math.abs(t.c-s.x0)<0.001 ? 1 : -1); }
 function porta(s, o, sh, w, centro){
@@ -1295,6 +1335,11 @@ function avalia(v, q){
   const tot = v.pav.reduce((s,p)=>s+p.salas.filter(x=>!TIPOS[x.tipo].aberto).reduce((t,x)=>t+area(x),0),0);
   const circ = v.pav.reduce((s,p)=>s+p.salas.filter(x=>['circ','hall','galeria'].includes(x.tipo)).reduce((t,x)=>t+area(x),0),0);
   if(circ/tot > 0.14) pen += 60*(circ/tot-0.14);
+  // vento de L/SE: compara a planta normal com a espelhada e sugere a melhor
+  const vn = avaliaVento(v, q, false), ve = avaliaVento(v, q, true);
+  const vv = ve.pen < vn.pen ? ve : vn; v.espelharVento = ve.pen < vn.pen;
+  pen += vv.pen; av.push(...vv.av);
+  if(v.espelharVento) av.push('A versão espelhada recebe melhor o vento de leste/sudeste; ela já aparece espelhada.');
   v.score = Math.max(0, Math.round(100 - pen));
   v.avisos = (v.avisos||[]).concat(av);
   v.ocupacao = r2(taxa); v.projecao = r2(proj); v.circPct = r2(100*circ/tot);
@@ -1322,10 +1367,24 @@ function quadro(v){
 const f2 = n => (Math.round(n*100)/100).toFixed(2).replace('.', ',');
 
 /* ---------- Geração ---------- */
+function comTorre(v, q){
+  if(!q.torreCalor) return v;
+  const casa = v.pav.filter(p => !p.anexo && p.nome!=='Subsolo' && p.nome!=='Rooftop');
+  const topo = casa[casa.length-1];
+  const esc = topo.salas.find(s => s.tipo==='escada');
+  const estar = casa[0].salas.find(s => s.tipo==='estar') || casa[0].salas.find(s => s.tipo==='jantar');
+  const base = esc && casa.length > 1 ? esc : estar;
+  if(!base) return v;
+  const cx = (base.x0+base.x1)/2, cy = (base.y0+base.y1)/2, t = 1.5;
+  v.torre = {x0:r2(cx-t/2), y0:r2(cy-t/2), x1:r2(cx+t/2), y1:r2(cy+t/2), sobre: base===esc ? 'escada' : 'estar'};
+  v.avisos.push(base===esc ? 'Torre de calor sobre a escada: o vão da escada leva o ar quente para fora, por efeito chaminé.' : 'Torre de calor sobre o estar: exaustão do ar quente por efeito chaminé, com aberturas altas a sotavento.');
+  return v;
+}
+
 function geraTodas(q, P, Ws){
   const out = [];
   const push0 = out.push.bind(out);
-  out.push = (...vs) => push0(...vs.map(v => comRooftop(v, q)));
+  out.push = (...vs) => push0(...vs.map(v => comTorre(comRooftop(v, q), q)));
   for(const W of Ws){
     const modos = [], f = q.formato, quer = x => f==='auto' || f===x;
     const larguraCol = (q.tipo==='sobrado'||q.subsolo) ? COL : C;
