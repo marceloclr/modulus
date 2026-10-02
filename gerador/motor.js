@@ -49,7 +49,7 @@ const FATOR = {compacto:0.85, medio:1, amplo:1.25};
 
 const PADRAO = {
   frente:12, fundo:30, recFrente:5, recLat:1.5, recFundo:3, taxa:60,
-  tipo:'terrea', peDireito:3.0,
+  tipo:'terrea', formato:'auto', peDireito:3.0,
   quartos:3, suites:1, master:true, tamanho:'medio',
   banhosSociais:1, lavabo:false,
   estar:true, jantar:true, tv:false, escritorio:false,
@@ -70,6 +70,7 @@ function normaliza(p){
   q.inclinacao = clamp(q.inclinacao || 20, 8, 25);
   if(!FATOR[q.tamanho]) q.tamanho = 'medio';
   if(q.tipo!=='sobrado') q.tipo = 'terrea';
+  if(!['auto','bloco','L','U','H'].includes(q.formato)) q.formato = 'auto';
   if(!['coberta','descoberta','nenhuma'].includes(q.garagem)) q.garagem = 'coberta';
   if(q.vagas===0) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
@@ -309,7 +310,7 @@ function linear(q, P, W, modo, opts){
     pav.push({nome:'Térreo', salas: terreo});
   } else {
     // sobrado: íntimo no superior, com a mesma coluna de escada
-    const tirasS = [{x0:0, x1:cxA, lado:'x1'}, {x0:cxA+COL, x1:W, lado:'x0'}].filter(t => t.x1-t.x0 >= 2.6);
+    const tirasS = (modo==='L' ? [{x0:0, x1:cxA, lado:'x1'}] : [{x0:0, x1:cxA, lado:'x1'}, {x0:cxA+COL, x1:W, lado:'x0'}]).filter(t => t.x1-t.x0 >= 2.6);
     const fi = faixaIntima(P.mods, tirasS, 0, escRect.y1 + 1.0);
     const sup = fi.salas;
     const Ls = fi.Li;
@@ -317,7 +318,8 @@ function linear(q, P, W, modo, opts){
     sup.push(sala('escada', escRect.x0, escRect.y0, escRect.x1, escRect.y1, {desce:true, esc}));
     if(escRect.y0 > 0.3) sup.push(sala('rouparia', cxA+C, 0, cxA+COL, escRect.y0));
     if(Ls - escRect.y1 > 0.3) sup.push(sala('rouparia', cxA+C, escRect.y1, cxA+COL, Ls));
-    for(const t of [{x0:0,x1:cxA},{x0:cxA+COL,x1:W}]) if(t.x1-t.x0>0.05 && t.x1-t.x0<2.6) sup.push(sala('rouparia', t.x0, 0, t.x1, Ls, {nome:'Armários'}));
+    for(const t of (modo==='L' ? [{x0:0,x1:cxA}] : [{x0:0,x1:cxA},{x0:cxA+COL,x1:W}])) if(t.x1-t.x0>0.05 && t.x1-t.x0<2.6) sup.push(sala('rouparia', t.x0, 0, t.x1, Ls, {nome:'Armários'}));
+    if(modo==='L' && W-(cxA+COL) > 0.5) sup.push(sala('terraco', cxA+COL, 0, W, Ls, {nome:'Terraço'}));
     Dt = yI; var Dter = yI, Lsup = Ls;
     if(Ls > Dt + 0.05){
       // completa o térreo sob o superior
@@ -398,6 +400,49 @@ function emH(q, P, W){
     cotasY:[0, yb, yb+C+Db, D], patios:[{x0:wi, y0:0, x1:xs, y1:yb}, {x0:wi, y0:yb+C+Db, x1:xs, y1:D}]};
 }
 
+/* ---------- Tipologia em U: faixa social na frente; ala íntima e ala de apoio em volta de um pátio aberto para o fundo ---------- */
+function emU(q, P, W){
+  const av = [];
+  const lq = clamp(Math.sqrt(alvo('suite',q)*1.25), 3.2, 4.6);
+  const ws = r2(lq+0.6), wi = ws + C;
+  const apoio = [];
+  for(const t of P.apoioDir) if(t!=='cozinha') apoio.push({tipo:t, a:alvo(t,q)});
+  for(const t of P.apoioEsq) apoio.push({tipo:t, a:alvo(t,q)});
+  const wa = 3.2;
+  // faixa social: escritório, TV, estar, jantar, cozinha e garagem coberta no fim (lado do apoio)
+  let vagasDentro = 0, Wg = 0;
+  if(q.garagem==='coberta' && !q.subGaragem && q.vagas>0){
+    vagasDentro = q.vagas; while(vagasDentro>0 && W - vagasDentro*VAGA_L < 9) vagasDentro--;
+    Wg = vagasDentro*VAGA_L;
+    if(vagasDentro < q.vagas) av.push(`Só ${vagasDentro} de ${q.vagas} vagas cabem cobertas na faixa da frente; as demais ficam no recuo frontal.`);
+  }
+  const xR = W - Wg, xa = xR - wa, xg = xa - C;   // ala de apoio (sob a cozinha, ao lado da garagem) e sua galeria
+  if(xg - wi < 3.0) return null;
+  const itens = P.social.map(t => ({tipo:t, a:alvo(t,q)})).concat([{tipo:'cozinha', a:alvo('cozinha',q)}]);
+  const aS = itens.reduce((t,i)=>t+i.a,0);
+  const Dv = q.varanda ? 2.0 : 0;
+  let Ds = clamp(aS/(W-Wg), 3.6, 6.5);
+  if(Wg>0) Ds = Math.max(Ds, VAGA_P - Dv);
+  const yb = Dv + Ds;
+  const salas = [];
+  if(Dv>0) salas.push(sala('varanda', 0, 0, W-Wg, Dv));
+  salas.push(...faixa(0, Dv, W-Wg, yb, itens, 'x'));
+  if(Wg>0) salas.push(sala('garagem', W-Wg, 0, W, yb, {vagas:vagasDentro}));
+  // ala íntima à esquerda, corredor do lado do pátio
+  const fi = faixaIntima(P.mods, [{x0:0, x1:ws, lado:'x1'}], yb, 0);
+  salas.push(...fi.salas);
+  salas.push(sala('circ', ws, yb, wi, yb+fi.Li));
+  // ala de apoio à direita, com galeria do lado do pátio
+  let La = 0;
+  // um ambiente por linha, todos encostados na galeria
+  for(const it of apoio){ const L = Math.max(TIPOS[it.tipo].lado||1.2, it.a/wa); salas.push(sala(it.tipo, xa, yb+La, xR, yb+La+L)); La += L; }
+  if(q.gourmet){ const gL = clamp(alvo('gourmet',q)/wa, 3.0, 5.0); salas.push(sala('gourmet', xa, yb+La, xR, yb+La+gL)); La += gL; }
+  if(La > 0) salas.push(sala('galeria', xg, yb, xa, yb+La));
+  const D = yb + Math.max(fi.Li, La);
+  return {tipologia:'Em U', W:r2(W), D:r2(D), pav:[{nome:'Térreo', salas}], avisos:av, escada:null, garagemDentro:vagasDentro,
+    cotasY:[0, Dv, yb, D].filter((v,i,a)=>a.indexOf(v)===i), patios:[{x0:wi, y0:yb, x1:La>0?xg:xa, y1:D}]};
+}
+
 /* ---------- Subsolo ---------- */
 function subsolo(q, W, D, cxA, escRect, av){
   const salas = [];
@@ -473,12 +518,12 @@ const PREF = {
   quarto:['circ','hall'], suite:['circ','hall'], master:['circ','hall'],
   banhoSocial:['circ','hall','galeria','estar','jantar','tv','escritorio'], lavabo:['hall','galeria','estar','jantar','circ','tv'],
   escritorio:['estar','hall','galeria','circ','tv','jantar','garagem'], tv:['estar','jantar','hall','circ','galeria'],
-  cozinha:['jantar','hall','galeria','estar'], servico:['cozinha','hall','galeria','garagem','circ'], despensa:['cozinha','servico','hall'],
+  cozinha:['jantar','hall','galeria','estar'], servico:['cozinha','hall','galeria','garagem','circ'], despensa:['cozinha','servico','hall','galeria'],
   garagem:['hall','servico','cozinha','estar','galeria','escritorio'], rouparia:['circ','hall'], deposito:['hall','circ','manobra','galeria','servico','garagem','lazer','cozinha'],
   lazer:['hall','manobra'], gourmet:['cozinha','jantar','servico','estar','galeria'],
   salaIntima:['circ','hall'], hall:[], circ:[], galeria:[], escada:[], manobra:['hall'], rampa:[], varanda:[], terraco:['circ','hall'],
 };
-const ABERTOS = [['estar','jantar'],['estar','tv'],['hall','estar'],['hall','jantar'],['hall','tv'],['hall','circ'],['galeria','circ'],['galeria','jantar'],['galeria','estar'],['galeria','cozinha'],['manobra','garagem'],['manobra','rampa'],['hall','manobra']];
+const ABERTOS = [['circ','estar'],['circ','jantar'],['circ','tv'],['estar','jantar'],['estar','tv'],['hall','estar'],['hall','jantar'],['hall','tv'],['hall','circ'],['galeria','circ'],['galeria','jantar'],['galeria','estar'],['galeria','cozinha'],['manobra','garagem'],['manobra','rampa'],['hall','manobra']];
 
 function compartilhado(a, b){
   // aresta comum entre retângulos: {o:'v'|'h', c, t0, t1}
@@ -657,18 +702,20 @@ const f2 = n => (Math.round(n*100)/100).toFixed(2).replace('.', ',');
 function geraTodas(q, P, Ws){
   const out = [];
   for(const W of Ws){
-    const modos = [];
+    const modos = [], f = q.formato, quer = x => f==='auto' || f===x;
     const larguraCol = (q.tipo==='sobrado'||q.subsolo) ? COL : C;
-    if(W >= 2*TIPOS.suite.lado + larguraCol - 0.01) modos.push('duplo');
-    if(W <= 7.6) modos.push('simples');
-    if(W >= 10 && q.tipo==='terrea') modos.push('L');
+    if(quer('bloco') && W >= 2*TIPOS.suite.lado + larguraCol - 0.01) modos.push('duplo');
+    if(quer('bloco') && (W <= 7.6 || (f==='bloco' && W < 2*TIPOS.suite.lado + larguraCol))) modos.push('simples');
+    if(quer('L') && W >= 9) modos.push('L');
     for(const m of modos){ try{
       let v = linear(q, P, W, m);
       // no sobrado, se o superior for bem mais longo, aumenta as faixas do térreo (até 30 %) antes de criar varanda
       if(q.tipo==='sobrado' && v.Lsup && v.Lsup > v.Dter + 1.0){ const k = Math.min(1.3, 1 + (v.Lsup - v.Dter)/Math.max(1, v.Dter - (q.varanda?2:0))); v = linear(q, P, W, m, {cresce:k}); }
       out.push(v);
     }catch(e){ /* combinação inviável */ } }
-    if(W >= 15 && q.tipo==='terrea' && !q.subsolo){ const h = emH(q, P, W); if(h) out.push(h); }
+    const soTerrea = q.tipo==='terrea' && !q.subsolo;
+    if(quer('H') && W >= 15 && soTerrea){ const h = emH(q, P, W); if(h) out.push(h); }
+    if(quer('U') && W >= 12 && soTerrea){ const u = emU(q, P, W); if(u) out.push(u); }
   }
   return out;
 }
@@ -682,7 +729,10 @@ function gerar(entrada){
   const Ws = [];
   for(let w = Math.floor(B*2)/2; w >= Math.max(6, B-6); w -= 0.5) Ws.push(r2(w));
   if(!Ws.length) Ws.push(B);
+  const NOMES = {bloco:'bloco único', L:'em L', U:'em U', H:'em H'};
+  if((q.formato==='U'||q.formato==='H') && (q.tipo==='sobrado'||q.subsolo)) avisos.push(`O formato ${NOMES[q.formato]} está disponível só para casa térrea sem subsolo.`);
   const todas = geraTodas(q, P, Ws).map(v => avalia(v, q));
+  if(!todas.length && q.formato!=='auto') avisos.push(`O formato ${NOMES[q.formato]} não cabe na área edificável de ${f2(B)} m de largura. Veja o terreno mínimo para este formato ou escolha outro.`);
   todas.sort((a,b) => b.score-a.score || a.W*a.D-b.W*b.D);
   // até 3 variantes, preferindo tipologias diferentes
   const escolhidas = [];
