@@ -38,6 +38,25 @@ function espelha(v){
 
 function compartilhado(a, b){ return Motor._interno.compartilhado(a, b); }
 
+/* Rosa dos ventos: a frente do terreno (topo do desenho) aponta para o rumo escolhido. */
+function rosa(cx, cy, R, rumo){
+  const conhecido = rumo && Motor.RUMOS[rumo] !== undefined;
+  const giro = conhecido ? -Motor.RUMOS[rumo] : 0;        // ângulo do norte em relação ao topo
+  const pts = [['N',0],['NE',45],['L',90],['SE',135],['S',180],['SO',225],['O',270],['NO',315]];
+  const pol = a => { const t = (a + giro - 90) * Math.PI/180; return [Math.cos(t), Math.sin(t)]; };
+  let g = `<g class="rosa"><circle cx="${cx}" cy="${cy}" r="${R}" fill="#FFFFFF" fill-opacity=".85" stroke="#8A8F98" stroke-width=".8"/>`;
+  for(const [n,a] of pts){
+    const card = a % 90 === 0, [ux,uy] = pol(a), L = card ? R*0.82 : R*0.55, w = card ? R*0.13 : R*0.09;
+    const [px,py] = [-uy, ux];
+    const cor = n==='N' ? '#B4532A' : card ? '#2B2F36' : '#8A8F98';
+    g += `<path d="M${(cx+ux*L).toFixed(1)},${(cy+uy*L).toFixed(1)} L${(cx+px*w).toFixed(1)},${(cy+py*w).toFixed(1)} L${cx},${cy} Z" fill="${cor}"/><path d="M${(cx+ux*L).toFixed(1)},${(cy+uy*L).toFixed(1)} L${(cx-px*w).toFixed(1)},${(cy-py*w).toFixed(1)} L${cx},${cy} Z" fill="${cor}" fill-opacity=".55"/>`;
+    const T = R + (card ? 7 : 6);
+    g += `<text x="${(cx+ux*T).toFixed(1)}" y="${(cy+uy*T+2.6).toFixed(1)}" text-anchor="middle" style="font-size:${card?7.4:6}px;font-weight:${card?700:500};fill:${n==='N'?'#B4532A':'#43474D'}">${n}</text>`;
+  }
+  g += `<text x="${cx}" y="${cy - R - 16}" text-anchor="middle" style="font-size:6.2px;fill:#5d6168">${conhecido ? 'frente para ' + Motor.NOMES_RUMO[rumo].toLowerCase() : 'orientação não informada'}</text></g>`;
+  return g;
+}
+
 function planta(v, idx, op){
   op = op || {};
   const p = v.pav[idx];
@@ -47,7 +66,7 @@ function planta(v, idx, op){
   const OX = 70 - mx0*K + (mx0<0 ? 12 : 0), OY = 96 - my0*K;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
   const W = p.W || v.W, D = p.anexo ? p.D : Math.max(v.D, ...S.map(s => s.y1));
-  const larg = OX + Math.max(W, ...pocos.map(q => q.x1), ...S.map(q => q.x1))*K + 40, alt = OY + Math.max(D, ...pocos.map(q => q.y1), ...S.map(q => q.y1))*K + 60;
+  const larg = OX + Math.max(W, ...pocos.map(q => q.x1), ...S.map(q => q.x1))*K + 120, alt = OY + Math.max(D, ...pocos.map(q => q.y1), ...S.map(q => q.y1))*K + 60;
   const o = [];
   const line = (x0,y0,x1,y1,st,w,ex) => o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="${st}" stroke-width="${w}"${ex?' '+ex:''}/>`);
   const seg = (e, st, w, ex) => e.o==='h' ? line(e.t0, e.c, e.t1, e.c, st, w, ex) : line(e.c, e.t0, e.c, e.t1, st, w, ex);
@@ -203,6 +222,7 @@ function planta(v, idx, op){
 <title>${esc(titulo)}</title><style>text{font-family:"IBM Plex Sans","Inter","Segoe UI",Helvetica,Arial,sans-serif;fill:#2F333A}.tt{font-size:15px;font-weight:600}.st{font-size:8.6px;fill:#5d6168}.rn{font-weight:600;text-anchor:middle;letter-spacing:.2px}.rd{text-anchor:middle;fill:#4a4e55}.cota{font-size:6.6px;text-anchor:middle;fill:#55595F}</style>
 <rect width="100%" height="100%" fill="#FBFAF7"/>
 <text x="${OX}" y="30" class="tt">${esc(titulo)}</text>
+${rosa(Math.ceil(larg) - 52, Math.max(OY + 30, 92), 26, op.rumo !== undefined ? op.rumo : v.rumo)}
 <text x="${OX}" y="46" class="st">${esc(sub)}</text>
 ${o.join('\n')}
 </svg>`;
@@ -263,7 +283,8 @@ function lote(v, q, res){
   o.push(`<text transform="translate(${X(0)-8},${(Y(0)+Y(q.fundo))/2}) rotate(-90)" class="cota">fundo ${f2(q.fundo)} m</text>`);
   o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.recFrente/2)+3}" class="cota">recuo ${f2(q.recFrente)}</text>`);
   if(!(v.anexos||[]).length) o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.fundo - q.recFundo/2)+3}" class="cota">fundo ${f2(q.fundo - v.y0 - v.D)} m livres</text>`);
-  const W2 = Math.ceil(w + OX + 20), H2 = Math.ceil(h + OY + 16);
+  const W2 = Math.ceil(w + OX + 90), H2 = Math.ceil(Math.max(h + OY + 16, 140));
+  o.push(rosa(W2 - 40, OY + 46, 24, q.orientacao));
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" role="img" aria-label="Implantação no lote"><style>text{font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif}.cota{font-size:8px;text-anchor:middle;fill:#55595F}</style><rect width="100%" height="100%" fill="#FBFAF7"/>${o.join('')}</svg>`;
 }
 

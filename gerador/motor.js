@@ -48,10 +48,13 @@ const TIPOS = {
   jardim:       {nome:'Jardim de inverno', zona:'patio', aberto:1},
 };
 const FATOR = {compacto:0.85, medio:1, amplo:1.25};
+/* Rumos da frente do terreno (graus no sentido horário a partir do norte). */
+const RUMOS = {N:0, NE:45, L:90, SE:135, S:180, SO:225, O:270, NO:315};
+const NOMES_RUMO = {N:'Norte', NE:'Nordeste', L:'Leste', SE:'Sudeste', S:'Sul', SO:'Sudoeste', O:'Oeste', NO:'Noroeste'};
 const DIMENSIONAVEIS = ['quarto','suite','master','banhoSuite','closet','banhoSocial','lavabo','estar','jantar','tv','escritorio','cozinha','servico','despensa','gourmet'];
 
 const PADRAO = {
-  frente:12, fundo:30, recFrente:5, recLat:1.5, recFundo:3, taxa:60,
+  frente:12, fundo:30, recFrente:5, recLat:1.5, recFundo:3, taxa:60, orientacao:'',
   tipo:'terrea', formato:'auto', peDireito:3.0,
   quartos:3, suites:1, master:true, tamanho:'medio',
   banhosSociais:1, lavabo:false,
@@ -96,6 +99,7 @@ function normaliza(p){
   if(q.vagas===0 && !q.subsolo) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
   if(q.varandaForma!=='L') q.varandaForma = 'corrida';
+  if(!Object.prototype.hasOwnProperty.call(RUMOS, q.orientacao)) q.orientacao = '';
   // dimensões pedidas: d_<tipo>_w × d_<tipo>_l, ou só a área d_<tipo>_a
   q.dims = {};
   for(const t of DIMENSIONAVEIS){
@@ -1316,6 +1320,7 @@ function gerar(entrada){
   const P = programa(q);
   const B = r2(q.frente - 2*q.recLat), Dmax = r2(q.fundo - q.recFrente - q.recFundo);
   const avisos = [];
+  if(!q.orientacao) avisos.push('Informe para onde a frente do terreno está voltada (rosa dos ventos no bloco Terreno). Sem isso, a rosa das plantas não mostra a orientação real.');
   if(B < 5) avisos.push(`A área edificável tem só ${f2(B)} m de largura.`);
   const Ws = [];
   for(let w = Math.floor(B*2)/2; w >= Math.max(6, B-6); w -= 0.5) Ws.push(r2(w));
@@ -1329,7 +1334,7 @@ function gerar(entrada){
   const escolhidas = [];
   for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
-  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; });
+  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; });
   const lm = loteMinimo(q, P);
   if(escolhidas.length && escolhidas[0].score < 60) avisos.push('O programa não cabe bem neste terreno. Veja o terreno mínimo sugerido.');
   return {entrada:q, B, Dmax, variantes:escolhidas, loteMinimo:lm, avisos, escada: (q.tipo==='sobrado'||q.subsolo) ? escada(q) : null};
@@ -1374,5 +1379,5 @@ function loteMinimo(q, P){
   return {minimo:best, comFrente};
 }
 
-return {gerar, edicula, normaliza, DIMENSIONAVEIS, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
+return {gerar, edicula, normaliza, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
 });

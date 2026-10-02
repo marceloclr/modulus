@@ -27,6 +27,18 @@
 .salvar-banco{display:inline-flex;gap:6px;flex-wrap:wrap}
 .salvar-banco input{font:500 13px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:180px}
 .salvar-banco input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
+.rosa-sel{position:relative;width:200px;height:200px;margin:4px auto 2px;color:var(--ink-2)}
+.rosa-centro{position:absolute;left:50%;top:50%;width:120px;height:120px;transform:translate(-50%,-50%)}
+#rosaSeta{transition:transform .2s}
+.rosa-sel label{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(var(--a)) translateY(-82px) rotate(calc(-1*var(--a)));cursor:pointer}
+.rosa-sel input{position:absolute;opacity:0;pointer-events:none}
+.rosa-sel span{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font:600 12px 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.rosa-sel label:nth-of-type(odd) span{width:38px;height:38px;font-size:13.5px}
+.rosa-sel label:first-of-type span{color:#B4532A}
+.rosa-sel input:checked + span{background:var(--graphite);color:var(--bg);border-color:var(--graphite)}
+.rosa-sel input:focus-visible + span{outline:2px solid var(--steel);outline-offset:2px}
+.rosa-txt{text-align:center;font-size:13px;margin:0 0 6px;color:var(--ink-2)}
+@media (prefers-reduced-motion:reduce){#rosaSeta{transition:none}}
 .dimrow{display:grid;grid-template-columns:minmax(0,1fr) 54px 10px 54px 18px 52px;align-items:center;gap:4px;font-size:12.5px;color:var(--ink-2);margin:5px 0}
 .dimrow i{font-style:normal;color:var(--ink-3);text-align:center;font-size:11.5px}
 .dimrow input{width:100%;font:500 12.5px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 5px}
@@ -60,6 +72,23 @@
       </div>
 
       <fieldset class="fs"><legend>Terreno</legend>
+        <p class="fld wide"><small><strong>Para onde a frente do terreno (a rua) está voltada?</strong> Clique no rumo.</small></p>
+        <div class="rosa-sel" role="radiogroup" aria-label="Para onde a frente do terreno está voltada">
+          <svg class="rosa-centro" viewBox="-60 -60 120 120" aria-hidden="true">
+            <circle r="44" fill="none" stroke="currentColor" stroke-opacity=".25"/>
+            <circle r="30" fill="none" stroke="currentColor" stroke-opacity=".15" stroke-dasharray="2 3"/>
+            <g id="rosaSeta"><rect x="-11" y="-6" width="22" height="20" rx="2" fill="var(--z-social-f)" stroke="var(--z-social-s)"/><path d="M-13 -6 L0 -17 L13 -6" fill="none" stroke="var(--z-social-s)" stroke-width="1.6"/><path d="M0 -20 V-40" stroke="var(--brass)" stroke-width="2.4"/><path d="M-6 -34 L0 -42 L6 -34" fill="none" stroke="var(--brass)" stroke-width="2.4"/><text y="30" text-anchor="middle" style="font:600 8px 'IBM Plex Sans',sans-serif;fill:currentColor">rua</text></g>
+          </svg>
+          <label style="--a:0deg" data-tip="Frente voltada para norte"><input type="radio" name="orientacao" value="N"><span>N</span></label>
+          <label style="--a:45deg" data-tip="Frente voltada para nordeste"><input type="radio" name="orientacao" value="NE"><span>NE</span></label>
+          <label style="--a:90deg" data-tip="Frente voltada para leste"><input type="radio" name="orientacao" value="L"><span>L</span></label>
+          <label style="--a:135deg" data-tip="Frente voltada para sudeste"><input type="radio" name="orientacao" value="SE"><span>SE</span></label>
+          <label style="--a:180deg" data-tip="Frente voltada para sul"><input type="radio" name="orientacao" value="S"><span>S</span></label>
+          <label style="--a:225deg" data-tip="Frente voltada para sudoeste"><input type="radio" name="orientacao" value="SO"><span>SO</span></label>
+          <label style="--a:270deg" data-tip="Frente voltada para oeste"><input type="radio" name="orientacao" value="O"><span>O</span></label>
+          <label style="--a:315deg" data-tip="Frente voltada para noroeste"><input type="radio" name="orientacao" value="NO"><span>NO</span></label>
+        </div>
+        <p class="rosa-txt" id="rosaTxt">Frente ainda não informada</p>
         <label class="fld">Frente (m)<input type="number" name="frente" min="5" max="60" step="0.5"></label>
         <label class="fld">Fundo (m)<input type="number" name="fundo" min="10" max="80" step="0.5"></label>
         <label class="fld">Recuo frontal (m)<input type="number" name="recFrente" min="0" max="15" step="0.25"></label>
@@ -285,6 +314,11 @@ function sincroniza(){
   const sob = (form.querySelector('input[name=tipo]:checked')||{}).value === 'sobrado';
   const fmt = form.elements.formato.value, chave = fmt==='U' ? 'U' : fmt==='L' ? 'L' : 'b';
   document.getElementById('supOps').hidden = !sob;
+  const rumo = (form.querySelector('input[name=orientacao]:checked')||{}).value;
+  const graus = {N:0,NE:45,L:90,SE:135,S:180,SO:225,O:270,NO:315}, nomes = {N:'norte',NE:'nordeste',L:'leste',SE:'sudeste',S:'sul',SO:'sudoeste',O:'oeste',NO:'noroeste'};
+  document.getElementById('rosaSeta').style.transform = 'rotate(' + (rumo ? graus[rumo] : 0) + 'deg)';
+  document.getElementById('rosaSeta').style.opacity = rumo ? 1 : .35;
+  document.getElementById('rosaTxt').textContent = rumo ? 'Frente voltada para ' + nomes[rumo] : 'Frente ainda não informada';
   // dimensões: só os cômodos que fazem parte do programa
   const E = form.elements, nQt = +E.quartos.value||0, ns = Math.min(+E.suites.value||0, nQt), mst = E.master.checked && ns > 0;
   const vis = {quarto: nQt - ns > 0, suite: ns - (mst?1:0) > 0, master: mst, banhoSuite: ns > 0, closet: ns > 0, banhoSocial: (+E.banhosSociais.value||0) > 0, lavabo: E.lavabo.checked,
@@ -367,7 +401,7 @@ function render(){
   // terreno
   document.getElementById('lote').innerHTML = Desenho.lote(v, q, res);
   const lm = res.loteMinimo;
-  let t = `<tbody><tr><td>Terreno informado</td><td class="n">${f2(q.frente)} × ${f2(q.fundo)} m = ${f2(q.frente*q.fundo)} m²</td></tr>`;
+  let t = `<tbody><tr><td>Frente voltada para</td><td class="n">${q.orientacao ? Motor.NOMES_RUMO[q.orientacao] + ' (' + q.orientacao + ')' : 'não informado'}</td></tr><tr><td>Terreno informado</td><td class="n">${f2(q.frente)} × ${f2(q.fundo)} m = ${f2(q.frente*q.fundo)} m²</td></tr>`;
   t += `<tr><td>Recuos</td><td class="n">frente ${f2(q.recFrente)} · laterais ${f2(q.recLat)} · fundo ${f2(q.recFundo)} m</td></tr>`;
   t += `<tr><td>Casa desta variante</td><td class="n">${f2(v.W)} × ${f2(v.D)} m · projeção ${f2(v.projecao)} m²</td></tr>`;
   if(lm.minimo) t += `<tr class="total"><td>Terreno mínimo</td><td class="n">${f2(lm.minimo.frente)} × ${f2(lm.minimo.fundo)} m = ${f2(lm.minimo.area)} m²<br><small>${lm.minimo.tipologia}</small></td></tr>`;
