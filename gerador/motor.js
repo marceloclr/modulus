@@ -1347,7 +1347,7 @@ function gerar(entrada){
   const escolhidas = [];
   for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
-  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; });
+  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recLat:q.recLat, recFundo:q.recFundo}; });
   const lm = loteMinimo(q, P);
   if(escolhidas.length && escolhidas[0].score < 60) avisos.push('O programa não cabe bem neste terreno. Veja o terreno mínimo sugerido.');
   return {entrada:q, B, Dmax, variantes:escolhidas, loteMinimo:lm, avisos, escada: (q.tipo==='sobrado'||q.subsolo) ? escada(q) : null};

@@ -42,10 +42,29 @@ function espelha(v){
 
 function compartilhado(a, b){ return Motor._interno.compartilhado(a, b); }
 
+/* Giro da planta: o desenho é feito com a rua no topo e depois girado pelo rumo da frente, para o norte ficar no alto.
+   Os textos são recolocados para continuarem legíveis. */
+function rumoGraus(rumo){ return rumo && Motor.RUMOS[rumo] !== undefined ? Motor.RUMOS[rumo] : 0; }
+function textosLegiveis(str, F){
+  if(!F) return str;
+  str = str.replace(/<rect [^>]*fill="#FFFFFF" fill-opacity="\.8"\/>/g, '');
+  const norm = a => { let t = ((a % 360) + 540) % 360 - 180; if(t > 90) t -= 180; if(t <= -90) t += 180; return t; };
+  str = str.replace(/<text transform="translate\(([-\d.]+),([-\d.]+)\) rotate\(([-\d.]+)\)"/g, (m, a, b, rr) => `<text transform="translate(${a},${b}) rotate(${(norm(F + +rr) - F).toFixed(1)})"`);
+  str = str.replace(/<text x="([-\d.]+)" y="([-\d.]+)"/g, (m, a, b) => `<text transform="rotate(${-F} ${a} ${b})" x="${a}" y="${b}"`);
+  return str;
+}
+/* Envolve o conteúdo (caixa px0..px1 × py0..py1) num grupo girado e devolve as medidas da caixa girada. */
+function girado(conteudo, F, px0, py0, px1, py1, ox, oy){
+  const cx = (px0+px1)/2, cy = (py0+py1)/2, w = px1-px0, h = py1-py0, t = F*Math.PI/180;
+  const Wr = Math.abs(w*Math.cos(t)) + Math.abs(h*Math.sin(t)), Hr = Math.abs(w*Math.sin(t)) + Math.abs(h*Math.cos(t));
+  const tx = ox + Wr/2 - cx, ty = oy + Hr/2 - cy;
+  return {g:`<g class="${F ? 'halo' : ''}" transform="translate(${tx.toFixed(1)},${ty.toFixed(1)}) rotate(${F} ${cx.toFixed(1)} ${cy.toFixed(1)})">${textosLegiveis(conteudo, F)}</g>`, Wr, Hr};
+}
+
 /* Rosa dos ventos: a frente do terreno (topo do desenho) aponta para o rumo escolhido. */
 function rosa(cx, cy, R, rumo){
   const conhecido = rumo && Motor.RUMOS[rumo] !== undefined;
-  const giro = conhecido ? -Motor.RUMOS[rumo] : 0;        // ângulo do norte em relação ao topo
+  const giro = 0;                                         // norte sempre para cima; quem gira é a planta
   const pts = [['N',0],['NE',45],['L',90],['SE',135],['S',180],['SO',225],['O',270],['NO',315]];
   const pol = a => { const t = (a + giro - 90) * Math.PI/180; return [Math.cos(t), Math.sin(t)]; };
   let g = `<g class="rosa"><circle cx="${cx}" cy="${cy}" r="${R}" fill="#FFFFFF" fill-opacity=".85" stroke="#8A8F98" stroke-width=".8"/>`;
@@ -67,11 +86,17 @@ function planta(v, idx, op){
   const S = p.salas, T = Motor.TIPOS;
   const pocos = p.pocos || [];
   const extras = p.rampaFora ? [p.rampaFora] : [];
-  const mx0 = Math.min(0, ...pocos.map(q => q.x0), ...S.map(q => q.x0)), my0 = Math.min(0, ...pocos.map(q => q.y0), ...S.map(q => q.y0), ...extras.map(q => q.y0 - 1.2));
+  // posição do pavimento no lote (casa ou edícula) para desenhar o terreno por baixo
+  const L = v.lote; let lo = null;
+  if(L){ const ed = p.anexo ? (v.anexos||[]).find(a => a.tipo==='edicula') : null;
+    const ox = ed ? ed.x0 : v.x0, oy = ed ? ed.y0 : v.y0;
+    if(ox !== undefined){ lo = {x0:-ox, y0:-oy, x1:L.frente-ox, y1:L.fundo-oy, rf:L.recFrente, rl:L.recLat, rb:L.recFundo}; extras.push(lo); } }
+  const mx0 = Math.min(0, ...pocos.map(q => q.x0), ...S.map(q => q.x0), ...extras.map(q => q.x0 - 1.6)), my0 = Math.min(0, ...pocos.map(q => q.y0), ...S.map(q => q.y0), ...extras.map(q => q.y0 - 1.2));
   const OX = 70 - mx0*K + (mx0<0 ? 12 : 0), OY = 96 - my0*K;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
   const W = p.W || v.W, D = p.anexo ? p.D : Math.max(v.D, ...S.map(s => s.y1));
-  const larg = OX + Math.max(W, ...pocos.map(q => q.x1), ...S.map(q => q.x1))*K + 120, alt = OY + Math.max(D, ...pocos.map(q => q.y1), ...S.map(q => q.y1))*K + 60 + (p.nome==='Subsolo' ? 34 : 0);
+  const mx1 = Math.max(W, ...pocos.map(q => q.x1), ...S.map(q => q.x1), ...extras.map(q => q.x1)), my1 = Math.max(D, ...pocos.map(q => q.y1), ...S.map(q => q.y1), ...extras.map(q => q.y1));
+  const larg = OX + mx1*K + 120, alt = OY + my1*K + 60 + (p.nome==='Subsolo' ? 34 : 0);
   const o = [];
   const line = (x0,y0,x1,y1,st,w,ex) => o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="${st}" stroke-width="${w}"${ex?' '+ex:''}/>`);
   const seg = (e, st, w, ex) => e.o==='h' ? line(e.t0, e.c, e.t1, e.c, st, w, ex) : line(e.c, e.t0, e.c, e.t1, st, w, ex);
@@ -80,6 +105,12 @@ function planta(v, idx, op){
   const ehSub = p.nome==='Subsolo', MOSTRA = new Set(['rampa','garagem','escada','elevador','jardim']);
   const oculto = s => false;
 
+  // terreno: lote, área edificável e rua
+  if(lo){
+    o.push(`<rect x="${X(lo.x0)}" y="${Y(lo.y0)}" width="${((lo.x1-lo.x0)*K).toFixed(1)}" height="${((lo.y1-lo.y0)*K).toFixed(1)}" fill="#EEF2E8" stroke="#5F7350" stroke-width="1.2"><title>Lote ${f2(L.frente)} × ${f2(L.fundo)} m</title></rect>`);
+    o.push(`<rect x="${X(lo.x0+lo.rl)}" y="${Y(lo.y0+lo.rf)}" width="${((lo.x1-lo.x0-2*lo.rl)*K).toFixed(1)}" height="${((lo.y1-lo.y0-lo.rf-lo.rb)*K).toFixed(1)}" fill="none" stroke="#5F7350" stroke-width=".7" stroke-dasharray="5 4"><title>Área edificável</title></rect>`);
+    o.push(`<text x="${((X(lo.x0)+X(lo.x1))/2).toFixed(1)}" y="${(Y(lo.y0)-6).toFixed(1)}" class="cota" style="font-size:7.4px;font-weight:600;fill:#5F7350">RUA</text>`);
+  }
   // pátios (H)
   if(idx===v.pav.findIndex(q => q.nome==='Térreo') && v.patios) for(const pt of v.patios) if(pt.y1-pt.y0>0.5)
     o.push(`<rect x="${X(pt.x0)}" y="${Y(pt.y0)}" width="${((pt.x1-pt.x0)*K).toFixed(1)}" height="${((pt.y1-pt.y0)*K).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}"><title>Pátio</title></rect>`);
@@ -215,8 +246,7 @@ function planta(v, idx, op){
     const sub = big ? `${f2(w)} × ${f2(h)} · ${f2(a)} m²` : `${f2(a)} m²`;
     const bw = Math.min(pw-4, Math.max(nome.length*fs*0.66, sub.length*(big?3.7:3.4)) + 8);
     o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(cy-fs-2).toFixed(1)}" width="${bw.toFixed(1)}" height="${(fs+12).toFixed(1)}" rx="2" fill="#FFFFFF" fill-opacity=".8"/>`);
-    o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${fs}px">${nome}</text>`);
-    o.push(`<text x="${cx}" y="${cy+8.5}" class="rd" style="font-size:${big?6.6:5.8}px">${sub}</text>`);
+    o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${fs}px">${nome}<tspan x="${cx}" dy="8.5" class="rd" style="font-size:${big?6.6:5.8}px;font-weight:400">${sub}</tspan></text>`);
   }
   // cotas
   const cota = (a0, a1, pos, t, vert) => {
@@ -230,18 +260,25 @@ function planta(v, idx, op){
   const ys = (v.cotasY||[]).filter(y => y<=D+0.01);
   if(p.nome==='Térreo') for(let i=0;i<ys.length-1;i++) if(ys[i+1]-ys[i] > 0.6) cota(ys[i], ys[i+1], -0.75, f2(ys[i+1]-ys[i]), true);
 
-  if(ehSub){ let lx = OX, ly = alt - 22;
+  const fora = [];
+  const legY = () => 0;
+  if(ehSub){ let lx = 0, ly = 0;
     for(const t of ['rampa','manobra','garagem','escada','elevador','jardim']){ const c = SUB_COR[t];
-      o.push(`<rect x="${lx}" y="${ly-7}" width="11" height="9" rx="2" fill="${c[0]}" stroke="${c[1]}"/><text x="${lx+15}" y="${ly}" style="font-size:7px;fill:#43474D">${c[2]}</text>`); lx += 24 + c[2].length*3.9; } }
+      fora.push(`<rect x="${lx}" y="${ly-7}" width="11" height="9" rx="2" fill="${c[0]}" stroke="${c[1]}"/><text x="${lx+15}" y="${ly}" style="font-size:7px;fill:#43474D">${c[2]}</text>`); lx += 24 + c[2].length*3.9; } }
   const titulo = op.titulo || `${v.nome} · ${p.nome}`;
   const sub = op.sub || (p.anexo ? `Edícula ${f2(W)} × ${f2(D)} m · frente voltada para a casa · escala ${K} px/m` : `${v.tipologia} · casa ${f2(W)} × ${f2(v.D)} m · escala ${K} px/m${v.espelhada?' · espelhada':''}`);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.ceil(larg)} ${Math.ceil(alt)}" width="${Math.ceil(larg)}" height="${Math.ceil(alt)}" role="img" aria-label="${esc(titulo)}">
-<title>${esc(titulo)}</title><style>text{font-family:"IBM Plex Sans","Inter","Segoe UI",Helvetica,Arial,sans-serif;fill:#2F333A}.tt{font-size:15px;font-weight:600}.st{font-size:8.6px;fill:#5d6168}.rn{font-weight:600;text-anchor:middle;letter-spacing:.2px}.rd{text-anchor:middle;fill:#4a4e55}.cota{font-size:6.6px;text-anchor:middle;fill:#55595F}</style>
+  const rumoP = op.rumo !== undefined ? op.rumo : v.rumo, F = rumoGraus(rumoP);
+  const px0 = X(mx0) - 6, py0 = Y(my0) - 6, px1 = OX + mx1*K + 12, py1 = OY + my1*K + 12;
+  const gg = girado(o.join('\n'), F, px0, py0, px1, py1, 20, 64);
+  const LW = Math.ceil(gg.Wr + 150), LH = Math.ceil(gg.Hr + 64 + 24 + (fora.length ? 26 : 0));
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LW} ${LH}" width="${LW}" height="${LH}" role="img" aria-label="${esc(titulo)}">
+<title>${esc(titulo)}</title><style>text{font-family:"IBM Plex Sans","Inter","Segoe UI",Helvetica,Arial,sans-serif;fill:#2F333A}.tt{font-size:15px;font-weight:600}.st{font-size:8.6px;fill:#5d6168}.rn{font-weight:600;text-anchor:middle;letter-spacing:.2px}.rd{text-anchor:middle;fill:#4a4e55}.cota{font-size:6.6px;text-anchor:middle;fill:#55595F}.halo text{paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px;stroke-linejoin:round}</style>
 <rect width="100%" height="100%" fill="#FBFAF7"/>
-<text x="${OX}" y="30" class="tt">${esc(titulo)}</text>
-${rosa(Math.ceil(larg) - 52, Math.max(OY + 30, 92), 26, op.rumo !== undefined ? op.rumo : v.rumo)}
-<text x="${OX}" y="46" class="st">${esc(sub)}</text>
-${o.join('\n')}
+<text x="20" y="30" class="tt">${esc(titulo)}</text>
+<text x="20" y="46" class="st">${esc(sub)}${F ? ' · planta girada: norte para cima' : ''}</text>
+${gg.g}
+${rosa(LW - 62, 110, 26, rumoP)}
+${fora.length ? `<g transform="translate(20,${LH - 14})">${fora.join('')}</g>` : ''}
 </svg>`;
 }
 
@@ -300,9 +337,11 @@ function lote(v, q, res){
   o.push(`<text transform="translate(${X(0)-8},${(Y(0)+Y(q.fundo))/2}) rotate(-90)" class="cota">fundo ${f2(q.fundo)} m</text>`);
   o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.recFrente/2)+3}" class="cota">recuo ${f2(q.recFrente)}</text>`);
   if(!(v.anexos||[]).length) o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.fundo - q.recFundo/2)+3}" class="cota">fundo ${f2(q.fundo - v.y0 - v.D)} m livres</text>`);
-  const W2 = Math.ceil(w + OX + 90), H2 = Math.ceil(Math.max(h + OY + 16, 140));
-  o.push(rosa(W2 - 40, OY + 46, 24, q.orientacao));
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" role="img" aria-label="Implantação no lote"><style>text{font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif}.cota{font-size:8px;text-anchor:middle;fill:#55595F}</style><rect width="100%" height="100%" fill="#FBFAF7"/>${o.join('')}</svg>`;
+  const F = rumoGraus(q.orientacao);
+  const gg = girado(o.join(''), F, X(0) - 30, Y(0) - 22, X(q.frente) + 8, Y(q.fundo) + 8, 14, 14);
+  const W2 = Math.ceil(gg.Wr + 100), H2 = Math.ceil(Math.max(gg.Hr + 28, 150));
+  o.length = 0; o.push(gg.g, rosa(W2 - 44, 60, 24, q.orientacao));
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" role="img" aria-label="Implantação no lote"><style>text{font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif}.cota{font-size:8px;text-anchor:middle;fill:#55595F}.halo text{paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px}</style><rect width="100%" height="100%" fill="#FBFAF7"/>${o.join('')}</svg>`;
 }
 
 return {planta, lote, espelha, COR};
