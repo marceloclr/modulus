@@ -48,6 +48,7 @@ const TIPOS = {
   jardim:       {nome:'Jardim de inverno', zona:'patio', aberto:1},
 };
 const FATOR = {compacto:0.85, medio:1, amplo:1.25};
+const DIMENSIONAVEIS = ['quarto','suite','master','banhoSuite','closet','banhoSocial','lavabo','estar','jantar','tv','escritorio','cozinha','servico','despensa','gourmet'];
 
 const PADRAO = {
   frente:12, fundo:30, recFrente:5, recLat:1.5, recFundo:3, taxa:60,
@@ -95,6 +96,13 @@ function normaliza(p){
   if(q.vagas===0 && !q.subsolo) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
   if(q.varandaForma!=='L') q.varandaForma = 'corrida';
+  // dimensões pedidas: d_<tipo>_w × d_<tipo>_l, ou só a área d_<tipo>_a
+  q.dims = {};
+  for(const t of DIMENSIONAVEIS){
+    const w = +q['d_'+t+'_w'] || 0, l = +q['d_'+t+'_l'] || 0, a = +q['d_'+t+'_a'] || 0;
+    if(w > 0.5 && l > 0.5) q.dims[t] = {w:Math.min(w,l), l:Math.max(w,l), a:r2(w*l)};
+    else if(a > 0.5) q.dims[t] = {a};
+  }
   if(!['nenhum','lateraisFundo','todos'].includes(q.subRecuos)) q.subRecuos = 'nenhum';
   q.permeab = clamp(isNaN(+q.permeab) ? 20 : +q.permeab, 0, 80);
   // onde ficam as vagas: só no térreo, só no subsolo ou nos dois
@@ -108,7 +116,9 @@ function normaliza(p){
 }
 
 /* ---------- Programa → listas de ambientes ---------- */
-function alvo(tipo, q){ const t = TIPOS[tipo]; return t.alvo * (t.hab ? FATOR[q.tamanho] : 1); }
+function alvo(tipo, q){ const d = q.dims && q.dims[tipo]; if(d) return d.a; const t = TIPOS[tipo]; return t.alvo * (t.hab ? FATOR[q.tamanho] : 1); }
+/* Largura pedida para a faixa dos quartos (lado menor da suíte, da master ou do quarto), se houver. */
+function larguraQuartoPedida(q){ const d = q.dims || {}; for(const t of ['suite','master','quarto']) if(d[t] && d[t].w) return d[t].w; return null; }
 
 function programa(q){
   const mods = [];   // módulos da faixa íntima
@@ -116,10 +126,10 @@ function programa(q){
   const nS = q.suites, nQ = q.quartos - q.suites;
   for(let i=0;i<nS;i++){
     const m = q.master && i===0;
-    mods.push({tipo: m?'master':'suite', id: ++id,
+    mods.push({tipo: m?'master':'suite', id: ++id, fixo: !!(q.dims && q.dims[m?'master':'suite'] && q.dims[m?'master':'suite'].w),
       aq: alvo(m?'master':'suite', q), ab: alvo(m?'banhoMaster':'banhoSuite', q), ac: alvo(m?'closetMaster':'closet', q)});
   }
-  for(let i=0;i<nQ;i++) mods.push({tipo:'quarto', id: ++id, aq: alvo('quarto', q)});
+  for(let i=0;i<nQ;i++) mods.push({tipo:'quarto', id: ++id, aq: alvo('quarto', q), fixo: !!(q.dims && q.dims.quarto && q.dims.quarto.w)});
   let bs = q.banhosSociais;
   if(nQ>0 && bs>0){ mods.push({tipo:'banhoSocial', id: ++id, ab: alvo('banhoSocial', q)}); bs--; }
   // ordem: master no fim (mais ao fundo), banho social no começo (perto do social)
@@ -249,12 +259,19 @@ function faixaIntima(mods, tiras, y0, compMin, fixo){
   tiras.forEach((t,k) => {
     const f = fila[k]; if(!f.length){ if(Li>0.5) out.push(sala('deposito', t.x0, y0, t.x1, y0+Li, {nome:'Depósito / armários'})); return; }
     // estica no máximo 25 %; o que sobrar vira sala íntima ou rouparia no fim da tira
-    let esc = Li / comp[k], sobra = 0;
-    if(esc > 1.25 && Li - comp[k]*1.25 >= 1.2){ esc = 1.25; sobra = Li - comp[k]*esc; if(sobra < 1.2){ esc = Li/comp[k]; sobra = 0; } }
+    // módulos com medida pedida não esticam; os demais esticam até 25 %; o resto vira sala íntima ou rouparia
+    const X = f.filter(it => it.m.fixo).reduce((t,it) => t + it.L, 0), F = comp[k] - X;
+    let escF = 1, escX = 1, sobra = 0;
+    if(Li < comp[k] - 0.01){ escF = escX = Li/comp[k]; }
+    else if(Li > comp[k] + 0.01){
+      const extra = Li - comp[k];
+      if(F > 0){ escF = Math.min(1.25, 1 + extra/F); sobra = Li - X - F*escF; if(sobra < 1.2){ escF = (Li - X)/F; sobra = 0; } }
+      else { sobra = extra; if(sobra < 1.2){ escX = Li/comp[k]; sobra = 0; } }
+    }
     let y = y0;
     const fim = y0 + Li - sobra;
     f.forEach((it,i) => {
-      const L = i===f.length-1 ? fim-y : it.L*esc;
+      const L = i===f.length-1 ? fim-y : it.L*(it.m.fixo ? escX : escF);
       out.push(...desenhaModulo(it.m, t.x0, y, t.x1, y+L, t.lado, i%2===1));
       y += L;
     });
@@ -342,7 +359,7 @@ function linear(q, P, W, modo, opts){
   if(modo==='duplo'){ cxI = r2(Wtir/2); tiras = [{x0:0,x1:cxI,lado:'x1'},{x0:cxI+C,x1:W,lado:'x0'}]; }
   else if(modo==='simples'){ cxI = r2(W - C); tiras = [{x0:0,x1:cxI,lado:'x1'}]; }
   else { // L: tira única à esquerda e corredor; o resto do fundo fica livre
-    const ws = clamp(opts.ws || lq+0.6, 3.0, W-C-3.0);
+    const ws = clamp(opts.ws || larguraQuartoPedida(q) || lq+0.6, 3.0, W-C-3.0);
     cxI = r2(ws); tiras = [{x0:0,x1:cxI,lado:'x1'}];
   }
   let cxA = r2(clamp(cxI, 0, W-colw));
@@ -498,7 +515,7 @@ function linear(q, P, W, modo, opts){
 /* ---------- Tipologia em H: ala íntima | pátio + ligação (cozinha e serviço) | ala social ---------- */
 function emH(q, P, W){
   const av = [];
-  const lq = clamp(Math.sqrt(alvo('suite',q)*1.25), 3.2, 4.6);
+  const lq = larguraQuartoPedida(q) ? clamp(larguraQuartoPedida(q) - 0.6, 2.6, 6.0) : clamp(Math.sqrt(alvo('suite',q)*1.25), 3.2, 4.6);
   const ws = r2(lq+0.6), wi = ws + C;
   let wsoc = 5.5;
   let vagasDentro = 0;
@@ -564,7 +581,7 @@ function emH(q, P, W){
 /* ---------- Tipologia em U: faixa social na frente; ala íntima e ala de apoio em volta de um pátio aberto para o fundo ---------- */
 function emU(q, P, W){
   const av = [];
-  const lq = clamp(Math.sqrt(alvo('suite',q)*1.25), 3.2, 4.6);
+  const lq = larguraQuartoPedida(q) ? clamp(larguraQuartoPedida(q) - 0.6, 2.6, 6.0) : clamp(Math.sqrt(alvo('suite',q)*1.25), 3.2, 4.6);
   const ws = r2(lq+0.6), wi = ws + C;
   const apoio = [];
   for(const t of P.apoioDir) if(t!=='cozinha') apoio.push({tipo:t, a:alvo(t,q)});
@@ -1203,6 +1220,16 @@ function avalia(v, q){
     }
     if(!['circ','hall','galeria','rampa','manobra','escada','rouparia','varanda','terraco','garagem','deposito'].includes(s.tipo) && lmax/lmin > 2.6) pen += 2*(lmax/lmin-2.6);
   }
+  // dimensões pedidas: penaliza a diferença e avisa uma vez por tipo de cômodo
+  const avisados = new Set();
+  for(const p of v.pav) for(const s of p.salas){
+    const d = q.dims && q.dims[s.tipo==='banhoMaster' ? '' : s.tipo]; if(!d || s.nucleo) continue;
+    const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h, mn = Math.min(w,h), mx = Math.max(w,h);
+    let dif = 0, txt = '';
+    if(d.w){ dif = Math.abs(mn - d.w) + Math.abs(mx - d.l); txt = `${f2(mn)} × ${f2(mx)} m (pedido ${f2(d.w)} × ${f2(d.l)} m)`; if(dif > 0.5) pen += 2*dif; }
+    else { const rel = Math.abs(a - d.a)/d.a; dif = rel; txt = `${f2(a)} m² (pedido ${f2(d.a)} m²)`; if(rel > 0.2) pen += 10*rel; }
+    if((d.w ? dif > 0.5 : dif > 0.2) && !avisados.has(s.tipo)){ avisados.add(s.tipo); av.push(`${p.nome}: ${rotulo(s)} ficou com ${txt}.`); }
+  }
   for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo'); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas; av.push(...ab.avisos); pen += 6*ab.avisos.length; }
   // terreno
   const B = q.frente - 2*q.recLat, Dmax = q.fundo - q.recFrente - q.recFundo;
@@ -1347,5 +1374,5 @@ function loteMinimo(q, P){
   return {minimo:best, comFrente};
 }
 
-return {gerar, edicula, normaliza, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
+return {gerar, edicula, normaliza, DIMENSIONAVEIS, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
 });

@@ -27,6 +27,10 @@
 .salvar-banco{display:inline-flex;gap:6px;flex-wrap:wrap}
 .salvar-banco input{font:500 13px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:180px}
 .salvar-banco input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
+.dimrow{display:grid;grid-template-columns:minmax(0,1fr) 54px 10px 54px 18px 52px;align-items:center;gap:4px;font-size:12.5px;color:var(--ink-2);margin:5px 0}
+.dimrow i{font-style:normal;color:var(--ink-3);text-align:center;font-size:11.5px}
+.dimrow input{width:100%;font:500 12.5px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 5px}
+.dimrow input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .vtab{flex-direction:column;align-items:flex-start;gap:2px;line-height:1.25}
 .vtab small{font-size:11.5px;color:inherit;opacity:.8;font-weight:400}
 @media (max-width:899px){
@@ -122,6 +126,25 @@
         <label class="fld">Cozinha<select name="cozinha"><option value="aberta">Aberta para o jantar</option><option value="fechada">Fechada</option></select></label>
         <label class="chk"><input type="checkbox" name="servico">Área de serviço</label>
         <label class="chk"><input type="checkbox" name="despensa">Despensa</label>
+      </fieldset>
+
+      <fieldset class="fs"><legend>Dimensões dos cômodos (opcional)</legend>
+          <p class="fld wide"><small>Largura × comprimento em metros, ou só a área. Em branco, o gerador decide. A nota mostra quanto cada variante se afasta do pedido.</small></p>
+          <div class="dimrow" data-t="quarto"><span>Quarto</span><input type="number" name="d_quarto_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Quarto: largura (m)"><i>×</i><input type="number" name="d_quarto_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Quarto: comprimento (m)"><i>ou</i><input type="number" name="d_quarto_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Quarto: área (m²)"></div>
+          <div class="dimrow" data-t="suite"><span>Suíte (quarto)</span><input type="number" name="d_suite_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Suíte (quarto): largura (m)"><i>×</i><input type="number" name="d_suite_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Suíte (quarto): comprimento (m)"><i>ou</i><input type="number" name="d_suite_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Suíte (quarto): área (m²)"></div>
+          <div class="dimrow" data-t="master"><span>Suíte master (quarto)</span><input type="number" name="d_master_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Suíte master (quarto): largura (m)"><i>×</i><input type="number" name="d_master_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Suíte master (quarto): comprimento (m)"><i>ou</i><input type="number" name="d_master_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Suíte master (quarto): área (m²)"></div>
+          <div class="dimrow" data-t="banhoSuite"><span>Banho das suítes</span><input type="number" name="d_banhoSuite_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Banho das suítes: largura (m)"><i>×</i><input type="number" name="d_banhoSuite_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Banho das suítes: comprimento (m)"><i>ou</i><input type="number" name="d_banhoSuite_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Banho das suítes: área (m²)"></div>
+          <div class="dimrow" data-t="closet"><span>Closet</span><input type="number" name="d_closet_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Closet: largura (m)"><i>×</i><input type="number" name="d_closet_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Closet: comprimento (m)"><i>ou</i><input type="number" name="d_closet_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Closet: área (m²)"></div>
+          <div class="dimrow" data-t="banhoSocial"><span>Banho social</span><input type="number" name="d_banhoSocial_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Banho social: largura (m)"><i>×</i><input type="number" name="d_banhoSocial_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Banho social: comprimento (m)"><i>ou</i><input type="number" name="d_banhoSocial_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Banho social: área (m²)"></div>
+          <div class="dimrow" data-t="lavabo"><span>Lavabo</span><input type="number" name="d_lavabo_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Lavabo: largura (m)"><i>×</i><input type="number" name="d_lavabo_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Lavabo: comprimento (m)"><i>ou</i><input type="number" name="d_lavabo_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Lavabo: área (m²)"></div>
+          <div class="dimrow" data-t="estar"><span>Sala de estar</span><input type="number" name="d_estar_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Sala de estar: largura (m)"><i>×</i><input type="number" name="d_estar_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Sala de estar: comprimento (m)"><i>ou</i><input type="number" name="d_estar_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Sala de estar: área (m²)"></div>
+          <div class="dimrow" data-t="jantar"><span>Sala de jantar</span><input type="number" name="d_jantar_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Sala de jantar: largura (m)"><i>×</i><input type="number" name="d_jantar_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Sala de jantar: comprimento (m)"><i>ou</i><input type="number" name="d_jantar_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Sala de jantar: área (m²)"></div>
+          <div class="dimrow" data-t="tv"><span>Sala de TV</span><input type="number" name="d_tv_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Sala de TV: largura (m)"><i>×</i><input type="number" name="d_tv_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Sala de TV: comprimento (m)"><i>ou</i><input type="number" name="d_tv_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Sala de TV: área (m²)"></div>
+          <div class="dimrow" data-t="escritorio"><span>Escritório</span><input type="number" name="d_escritorio_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Escritório: largura (m)"><i>×</i><input type="number" name="d_escritorio_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Escritório: comprimento (m)"><i>ou</i><input type="number" name="d_escritorio_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Escritório: área (m²)"></div>
+          <div class="dimrow" data-t="cozinha"><span>Cozinha</span><input type="number" name="d_cozinha_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Cozinha: largura (m)"><i>×</i><input type="number" name="d_cozinha_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Cozinha: comprimento (m)"><i>ou</i><input type="number" name="d_cozinha_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Cozinha: área (m²)"></div>
+          <div class="dimrow" data-t="servico"><span>Área de serviço</span><input type="number" name="d_servico_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Área de serviço: largura (m)"><i>×</i><input type="number" name="d_servico_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Área de serviço: comprimento (m)"><i>ou</i><input type="number" name="d_servico_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Área de serviço: área (m²)"></div>
+          <div class="dimrow" data-t="despensa"><span>Despensa</span><input type="number" name="d_despensa_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Despensa: largura (m)"><i>×</i><input type="number" name="d_despensa_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Despensa: comprimento (m)"><i>ou</i><input type="number" name="d_despensa_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Despensa: área (m²)"></div>
+          <div class="dimrow" data-t="gourmet"><span>Varanda gourmet</span><input type="number" name="d_gourmet_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Varanda gourmet: largura (m)"><i>×</i><input type="number" name="d_gourmet_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Varanda gourmet: comprimento (m)"><i>ou</i><input type="number" name="d_gourmet_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Varanda gourmet: área (m²)"></div>
       </fieldset>
 
       <fieldset class="fs"><legend>Garagem e áreas externas</legend>
@@ -243,7 +266,7 @@ function lerForm(){
     if(!el.name) continue;
     if(el.type==='checkbox') d[el.name] = el.checked;
     else if(el.type==='radio'){ if(el.checked) d[el.name] = el.value; }
-    else if(el.type==='number') d[el.name] = parseFloat(el.value);
+    else if(el.type==='number'){ const n = parseFloat(el.value); if(!isNaN(n) || !el.name.startsWith('d_')) d[el.name] = n; }
     else d[el.name] = el.value;
   }
   return d;
@@ -262,6 +285,11 @@ function sincroniza(){
   const sob = (form.querySelector('input[name=tipo]:checked')||{}).value === 'sobrado';
   const fmt = form.elements.formato.value, chave = fmt==='U' ? 'U' : fmt==='L' ? 'L' : 'b';
   document.getElementById('supOps').hidden = !sob;
+  // dimensões: só os cômodos que fazem parte do programa
+  const E = form.elements, nQt = +E.quartos.value||0, ns = Math.min(+E.suites.value||0, nQt), mst = E.master.checked && ns > 0;
+  const vis = {quarto: nQt - ns > 0, suite: ns - (mst?1:0) > 0, master: mst, banhoSuite: ns > 0, closet: ns > 0, banhoSocial: (+E.banhosSociais.value||0) > 0, lavabo: E.lavabo.checked,
+    estar: E.estar.checked, jantar: E.jantar.checked, tv: E.tv.checked, escritorio: E.escritorio.checked, cozinha: true, servico: E.servico.checked, despensa: E.despensa.checked, gourmet: E.gourmet.checked || E.gourmetDest.checked};
+  form.querySelectorAll('.dimrow').forEach(el => { el.hidden = !vis[el.dataset.t]; });
   document.getElementById('varOps').hidden = !form.elements.varanda.checked;
   const sub = form.elements.subsolo.checked, gl = form.elements.garagemLocal;
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
