@@ -270,7 +270,7 @@
             <li>Áreas e lados mínimos de um código de obras genérico (quarto 8 m² e 2,60 m; suíte 9 m² e 2,80 m; banho 2,4 m² e 1,20 m).</li>
             <li>Suítes com banho na fachada e closet para dentro; banhos vizinhos encostados para concentrar a hidráulica.</li>
             <li>Escada reta pela fórmula de Blondel; rampa de garagem pela inclinação informada.</li>
-            <li>Subsolo: o lance de escada para o térreo fica na lateral, junto ao elevador; manobra contínua de 5 m, pilares só no perímetro e entre vagas, jardim de inverno no fundo, oposto à rampa.</li>
+            <li>Subsolo dimensionado pelo número de vagas pedido (o menor retângulo que as comporta, para reduzir custo): escada na lateral junto ao elevador, manobra contínua de 5 m, rampa desenhada em escala e jardim de inverno a céu aberto, oposto à rampa.</li>
             <li>Janelas dimensionadas por 1/8 da área do piso (luz) e 1/16 (ventilação). Subsolo sempre com ventilação cruzada: janelas altas no semienterrado, pátios ingleses de 1,50 m em lados opostos no enterrado.</li>
             <li>Estudo automático: confira acessibilidade, estrutura e legislação com um responsável técnico.</li>
           </ul>
@@ -329,7 +329,7 @@ function sincroniza(){
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
   if(!sub) gl.value = 'terreo';
   document.getElementById('garNota').hidden = sub;
-  document.getElementById('vagasRot').textContent = gl.value==='terreo' ? 'Vagas' : 'Vagas no subsolo (mínimo; o gerador põe quantas couberem)';
+  document.getElementById('vagasRot').textContent = gl.value==='terreo' ? 'Vagas' : 'Vagas no subsolo (o subsolo é dimensionado para elas)';
   document.getElementById('vagasTOps').hidden = gl.value!=='ambos';
   document.getElementById('rtOps').hidden = !form.elements.rooftop.checked;
   document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';

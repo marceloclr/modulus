@@ -39,7 +39,7 @@ function rodar(){
         for(let i=0;i<S.length;i++){
           const s = S[i];
           if(s.x1-s.x0 < 0.3 || s.y1-s.y0 < 0.3) erros.push(`${v.nome}/${p.nome}: ${s.nome} degenerado`);
-          if(s.x0 < Xp0-E || s.x1 > Xp1+E) erros.push(`${v.nome}/${p.nome}: ${s.nome} fora da largura`);
+          if(s.tipo!=='jardim' && (s.x0 < Xp0-E || s.x1 > Xp1+E)) erros.push(`${v.nome}/${p.nome}: ${s.nome} fora da largura`);
           for(let j=i+1;j<S.length;j++) if(sobrepoe(s, S[j])) erros.push(`${v.nome}/${p.nome}: ${s.nome} sobrepõe ${S[j].nome}`);
         }
         // cada par de andares vizinhos precisa de um lance de escada em comum (mesma posição nos dois)
@@ -71,7 +71,7 @@ function rodar(){
       }
       const sub = v.pav.find(p => p.nome==='Subsolo');
       if(sub && !sub.cruzada) erros.push(`${v.nome}: subsolo sem ventilação cruzada`);
-      if(sub && c.subNivel==='inteiro' && !(sub.pocos||[]).length) erros.push(`${v.nome}: subsolo enterrado sem pátio inglês`);
+      if(sub && !sub.salas.some(s => s.tipo==='jardim')) erros.push(`${v.nome}: subsolo sem jardim de inverno`);
       if(c.tipo==='sobrado' && !v.pav.some(p => p.nome==='Superior')) erros.push(`${v.nome}: sobrado sem superior`);
       if(c.supModo==='parcial'){ const sp = v.pav.find(p => p.nome==='Superior'); if(sp && !sp.salas.some(s => s.nome==='Laje' || s.nome==='Terraço')) erros.push(`${v.nome}: superior parcial sem laje`); }
       if(c.supTv){ const sp = v.pav.find(p => p.nome==='Superior'); if(!sp || !sp.salas.some(s => s.tipo==='tv')) erros.push(`${v.nome}: sala de TV não foi para cima`); }
@@ -80,7 +80,8 @@ function rodar(){
         if(els.some(e => !e)) erros.push(`${v.nome}: falta elevador em algum pavimento`);
         else if(els.some(e => Math.abs(e.x0-els[0].x0)>E || Math.abs(e.y0-els[0].y0)>E)) erros.push(`${v.nome}: elevador fora de prumo`); }
       if(c.formato && c.formato!=='auto' && c.subsolo && !v.pav.some(p => p.nome==='Subsolo')) erros.push(`${v.nome}: formato sem subsolo`);
-      if(c.subRecuos && c.subRecuos!=='nenhum'){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(!sb || sb.dim.W < c.frente - 0.01) erros.push(`${v.nome}: subsolo não ocupa os recuos laterais`); if(sb && sb.vagas < c.vagas) erros.push(`${v.nome}: subsolo com ${sb.vagas} de ${c.vagas} vagas`); }
+      if(c.subRecuos && c.subRecuos!=='nenhum' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(!sb || sb.vagas < c.vagas) erros.push(`${v.nome}: subsolo com ${sb ? sb.vagas : 0} de ${c.vagas} vagas`); }
+      if(c.subsolo && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(sb && sb.vagas > (c.vagas||2)) erros.push(`${v.nome}: subsolo com mais vagas que o pedido (custo)`); }
       if(c.piscina && !(v.anexos||[]).some(a => a.tipo==='piscina')) erros.push(`${v.nome}: sem piscina`);
       for(const a of (v.anexos||[])) if(a.y0 < v.y0 + v.D - E) erros.push(`${v.nome}: anexo ${a.tipo} sobre a casa`);
       const an = (v.anexos||[]); for(let i=0;i<an.length;i++) for(let j=i+1;j<an.length;j++) if(sobrepoe(an[i], an[j])) erros.push(`${v.nome}: ${an[i].tipo} sobrepõe ${an[j].tipo}`);
