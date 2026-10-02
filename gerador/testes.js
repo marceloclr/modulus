@@ -31,8 +31,16 @@ function rodar(){
           if(s.x0 < -E || s.x1 > Wp+E) erros.push(`${v.nome}/${p.nome}: ${s.nome} fora da largura`);
           for(let j=i+1;j<S.length;j++) if(sobrepoe(s, S[j])) erros.push(`${v.nome}/${p.nome}: ${s.nome} sobrepõe ${S[j].nome}`);
         }
-        const e = S.find(s => s.tipo==='escada');
-        if(e && !p.anexo){ if(esc && (Math.abs(esc.x0-e.x0)>E || Math.abs(esc.y0-e.y0)>E || Math.abs(esc.x1-e.x1)>E || Math.abs(esc.y1-e.y1)>E)) erros.push(`${v.nome}: escada desalinhada no ${p.nome}`); esc = esc || e; }
+        // cada par de andares vizinhos precisa de um lance de escada em comum (mesma posição nos dois)
+        if(!p.anexo){ const es = S.filter(s => s.tipo==='escada');
+          if(esc && !es.some(a => esc.some(b => Math.abs(a.x0-b.x0)<E && Math.abs(a.y0-b.y0)<E && Math.abs(a.x1-b.x1)<E && Math.abs(a.y1-b.y1)<E))) erros.push(`${v.nome}: nenhum lance liga o ${p.nome} ao andar de baixo`);
+          esc = es; }
+        if(p.nome==='Subsolo'){
+          const m = p.manobra;
+          if(m){ for(const pl of (p.pilares||[])) if(pl.y > m.y0+0.2 && pl.y < m.y1-0.2 && pl.x > 0.2 && pl.x < v.W-0.2) erros.push(`${v.nome}: pilar dentro da manobra`);
+            for(const s of S) if(!['manobra','rampa','jardim'].includes(s.tipo) && s.y0 < m.y1-E && s.y1 > m.y0+E) erros.push(`${v.nome}: ${s.nome} invade a manobra`); }
+          const n = p.nucleo; if(n && !(n.x0 < E || n.x1 > v.W-E || n.y1 > p.dim.D-E)) erros.push(`${v.nome}: núcleo do subsolo no meio`);
+        }
       }
       if(c.tipo==='sobrado' && v.pav.length < 2) erros.push(`${v.nome}: sobrado sem superior`);
       if(c.subsolo && !v.pav.some(p => p.nome==='Subsolo')) erros.push(`${v.nome}: sem subsolo`);

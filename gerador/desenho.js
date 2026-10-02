@@ -19,6 +19,9 @@ function espelha(v){
   for(const p of c.pav){
     if(p.anexo) continue;
     if(p.pocos) for(const s of p.pocos){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
+    if(p.pilares) for(const pl of p.pilares) pl.x = fx(pl.x);
+    if(p.nucleo){ const a = fx(p.nucleo.x1), b = fx(p.nucleo.x0); p.nucleo.x0 = a; p.nucleo.x1 = b; }
+    if(p.rampa && p.rampa.x0 !== undefined) p.rampa.x0 = +(W - p.rampa.x0 - p.rampa.largura).toFixed(2);
     for(const s of p.salas){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
     for(const k of ['portas','vaos','janelas']) for(const e of (p[k]||[])){
       if(e.o==='v'){ e.c = fx(e.c); if(e.dentro) e.dentro *= -1; }
@@ -83,6 +86,10 @@ function planta(v, idx, op){
       const lab = s.sobe && s.desce ? 'SOBE / DESCE' : s.sobe ? 'SOBE' : 'DESCE';
       o.push(`<text transform="translate(${tx+3},${ty}) rotate(-90)" class="rd" style="font-size:6.4px;font-weight:600">${lab}</text>`);
     }
+    if(s.tipo==='elevador'){
+      line(s.x0+0.15, s.y0+0.15, s.x1-0.15, s.y1-0.15, '#6B7280', .8); line(s.x0+0.15, s.y1-0.15, s.x1-0.15, s.y0+0.15, '#6B7280', .8);
+      o.push(`<text x="${(X(s.x0)+X(s.x1))/2}" y="${(Y(s.y0)+Y(s.y1))/2+2.5}" class="rd" style="font-size:6px;font-weight:600">ELEV.</text>`);
+    }
     if(s.tipo==='rampa'){
       for(let y=s.y0+0.5;y<s.y1;y+=0.5) line(s.x0, y, s.x1, y, '#A39C90', .6);
       o.push(`<text transform="translate(${(X(s.x0)+X(s.x1))/2+3},${(Y(s.y0)+Y(s.y1))/2}) rotate(-90)" class="rd" style="font-size:7px;font-weight:600">RAMPA ${s.inclinacao||20}%</text>`);
@@ -137,10 +144,13 @@ function planta(v, idx, op){
     if(d.entrada){ const mx = d.o==='h' ? (d.t0+d.t1)/2 : d.c, my = d.o==='h' ? d.c : (d.t0+d.t1)/2;
       o.push(`<text x="${X(mx)}" y="${Y(my) + (d.o==='h' ? -6 : 3)}" class="rn" style="font-size:6.4px;fill:${PORTA}">▼ ENTRADA</text>`); }
   }
+  // pilares (subsolo)
+  for(const pl of (p.pilares||[])) o.push(`<rect x="${(X(pl.x)-5.5).toFixed(1)}" y="${(Y(pl.y)-5.5).toFixed(1)}" width="11" height="11" fill="#111318" stroke="#FFFFFF" stroke-width="1.2"><title>Pilar</title></rect>`);
+  if(p.manobra) o.push(`<text x="${X(W)-6}" y="${Y(p.manobra.y0)+10}" class="rd" style="font-size:6px;text-anchor:end;fill:#57534E">faixa de manobra livre, sem pilares</text>`);
   // rótulos
   for(const s of S){
     const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h;
-    if(s.tipo==='escada' || s.tipo==='rampa') continue;
+    if(s.tipo==='escada' || s.tipo==='rampa' || s.tipo==='elevador') continue;
     const cx = (X(s.x0)+X(s.x1))/2, cy = (Y(s.y0)+Y(s.y1))/2;
     const nome = esc((s.nome||'').toUpperCase());
     const pw = w*K, ph = h*K;
@@ -200,8 +210,9 @@ function lote(v, q, res){
   const sub = v.pav.find(p => p.nome==='Subsolo');
   if(sub) for(const pc of (sub.pocos||[])){ const ax0 = v.espelhada ? v.x0 + v.W - pc.x1 : v.x0 + pc.x0;
     o.push(`<rect x="${X(ax0)}" y="${Y(v.y0+pc.y0)}" width="${((pc.x1-pc.x0)*k).toFixed(1)}" height="${((pc.y1-pc.y0)*k).toFixed(1)}" fill="#D6E4CC" stroke="#5F7350" stroke-dasharray="2 2"><title>Pátio inglês do subsolo</title></rect>`); }
+  if(sub){ const jd = sub.salas.find(s => s.tipo==='jardim'); if(jd) o.push(`<rect x="${X(v.x0+jd.x0)}" y="${Y(v.y0+jd.y0)}" width="${((jd.x1-jd.x0)*k).toFixed(1)}" height="${((jd.y1-jd.y0)*k).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}"><title>Jardim de inverno do subsolo</title></rect>`); }
   if(sub && sub.rampa && q.subGaragem){
-    const rx = v.espelhada ? v.x0 + v.W - 3 : v.x0;
+    const rx = v.x0 + (sub.rampa.x0 !== undefined ? sub.rampa.x0 : 0);
     o.push(`<rect x="${X(rx)}" y="${Y(q.recFrente - sub.rampa.Lout)}" width="${3*k}" height="${(sub.rampa.Lout*k).toFixed(1)}" fill="#E9E6E1" stroke="#A39C90"><title>Rampa externa ${f2(sub.rampa.Lout)} m</title></rect>`);
   }
   for(const a of (v.anexos||[])){
