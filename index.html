@@ -11,12 +11,12 @@
 <link rel="stylesheet" href="assets/base.css">
 <script src="assets/base.js"></script>
 </head>
-<body>
+<body data-nav="inicio" data-root="">
 <header class="bar">
   <div class="bar-in">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true"><span></span></div>
-      <div class="crumb"><span class="chip">Projetos</span><span class="sec">Plantas humanizadas</span></div>
+      <div class="crumb"><span class="chip">Início</span><span class="sec">Plantas humanizadas</span></div>
     </div>
     <button class="btn" id="themeBtn" type="button" data-tip="Alterna entre o tema claro e o escuro. A escolha fica guardada neste navegador">Tema escuro</button>
   </div>
@@ -32,11 +32,26 @@
       </div>
       <div class="carimbo" aria-label="Resumo da coleção">
         <div class="title">Coleção</div>
-        <div class="row"><div class="cell"><span class="k">Projetos</span><span class="v">2 estudos e 1 gerador</span></div><div class="cell"><span class="k">Fase</span><span class="v">Estudo preliminar</span></div></div>
+        <div class="row"><div class="cell"><span class="k">Conteúdo</span><span class="v">Gerador e banco de projetos</span></div><div class="cell"><span class="k">Fase</span><span class="v">Estudo preliminar</span></div></div>
         <div class="row"><div class="cell"><span class="k">Medidas</span><span class="v">Pelo eixo das paredes</span></div><div class="cell"><span class="k">Responsável técnico</span><span class="v">A definir</span></div></div>
       </div>
     </div>
 
+    <div class="atalhos">
+      <a class="atalho" href="gerador/" style="--c:var(--brass)">
+        <span class="k">Gerador</span>
+        <strong>Gerar uma planta</strong>
+        <span>Terreno, formato (bloco único, L, U, H), quartos, salas, garagem, sobrado, subsolo, edícula e piscina.</span>
+        <span class="go">Abrir o gerador →</span>
+      </a>
+      <a class="atalho" href="banco/" style="--c:var(--patina)">
+        <span class="k">Banco de projetos</span>
+        <strong>Ver projetos prontos</strong>
+        <span>Estudos publicados e as plantas que você salvou no gerador, com filtros e exportação.</span>
+        <span class="go">Abrir o banco →</span>
+      </a>
+    </div>
+    <h2 style="margin:6px 0 14px">Estudos em destaque</h2>
     <div class="projs">
       <a class="proj" href="casa-simetrica/" style="--c:var(--patina)">
         <div class="thumb"><img src="casa-simetrica/planta_A_v2_norte.svg" alt="Miniatura da planta da residência simétrica, opção A" loading="lazy"></div>
@@ -54,25 +69,6 @@
           <p>Ala íntima com três suítes, ala social com escritório e banho reversível, e ligação pela cozinha e pela área de serviço.</p>
           <dl><dt>Casa</dt><dd>18,80 × 19,00 m</dd><dt>Área fechada</dt><dd>244,28 m²</dd><dt>Lote</dt><dd>mínimo de 21,80 × 27,00 m</dd></dl>
           <span class="go">Abrir o estudo →</span>
-        </div>
-      </a>
-      <a class="proj" href="gerador/" style="--c:var(--brass)">
-        <div class="thumb"><svg viewBox="0 0 320 200" width="100%" height="100%" role="img" aria-label="Ilustração de formulário gerando uma planta">
-          <rect x="18" y="26" width="104" height="148" rx="8" fill="#fff" stroke="#C9CDD2"/>
-          <g fill="#E4E7EA"><rect x="30" y="42" width="80" height="10" rx="3"/><rect x="30" y="62" width="80" height="10" rx="3"/><rect x="30" y="82" width="80" height="10" rx="3"/><rect x="30" y="102" width="56" height="10" rx="3"/></g>
-          <rect x="30" y="148" width="80" height="14" rx="5" fill="#A07F4B"/>
-          <path d="M134 100h22" stroke="#A07F4B" stroke-width="2" marker-end="url(#a1)"/>
-          <defs><marker id="a1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#A07F4B" stroke-width="1.6"/></marker></defs>
-          <g stroke="#2B2F36" stroke-width="3" fill="none"><rect x="170" y="36" width="130" height="130"/></g>
-          <rect x="171.5" y="37.5" width="60" height="55" fill="#E3EEEC"/><rect x="231.5" y="37.5" width="67" height="55" fill="#E3EEEC"/>
-          <rect x="171.5" y="92.5" width="127" height="72" fill="#E7E7F0"/><rect x="250" y="120" width="48.5" height="44.5" fill="#ECECE8"/>
-          <g stroke="#2B2F36" stroke-width="1.6"><path d="M171 92h128M231 37v55M250 120v45M250 120h49"/></g>
-        </svg></div>
-        <div class="body">
-          <h2>Gerador de plantas</h2>
-          <p>Preencha o terreno, os cômodos, os banheiros, a garagem e o tipo da casa (térrea ou sobrado, com ou sem subsolo) e receba variantes de planta com quadro de áreas.</p>
-          <dl><dt>Entrada</dt><dd>terreno, recuos e programa</dd><dt>Saída</dt><dd>plantas por pavimento, SVG e PNG</dd></dl>
-          <span class="go">Abrir o gerador →</span>
         </div>
       </a>
     </div>

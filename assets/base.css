@@ -262,3 +262,29 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .warn ul{margin:4px 0 0;padding-left:18px}
 .plan-box{background:#FBFAF7;border:1px solid var(--line);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow);margin-bottom:14px;overflow:auto}
 .plan-box svg{display:block;width:100%;height:auto;max-height:78vh}
+
+/* Menu geral (Início · Gerador · Banco de projetos) */
+.topnav{display:flex;align-items:center;gap:4px;flex:none}
+.topnav a{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;color:var(--ink-2);text-decoration:none;padding:8px 12px;border-radius:9px;border:1px solid transparent}
+.topnav a:hover{color:var(--ink);background:var(--surface-2)}
+.topnav a[aria-current="page"]{color:var(--ink);background:var(--surface-2);border-color:var(--line);box-shadow:inset 0 -2px 0 var(--brass)}
+.topnav a:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+.topnav svg{width:15px;height:15px;flex:none}
+.navbtn{display:none}
+@media (max-width:760px){
+  .navbtn{display:inline-flex}
+  .topnav{display:none;position:absolute;top:calc(var(--hdr) - 4px);right:12px;left:12px;flex-direction:column;align-items:stretch;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:var(--shadow);z-index:50}
+  body.nav-open .topnav{display:flex}
+  .topnav a{padding:11px 12px;font-size:15px}
+  .bar-in .crumb .sec{display:none}
+}
+.atalhos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:0 0 30px}
+@media (max-width:760px){.atalhos{grid-template-columns:minmax(0,1fr)}}
+.atalho{display:flex;flex-direction:column;gap:6px;padding:22px 24px;background:var(--surface-2);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:var(--radius);box-shadow:var(--shadow);color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}
+.atalho:hover{border-color:var(--ink-3);border-left-color:var(--c);transform:translateY(-2px)}
+.atalho:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+.atalho .k{font-size:13px;color:var(--ink-3)}
+.atalho strong{font-family:'IBM Plex Serif',Georgia,serif;font-weight:500;font-size:24px;line-height:1.2}
+.atalho span{color:var(--ink-2);font-size:14.5px}
+.atalho .go{margin-top:6px;color:var(--c);font-weight:500}
+@media (prefers-reduced-motion:reduce){.atalho{transition:none}.atalho:hover{transform:none}}
