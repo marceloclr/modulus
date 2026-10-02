@@ -446,8 +446,9 @@ function linear(q, P, W, modo, opts){
       sup.push(sala('circ', cxA, ys0, cxA+C, ys1, {nome:'Hall íntimo'}));
       sup.push(sala('escada', escRect.x0, escRect.y0, escRect.x1, escRect.y1, {desce:true, esc}));
       const yCol = modo==='L' ? Math.min(ys1, yI) : ys1;
-      if(escRect.y0 - ys0 > 0.3) sup.push(sala('rouparia', cxA+C, ys0, cxA+COL, escRect.y0));
-      if(yCol - escRect.y1 > 0.3) sup.push(sala('rouparia', cxA+C, escRect.y1, cxA+COL, yCol));
+      // acima e abaixo da escada a coluna vira corredor, para os quartos do outro lado terem porta
+      if(escRect.y0 - ys0 > 0.3) sup.push(sala('circ', cxA+C, ys0, cxA+COL, escRect.y0, {nome:'Hall íntimo'}));
+      if(yCol - escRect.y1 > 0.3) sup.push(sala('circ', cxA+C, escRect.y1, cxA+COL, yCol, {nome:'Hall íntimo'}));
       if(!ladoX0 && cxA > 0.05 && !comElev) sup.push(sala('rouparia', 0, ys0, cxA, ys1, {nome:'Armários'}));
       if(ladoX1.x1 - ladoX1.x0 > 0.05 && ladoX1.x1 - ladoX1.x0 < 2.6) sup.push(sala('rouparia', ladoX1.x0, ys0, ladoX1.x1, yLim, {nome:'Armários'}));
       if(comElev){
@@ -854,6 +855,22 @@ function subsolo(q, W, D, cel, av){
     if(yl >= VAGA_P - 0.01) linha(yl - 0.15, s => s.y1 <= yl + 0.01);
     if(Dsub - (yl + MANOBRA + VAGA_P) > vao) linha(yl + MANOBRA + VAGA_P - 0.15, s => s.y0 >= yl + MANOBRA - 0.01);
   }
+  // completa linhas de pilares onde o vão passar do máximo, sem tocar na faixa de manobra
+  const fora = y => yl===null || y < yl - 0.1 || y > yl + MANOBRA + 0.1;
+  const xsLinha = ao(0, W, 5).filter(x => !(Lin > 0 && x > rx0 + 0.2 && x < rx1 - 0.2));
+  for(let guarda = 0; guarda < 8; guarda++){
+    const ys0 = [0, ...linhasY, Dsub].sort((a,b)=>a-b); let mexeu = false;
+    for(let i=0;i<ys0.length-1;i++){ const a = ys0[i], b = ys0[i+1]; if(b - a <= vao + 0.01) continue;
+      // candidatos: meio do vão ou bordas das fileiras de vagas (nunca dentro de vaga ou da manobra)
+      const proib = yl===null ? [] : [[yl - 0.1, yl + MANOBRA + 0.1], [yl + MANOBRA + 0.3, yl + MANOBRA + VAGA_P - 0.3]].concat(yl >= VAGA_P - 0.01 ? [[yl - VAGA_P + 0.3, yl - 0.3]] : []);
+      const ok = y => y > a + 0.5 && y < b - 0.5 && !proib.some(([m,n]) => y > m && y < n);
+      const cands = [(a+b)/2].concat(yl===null ? [] : [yl - 0.15, yl + MANOBRA + 0.15, yl + MANOBRA + VAGA_P - 0.15, yl - VAGA_P + 0.15]).filter(ok);
+      if(!cands.length) continue;
+      cands.sort((m,n) => Math.abs(m-(a+b)/2) - Math.abs(n-(a+b)/2));
+      const y = cands[0];
+      for(const x of xsLinha) addPil(x, y); linhasY.push(r2(y)); mexeu = true; break; }
+    if(!mexeu) break;
+  }
   const ys = [0, ...linhasY, Dsub].sort((a,b)=>a-b);
   let maior = 0; for(let i=0;i<ys.length-1;i++) maior = Math.max(maior, ys[i+1]-ys[i]);
   if(maior > vao + 0.01) av.push(`Subsolo: vão de ${f2(maior)} m entre linhas de pilares; prever laje protendida ou viga de transição para manter a manobra livre.`);
@@ -935,7 +952,7 @@ const PREF = {
   lazer:['hall','manobra','garagem','deposito','jardim'], gourmet:['cozinha','jantar','servico','estar','galeria'],
   salaIntima:['circ','hall'], hall:[], circ:[], galeria:[], escada:[], elevador:[], jardim:[], manobra:['hall'], rampa:[], varanda:[], terraco:['circ','hall'],
 };
-const ABERTOS = [['gourmet','terraco'],['gourmet','hall'],['hall','terraco'],['hall','hall'],['hall','elevador'],['circ','elevador'],['circ','estar'],['circ','jantar'],['circ','tv'],['estar','jantar'],['estar','tv'],['hall','estar'],['hall','jantar'],['hall','tv'],['hall','circ'],['galeria','circ'],['galeria','jantar'],['galeria','estar'],['galeria','cozinha'],['manobra','garagem'],['manobra','rampa'],['hall','manobra']];
+const ABERTOS = [['circ','circ'],['gourmet','terraco'],['gourmet','hall'],['hall','terraco'],['hall','hall'],['hall','elevador'],['circ','elevador'],['circ','estar'],['circ','jantar'],['circ','tv'],['estar','jantar'],['estar','tv'],['hall','estar'],['hall','jantar'],['hall','tv'],['hall','circ'],['galeria','circ'],['galeria','jantar'],['galeria','estar'],['galeria','cozinha'],['manobra','garagem'],['manobra','rampa'],['hall','manobra']];
 
 function compartilhado(a, b){
   // aresta comum entre retângulos: {o:'v'|'h', c, t0, t1}
@@ -1137,7 +1154,7 @@ function avalia(v, q){
       if(a < t.min - 0.01){ pen += 6*(t.min-a); av.push(`${p.nome}: ${rotulo(s)} com ${f2(a)} m², abaixo do mínimo de ${f2(t.min)} m².`); }
       if(lmin < t.lado - 0.01){ pen += 12*(t.lado-lmin); av.push(`${p.nome}: ${rotulo(s)} com lado de ${f2(lmin)} m, abaixo de ${f2(t.lado)} m.`); }
       const ra = a / (t.alvo || a);
-      if(ra > 1.8) pen += (ra-1.8)*4;
+      if(ra > 1.8 && p.nome!=='Subsolo' && s.tipo!=='deposito') pen += (ra-1.8)*4;
     }
     if(!['circ','hall','galeria','rampa','manobra','escada','rouparia','varanda','terraco','garagem','deposito'].includes(s.tipo) && lmax/lmin > 2.6) pen += 2*(lmax/lmin-2.6);
   }

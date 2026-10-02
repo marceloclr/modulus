@@ -11,6 +11,15 @@ const CASOS = {
   'Em U, 22 × 30': {frente:22, fundo:30, quartos:3, suites:3, escritorio:true, vagas:2, gourmet:true, lavabo:true, formato:'U'},
   'Edícula 2 pav. e piscina, 16 × 42': {frente:16, fundo:42, quartos:3, suites:2, edicula:'2', piscina:true, pisPrainha:true, pisForma:'L', gourmetDest:true},
   'Subsolo enterrado com lazer, 12 × 32': {frente:12, fundo:32, quartos:3, suites:2, subsolo:true, subNivel:'inteiro', subLazer:true, vagas:2},
+  'Sobrado em L, só a frente sobe, 16 × 32': {frente:16, fundo:32, tipo:'sobrado', formato:'L', quartos:4, suites:3, supModo:'parcial', secFrente:true, secFundo:false, supQuartos:3},
+  'Sobrado em U, frente e ala esquerda, 22 × 30': {frente:22, fundo:30, tipo:'sobrado', formato:'U', quartos:4, suites:3, supModo:'parcial', secFrente:true, secAlaE:true, secAlaD:false},
+  'Sobrado correspondente com TV e escritório em cima, 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, tv:true, escritorio:true, supTv:true, supEscritorio:true},
+  'Térrea com rooftop e spa, 14 × 30': {frente:14, fundo:30, quartos:3, suites:2, rooftop:true, rtArea:60, rtSpa:true},
+  'Sobrado com rooftop, 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, rooftop:true, rtArea:50},
+  'Subsolo com elevador e sobrado, 12 × 32': {frente:12, fundo:32, tipo:'sobrado', quartos:3, suites:2, subsolo:true, elevador:true, vagas:2},
+  'U com subsolo, 22 × 34': {frente:22, fundo:34, formato:'U', quartos:3, suites:3, subsolo:true, vagas:3},
+  'H com subsolo, 22 × 34': {frente:22, fundo:34, formato:'H', quartos:3, suites:3, subsolo:true, vagas:3},
+  'L com subsolo, 16 × 34': {frente:16, fundo:34, formato:'L', quartos:3, suites:2, subsolo:true, vagas:2},
   'Programa grande demais, 8 × 20': {frente:8, fundo:20, quartos:6, suites:6, tv:true, escritorio:true, vagas:3},
 };
 const E = 0.011;
@@ -57,6 +66,14 @@ function rodar(){
       const sub = v.pav.find(p => p.nome==='Subsolo');
       if(sub && !sub.cruzada) erros.push(`${v.nome}: subsolo sem ventilação cruzada`);
       if(sub && c.subNivel==='inteiro' && !(sub.pocos||[]).length) erros.push(`${v.nome}: subsolo enterrado sem pátio inglês`);
+      if(c.tipo==='sobrado' && !v.pav.some(p => p.nome==='Superior')) erros.push(`${v.nome}: sobrado sem superior`);
+      if(c.supModo==='parcial'){ const sp = v.pav.find(p => p.nome==='Superior'); if(sp && !sp.salas.some(s => s.nome==='Laje' || s.nome==='Terraço')) erros.push(`${v.nome}: superior parcial sem laje`); }
+      if(c.supTv){ const sp = v.pav.find(p => p.nome==='Superior'); if(!sp || !sp.salas.some(s => s.tipo==='tv')) erros.push(`${v.nome}: sala de TV não foi para cima`); }
+      if(c.rooftop){ const rt = v.pav.find(p => p.nome==='Rooftop'); if(!rt) erros.push(`${v.nome}: sem rooftop`); else if(!rt.salas.some(s => s.tipo==='terraco')) erros.push(`${v.nome}: rooftop sem deck`); }
+      if(c.elevador){ const els = v.pav.filter(p => !p.anexo && p.nome!=='Rooftop').map(p => p.salas.find(s => s.tipo==='elevador'));
+        if(els.some(e => !e)) erros.push(`${v.nome}: falta elevador em algum pavimento`);
+        else if(els.some(e => Math.abs(e.x0-els[0].x0)>E || Math.abs(e.y0-els[0].y0)>E)) erros.push(`${v.nome}: elevador fora de prumo`); }
+      if(c.formato && c.formato!=='auto' && c.subsolo && !v.pav.some(p => p.nome==='Subsolo')) erros.push(`${v.nome}: formato sem subsolo`);
       if(c.piscina && !(v.anexos||[]).some(a => a.tipo==='piscina')) erros.push(`${v.nome}: sem piscina`);
       for(const a of (v.anexos||[])) if(a.y0 < v.y0 + v.D - E) erros.push(`${v.nome}: anexo ${a.tipo} sobre a casa`);
       const an = (v.anexos||[]); for(let i=0;i<an.length;i++) for(let j=i+1;j<an.length;j++) if(sobrepoe(an[i], an[j])) erros.push(`${v.nome}: ${an[i].tipo} sobrepõe ${an[j].tipo}`);
