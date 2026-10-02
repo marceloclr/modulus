@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1028 748" width="1028" height="748">
+<title>Planta humanizada · Casa em H (v1)</title><style>text{font-family:"Inter","Segoe UI","DejaVu Sans",Helvetica,Arial,sans-serif;fill:#2F333A}.tt{font-size:15px;font-weight:600}.st{font-size:8.6px;fill:#5d6168}.rn{font-weight:600;text-anchor:middle;letter-spacing:.2px}.rd{text-anchor:middle;fill:#4a4e55}.cota{font-size:6.6px;text-anchor:middle;fill:#55595F}.lh{font-size:8.4px;font-weight:600}.lg{font-size:6.8px;fill:#43474d}</style>
+<rect width="1028" height="748" fill="#FBFAF7"/>
+<text x="72" y="30" class="tt">Planta humanizada · Casa em H (v1)</text>
+<text x="72" y="46" class="st">Ala íntima com 3 suítes (quarto 4,00 × 5,00, banho na fachada, closet para o pátio) · ala social · ligação por cozinha e serviço · casa 18,80 × 19,00 m · escala 30 px/m</text>
+<rect x="258" y="118" width="198" height="330" fill="#E6ECDF" stroke="#9DB08C" stroke-width="1"><title>Pátio de entrada: 6,60 × 11,00 = 72,60 m²</title></rect>
+<rect x="258" y="592" width="198" height="96" fill="#E6ECDF" stroke="#9DB08C" stroke-width="1"><title>Pátio posterior: 6,60 × 3,20 (aberto para o quintal)</title></rect>
+<rect x="72" y="118" width="150" height="120" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Suíte 1: 5,00 × 4,00 = 20,00 m²</title></rect>
+<rect x="72" y="238" width="78" height="60" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Banho 1: 2,60 × 2,00 = 5,20 m²</title></rect>
+<rect x="150" y="238" width="72" height="60" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Closet 1: 2,40 × 2,00 = 4,80 m²</title></rect>
+<rect x="72" y="298" width="78" height="60" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Banho 2: 2,60 × 2,00 = 5,20 m²</title></rect>
+<rect x="150" y="298" width="72" height="60" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Closet 2: 2,40 × 2,00 = 4,80 m²</title></rect>
+<rect x="72" y="358" width="150" height="120" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Suíte 2: 5,00 × 4,00 = 20,00 m²</title></rect>
+<rect x="72" y="478" width="150" height="120" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Suíte master: 5,00 × 4,00 = 20,00 m²</title></rect>
+<rect x="72" y="598" width="84" height="90" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Banho master: 2,80 × 3,00 = 8,40 m²</title></rect>
+<rect x="156" y="598" width="102" height="90" fill="#E3EEEC" stroke="#93B3AC" stroke-width="1"><title>Closet master: 3,40 × 3,00 = 10,20 m²</title></rect>
+<rect x="222" y="118" width="36" height="420" fill="#EEF0F4" stroke="#A9AFBD" stroke-width="1"><title>Circulação íntima: 1,20 × 14,00 = 16,80 m²</title></rect>
+<rect x="222" y="538" width="36" height="60" fill="#ECECE8" stroke="#ABAB9F" stroke-width="1"><title>Rouparia: 1,20 × 2,00 = 2,40 m²</title></rect>
+<rect x="258" y="448" width="198" height="36" fill="#EEF0F4" stroke="#A9AFBD" stroke-width="1"><title>Galeria: 6,60 × 1,20 = 7,92 m²</title></rect>
+<rect x="258" y="484" width="78" height="108" fill="#ECECE8" stroke="#ABAB9F" stroke-width="1"><title>Área de serviço: 2,60 × 3,60 = 9,36 m²</title></rect>
+<rect x="336" y="484" width="120" height="108" fill="#E7E7F0" stroke="#9C9CBD" stroke-width="1"><title>Cozinha: 4,00 × 3,60 = 14,40 m²</title></rect>
+<rect x="456" y="118" width="66" height="180" fill="#EEF0F4" stroke="#A9AFBD" stroke-width="1"><title>Vestíbulo: 2,20 × 6,00 = 13,20 m²</title></rect>
+<rect x="522" y="118" width="114" height="126" fill="#E7E7F0" stroke="#9C9CBD" stroke-width="1"><title>Escritório: 3,80 × 4,20 = 15,96 m²</title></rect>
+<rect x="522" y="244" width="114" height="54" fill="#ECECE8" stroke="#ABAB9F" stroke-width="1"><title>Banho social: 3,80 × 1,80 = 6,84 m²</title></rect>
+<rect x="456" y="298" width="180" height="150" fill="#E7E7F0" stroke="#9C9CBD" stroke-width="1"><title>Sala de estar: 6,00 × 5,00 = 30,00 m²</title></rect>
+<rect x="456" y="448" width="180" height="144" fill="#E7E7F0" stroke="#9C9CBD" stroke-width="1"><title>Sala de jantar: 6,00 × 4,80 = 28,80 m²</title></rect>
+<rect x="456" y="592" width="180" height="96" fill="#F3EBDD" stroke="#C8B08A" stroke-width="1"><title>Varanda gourmet: 6,00 × 3,20 = 19,20 m²</title></rect>
+<rect x="81" y="148" width="60" height="57" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="84" y="152.5" width="13.5" height="22.5" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="84" y="178" width="13.5" height="22.5" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="81" y="389.5" width="60" height="57" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="84" y="394" width="13.5" height="22.5" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="84" y="419.5" width="13.5" height="22.5" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="81" y="508" width="63" height="60" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="84" y="512.5" width="13.5" height="24" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="84" y="539.5" width="13.5" height="24" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="150" y="124" width="54" height="13.5" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="150" y="458.5" width="54" height="13.5" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="156" y="484" width="54" height="13.5" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="153" y="241" width="66" height="16.5" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="153" y="338.5" width="66" height="16.5" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="240" y="601" width="15" height="84" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="159" y="671.5" width="75" height="13.5" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="129" cy="284.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="75" y="241" width="30" height="24" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="129" cy="311.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="75" y="331" width="30" height="24" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="138" cy="670" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="75" y="601" width="36" height="36" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="75" y="667" width="42" height="18" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="582" y="127" width="48" height="21" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="558" y="190" width="72" height="18" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="555" y="280" width="24" height="15" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="591" cy="286" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="604.5" y="247" width="28.5" height="48" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="609" y="316" width="21" height="114" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="510" y="331" width="24" height="84" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="552" y="355" width="36" height="36" rx="2" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="504" y="490" width="84" height="60" rx="4" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="519" cy="482.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="519" cy="557.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="546" cy="482.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="546" cy="557.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="573" cy="482.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><circle cx="573" cy="557.5" r="6" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="342" y="574" width="108" height="15" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="366" y="520" width="48" height="24" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="261" y="487" width="18" height="102" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="288" y="487" width="24" height="18" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="312" y="487" width="21" height="18" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="567" y="607" width="63" height="18" rx="1" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/><rect x="492" y="628" width="72" height="36" rx="4" fill="#FFFFFF" stroke="#8A8F98" stroke-width=".8"/>
+<path d="M72,118 L258,118 L258,448 L456,448 L456,118 L636,118 L636,592 L456,592 L258,592 L258,688 L72,688 Z" fill="none" stroke="#2B2F36" stroke-width="6" stroke-linejoin="miter"/>
+<line x1="72" y1="238" x2="222" y2="238" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="150" y1="238" x2="150" y2="358" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="72" y1="298" x2="222" y2="298" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="72" y1="358" x2="222" y2="358" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="72" y1="478" x2="222" y2="478" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="72" y1="598" x2="258" y2="598" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="156" y1="598" x2="156" y2="688" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="222" y1="118" x2="222" y2="598" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="222" y1="538" x2="258" y2="538" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="258" y1="118" x2="258" y2="448" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="258" y1="484" x2="258" y2="598" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="258" y1="448" x2="456" y2="448" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="258" y1="484" x2="456" y2="484" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="336" y1="484" x2="336" y2="592" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="258" y1="592" x2="456" y2="592" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="456" y1="118" x2="456" y2="448" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="456" y1="484" x2="456" y2="592" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="522" y1="118" x2="522" y2="298" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="522" y1="244" x2="636" y2="244" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<line x1="456" y1="592" x2="636" y2="592" stroke="#2B2F36" stroke-width="3.2" stroke-linecap="square"/>
+<path d="M456,592 L456,688 L636,688 L636,592" fill="none" stroke="#C8B08A" stroke-width="1.4" stroke-dasharray="4 3"/>
+<line x1="162" y1="238" x2="210" y2="238" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="162" y1="358" x2="210" y2="358" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="168" y1="598" x2="216" y2="598" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="258" y1="448" x2="258" y2="484" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="456" y1="448" x2="456" y2="484" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="348" y1="484" x2="444" y2="484" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="456" y1="505" x2="456" y2="565" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="459" y1="298" x2="519" y2="298" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="108" y1="118" x2="186" y2="118" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="108" y1="118" x2="186" y2="118" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="72" y1="148" x2="72" y2="208" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="148" x2="72" y2="208" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="72" y1="388" x2="72" y2="448" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="388" x2="72" y2="448" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="72" y1="508" x2="72" y2="568" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="508" x2="72" y2="568" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="72" y1="256" x2="72" y2="280" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="256" x2="72" y2="280" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
+<line x1="72" y1="316" x2="72" y2="340" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="316" x2="72" y2="340" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
+<line x1="96" y1="688" x2="132" y2="688" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="96" y1="688" x2="132" y2="688" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
+<line x1="180" y1="688" x2="234" y2="688" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="180" y1="688" x2="234" y2="688" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
+<line x1="228" y1="118" x2="252" y2="118" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="228" y1="118" x2="252" y2="118" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
+<line x1="258" y1="148" x2="258" y2="226" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="258" y1="148" x2="258" y2="226" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="258" y1="268" x2="258" y2="430" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="258" y1="268" x2="258" y2="430" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="270" y1="448" x2="444" y2="448" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="270" y1="448" x2="444" y2="448" stroke="#4C86C6" stroke-width="1.2" />
+<line x1="270" y1="448" x2="444" y2="448" stroke="#4C86C6" stroke-width="4" stroke-opacity=".25"/>
+<line x1="294" y1="592" x2="324" y2="592" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="294" y1="592" x2="324" y2="592" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
+<line x1="354" y1="592" x2="438" y2="592" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="354" y1="592" x2="438" y2="592" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="546" y1="118" x2="612" y2="118" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="546" y1="118" x2="612" y2="118" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="636" y1="148" x2="636" y2="214" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="636" y1="148" x2="636" y2="214" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="636" y1="256" x2="636" y2="286" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="636" y1="256" x2="636" y2="286" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
+<line x1="456" y1="322" x2="456" y2="430" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="456" y1="322" x2="456" y2="430" stroke="#4C86C6" stroke-width="1.2" />
+<line x1="456" y1="322" x2="456" y2="430" stroke="#4C86C6" stroke-width="4" stroke-opacity=".25"/>
+<line x1="636" y1="322" x2="636" y2="424" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="636" y1="322" x2="636" y2="424" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="636" y1="472" x2="636" y2="568" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="636" y1="472" x2="636" y2="568" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="474" y1="592" x2="618" y2="592" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="474" y1="592" x2="618" y2="592" stroke="#4C86C6" stroke-width="1.2" />
+<line x1="474" y1="592" x2="618" y2="592" stroke="#4C86C6" stroke-width="4" stroke-opacity=".25"/>
+<line x1="222" y1="130" x2="222" y2="157" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="222" y1="157" x2="195" y2="157" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M195,157 A27,27 0 0 1 222,130" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="222" y1="448" x2="222" y2="475" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="222" y1="448" x2="195" y2="448" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M195,448 A27,27 0 0 0 222,475" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="222" y1="487" x2="222" y2="514" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="222" y1="514" x2="195" y2="514" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M195,514 A27,27 0 0 1 222,487" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="150" y1="262" x2="150" y2="283" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="150" y1="283" x2="129" y2="283" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M129,283 A21,21 0 0 1 150,262" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="150" y1="313" x2="150" y2="334" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="150" y1="334" x2="129" y2="334" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M129,334 A21,21 0 0 1 150,313" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="120" y1="598" x2="144" y2="598" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="120" y1="598" x2="120" y2="622" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M120,622 A24,24 0 0 0 144,598" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="234" y1="538" x2="255" y2="538" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="234" y1="538" x2="234" y2="559" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M234,559 A21,21 0 0 0 255,538" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="336" y1="496" x2="336" y2="520" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="336" y1="520" x2="312" y2="520" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M312,520 A24,24 0 0 1 336,496" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="282" y1="592" x2="309" y2="592" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="282" y1="592" x2="282" y2="619" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M282,619 A27,27 0 0 0 309,592" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="474" y1="118" x2="504" y2="118" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="474" y1="118" x2="474" y2="148" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M474,148 A30,30 0 0 0 504,118" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="522" y1="148" x2="522" y2="175" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="522" y1="175" x2="549" y2="175" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M549,175 A27,27 0 0 0 522,148" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="522" y1="256" x2="522" y2="280" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="522" y1="280" x2="546" y2="280" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M546,280 A24,24 0 0 0 522,256" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<line x1="528" y1="244" x2="549" y2="244" stroke="#F4F2EC" stroke-width="4.2" />
+<line x1="528" y1="244" x2="528" y2="265" stroke="#8C6A2F" stroke-width="1.6" />
+<path d="M528,265 A21,21 0 0 0 549,244" fill="none" stroke="#8C6A2F" stroke-width=".7" stroke-dasharray="2 2"/>
+<g><rect x="146" y="164" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="180" y="175" class="rn" style="font-size:8.6px">SUÍTE 1</text>
+<text x="180" y="185" class="rd" style="font-size:6.8px">5,00 × 4,00 · 20,00 m²</text>
+</g>
+<g><rect x="146" y="404" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="180" y="415" class="rn" style="font-size:8.6px">SUÍTE 2</text>
+<text x="180" y="425" class="rd" style="font-size:6.8px">5,00 × 4,00 · 20,00 m²</text>
+</g>
+<g><rect x="146" y="524" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="180" y="535" class="rn" style="font-size:8.6px">SUÍTE MASTER</text>
+<text x="180" y="545" class="rd" style="font-size:6.8px">5,00 × 4,00 · 20,00 m²</text>
+</g>
+<text x="111" y="272.5" class="rn" style="font-size:6.6px">BANHO</text>
+<text x="111" y="280.5" class="rd" style="font-size:6px">5,20 m²</text>
+<text x="186" y="275.5" class="rn" style="font-size:6.6px">CLOSET</text>
+<text x="186" y="283.5" class="rd" style="font-size:6px">4,80 m²</text>
+<text x="111" y="328" class="rn" style="font-size:6.6px">BANHO</text>
+<text x="111" y="336" class="rd" style="font-size:6px">5,20 m²</text>
+<text x="186" y="323.5" class="rn" style="font-size:6.6px">CLOSET</text>
+<text x="186" y="331.5" class="rd" style="font-size:6px">4,80 m²</text>
+<text x="114" y="649" class="rn" style="font-size:6.6px">BANHO MASTER</text>
+<text x="114" y="657" class="rd" style="font-size:6px">2,80 × 3,00 · 8,40 m²</text>
+<text x="201" y="640" class="rn" style="font-size:6.6px">CLOSET MASTER</text>
+<text x="201" y="648" class="rd" style="font-size:6px">3,40 × 3,00 · 10,20 m²</text>
+<text transform="translate(241.5,328) rotate(-90)" class="rn" style="font-size:6.6px">CIRCULAÇÃO 1,20</text>
+<text transform="translate(241.5,578.5) rotate(-90)" class="rn" style="font-size:5.6px">ROUPARIA</text>
+<text x="357" y="469.6" class="rn" style="font-size:6.4px">GALERIA ENVIDRAÇADA 1,20</text>
+<g><rect x="263" y="515" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="297" y="526" class="rn" style="font-size:7.4px">SERVIÇO</text>
+<text x="297" y="536" class="rd" style="font-size:6.8px">2,60 × 3,60 · 9,36 m²</text>
+</g>
+<g><rect x="362" y="495.5" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="396" y="506.5" class="rn" style="font-size:8.6px">COZINHA</text>
+<text x="396" y="516.5" class="rd" style="font-size:6.8px">4,00 × 3,60 · 14,40 m²</text>
+</g>
+<g><rect x="455" y="194" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="489" y="205" class="rn" style="font-size:7.6px">VESTÍBULO</text>
+<text x="489" y="215" class="rd" style="font-size:6.8px">2,20 × 6,00</text>
+</g>
+<g><rect x="530" y="161" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="564" y="172" class="rn" style="font-size:8px">ESCRITÓRIO</text>
+<text x="564" y="182" class="rd" style="font-size:6.8px">3,80 × 4,20 · 15,96 m²</text>
+</g>
+<text x="579" y="260.5" class="rn" style="font-size:6.4px">BANHO SOCIAL</text>
+<text x="579" y="268.5" class="rd" style="font-size:6px">reversível · 6,84 m²</text>
+<g><rect x="512" y="320" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="546" y="331" class="rn" style="font-size:8.6px">SALA DE ESTAR</text>
+<text x="546" y="341" class="rd" style="font-size:6.8px">6,00 × 5,00 · 30,00 m²</text>
+</g>
+<g><rect x="512" y="563" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="546" y="574" class="rn" style="font-size:8.6px">SALA DE JANTAR</text>
+<text x="546" y="584" class="rd" style="font-size:6.8px">6,00 × 4,80 · 28,80 m²</text>
+</g>
+<g><rect x="512" y="635" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="546" y="646" class="rn" style="font-size:7.6px">VARANDA GOURMET</text>
+<text x="546" y="656" class="rd" style="font-size:6.8px">6,00 × 3,20 · 19,20 m²</text>
+</g>
+<g><rect x="323" y="263" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="357" y="274" class="rn" style="font-size:7.6px">PÁTIO DE ENTRADA</text>
+<text x="357" y="284" class="rd" style="font-size:6.8px">6,60 × 11,00 · jardim</text>
+</g>
+<g><rect x="323" y="632" width="68" height="24" rx="2" fill="#FFFFFF" fill-opacity=".82"/>
+<text x="357" y="643" class="rn" style="font-size:7.2px">PÁTIO POSTERIOR</text>
+<text x="357" y="653" class="rd" style="font-size:6.8px">aberto para o quintal</text>
+</g>
+<text x="489" y="107.5" class="rn" style="font-size:7px;fill:#8C6A2F">▼ ENTRADA</text>
+<line x1="72" y1="71.5" x2="636" y2="71.5" stroke="#55595F" stroke-width="0.7" />
+<line x1="72" y1="67.9" x2="72" y2="75.1" stroke="#55595F" stroke-width="0.7" />
+<line x1="636" y1="67.9" x2="636" y2="75.1" stroke="#55595F" stroke-width="0.7" />
+<text x="354.0" y="68.5" class="cota" >18,80</text>
+<line x1="72" y1="89.5" x2="258" y2="89.5" stroke="#55595F" stroke-width="0.7" />
+<line x1="72" y1="85.9" x2="72" y2="93.1" stroke="#55595F" stroke-width="0.7" />
+<line x1="258" y1="85.9" x2="258" y2="93.1" stroke="#55595F" stroke-width="0.7" />
+<text x="165.0" y="86.5" class="cota" >6,20</text>
+<line x1="258" y1="89.5" x2="456" y2="89.5" stroke="#55595F" stroke-width="0.7" />
+<line x1="258" y1="85.9" x2="258" y2="93.1" stroke="#55595F" stroke-width="0.7" />
+<line x1="456" y1="85.9" x2="456" y2="93.1" stroke="#55595F" stroke-width="0.7" />
+<text x="357.0" y="86.5" class="cota" >6,60</text>
+<line x1="456" y1="89.5" x2="636" y2="89.5" stroke="#55595F" stroke-width="0.7" />
+<line x1="456" y1="85.9" x2="456" y2="93.1" stroke="#55595F" stroke-width="0.7" />
+<line x1="636" y1="85.9" x2="636" y2="93.1" stroke="#55595F" stroke-width="0.7" />
+<text x="546.0" y="86.5" class="cota" >6,00</text>
+<line x1="25.5" y1="118" x2="25.5" y2="688" stroke="#55595F" stroke-width="0.7" />
+<line x1="21.9" y1="118" x2="29.1" y2="118" stroke="#55595F" stroke-width="0.7" />
+<line x1="21.9" y1="688" x2="29.1" y2="688" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(22.5,403.0) rotate(-90)" class="cota">19,00</text>
+<line x1="46.5" y1="118" x2="46.5" y2="238" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="118" x2="50.1" y2="118" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="238" x2="50.1" y2="238" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(43.5,178.0) rotate(-90)" class="cota">4,00</text>
+<line x1="46.5" y1="238" x2="46.5" y2="298" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="238" x2="50.1" y2="238" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="298" x2="50.1" y2="298" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(43.5,268.0) rotate(-90)" class="cota">2,00</text>
+<line x1="46.5" y1="298" x2="46.5" y2="358" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="298" x2="50.1" y2="298" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="358" x2="50.1" y2="358" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(43.5,328.0) rotate(-90)" class="cota">2,00</text>
+<line x1="46.5" y1="358" x2="46.5" y2="478" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="358" x2="50.1" y2="358" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="478" x2="50.1" y2="478" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(43.5,418.0) rotate(-90)" class="cota">4,00</text>
+<line x1="46.5" y1="478" x2="46.5" y2="598" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="478" x2="50.1" y2="478" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="598" x2="50.1" y2="598" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(43.5,538.0) rotate(-90)" class="cota">4,00</text>
+<line x1="46.5" y1="598" x2="46.5" y2="688" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="598" x2="50.1" y2="598" stroke="#55595F" stroke-width="0.7" />
+<line x1="42.9" y1="688" x2="50.1" y2="688" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(43.5,643.0) rotate(-90)" class="cota">3,00</text>
+<line x1="664.5" y1="118" x2="664.5" y2="298" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="118" x2="668.1" y2="118" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="298" x2="668.1" y2="298" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(661.5,208.0) rotate(-90)" class="cota">6,00</text>
+<line x1="664.5" y1="298" x2="664.5" y2="448" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="298" x2="668.1" y2="298" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="448" x2="668.1" y2="448" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(661.5,373.0) rotate(-90)" class="cota">5,00</text>
+<line x1="664.5" y1="448" x2="664.5" y2="592" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="448" x2="668.1" y2="448" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="592" x2="668.1" y2="592" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(661.5,520.0) rotate(-90)" class="cota">4,80</text>
+<line x1="664.5" y1="592" x2="664.5" y2="688" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="592" x2="668.1" y2="592" stroke="#55595F" stroke-width="0.7" />
+<line x1="660.9" y1="688" x2="668.1" y2="688" stroke="#55595F" stroke-width="0.7" />
+<text transform="translate(661.5,640.0) rotate(-90)" class="cota">3,20</text>
+<text x="718" y="108" class="lh" >Legenda de zonas</text>
+<rect x="718" y="114" width="18" height="11" fill="#E3EEEC" stroke="#93B3AC"/>
+<text x="744" y="122" class="lg" >Ala íntima (suítes, closets, banhos)</text>
+<rect x="718" y="129" width="18" height="11" fill="#E7E7F0" stroke="#9C9CBD"/>
+<text x="744" y="137" class="lg" >Social (escritório, estar, jantar, cozinha)</text>
+<rect x="718" y="144" width="18" height="11" fill="#ECECE8" stroke="#ABAB9F"/>
+<text x="744" y="152" class="lg" >Apoio (serviço, banho social, rouparia)</text>
+<rect x="718" y="159" width="18" height="11" fill="#EEF0F4" stroke="#A9AFBD"/>
+<text x="744" y="167" class="lg" >Circulação (vestíbulo, galeria)</text>
+<rect x="718" y="174" width="18" height="11" fill="#F3EBDD" stroke="#C8B08A"/>
+<text x="744" y="182" class="lg" >Varanda</text>
+<rect x="718" y="189" width="18" height="11" fill="#E6ECDF" stroke="#9DB08C"/>
+<text x="744" y="197" class="lg" >Pátios (área livre)</text>
+<text x="718" y="218" class="lh" >Convenções gráficas</text>
+<g transform="translate(718,229)"><line x1="0" y1="0" x2="18" y2="0" stroke="#2B2F36" stroke-width="4"/></g>
+<text x="744" y="232" class="lg" >Parede</text>
+<g transform="translate(718,243)"><line x1="0" y1="0" x2="18" y2="0" stroke="#4C86C6" stroke-width="1.4"/></g>
+<text x="744" y="246" class="lg" >Janela</text>
+<g transform="translate(718,257)"><line x1="0" y1="0" x2="18" y2="0" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/></g>
+<text x="744" y="260" class="lg" >Janela alta (banhos, closet, serviço)</text>
+<g transform="translate(718,271)"><line x1="0" y1="0" x2="18" y2="0" stroke="#4C86C6" stroke-width="4" stroke-opacity=".3"/></g>
+<text x="744" y="274" class="lg" >Porta ou pano de vidro</text>
+<g transform="translate(718,285)"><line x1="0" y1="0" x2="18" y2="0" stroke="#8C6A2F" stroke-width="1.6"/></g>
+<text x="744" y="288" class="lg" >Porta: folha + arco de giro</text>
+<text x="718" y="310" class="lh" >Quadro de áreas</text>
+<text x="718" y="324" class="lg" >Suíte 1 e 2 (quarto 4,00 × 5,00)</text>
+<text x="1008" y="324" class="lg" text-anchor="end">20,00 m² cada</text>
+<text x="718" y="336.5" class="lg" >Suíte master (quarto 4,00 × 5,00)</text>
+<text x="1008" y="336.5" class="lg" text-anchor="end">20,00 m²</text>
+<text x="718" y="349" class="lg" >Banho + closet (suítes 1 e 2)</text>
+<text x="1008" y="349" class="lg" text-anchor="end">10,00 m² cada</text>
+<text x="718" y="361.5" class="lg" >Banho + closet master</text>
+<text x="1008" y="361.5" class="lg" text-anchor="end">18,60 m²</text>
+<text x="718" y="374" class="lg" >Escritório</text>
+<text x="1008" y="374" class="lg" text-anchor="end">15,96 m²</text>
+<text x="718" y="386.5" class="lg" >Banho social reversível</text>
+<text x="1008" y="386.5" class="lg" text-anchor="end">6,84 m²</text>
+<text x="718" y="399" class="lg" >Vestíbulo</text>
+<text x="1008" y="399" class="lg" text-anchor="end">13,20 m²</text>
+<text x="718" y="411.5" class="lg" >Sala de estar</text>
+<text x="1008" y="411.5" class="lg" text-anchor="end">30,00 m²</text>
+<text x="718" y="424" class="lg" >Sala de jantar</text>
+<text x="1008" y="424" class="lg" text-anchor="end">28,80 m²</text>
+<text x="718" y="436.5" class="lg" >Cozinha</text>
+<text x="1008" y="436.5" class="lg" text-anchor="end">14,40 m²</text>
+<text x="718" y="449" class="lg" >Área de serviço</text>
+<text x="1008" y="449" class="lg" text-anchor="end">9,36 m²</text>
+<text x="718" y="461.5" class="lg" >Circulações (íntima + galeria) e rouparia</text>
+<text x="1008" y="461.5" class="lg" text-anchor="end">27,12 m²</text>
+<text x="718" y="474" class="lg" style="font-weight:600">Área fechada (projeção)</text>
+<text x="1008" y="474" class="lg" text-anchor="end" style="font-weight:600">244,28 m²</text>
+<text x="718" y="486.5" class="lg" >Varanda gourmet</text>
+<text x="1008" y="486.5" class="lg" text-anchor="end">19,20 m²</text>
+<text x="718" y="499" class="lg" style="font-weight:600">Total construído</text>
+<text x="1008" y="499" class="lg" text-anchor="end" style="font-weight:600">263,48 m²</text>
+<text x="718" y="521.5" class="lh" >Terreno mínimo proposto</text>
+<text x="718" y="535.5" class="lg" >Casa: 18,80 × 19,00 m</text>
+<text x="718" y="548" class="lg" >Recuos (hipótese): frente 5,00 · laterais 1,50 · fundo 3,00 m</text>
+<text x="718" y="560.5" class="lg" style="font-weight:600">Mínimo: 21,80 × 27,00 m = 588,60 m²</text>
+<text x="718" y="573" class="lg" style="font-weight:600">Recomendado: 22,00 × 30,00 m = 660,00 m² (quintal de 6,00 m)</text>
+<text x="718" y="585.5" class="lg" >Ocupação no lote recomendado: 39,92 %</text>
+<g transform="translate(788,602)"><rect width="92.4" height="126" fill="#E6ECDF" stroke="#5F7350" stroke-width="1"/><path d="M6.720000000000001,21 h26.040000000000003 v46.2 h27.72 v-46.2 h25.200000000000003 v79.8 h-25.200000000000003 v-13.440000000000001 h-27.72 v13.440000000000001 h-26.040000000000003 Z" fill="#D9D3C4" stroke="#2B2F36" stroke-width="1"/><rect x="0" y="0" width="92.4" height="21" fill="none" stroke="#5F7350" stroke-dasharray="2 2"/><text x="46.2" y="-4" class="cota">rua · 22,00</text><text transform="translate(-4,63) rotate(-90)" class="cota">30,00</text><text x="46.2" y="12.18" class="cota">recuo 5,00</text><text x="46.2" y="115.92000000000002" class="cota">quintal 6,00</text></g>
+</svg>
