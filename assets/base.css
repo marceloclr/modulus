@@ -312,3 +312,4 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .legenda-zonas{display:flex;flex-wrap:wrap;gap:8px 14px;margin:-4px 0 14px;font-size:13px;color:var(--ink-2)}
 .legenda-zonas span{display:inline-flex;align-items:center;gap:6px}
 .legenda-zonas i{width:14px;height:14px;border-radius:4px;border:1.5px solid;display:inline-block}
+[hidden]{display:none!important}

@@ -69,8 +69,23 @@
           <label><input type="radio" name="tipo" value="terrea">Térrea</label>
           <label><input type="radio" name="tipo" value="sobrado">Sobrado</label>
         </div>
-        <label class="fld">Formato<select name="formato"><option value="auto">Automático (melhores)</option><option value="bloco">Bloco único</option><option value="L">Em L</option><option value="U">Em U (só térrea)</option><option value="H">Em H (só térrea)</option></select></label>
+        <label class="fld">Formato<select name="formato"><option value="auto">Automático (melhores)</option><option value="bloco">Bloco único</option><option value="L">Em L</option><option value="U">Em U</option><option value="H">Em H (só térrea)</option></select></label>
         <label class="fld">Pé-direito piso a piso (m)<input type="number" name="peDireito" min="2.6" max="4.5" step="0.05"></label>
+        <div id="supOps">
+          <label class="fld">Pavimento superior<select name="supModo"><option value="corresp">Correspondente (toda a projeção)</option><option value="parcial">Parcial (escolher seções)</option></select></label>
+          <div id="secOps">
+            <p class="fld wide"><small id="secNota">Seções com dois pavimentos (a parte com a escada sempre sobe):</small></p>
+            <label class="chk sec-b sec-L sec-U"><input type="checkbox" name="secFrente"><span class="sec-txt" data-b="Frente (salas)" data-L="Frente (salas e serviço)" data-U="Frente (salas e cozinha)">Frente</span></label>
+            <label class="chk sec-b sec-L"><input type="checkbox" name="secFundo"><span class="sec-txt" data-b="Fundo" data-L="Ala do L">Fundo</span></label>
+            <label class="chk sec-U"><input type="checkbox" name="secAlaE">Ala esquerda (quartos)</label>
+            <label class="chk sec-U"><input type="checkbox" name="secAlaD">Ala direita (apoio)</label>
+          </div>
+          <p class="fld wide"><small>Levar para o superior:</small></p>
+          <label class="fld">Quartos no superior<input type="number" name="supQuartos" min="0" max="8" step="1"><small>Sobem primeiro a master e as suítes.</small></label>
+          <label class="chk"><input type="checkbox" name="supEscritorio">Escritório</label>
+          <label class="chk"><input type="checkbox" name="supTv">Sala de TV / sala íntima</label>
+          <label class="chk"><input type="checkbox" name="supServico">Lavanderia</label>
+        </div>
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
@@ -184,7 +199,7 @@
             <li><strong>Em L:</strong> social e apoio na frente; ala íntima numa tira lateral, liberando quintal.</li>
             <li><strong>Em U:</strong> salas e cozinha na frente; ala íntima e ala de apoio com galeria em volta de um pátio aberto para o fundo (térrea).</li>
             <li><strong>Em H:</strong> ala íntima e ala social paralelas, ligadas por cozinha, serviço e galeria (lotes largos, térrea).</li>
-            <li><strong>Sobrado:</strong> social e serviço no térreo, quartos no superior; a escada fica na mesma posição em todos os pavimentos.</li>
+            <li><strong>Sobrado:</strong> em bloco único, L ou U; o superior pode ocupar toda a projeção ou só as seções escolhidas, com os cômodos que você levar para cima (master e suítes sobem primeiro).</li>
           </ul>
         </div>
         <div class="card tint" style="--c:var(--rust)">
@@ -234,6 +249,15 @@ function preencher(d){
 }
 function sincroniza(){
   document.getElementById('subOps').hidden = !form.elements.subsolo.checked;
+  const sob = (form.querySelector('input[name=tipo]:checked')||{}).value === 'sobrado';
+  const fmt = form.elements.formato.value, chave = fmt==='U' ? 'U' : fmt==='L' ? 'L' : 'b';
+  document.getElementById('supOps').hidden = !sob;
+  document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';
+  form.querySelectorAll('#secOps .chk').forEach(el => { el.hidden = fmt!=='auto' && !el.classList.contains('sec-' + chave); });
+  form.querySelectorAll('#secOps .sec-txt').forEach(el => { el.textContent = el.dataset[chave.toLowerCase()] || el.dataset.b; });
+  form.elements.formato.querySelector('option[value=H]').disabled = sob;
+  if(sob && fmt==='H') form.elements.formato.value = 'auto';
+  const nq = +form.elements.quartos.value || 0; form.elements.supQuartos.max = nq; if(+form.elements.supQuartos.value > nq || form.elements.supQuartos.value==='' || +form.elements.supQuartos.value < 0) form.elements.supQuartos.value = nq;
   const ed = form.elements.edicula.value;
   document.getElementById('edOps').hidden = ed==='nenhuma';
   document.getElementById('edNota').hidden = ed!=='2';
