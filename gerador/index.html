@@ -61,6 +61,7 @@
         <label class="fld">Recuo frontal (m)<input type="number" name="recFrente" min="0" max="15" step="0.25"></label>
         <label class="fld">Recuos laterais (m)<input type="number" name="recLat" min="0" max="5" step="0.25"></label>
         <label class="fld">Recuo de fundo (m)<input type="number" name="recFundo" min="0" max="15" step="0.25"></label>
+        <label class="fld">Permeabilidade mínima (%)<input type="number" name="permeab" min="0" max="80" step="5"></label>
         <label class="fld">Taxa de ocupação máx. (%)<input type="number" name="taxa" min="20" max="100" step="5"><small>Recuos e taxa variam por município: confira a lei de uso do solo.</small></label>
       </fieldset>
 
@@ -98,6 +99,7 @@
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
           <label class="fld">Nível do subsolo<select name="subNivel"><option value="meio">Semienterrado (1,40 m)</option><option value="inteiro">Enterrado</option></select></label>
+          <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><small>Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</small></label>
           <label class="chk"><input type="checkbox" name="subGaragem">Garagem no subsolo</label>
           <label class="chk"><input type="checkbox" name="subDeposito">Depósito</label>
           <label class="chk"><input type="checkbox" name="subLazer">Salão de lazer</label>

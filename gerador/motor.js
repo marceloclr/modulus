@@ -63,6 +63,7 @@ const PADRAO = {
   supModo:'corresp', secFrente:true, secMeio:true, secFundo:true, secAlaE:true, secAlaD:false,
   supQuartos:-1, supEscritorio:false, supTv:false, supServico:false,
   rooftop:false, rtArea:40, rtDeck:true, rtGourmet:true, rtBanho:true, rtSpa:false, rtTecnica:true,
+  subRecuos:'nenhum', permeab:20,
   subsolo:false, subNivel:'meio', subGaragem:true, subDeposito:true, subLazer:false, inclinacao:20,
 };
 
@@ -93,6 +94,8 @@ function normaliza(p){
   if(!['coberta','descoberta','nenhuma'].includes(q.garagem)) q.garagem = 'coberta';
   if(q.vagas===0) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
+  if(!['nenhum','lateraisFundo','todos'].includes(q.subRecuos)) q.subRecuos = 'nenhum';
+  q.permeab = clamp(isNaN(+q.permeab) ? 20 : +q.permeab, 0, 80);
   if(!q.subsolo){ q.subGaragem = false; }
   return q;
 }
@@ -690,7 +693,7 @@ function comAnexos(v, q){
   const quer = q.piscina || q.gourmetDest || q.edicula!=='nenhuma';
   if(!quer) return v;
   const sub = v.pav.find(p => p.nome==='Subsolo');
-  const xq0 = q.recLat, xq1 = q.frente - q.recLat, yq0 = Math.max(v.y0 + v.D + q.afastAnexo, sub ? v.y0 + sub.dim.D + 2.5 : 0);
+  const xq0 = q.recLat, xq1 = q.frente - q.recLat, yq0 = Math.max(v.y0 + v.D + q.afastAnexo, sub ? v.y0 + sub.dim.y0 + sub.dim.D + 2.5 : 0);
   const yq1 = q.fundo - (q.anexoFundo ? 0 : q.recFundo);
   const ed = q.edicula!=='nenhuma' ? edicula(q) : null;
   if(ed) v.pav.push(...ed.pav);
@@ -748,11 +751,18 @@ function copiaNucleo(cel, flags){
 }
 
 /* ---------- Subsolo: manobra contínua, núcleo na lateral, rampa do lado oposto, jardim de inverno no fundo ---------- */
-function subsolo(q, W, D, cel, av){
+function subsolo(q, W0, D0, cel0, av){
+  // quanto o subsolo avança sobre os recuos, conforme a opção escolhida
+  const B = q.frente - 2*q.recLat, lat = q.subRecuos!=='nenhum', fundoLivre = q.subRecuos!=='nenhum';
+  const xL = lat ? r2(q.recLat + (B - W0)/2) : 0, xR = lat ? r2(q.frente - (q.recLat + (B - W0)/2) - W0) : 0;
+  const yF = q.subRecuos==='todos' ? q.recFrente : 0;
+  const W = r2(W0 + xL + xR), D = r2(D0 + yF);
+  const cel = cel0.map(c => Object.assign({}, c, {x0:c.x0+xL, x1:c.x1+xL, y0:c.y0+yF, y1:c.y1+yF}));
+  if(lat) av.push(q.subRecuos==='todos' ? 'Subsolo ocupa todos os recuos: vai da frente ao fundo do lote e de divisa a divisa.' : 'Subsolo ocupa os recuos laterais e de fundo (de divisa a divisa).');
   const salas = [];
   const h = q.subNivel==='meio' ? 1.40 : q.peDireito + 0.20;
   const Lr = r2(h / (q.inclinacao/100));
-  const Lin = q.subGaragem ? Math.max(0, r2(Lr - q.recFrente)) : 0;
+  const Lin = q.subGaragem ? Math.max(0, r2(Lr - (q.recFrente - yF))) : 0;
   if(q.subNivel==='meio') av.push('Subsolo semienterrado: o térreo fica 1,40 m acima da rua, com escada ou rampa de acesso na frente.');
   const nx0 = Math.min(...cel.map(c => c.x0)), nx1 = Math.max(...cel.map(c => c.x1)), ny0 = Math.min(...cel.map(c => c.y0)), ny1 = Math.max(...cel.map(c => c.y1));
   const nucleoEsq = nx0 < W/2;
@@ -768,13 +778,13 @@ function subsolo(q, W, D, cel, av){
     if(ny0 - MANOBRA >= Lin - 0.001) cands.push(r2(ny0 - MANOBRA));      // núcleo no começo da fileira de vagas
     cands.push(r2(Math.max(Lin, ny1)));                                     // manobra logo depois do núcleo
     let melhor = null;
-    const limite = q.fundo - q.recFrente - 2.0;                       // o jardim de inverno ainda precisa caber no lote
+    const limite = yF + q.fundo - q.recFrente - (fundoLivre ? 2.0 : Math.max(q.recFundo, 2.0));   // fundo do lote menos jardim (ou recuo de fundo)
     for(const c of cands){
       const n = Math.min(q.vagas, (c >= VAGA_P - 0.01 ? cap(c - VAGA_P, c) : 0) + cap(c + MANOBRA, c + MANOBRA + VAGA_P));
       const prof = Math.max(D, c + MANOBRA + VAGA_P), cabe = prof <= limite + 0.01;
       if(!melhor || (cabe && !melhor.cabe) || (cabe===melhor.cabe && (n > melhor.n || (n === melhor.n && prof < melhor.prof - 0.01)))) melhor = {c, n, prof, cabe};
     }
-    if(!melhor.cabe) av.push(`Subsolo: a garagem precisa de ${f2(melhor.prof + 2.0)} m de profundidade a partir do recuo frontal, mais do que o lote oferece.`);
+    if(!melhor.cabe) av.push(`Subsolo: a garagem precisa de ${f2(melhor.prof - yF + 2.0)} m a partir do recuo frontal, mais do que o lote permite com os recuos escolhidos.`);
     yl = melhor.c;
   }
   const livres = [];
@@ -831,7 +841,7 @@ function subsolo(q, W, D, cel, av){
   // pátios ingleses no enterrado (laterais, se o recuo permitir)
   const pocos = [];
   if(q.subNivel==='inteiro'){
-    const pw = Math.min(1.5, q.recLat);
+    const pw = lat ? 0 : Math.min(1.5, q.recLat);
     if(pw >= 1.2){ const ya = 1.0; pocos.push({x0:-pw, y0:ya, x1:0, y1:Dsub}, {x0:W, y0:ya, x1:W+pw, y1:Dsub});
       av.push(`Subsolo enterrado: pátios ingleses de ${f2(pw)} m nas laterais e jardim de inverno no fundo, para luz e ventilação cruzada.`); }
     else av.push('Subsolo enterrado: jardim de inverno no fundo; a boca da rampa faz a entrada de ar na frente.');
@@ -874,8 +884,11 @@ function subsolo(q, W, D, cel, av){
   const ys = [0, ...linhasY, Dsub].sort((a,b)=>a-b);
   let maior = 0; for(let i=0;i<ys.length-1;i++) maior = Math.max(maior, ys[i+1]-ys[i]);
   if(maior > vao + 0.01) av.push(`Subsolo: vão de ${f2(maior)} m entre linhas de pilares; prever laje protendida ou viga de transição para manter a manobra livre.`);
-  return {nome:'Subsolo', salas, dim:{W, D:Dsub}, pocos, pilares:pil, manobra: yl===null ? null : {y0:yl, y1:yl+MANOBRA},
-    nucleo:{x0:nx0, y0:ny0, x1:nx1, y1:ny1}, rampa:{desnivel:h, L:Lr, Lin, Lout:r2(Lr-Lin), largura:RAMPA_L, inclinacao:q.inclinacao, x0:rx0}, vagas:vagasOk};
+  // volta para as coordenadas da casa
+  const mv = o => { o.x0 = r2(o.x0 - xL); o.x1 = r2(o.x1 - xL); o.y0 = r2(o.y0 - yF); o.y1 = r2(o.y1 - yF); return o; };
+  salas.forEach(mv); pocos.forEach(mv); for(const pl of pil){ pl.x = r2(pl.x - xL); pl.y = r2(pl.y - yF); }
+  return {nome:'Subsolo', salas, dim:{x0:-xL, y0:-yF, W, D:Dsub}, recuos:q.subRecuos, pocos, pilares:pil, manobra: yl===null ? null : {y0:r2(yl-yF), y1:r2(yl+MANOBRA-yF)},
+    nucleo:mv({x0:nx0, y0:ny0, x1:nx1, y1:ny1}), rampa:{desnivel:h, L:Lr, Lin, Lout:r2(Lr-Lin), largura:RAMPA_L, inclinacao:q.inclinacao, x0:r2(rx0 - xL)}, vagas:vagasOk};
 }
 
 /* ---------- Rooftop: cobertura usável sobre o último pavimento, com acesso pela escada empilhada ---------- */
@@ -986,14 +999,14 @@ function trechosExternos(s, salas, filtro){
 /* Subsolo: aberturas altas (semienterrado) ou voltadas para pátios ingleses (enterrado), com ventilação cruzada obrigatória. */
 function janelasSubsolo(pav, q, S, av){
   const janelas = [];
-  const W = pav.dim.W, D = pav.dim.D, semi = q.subNivel==='meio', pocos = pav.pocos || [];
+  const X0 = pav.dim.x0 || 0, Y0 = pav.dim.y0 || 0, W = pav.dim.W, D = pav.dim.D, semi = q.subNivel==='meio', pocos = pav.pocos || [];
   const E = 0.01;
-  const ladoDe = e => e.o==='v' ? (Math.abs(e.c)<E ? 'x0' : Math.abs(e.c-W)<E ? 'x1' : null) : (Math.abs(e.c)<E ? 'y0' : Math.abs(e.c-D)<E ? 'y1' : null);
+  const ladoDe = e => e.o==='v' ? (Math.abs(e.c-X0)<E ? 'x0' : Math.abs(e.c-X0-W)<E ? 'x1' : null) : (Math.abs(e.c-Y0)<E ? 'y0' : Math.abs(e.c-Y0-D)<E ? 'y1' : null);
   // trecho de parede que dá para um pátio inglês (enterrado) ou para fora (semienterrado)
   const temJardim = S.some(o => o.tipo==='jardim');
   const trecho = (e, lado) => {
     if(semi || (lado==='y1' && temJardim)) return [e.t0, e.t1];
-    const p = pocos.find(p => lado==='x0' ? Math.abs(p.x1)<E : lado==='x1' ? Math.abs(p.x0-W)<E : lado==='y0' ? Math.abs(p.y1)<E : Math.abs(p.y0-D)<E);
+    const p = pocos.find(p => lado==='x0' ? Math.abs(p.x1-X0)<E : lado==='x1' ? Math.abs(p.x0-X0-W)<E : lado==='y0' ? Math.abs(p.y1-Y0)<E : Math.abs(p.y0-Y0-D)<E);
     if(!p) return null;
     const a = e.o==='v' ? Math.max(e.t0, p.y0) : Math.max(e.t0, p.x0), b = e.o==='v' ? Math.min(e.t1, p.y1) : Math.min(e.t1, p.x1);
     return b - a > 0.8 ? [a, b] : null;
@@ -1166,7 +1179,18 @@ function avalia(v, q){
   const proj = projecao(v) + (v.anexos||[]).filter(a => a.tipo!=='piscina').reduce((t,a)=>t+(a.x1-a.x0)*(a.y1-a.y0),0);
   if(v.anexoFalta) pen += 25*v.anexoFalta;
   const subA = v.pav.find(p => p.nome==='Subsolo');
-  if(subA){ const fimSub = q.recFrente + subA.dim.D + 2.0; if(fimSub > q.fundo + 0.01){ pen += 25*(fimSub - q.fundo); av.push(`O subsolo com o jardim de inverno vai até ${f2(fimSub)} m; o lote tem ${f2(q.fundo)} m.`); } }
+  if(subA && q.subGaragem && subA.vagas < q.vagas) pen += 10*(q.vagas - subA.vagas);
+  if(q.permeab > 0){
+    // impermeável: projeção do térreo, anexos (inclusive piscina), subsolo fora da projeção e rampa no recuo
+    let imp = projecao(v) + (v.anexos||[]).reduce((t,a)=>t+(a.x1-a.x0)*(a.y1-a.y0),0);
+    if(subA){ const d = subA.dim, sx0 = d.x0, sx1 = d.x0 + d.W, sy0 = d.y0, sy1 = d.y0 + d.D;
+      const ov = Math.max(0, Math.min(sx1, v.W) - Math.max(sx0, 0)) * Math.max(0, Math.min(sy1, v.D) - Math.max(sy0, 0));
+      imp += d.W*d.D - ov; if(subA.rampa && q.subGaragem) imp += subA.rampa.Lout * subA.rampa.largura; }
+    const lote = q.frente*q.fundo, perm = Math.max(0, lote - imp), pct = 100*perm/lote;
+    v.permeavel = r2(pct);
+    if(pct < q.permeab - 0.01){ pen += 2*(q.permeab - pct); av.push(`Área permeável de ${f2(pct)} % do lote, abaixo do mínimo de ${f2(q.permeab)} % (sem contar pisos externos).`); }
+  }
+  if(subA){ const fimSub = q.recFrente + subA.dim.y0 + subA.dim.D + 2.0; if(fimSub > q.fundo + 0.01){ pen += 25*(fimSub - q.fundo); av.push(`O subsolo com o jardim de inverno vai até ${f2(fimSub)} m; o lote tem ${f2(q.fundo)} m.`); } }
   if(v.anexoLarg) pen += 25*v.anexoLarg;
   const taxa = 100*proj/(q.frente*q.fundo);
   if(taxa > q.taxa + 0.01){ pen += 2*(taxa-q.taxa); av.push(`Ocupação de ${f2(taxa)} %, acima do máximo de ${f2(q.taxa)} %.`); }

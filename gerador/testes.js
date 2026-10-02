@@ -20,6 +20,8 @@ const CASOS = {
   'U com subsolo, 22 × 34': {frente:22, fundo:34, formato:'U', quartos:3, suites:3, subsolo:true, vagas:3},
   'H com subsolo, 22 × 34': {frente:22, fundo:34, formato:'H', quartos:3, suites:3, subsolo:true, vagas:3},
   'L com subsolo, 16 × 34': {frente:16, fundo:34, formato:'L', quartos:3, suites:2, subsolo:true, vagas:2},
+  'Subsolo nos recuos laterais e de fundo, 10 × 25': {frente:10, fundo:25, tipo:'sobrado', quartos:4, suites:2, subsolo:true, vagas:2, subRecuos:'lateraisFundo'},
+  'Subsolo em todos os recuos, 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, subsolo:true, vagas:3, subRecuos:'todos', subLazer:true},
   'Programa grande demais, 8 × 20': {frente:8, fundo:20, quartos:6, suites:6, tv:true, escritorio:true, vagas:3},
 };
 const E = 0.011;
@@ -33,11 +35,11 @@ function rodar(){
       let esc = null;
       for(const p of v.pav){
         const S = p.salas;
-        const Wp = p.W || v.W;
+        const Wp = p.W || v.W, Xp0 = (p.dim && p.dim.x0) || 0, Xp1 = p.dim ? Xp0 + p.dim.W : Wp;
         for(let i=0;i<S.length;i++){
           const s = S[i];
           if(s.x1-s.x0 < 0.3 || s.y1-s.y0 < 0.3) erros.push(`${v.nome}/${p.nome}: ${s.nome} degenerado`);
-          if(s.x0 < -E || s.x1 > Wp+E) erros.push(`${v.nome}/${p.nome}: ${s.nome} fora da largura`);
+          if(s.x0 < Xp0-E || s.x1 > Xp1+E) erros.push(`${v.nome}/${p.nome}: ${s.nome} fora da largura`);
           for(let j=i+1;j<S.length;j++) if(sobrepoe(s, S[j])) erros.push(`${v.nome}/${p.nome}: ${s.nome} sobrepõe ${S[j].nome}`);
         }
         // cada par de andares vizinhos precisa de um lance de escada em comum (mesma posição nos dois)
@@ -46,9 +48,9 @@ function rodar(){
           esc = es; }
         if(p.nome==='Subsolo'){
           const m = p.manobra;
-          if(m){ for(const pl of (p.pilares||[])) if(pl.y > m.y0+0.2 && pl.y < m.y1-0.2 && pl.x > 0.2 && pl.x < v.W-0.2) erros.push(`${v.nome}: pilar dentro da manobra`);
+          if(m){ for(const pl of (p.pilares||[])) if(pl.y > m.y0+0.2 && pl.y < m.y1-0.2 && pl.x > Xp0+0.2 && pl.x < Xp1-0.2) erros.push(`${v.nome}: pilar dentro da manobra`);
             for(const s of S) if(!['manobra','rampa','jardim'].includes(s.tipo) && s.y0 < m.y1-E && s.y1 > m.y0+E) erros.push(`${v.nome}: ${s.nome} invade a manobra`); }
-          const n = p.nucleo; if(n && !(n.x0 < E || n.x1 > v.W-E || n.y1 > p.dim.D-E)) erros.push(`${v.nome}: núcleo do subsolo no meio`);
+          const n = p.nucleo; if(n && !(n.x0 < E || n.x1 > v.W-E || n.x0 < Xp0+E || n.x1 > Xp1-E || n.y1 > p.dim.y0+p.dim.D-E)) erros.push(`${v.nome}: núcleo do subsolo no meio`);
         }
       }
       if(c.tipo==='sobrado' && v.pav.length < 2) erros.push(`${v.nome}: sobrado sem superior`);
@@ -74,6 +76,7 @@ function rodar(){
         if(els.some(e => !e)) erros.push(`${v.nome}: falta elevador em algum pavimento`);
         else if(els.some(e => Math.abs(e.x0-els[0].x0)>E || Math.abs(e.y0-els[0].y0)>E)) erros.push(`${v.nome}: elevador fora de prumo`); }
       if(c.formato && c.formato!=='auto' && c.subsolo && !v.pav.some(p => p.nome==='Subsolo')) erros.push(`${v.nome}: formato sem subsolo`);
+      if(c.subRecuos && c.subRecuos!=='nenhum'){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(!sb || sb.dim.W < c.frente - 0.01) erros.push(`${v.nome}: subsolo não ocupa os recuos laterais`); if(sb && sb.vagas < c.vagas) erros.push(`${v.nome}: subsolo com ${sb.vagas} de ${c.vagas} vagas`); }
       if(c.piscina && !(v.anexos||[]).some(a => a.tipo==='piscina')) erros.push(`${v.nome}: sem piscina`);
       for(const a of (v.anexos||[])) if(a.y0 < v.y0 + v.D - E) erros.push(`${v.nome}: anexo ${a.tipo} sobre a casa`);
       const an = (v.anexos||[]); for(let i=0;i<an.length;i++) for(let j=i+1;j<an.length;j++) if(sobrepoe(an[i], an[j])) erros.push(`${v.nome}: ${an[i].tipo} sobrepõe ${an[j].tipo}`);

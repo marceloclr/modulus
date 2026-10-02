@@ -22,6 +22,7 @@ function espelha(v){
     if(p.pilares) for(const pl of p.pilares) pl.x = fx(pl.x);
     if(p.nucleo){ const a = fx(p.nucleo.x1), b = fx(p.nucleo.x0); p.nucleo.x0 = a; p.nucleo.x1 = b; }
     if(p.spa) p.spa.x = fx(p.spa.x);
+    if(p.dim && p.dim.x0 !== undefined) p.dim.x0 = +(W - p.dim.x0 - p.dim.W).toFixed(2);
     if(p.rampa && p.rampa.x0 !== undefined) p.rampa.x0 = +(W - p.rampa.x0 - p.rampa.largura).toFixed(2);
     for(const s of p.salas){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
     for(const k of ['portas','vaos','janelas']) for(const e of (p[k]||[])){
@@ -42,11 +43,11 @@ function planta(v, idx, op){
   const p = v.pav[idx];
   const S = p.salas, T = Motor.TIPOS;
   const pocos = p.pocos || [];
-  const mx0 = Math.min(0, ...pocos.map(q => q.x0)), my0 = Math.min(0, ...pocos.map(q => q.y0));
+  const mx0 = Math.min(0, ...pocos.map(q => q.x0), ...S.map(q => q.x0)), my0 = Math.min(0, ...pocos.map(q => q.y0), ...S.map(q => q.y0));
   const OX = 70 - mx0*K + (mx0<0 ? 12 : 0), OY = 96 - my0*K;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
   const W = p.W || v.W, D = p.anexo ? p.D : Math.max(v.D, ...S.map(s => s.y1));
-  const larg = OX + Math.max(W, ...pocos.map(q => q.x1))*K + 40, alt = OY + Math.max(D, ...pocos.map(q => q.y1))*K + 60;
+  const larg = OX + Math.max(W, ...pocos.map(q => q.x1), ...S.map(q => q.x1))*K + 40, alt = OY + Math.max(D, ...pocos.map(q => q.y1), ...S.map(q => q.y1))*K + 60;
   const o = [];
   const line = (x0,y0,x1,y1,st,w,ex) => o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="${st}" stroke-width="${w}"${ex?' '+ex:''}/>`);
   const seg = (e, st, w, ex) => e.o==='h' ? line(e.t0, e.c, e.t1, e.c, st, w, ex) : line(e.c, e.t0, e.c, e.t1, st, w, ex);
@@ -176,8 +177,8 @@ function planta(v, idx, op){
     else { line(pos, a0, pos, a1, '#55595F', .7); for(const a of [a0,a1]) line(pos-.12, a, pos+.12, a, '#55595F', .7);
       o.push(`<text transform="translate(${X(pos)-3},${((Y(a0)+Y(a1))/2).toFixed(1)}) rotate(-90)" class="cota">${t}</text>`); }
   };
-  cota(0, W, -0.9, f2(W));
-  cota(0, D, -1.4, f2(D), true);
+  if(p.dim && p.dim.x0 !== undefined){ const d = p.dim; cota(d.x0, d.x0 + d.W, Math.min(-0.9, d.y0 - 0.9), f2(d.W)); } else cota(0, W, -0.9, f2(W));
+  if(p.dim && p.dim.y0 !== undefined){ const d = p.dim; cota(d.y0, d.y0 + d.D, Math.min(-1.4, d.x0 - 1.4), f2(d.D), true); } else cota(0, D, -1.4, f2(D), true);
   const ys = (v.cotasY||[]).filter(y => y<=D+0.01);
   if(p.nome==='Térreo') for(let i=0;i<ys.length-1;i++) if(ys[i+1]-ys[i] > 0.6) cota(ys[i], ys[i+1], -0.75, f2(ys[i+1]-ys[i]), true);
 
@@ -219,9 +220,11 @@ function lote(v, q, res){
   if(sub) for(const pc of (sub.pocos||[])){ const ax0 = v.espelhada ? v.x0 + v.W - pc.x1 : v.x0 + pc.x0;
     o.push(`<rect x="${X(ax0)}" y="${Y(v.y0+pc.y0)}" width="${((pc.x1-pc.x0)*k).toFixed(1)}" height="${((pc.y1-pc.y0)*k).toFixed(1)}" fill="#D6E4CC" stroke="#5F7350" stroke-dasharray="2 2"><title>Pátio inglês do subsolo</title></rect>`); }
   if(sub){ const jd = sub.salas.find(s => s.tipo==='jardim'); if(jd) o.push(`<rect x="${X(v.x0+jd.x0)}" y="${Y(v.y0+jd.y0)}" width="${((jd.x1-jd.x0)*k).toFixed(1)}" height="${((jd.y1-jd.y0)*k).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}"><title>Jardim de inverno do subsolo</title></rect>`); }
+  if(sub && sub.dim){ const d = sub.dim;
+    o.push(`<rect x="${X(v.x0+(d.x0||0))}" y="${Y(v.y0+(d.y0||0))}" width="${(d.W*k).toFixed(1)}" height="${(d.D*k).toFixed(1)}" fill="none" stroke="#44403C" stroke-width="1" stroke-dasharray="6 3"><title>Subsolo ${f2(d.W)} × ${f2(d.D)} m</title></rect>`); }
   if(sub && sub.rampa && q.subGaragem){
     const rx = v.x0 + (sub.rampa.x0 !== undefined ? sub.rampa.x0 : 0);
-    o.push(`<rect x="${X(rx)}" y="${Y(q.recFrente - sub.rampa.Lout)}" width="${3*k}" height="${(sub.rampa.Lout*k).toFixed(1)}" fill="#E9E6E1" stroke="#A39C90"><title>Rampa externa ${f2(sub.rampa.Lout)} m</title></rect>`);
+    o.push(`<rect x="${X(rx)}" y="${Y(q.recFrente + ((sub.dim && sub.dim.y0) || 0) - sub.rampa.Lout)}" width="${3*k}" height="${(sub.rampa.Lout*k).toFixed(1)}" fill="#E9E6E1" stroke="#A39C90"><title>Rampa externa ${f2(sub.rampa.Lout)} m</title></rect>`);
   }
   for(const a of (v.anexos||[])){
     if(a.tipo==='piscina'){
