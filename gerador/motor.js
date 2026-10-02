@@ -55,12 +55,19 @@ const PADRAO = {
   estar:true, jantar:true, tv:false, escritorio:false,
   cozinha:'aberta', servico:true, despensa:false,
   vagas:2, garagem:'coberta', varanda:true, gourmet:false,
+  gourmetDest:false, edicula:'nenhuma', edGourmet:true, edBanho:true, edDeposito:true, edQuarto:true,
+  piscina:false, pisForma:'retangular', pisC:8, pisL:4, pisP:1.4, pisPrainha:false, afastAnexo:3, anexoFundo:true,
   subsolo:false, subNivel:'meio', subGaragem:true, subDeposito:true, subLazer:false, inclinacao:20,
 };
 
 function normaliza(p){
   const q = Object.assign({}, PADRAO, p||{});
-  for(const k of ['frente','fundo','recFrente','recLat','recFundo','taxa','peDireito','quartos','suites','banhosSociais','vagas','inclinacao']) q[k] = +q[k] || 0;
+  for(const k of ['frente','fundo','recFrente','recLat','recFundo','taxa','peDireito','quartos','suites','banhosSociais','vagas','inclinacao','pisC','pisL','pisP','afastAnexo']) q[k] = +q[k] || 0;
+  for(const k of ['gourmetDest','edGourmet','edBanho','edDeposito','edQuarto','piscina','pisPrainha','anexoFundo']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
+  if(!['nenhuma','1','2'].includes(String(q.edicula))) q.edicula = 'nenhuma'; q.edicula = String(q.edicula);
+  if(q.edicula==='2'){ q.edQuarto = true; q.edGourmet = true; }
+  if(!['retangular','raia','L','oval'].includes(q.pisForma)) q.pisForma = 'retangular';
+  q.pisC = clamp(q.pisC || 8, 2, 25); q.pisL = clamp(q.pisL || 4, 1.5, 12); q.pisP = clamp(q.pisP || 1.4, 0.4, 3); q.afastAnexo = clamp(q.afastAnexo, 1.5, 10);
   for(const k of ['master','lavabo','estar','jantar','tv','escritorio','servico','despensa','varanda','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   q.quartos = clamp(Math.round(q.quartos), 1, 8);
   q.suites = clamp(Math.round(q.suites), 0, q.quartos);
@@ -443,6 +450,116 @@ function emU(q, P, W){
     cotasY:[0, Dv, yb, D].filter((v,i,a)=>a.indexOf(v)===i), patios:[{x0:wi, y0:yb, x1:La>0?xg:xa, y1:D}]};
 }
 
+/* ---------- Anexos no quintal: edícula, varanda gourmet destacada e piscina ---------- */
+function edicula(q){
+  const dois = q.edicula==='2';
+  const esc = dois ? escada(q) : null;
+  const De = r2(dois ? Math.max(4.5, esc.L + 0.4) : 4.0);
+  const wDep = q.edDeposito ? 1.8 : 0, wBan = q.edBanho ? 1.6 : 0, wGou = q.edGourmet ? Math.max(3.6, r2(16/De)) : 0;
+  const wQua = (!dois && q.edQuarto) ? 3.2 : 0, wEsc = dois ? COL : 0;
+  const ter = [], sup = [], pT = [], pS = [], jT = [], jS = [], vT = [];
+  let x = 0;
+  const col = {};
+  const ordem = dois ? ['dep','ban','gou','esc'] : ['dep','gou','ban','qua'];
+  const larg = {dep:wDep, ban:wBan, gou:wGou, qua:wQua, esc:wEsc};
+  for(const k of ordem){ if(larg[k] > 0){ col[k] = [x, x+larg[k]]; x += larg[k]; } }
+  const W = r2(x);
+  if(W <= 0) return null;
+  const S = (t, k, extra) => sala(t, col[k][0], 0, col[k][1], De, extra);
+  if(col.dep) ter.push(S('deposito', 'dep', {nome:'Depósito / lavanderia'}));
+  if(col.gou) ter.push(S('gourmet', 'gou', {nome:'Gourmet'}));
+  if(col.ban) ter.push(S('banhoSocial', 'ban', {nome:'Banho'}));
+  if(col.qua) ter.push(S('quarto', 'qua', {nome:'Quarto / estúdio'}));
+  let escRect = null;
+  if(dois){
+    const e0 = col.esc[0], ey0 = r2((De - esc.L)/2);
+    escRect = {x0:r2(e0+C), y0:ey0, x1:r2(e0+COL), y1:r2(ey0+esc.L)};
+    ter.push(sala('hall', e0, 0, e0+C, De, {nome:'Passagem'}));
+    ter.push(sala('escada', escRect.x0, escRect.y0, escRect.x1, escRect.y1, {sobe:true, esc}));
+    if(escRect.y0 > 0.3) ter.push(sala('rouparia', e0+C, 0, e0+COL, escRect.y0, {nome:'Armário'}));
+    if(De - escRect.y1 > 0.3) ter.push(sala('rouparia', e0+C, escRect.y1, e0+COL, De, {nome:'Armário'}));
+    // superior: quarto sobre a gourmet, banho exatamente sobre o banho de baixo, terraço sobre o depósito
+    if(col.dep) sup.push(sala('terraco', col.dep[0], 0, col.dep[1], De, {nome:'Terraço'}));
+    if(col.ban) sup.push(sala('banhoSocial', col.ban[0], 0, col.ban[1], De, {nome:'Banho'}));
+    sup.push(sala('quarto', col.gou[0], 0, col.gou[1], De, {nome:'Quarto de hóspedes'}));
+    sup.push(sala('hall', e0, 0, e0+C, De));
+    sup.push(sala('escada', escRect.x0, escRect.y0, escRect.x1, escRect.y1, {desce:true, esc}));
+    if(escRect.y0 > 0.3) sup.push(sala('rouparia', e0+C, 0, e0+COL, escRect.y0, {nome:'Armário'}));
+    if(De - escRect.y1 > 0.3) sup.push(sala('rouparia', e0+C, escRect.y1, e0+COL, De, {nome:'Armário'}));
+  }
+  // portas, vãos e janelas explícitos (frente da edícula em y = 0, voltada para a casa)
+  const find = (L, t) => L.find(o => o.tipo===t);
+  const ext = (sl, t0, w) => ({o:'h', c:0, t0:r2(t0), t1:r2(t0+w), sala:sl.id, dentro:1});
+  const lig = (L, a, b, w, P) => { const sa = find(L,a), sb = find(L,b); if(sa && sb){ const sh = compartilhado(sa, sb); if(sh) P.push(porta(sa, sb, sh, w)); } };
+  const tDep = find(ter,'deposito'), tGou = find(ter,'gourmet'), tBan = find(ter,'banhoSocial'), tQua = find(ter,'quarto');
+  if(tDep) pT.push(ext(tDep, tDep.x0 + 0.4, 0.8));
+  if(tBan && tGou) lig(ter, 'banhoSocial', 'gourmet', 0.7, pT); else if(tBan) pT.push(ext(tBan, tBan.x0+0.4, 0.7));
+  if(tBan && tQua) lig(ter, 'banhoSocial', 'quarto', 0.7, pT);
+  if(tQua) pT.push(ext(tQua, tQua.x1 - 1.1, 0.8));
+  const jan = (sl, lado, alta, w) => { const hz = lado[0]==='y'; const L = hz ? sl.x1-sl.x0 : sl.y1-sl.y0; w = Math.min(w, L-0.3); const m = hz ? (sl.x0+sl.x1)/2 : (sl.y0+sl.y1)/2;
+    return {o: hz ? 'h' : 'v', c: sl[lado], t0:r2(m-w/2), t1:r2(m+w/2), alta}; };
+  if(tBan) jT.push(jan(tBan, 'y1', true, 0.6));
+  if(tDep) jT.push(jan(tDep, 'y1', true, 0.8));
+  if(tQua) jT.push(jan(tQua, 'y1', false, 1.5));
+  if(dois){
+    const hT = find(ter,'hall'); if(hT && tGou){ const sh = compartilhado(hT, tGou); if(sh) vT.push({o:sh.o, c:sh.c, t0:sh.t0, t1:sh.t1, livre:true, a:hT.id, b:tGou.id}); }
+    const sBan = find(sup,'banhoSocial'), sQua = find(sup,'quarto'), sHall = find(sup,'hall');
+    if(sBan && sQua) lig(sup, 'banhoSocial', 'quarto', 0.7, pS);
+    if(sQua && sHall) lig(sup, 'quarto', 'hall', 0.8, pS);
+    if(sBan) jS.push(jan(sBan, 'y1', true, 0.6));           // mesma prumada da janela do banho de baixo
+    jS.push(jan(sQua, 'y0', false, 1.8)); jS.push(jan(sQua, 'y1', false, 1.2));
+  }
+  const pav = [{nome:'Edícula térreo', anexo:true, fixo:true, W, D:De, salas:ter, portas:pT, janelas:jT, vaos:vT}];
+  if(dois) pav.push({nome:'Edícula superior', anexo:true, fixo:true, W, D:De, salas:sup, portas:pS, janelas:jS, vaos:[]});
+  return {W, D:De, pav, dois};
+}
+
+function comAnexos(v, q){
+  const B = q.frente - 2*q.recLat;
+  v.x0 = r2(q.recLat + (B - v.W)/2); v.y0 = q.recFrente;
+  v.pav = v.pav.filter(p => !p.anexo);
+  v.avisos = (v.avisosBase = v.avisosBase || (v.avisos||[]).slice()).slice();
+  const itens = []; v.anexos = itens; v.anexoFalta = 0; v.anexoProf = 0; v.anexoLarg = 0;
+  const quer = q.piscina || q.gourmetDest || q.edicula!=='nenhuma';
+  if(!quer) return v;
+  const xq0 = q.recLat, xq1 = q.frente - q.recLat, yq0 = v.y0 + v.D + q.afastAnexo;
+  const yq1 = q.fundo - (q.anexoFundo ? 0 : q.recFundo);
+  const ed = q.edicula!=='nenhuma' ? edicula(q) : null;
+  if(ed) v.pav.push(...ed.pav);
+  // linha próxima da casa: piscina (com deck) e gourmet destacada
+  const linha = [];
+  if(q.piscina){ const pr = q.pisPrainha ? 1.5 : 0, deck = 1.2; linha.push({tipo:'piscina', w: q.pisC + pr + 2*deck, h: q.pisL + 2*deck, deck, pr}); }
+  if(q.gourmetDest) linha.push({tipo:'gourmetDest', w:4.4, h:4.0});
+  const Wq = xq1 - xq0;
+  let y = yq0, hl = 0, x = xq0;
+  const fila = [];
+  for(const it of linha){
+    if(x + it.w > xq1 + 0.01 && x > xq0){ y += hl + 1.5; hl = 0; x = xq0; }
+    fila.push(Object.assign(it, {x0:r2(x), y0:r2(y), x1:r2(x+it.w), y1:r2(y+it.h)}));
+    if(it.w > Wq + 0.01){ v.anexoLarg = (v.anexoLarg||0) + it.w - Wq; } if(it.w > Wq + 0.01) v.avisos.push(`O ${it.tipo==='piscina'?'conjunto de piscina e deck':'gourmet destacado'} (${f2(it.w)} m) é mais largo que o quintal (${f2(Wq)} m).`);
+    x += it.w + 1.5; hl = Math.max(hl, it.h);
+  }
+  let fim = fila.length ? y + hl : yq0;
+  let nec = fim;                                   // profundidade mínima necessária, com tudo encostado
+  if(ed){
+    nec = (fila.length ? fim + 1.5 : yq0) + ed.D;
+    const ey0 = Math.max(fila.length ? fim + 1.5 : yq0, yq1 - ed.D);
+    itens.push({tipo:'edicula', x0:r2(xq1 - ed.W), y0:r2(ey0), x1:r2(xq1), y1:r2(ey0+ed.D), dois:ed.dois});
+    if(ed.W > Wq + 0.01){ v.anexoLarg = (v.anexoLarg||0) + ed.W - Wq; } if(ed.W > Wq + 0.01) v.avisos.push(`A edícula (${f2(ed.W)} m) é mais larga que o quintal (${f2(Wq)} m).`);
+    fim = ey0 + ed.D;
+  }
+  for(const it of fila) itens.push(it);
+  const pi = itens.find(i => i.tipo==='piscina');
+  if(pi){
+    pi.forma = q.pisForma; pi.C = q.pisC; pi.L = q.pisL; pi.P = q.pisP;
+    const lam = q.pisForma==='oval' ? Math.PI*q.pisC*q.pisL/4 : q.pisForma==='L' ? q.pisC*q.pisL - (q.pisC*0.4)*(q.pisL*0.45) : q.pisC*q.pisL;
+    pi.lamina = r2(lam + pi.pr*q.pisL); pi.volume = r2(lam*q.pisP + pi.pr*q.pisL*0.3);
+  }
+  v.anexoProf = r2(nec - (v.y0 + v.D));
+  if(nec > yq1 + 0.01){ v.anexoFalta = r2(nec - yq1); v.avisos.push(`Os anexos precisam de ${f2(v.anexoProf)} m atrás da casa; o quintal tem ${f2(Math.max(0, yq1 - v.y0 - v.D))} m.`); }
+  return v;
+}
+
 /* ---------- Subsolo ---------- */
 function subsolo(q, W, D, cxA, escRect, av){
   const salas = [];
@@ -651,7 +768,8 @@ function porta(s, o, sh, w, centro){
 function avalia(v, q){
   let pen = 0; const av = [];
   for(const p of v.pav) for(const s of p.salas){
-    const t = TIPOS[s.tipo]; const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h, lmin = Math.min(w,h), lmax = Math.max(w,h);
+    const t = TIPOS[s.tipo];
+    if(p.anexo && (s.tipo==='rouparia'||s.tipo==='hall')) continue; const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h, lmin = Math.min(w,h), lmax = Math.max(w,h);
     if(t.min && !s.vaga && s.nome!=='Área técnica'){
       if(a < t.min - 0.01){ pen += 6*(t.min-a); av.push(`${p.nome}: ${rotulo(s)} com ${f2(a)} m², abaixo do mínimo de ${f2(t.min)} m².`); }
       if(lmin < t.lado - 0.01){ pen += 12*(t.lado-lmin); av.push(`${p.nome}: ${rotulo(s)} com lado de ${f2(lmin)} m, abaixo de ${f2(t.lado)} m.`); }
@@ -660,12 +778,14 @@ function avalia(v, q){
     }
     if(!['circ','hall','galeria','rampa','manobra','escada','rouparia','varanda','terraco','garagem','deposito'].includes(s.tipo) && lmax/lmin > 2.6) pen += 2*(lmax/lmin-2.6);
   }
-  for(const p of v.pav){ const ab = aberturas(p, q, p.nome==='Térreo'); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas; av.push(...ab.avisos); pen += 6*ab.avisos.length; }
+  for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo'); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas; av.push(...ab.avisos); pen += 6*ab.avisos.length; }
   // terreno
   const B = q.frente - 2*q.recLat, Dmax = q.fundo - q.recFrente - q.recFundo;
   if(v.W > B + 0.01){ pen += 40*(v.W-B); av.push(`A casa (${f2(v.W)} m) é mais larga que a área edificável (${f2(B)} m).`); }
   if(v.D > Dmax + 0.01){ pen += 25*(v.D-Dmax); av.push(`A casa precisa de ${f2(v.D)} m de profundidade; o terreno permite ${f2(Dmax)} m.`); }
-  const proj = projecao(v);
+  const proj = projecao(v) + (v.anexos||[]).filter(a => a.tipo!=='piscina').reduce((t,a)=>t+(a.x1-a.x0)*(a.y1-a.y0),0);
+  if(v.anexoFalta) pen += 25*v.anexoFalta;
+  if(v.anexoLarg) pen += 25*v.anexoLarg;
   const taxa = 100*proj/(q.frente*q.fundo);
   if(taxa > q.taxa + 0.01){ pen += 2*(taxa-q.taxa); av.push(`Ocupação de ${f2(taxa)} %, acima do máximo de ${f2(q.taxa)} %.`); }
   // circulação
@@ -731,14 +851,14 @@ function gerar(entrada){
   if(!Ws.length) Ws.push(B);
   const NOMES = {bloco:'bloco único', L:'em L', U:'em U', H:'em H'};
   if((q.formato==='U'||q.formato==='H') && (q.tipo==='sobrado'||q.subsolo)) avisos.push(`O formato ${NOMES[q.formato]} está disponível só para casa térrea sem subsolo.`);
-  const todas = geraTodas(q, P, Ws).map(v => avalia(v, q));
+  const todas = geraTodas(q, P, Ws).map(v => avalia(comAnexos(v, q), q));
   if(!todas.length && q.formato!=='auto') avisos.push(`O formato ${NOMES[q.formato]} não cabe na área edificável de ${f2(B)} m de largura. Veja o terreno mínimo para este formato ou escolha outro.`);
   todas.sort((a,b) => b.score-a.score || a.W*a.D-b.W*b.D);
   // até 3 variantes, preferindo tipologias diferentes
   const escolhidas = [];
   for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
-  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.x0 = r2(q.recLat + (B - v.W)/2); v.y0 = q.recFrente; });
+  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; });
   const lm = loteMinimo(q, P);
   if(escolhidas.length && escolhidas[0].score < 60) avisos.push('O programa não cabe bem neste terreno. Veja o terreno mínimo sugerido.');
   return {entrada:q, B, Dmax, variantes:escolhidas, loteMinimo:lm, avisos, escada: (q.tipo==='sobrado'||q.subsolo) ? escada(q) : null};
@@ -751,9 +871,11 @@ function loteMinimo(q, P){
     const vs = geraTodas(q, P, [W]);
     for(const v of vs){
       const fr = r2(W + 2*q.recLat);
-      let fu = Math.ceil((v.D + q.recFrente + q.recFundo)*2)/2;
+      comAnexos(v, Object.assign({}, q, {frente:fr, fundo:999}));
+      const atras = Math.max(q.recFundo, q.anexoFundo ? v.anexoProf : v.anexoProf + q.recFundo);
+      let fu = Math.ceil((v.D + q.recFrente + atras)*2)/2;
       const q2 = Object.assign({}, q, {frente:fr, fundo:fu});
-      avalia(v, q2);
+      avalia(comAnexos(v, q2), q2);
       const proj = v.projecao;
       if(100*proj/(fr*fu) > q.taxa) fu = r2(Math.ceil(proj/(q.taxa/100)/fr*2)/2);
       if(v.score < 70) continue;
@@ -763,11 +885,15 @@ function loteMinimo(q, P){
   }
   // fundo mínimo mantendo a frente informada
   let comFrente = null;
-  const vs = geraTodas(q, P, [r2(q.frente - 2*q.recLat)]).map(v => avalia(v, Object.assign({}, q, {fundo: 999})));
-  vs.sort((a,b) => b.score-a.score || a.D-b.D);
-  if(vs.length){ const v = vs[0]; comFrente = {frente:q.frente, fundo:r2(Math.ceil((v.D + q.recFrente + q.recFundo)*2)/2), tipologia:v.tipologia}; }
+  const q9 = Object.assign({}, q, {fundo: 999});
+  const vs = geraTodas(q, P, [r2(q.frente - 2*q.recLat)]).map(v => avalia(comAnexos(v, q9), q9));
+  const fundoDe = v => v.D + Math.max(q.recFundo, q.anexoFundo ? v.anexoProf : v.anexoProf + q.recFundo);
+  const bons = vs.filter(v => v.score >= 70);
+  (bons.length ? bons : vs).sort((a,b) => bons.length ? fundoDe(a)-fundoDe(b) : b.score-a.score);
+  if(vs.length){ const v = (bons.length ? bons : vs)[0]; const atras = Math.max(q.recFundo, q.anexoFundo ? v.anexoProf : v.anexoProf + q.recFundo);
+    comFrente = {frente:q.frente, fundo:r2(Math.ceil((v.D + q.recFrente + atras)*2)/2), tipologia:v.tipologia}; }
   return {minimo:best, comFrente};
 }
 
-return {gerar, normaliza, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
+return {gerar, edicula, normaliza, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
 });

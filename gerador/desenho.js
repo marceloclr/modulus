@@ -17,6 +17,7 @@ function espelha(v){
   const W = v.W, c = JSON.parse(JSON.stringify(v));
   const fx = x => +(W - x).toFixed(2);
   for(const p of c.pav){
+    if(p.anexo) continue;
     for(const s of p.salas){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
     for(const k of ['portas','vaos','janelas']) for(const e of (p[k]||[])){
       if(e.o==='v'){ e.c = fx(e.c); if(e.dentro) e.dentro *= -1; }
@@ -24,6 +25,7 @@ function espelha(v){
     }
   }
   if(c.patios) for(const s of c.patios){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
+  if(c.anexos && c.loteFrente){ const F = c.loteFrente; for(const a of c.anexos){ const x0 = +(F - a.x1).toFixed(2), x1 = +(F - a.x0).toFixed(2); a.x0 = x0; a.x1 = x1; a.espelhado = !a.espelhado; } }
   c.espelhada = true;
   return c;
 }
@@ -36,7 +38,7 @@ function planta(v, idx, op){
   const S = p.salas, T = Motor.TIPOS;
   const OX = 70, OY = 96;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
-  const W = v.W, D = Math.max(v.D, ...S.map(s => s.y1));
+  const W = p.W || v.W, D = p.anexo ? p.D : Math.max(v.D, ...S.map(s => s.y1));
   const larg = OX + W*K + 40, alt = OY + D*K + 60;
   const o = [];
   const line = (x0,y0,x1,y1,st,w,ex) => o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="${st}" stroke-width="${w}"${ex?' '+ex:''}/>`);
@@ -91,8 +93,8 @@ function planta(v, idx, op){
     const a = S[i], b = S[j], sh = compartilhado(a, b); if(!sh) continue;
     if(aberto(a) && aberto(b)) continue;
     const e = {o:sh.o, c:sh.c, t0:sh.t0, t1:sh.t1};
-    if(aberto(a) || aberto(b)) { seg(e, PAREDE, 6, 'stroke-linecap="square"'); continue; }
     if(livres.some(l => l.o===e.o && Math.abs(l.c-e.c)<0.001 && l.t0<=e.t0+0.001 && l.t1>=e.t1-0.001)) { seg(e, '#B7BAC2', .8, 'stroke-dasharray="3 3"'); continue; }
+    if(aberto(a) || aberto(b)) { seg(e, PAREDE, 6, 'stroke-linecap="square"'); continue; }
     seg(e, PAREDE, 3.2, 'stroke-linecap="square"');
   }
   // fachada
@@ -158,7 +160,7 @@ function planta(v, idx, op){
   if(p.nome==='Térreo') for(let i=0;i<ys.length-1;i++) if(ys[i+1]-ys[i] > 0.6) cota(ys[i], ys[i+1], -0.75, f2(ys[i+1]-ys[i]), true);
 
   const titulo = op.titulo || `${v.nome} · ${p.nome}`;
-  const sub = op.sub || `${v.tipologia} · casa ${f2(W)} × ${f2(v.D)} m · escala ${K} px/m${v.espelhada?' · espelhada':''}`;
+  const sub = op.sub || (p.anexo ? `Edícula ${f2(W)} × ${f2(D)} m · frente voltada para a casa · escala ${K} px/m` : `${v.tipologia} · casa ${f2(W)} × ${f2(v.D)} m · escala ${K} px/m${v.espelhada?' · espelhada':''}`);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.ceil(larg)} ${Math.ceil(alt)}" width="${Math.ceil(larg)}" height="${Math.ceil(alt)}" role="img" aria-label="${esc(titulo)}">
 <title>${esc(titulo)}</title><style>text{font-family:"IBM Plex Sans","Inter","Segoe UI",Helvetica,Arial,sans-serif;fill:#2F333A}.tt{font-size:15px;font-weight:600}.st{font-size:8.6px;fill:#5d6168}.rn{font-weight:600;text-anchor:middle;letter-spacing:.2px}.rd{text-anchor:middle;fill:#4a4e55}.cota{font-size:6.6px;text-anchor:middle;fill:#55595F}</style>
 <rect width="100%" height="100%" fill="#FBFAF7"/>
@@ -191,10 +193,28 @@ function lote(v, q, res){
     const rx = v.espelhada ? v.x0 + v.W - 3 : v.x0;
     o.push(`<rect x="${X(rx)}" y="${Y(q.recFrente - sub.rampa.Lout)}" width="${3*k}" height="${(sub.rampa.Lout*k).toFixed(1)}" fill="#E9E6E1" stroke="#A39C90"><title>Rampa externa ${f2(sub.rampa.Lout)} m</title></rect>`);
   }
+  for(const a of (v.anexos||[])){
+    if(a.tipo==='piscina'){
+      o.push(`<rect x="${X(a.x0)}" y="${Y(a.y0)}" width="${((a.x1-a.x0)*k).toFixed(1)}" height="${((a.y1-a.y0)*k).toFixed(1)}" fill="#EDE3D1" stroke="#C8B08A" stroke-width=".6"><title>Deck</title></rect>`);
+      const px0 = a.x0 + a.deck + (a.espelhado ? a.pr : 0), py0 = a.y0 + a.deck, pc = a.C, pl = a.L;
+      const fill = 'fill="#CFE6F2" stroke="#4C86C6" stroke-width="1"';
+      const tit = `<title>Piscina ${a.forma} ${f2(pc)} × ${f2(pl)} × ${f2(a.P)} m · lâmina ${f2(a.lamina)} m² · ${f2(a.volume)} m³</title>`;
+      if(a.forma==='oval') o.push(`<ellipse cx="${X(px0+pc/2)}" cy="${Y(py0+pl/2)}" rx="${(pc/2*k).toFixed(1)}" ry="${(pl/2*k).toFixed(1)}" ${fill}>${tit}</ellipse>`);
+      else if(a.forma==='L'){ const nx = pc*0.4, ny = pl*0.45;
+        o.push(`<path d="M${X(px0)},${Y(py0)} H${X(px0+pc)} V${Y(py0+pl-ny)} H${X(px0+pc-nx)} V${Y(py0+pl)} H${X(px0)} Z" ${fill}>${tit}</path>`); }
+      else o.push(`<rect x="${X(px0)}" y="${Y(py0)}" width="${(pc*k).toFixed(1)}" height="${(pl*k).toFixed(1)}" rx="${a.forma==='raia'?1:2}" ${fill}>${tit}</rect>`);
+      if(a.pr){ const prx = a.espelhado ? px0 - a.pr : px0 + pc; o.push(`<rect x="${X(prx)}" y="${Y(py0)}" width="${(a.pr*k).toFixed(1)}" height="${(pl*k).toFixed(1)}" fill="#E4F1F8" stroke="#4C86C6" stroke-width=".7" stroke-dasharray="2 2"><title>Prainha 1,50 m</title></rect>`); }
+      o.push(`<text x="${X(px0+pc/2)}" y="${Y(py0+pl/2)+3}" class="cota">piscina</text>`);
+    } else {
+      const c = a.tipo==='edicula' ? COR.apoio : COR.varanda;
+      o.push(`<rect x="${X(a.x0)}" y="${Y(a.y0)}" width="${((a.x1-a.x0)*k).toFixed(1)}" height="${((a.y1-a.y0)*k).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width="1"><title>${a.tipo==='edicula' ? 'Edícula' + (a.dois?' (2 pavimentos)':'') : 'Varanda gourmet destacada'}</title></rect>`);
+      o.push(`<text x="${X((a.x0+a.x1)/2)}" y="${Y((a.y0+a.y1)/2)+3}" class="cota">${a.tipo==='edicula' ? 'edícula' + (a.dois?' 2 pav.':'') : 'gourmet'}</text>`);
+    }
+  }
   o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(0)-8}" class="cota">rua · frente ${f2(q.frente)} m</text>`);
   o.push(`<text transform="translate(${X(0)-8},${(Y(0)+Y(q.fundo))/2}) rotate(-90)" class="cota">fundo ${f2(q.fundo)} m</text>`);
   o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.recFrente/2)+3}" class="cota">recuo ${f2(q.recFrente)}</text>`);
-  o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.fundo - q.recFundo/2)+3}" class="cota">fundo ${f2(q.fundo - v.y0 - v.D)} m livres</text>`);
+  if(!(v.anexos||[]).length) o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.fundo - q.recFundo/2)+3}" class="cota">fundo ${f2(q.fundo - v.y0 - v.D)} m livres</text>`);
   const W2 = Math.ceil(w + OX + 20), H2 = Math.ceil(h + OY + 16);
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" role="img" aria-label="Implantação no lote"><style>text{font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif}.cota{font-size:8px;text-anchor:middle;fill:#55595F}</style><rect width="100%" height="100%" fill="#FBFAF7"/>${o.join('')}</svg>`;
 }
