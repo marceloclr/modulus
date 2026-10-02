@@ -10,7 +10,7 @@ const CASOS = {
   'Térrea com subsolo, 15 × 30': {frente:15, fundo:30, quartos:3, suites:2, subsolo:true, subLazer:true, vagas:3},
   'Em U, 22 × 30': {frente:22, fundo:30, quartos:3, suites:3, escritorio:true, vagas:2, gourmet:true, lavabo:true, formato:'U'},
   'Edícula 2 pav. e piscina, 16 × 42': {frente:16, fundo:42, quartos:3, suites:2, edicula:'2', piscina:true, pisPrainha:true, pisForma:'L', gourmetDest:true},
-  'Subsolo enterrado com lazer, 12 × 32': {frente:12, fundo:32, quartos:3, suites:2, subsolo:true, subNivel:'inteiro', subLazer:true, vagas:2},
+  'Subsolo enterrado, 12 × 32': {frente:12, fundo:32, quartos:3, suites:2, subsolo:true, subNivel:'inteiro', subLazer:true, vagas:2},
   'Sobrado em L, só a frente sobe, 16 × 32': {frente:16, fundo:32, tipo:'sobrado', formato:'L', quartos:4, suites:3, supModo:'parcial', secFrente:true, secFundo:false, supQuartos:3},
   'Sobrado em U, frente e ala esquerda, 22 × 30': {frente:22, fundo:30, tipo:'sobrado', formato:'U', quartos:4, suites:3, supModo:'parcial', secFrente:true, secAlaE:true, secAlaD:false},
   'Sobrado correspondente com TV e escritório em cima, 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, tv:true, escritorio:true, supTv:true, supEscritorio:true},

@@ -52,6 +52,9 @@ function planta(v, idx, op){
   const line = (x0,y0,x1,y1,st,w,ex) => o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="${st}" stroke-width="${w}"${ex?' '+ex:''}/>`);
   const seg = (e, st, w, ex) => e.o==='h' ? line(e.t0, e.c, e.t1, e.c, st, w, ex) : line(e.c, e.t0, e.c, e.t1, st, w, ex);
   const aberto = s => !!T[s.tipo].aberto;
+  // no subsolo o desenho mostra só rampa, vagas, escada/elevador e jardim; o resto é piso neutro
+  const ehSub = p.nome==='Subsolo', MOSTRA = new Set(['rampa','garagem','escada','elevador','jardim']);
+  const oculto = s => ehSub && !MOSTRA.has(s.tipo);
 
   // pátios (H)
   if(idx===v.pav.findIndex(q => q.nome==='Térreo') && v.patios) for(const pt of v.patios) if(pt.y1-pt.y0>0.5)
@@ -64,6 +67,7 @@ function planta(v, idx, op){
   }
   // ambientes
   for(const s of S){
+    if(oculto(s)){ o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="#ECEAE5" stroke="#ECEAE5" stroke-width="1"/>`); continue; }
     const c = COR[s.zona] || COR.apoio, a = Motor.area(s);
     o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width="1"><title>${esc(s.nome)}: ${f2(s.x1-s.x0)} × ${f2(s.y1-s.y0)} = ${f2(a)} m²</title></rect>`);
   }
@@ -109,6 +113,7 @@ function planta(v, idx, op){
   const livres = (p.vaos||[]).filter(e => e.livre);
   for(let i=0;i<S.length;i++) for(let j=i+1;j<S.length;j++){
     const a = S[i], b = S[j], sh = compartilhado(a, b); if(!sh) continue;
+    if(ehSub && !(a.tipo==='elevador' || b.tipo==='elevador')) continue;   // subsolo sem paredes internas, só o poço do elevador
     if(aberto(a) && aberto(b)) continue;
     const e = {o:sh.o, c:sh.c, t0:sh.t0, t1:sh.t1};
     if(livres.some(l => l.o===e.o && Math.abs(l.c-e.c)<0.001 && l.t0<=e.t0+0.001 && l.t1>=e.t1-0.001)) { seg(e, '#B7BAC2', .8, 'stroke-dasharray="3 3"'); continue; }
@@ -117,20 +122,30 @@ function planta(v, idx, op){
   }
   // fachada
   const fech = S.filter(s => !aberto(s));
-  for(const s of S){
+  if(ehSub && p.dim){
+    // subsolo: só o contorno externo, aberto na boca da rampa
+    const d = p.dim, x0 = d.x0||0, y0 = d.y0||0, x1 = x0 + d.W, y1 = y0 + d.D;
+    const rp = S.find(s => s.tipo==='rampa');
+    const frente = rp ? [[x0, rp.x0], [rp.x1, x1]] : [[x0, x1]];
+    for(const [a0,a1] of frente) if(a1 - a0 > 0.05) seg({o:'h', c:y0, t0:a0, t1:a1}, PAREDE, 6, 'stroke-linecap="square"');
+    seg({o:'h', c:y1, t0:x0, t1:x1}, PAREDE, 6, 'stroke-linecap="square"');
+    seg({o:'v', c:x0, t0:y0, t1:y1}, PAREDE, 6, 'stroke-linecap="square"');
+    seg({o:'v', c:x1, t0:y0, t1:y1}, PAREDE, 6, 'stroke-linecap="square"');
+    const jd = S.find(s => s.tipo==='jardim'); if(jd) for(const e of Motor._interno.trechosExternos(jd, S)) seg(e, '#5E7D3A', 1.3, 'stroke-dasharray="4 3"');
+  } else for(const s of S){
     for(const e of Motor._interno.trechosExternos(s, S)){
       if(aberto(s)) seg(e, '#C8B08A', 1.3, 'stroke-dasharray="4 3"');
       else seg(e, PAREDE, 6, 'stroke-linecap="square"');
     }
   }
   // vãos parciais (closet), portas e janelas
-  for(const e of (p.vaos||[]).filter(e => !e.livre)) seg(e, PISO, 4.4);
+  if(!ehSub) for(const e of (p.vaos||[]).filter(e => !e.livre)) seg(e, PISO, 4.4);
   for(const e of (p.janelas||[])){
     seg(e, '#FFFFFF', 6.4);
     if(e.vidro){ seg(e, JAN, 4, 'stroke-opacity=".28"'); seg(e, JAN, 1.2); }
     else seg(e, JAN, 1.4, e.alta ? 'stroke-dasharray="3 2"' : '');
   }
-  for(const d of (p.portas||[])){
+  for(const d of (ehSub ? [] : (p.portas||[]))){
     seg(d, d.entrada ? '#FFFFFF' : PISO, 4.6);
     const w = d.t1 - d.t0, s = d.dentro || 1;
     const h0 = d.dobra ? d.t1 : d.t0, h1 = d.dobra ? d.t0 : d.t1;   // dobradiça e batente
@@ -149,12 +164,12 @@ function planta(v, idx, op){
   // spa do rooftop
   if(p.spa) o.push(`<circle cx="${X(p.spa.x)}" cy="${Y(p.spa.y)}" r="${p.spa.r*K}" fill="#CFE6F2" stroke="#4C86C6" stroke-width="1.2"><title>Spa</title></circle><text x="${X(p.spa.x)}" y="${Y(p.spa.y)+2.5}" class="rd" style="font-size:6.4px;font-weight:600">SPA</text>`);
   // pilares (subsolo)
-  for(const pl of (p.pilares||[])) o.push(`<rect x="${(X(pl.x)-5.5).toFixed(1)}" y="${(Y(pl.y)-5.5).toFixed(1)}" width="11" height="11" fill="#111318" stroke="#FFFFFF" stroke-width="1.2"><title>Pilar</title></rect>`);
-  if(p.manobra) o.push(`<text x="${X(W)-6}" y="${Y(p.manobra.y0)+10}" class="rd" style="font-size:6px;text-anchor:end;fill:#57534E">faixa de manobra livre, sem pilares</text>`);
+  if(!ehSub) for(const pl of (p.pilares||[])) o.push(`<rect x="${(X(pl.x)-5.5).toFixed(1)}" y="${(Y(pl.y)-5.5).toFixed(1)}" width="11" height="11" fill="#111318" stroke="#FFFFFF" stroke-width="1.2"><title>Pilar</title></rect>`);
+  if(p.manobra && !ehSub) o.push(`<text x="${X(W)-6}" y="${Y(p.manobra.y0)+10}" class="rd" style="font-size:6px;text-anchor:end;fill:#57534E">faixa de manobra livre, sem pilares</text>`);
   // rótulos
   for(const s of S){
     const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h;
-    if(s.tipo==='escada' || s.tipo==='rampa' || s.tipo==='elevador') continue;
+    if(s.tipo==='escada' || s.tipo==='rampa' || s.tipo==='elevador' || oculto(s)) continue;
     const cx = (X(s.x0)+X(s.x1))/2, cy = (Y(s.y0)+Y(s.y1))/2;
     const nome = esc((s.nome||'').toUpperCase());
     const pw = w*K, ph = h*K;

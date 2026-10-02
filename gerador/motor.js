@@ -99,6 +99,7 @@ function normaliza(p){
   // onde ficam as vagas: só no térreo, só no subsolo ou nos dois
   if(!['terreo','subsolo','ambos'].includes(q.garagemLocal)) q.garagemLocal = (p && p.subGaragem===false) ? 'terreo' : 'subsolo';
   if(!q.subsolo) q.garagemLocal = 'terreo';
+  q.subLazer = false;                         // o subsolo é só garagem: rampa, vagas, núcleo e jardim
   q.vagasTerreo = clamp(Math.round(+q.vagasTerreo || 0), 0, 4);
   q.subGaragem = q.subsolo && q.garagemLocal !== 'terreo';
   q.vagasT = q.garagemLocal==='terreo' ? q.vagas : q.garagemLocal==='ambos' ? q.vagasTerreo : 0;
