@@ -18,6 +18,7 @@ function espelha(v){
   const fx = x => +(W - x).toFixed(2);
   for(const p of c.pav){
     if(p.anexo) continue;
+    if(p.pocos) for(const s of p.pocos){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
     for(const s of p.salas){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
     for(const k of ['portas','vaos','janelas']) for(const e of (p[k]||[])){
       if(e.o==='v'){ e.c = fx(e.c); if(e.dentro) e.dentro *= -1; }
@@ -36,10 +37,12 @@ function planta(v, idx, op){
   op = op || {};
   const p = v.pav[idx];
   const S = p.salas, T = Motor.TIPOS;
-  const OX = 70, OY = 96;
+  const pocos = p.pocos || [];
+  const mx0 = Math.min(0, ...pocos.map(q => q.x0)), my0 = Math.min(0, ...pocos.map(q => q.y0));
+  const OX = 70 - mx0*K + (mx0<0 ? 12 : 0), OY = 96 - my0*K;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
   const W = p.W || v.W, D = p.anexo ? p.D : Math.max(v.D, ...S.map(s => s.y1));
-  const larg = OX + W*K + 40, alt = OY + D*K + 60;
+  const larg = OX + Math.max(W, ...pocos.map(q => q.x1))*K + 40, alt = OY + Math.max(D, ...pocos.map(q => q.y1))*K + 60;
   const o = [];
   const line = (x0,y0,x1,y1,st,w,ex) => o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="${st}" stroke-width="${w}"${ex?' '+ex:''}/>`);
   const seg = (e, st, w, ex) => e.o==='h' ? line(e.t0, e.c, e.t1, e.c, st, w, ex) : line(e.c, e.t0, e.c, e.t1, st, w, ex);
@@ -48,6 +51,12 @@ function planta(v, idx, op){
   // pátios (H)
   if(idx===v.pav.findIndex(q => q.nome==='Térreo') && v.patios) for(const pt of v.patios) if(pt.y1-pt.y0>0.5)
     o.push(`<rect x="${X(pt.x0)}" y="${Y(pt.y0)}" width="${((pt.x1-pt.x0)*K).toFixed(1)}" height="${((pt.y1-pt.y0)*K).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}"><title>Pátio</title></rect>`);
+  // pátios ingleses do subsolo
+  for(const pc of pocos){
+    o.push(`<rect x="${X(pc.x0)}" y="${Y(pc.y0)}" width="${((pc.x1-pc.x0)*K).toFixed(1)}" height="${((pc.y1-pc.y0)*K).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}" stroke-dasharray="4 3"><title>Pátio inglês ${f2(Math.min(pc.x1-pc.x0, pc.y1-pc.y0))} m</title></rect>`);
+    const vert = (pc.y1-pc.y0) > (pc.x1-pc.x0), cx = (X(pc.x0)+X(pc.x1))/2, cy = (Y(pc.y0)+Y(pc.y1))/2;
+    o.push(vert ? `<text transform="translate(${cx+2.5},${cy}) rotate(-90)" class="rd" style="font-size:6.4px;font-weight:600">PÁTIO INGLÊS</text>` : `<text x="${cx}" y="${cy+2.5}" class="rd" style="font-size:6.4px;font-weight:600">PÁTIO INGLÊS</text>`);
+  }
   // ambientes
   for(const s of S){
     const c = COR[s.zona] || COR.apoio, a = Motor.area(s);
@@ -189,6 +198,8 @@ function lote(v, q, res){
     for(let i=0;i<n;i++) o.push(`<rect x="${X(0.3+i*2.5)}" y="${Y(q.recFrente-dy)}" width="${2.4*k}" height="${dy*k}" fill="#E9E6E1" stroke="#A39C90" stroke-dasharray="2 2"><title>Vaga descoberta</title></rect>`);
   }
   const sub = v.pav.find(p => p.nome==='Subsolo');
+  if(sub) for(const pc of (sub.pocos||[])){ const ax0 = v.espelhada ? v.x0 + v.W - pc.x1 : v.x0 + pc.x0;
+    o.push(`<rect x="${X(ax0)}" y="${Y(v.y0+pc.y0)}" width="${((pc.x1-pc.x0)*k).toFixed(1)}" height="${((pc.y1-pc.y0)*k).toFixed(1)}" fill="#D6E4CC" stroke="#5F7350" stroke-dasharray="2 2"><title>Pátio inglês do subsolo</title></rect>`); }
   if(sub && sub.rampa && q.subGaragem){
     const rx = v.espelhada ? v.x0 + v.W - 3 : v.x0;
     o.push(`<rect x="${X(rx)}" y="${Y(q.recFrente - sub.rampa.Lout)}" width="${3*k}" height="${(sub.rampa.Lout*k).toFixed(1)}" fill="#E9E6E1" stroke="#A39C90"><title>Rampa externa ${f2(sub.rampa.Lout)} m</title></rect>`);

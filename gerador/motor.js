@@ -627,7 +627,21 @@ function subsolo(q, W, D, cxA, escRect, av){
     const t = usos[i] || (r.tipo==='deposito' ? 'deposito' : (usos.length ? 'deposito' : 'deposito'));
     salas.push(sala(t, r.x0, r.y0, r.x1, r.y1, i>=usos.length ? {nome: (r.x1-r.x0)<1.5||(r.y1-r.y0)<1.5 ? 'Área técnica' : 'Depósito'} : {}));
   });
-  return {nome:'Subsolo', salas, rampa:{desnivel:h, L:Lr, Lin, Lout:r2(Lr-Lin), largura:RAMPA_L, inclinacao:q.inclinacao}, vagas:vagasOk};
+  const pocos = [];
+  if(q.subNivel==='inteiro'){
+    const pw = Math.min(1.5, q.recLat);
+    if(pw >= 1.2){
+      const ya = r2(Math.min(D-2, Math.max(1.0, Lin)));
+      pocos.push({x0:-pw, y0:ya, x1:0, y1:D}, {x0:W, y0:ya, x1:W+pw, y1:D});
+      av.push(`Subsolo enterrado: pátios ingleses de ${f2(pw)} m nas duas laterais, para luz e ventilação cruzada.`);
+    } else {
+      const xa = q.subGaragem ? RAMPA_L + 0.5 : 0;
+      if(W - xa > 1.5) pocos.push({x0:xa, y0:-1.5, x1:W, y1:0});
+      pocos.push({x0:0, y0:D, x1:W, y1:D+1.5});
+      av.push('Subsolo enterrado: recuos laterais estreitos; pátios ingleses de 1,50 m na frente e no fundo.');
+    }
+  } else av.push('Subsolo semienterrado: janelas altas acima do nível do terreno em todas as fachadas.');
+  return {nome:'Subsolo', salas, dim:{W, D}, pocos, rampa:{desnivel:h, L:Lr, Lin, Lout:r2(Lr-Lin), largura:RAMPA_L, inclinacao:q.inclinacao}, vagas:vagasOk};
 }
 
 /* ---------- Portas, vãos e janelas ---------- */
@@ -637,7 +651,7 @@ const PREF = {
   escritorio:['estar','hall','galeria','circ','tv','jantar','garagem'], tv:['estar','jantar','hall','circ','galeria'],
   cozinha:['jantar','hall','galeria','estar'], servico:['cozinha','hall','galeria','garagem','circ'], despensa:['cozinha','servico','hall','galeria'],
   garagem:['hall','servico','cozinha','estar','galeria','escritorio'], rouparia:['circ','hall'], deposito:['hall','circ','manobra','galeria','servico','garagem','lazer','cozinha'],
-  lazer:['hall','manobra'], gourmet:['cozinha','jantar','servico','estar','galeria'],
+  lazer:['hall','manobra','garagem','deposito'], gourmet:['cozinha','jantar','servico','estar','galeria'],
   salaIntima:['circ','hall'], hall:[], circ:[], galeria:[], escada:[], manobra:['hall'], rampa:[], varanda:[], terraco:['circ','hall'],
 };
 const ABERTOS = [['circ','estar'],['circ','jantar'],['circ','tv'],['estar','jantar'],['estar','tv'],['hall','estar'],['hall','jantar'],['hall','tv'],['hall','circ'],['galeria','circ'],['galeria','jantar'],['galeria','estar'],['galeria','cozinha'],['manobra','garagem'],['manobra','rampa'],['hall','manobra']];
@@ -669,6 +683,47 @@ function trechosExternos(s, salas, filtro){
     for(const [a,b] of livres) out.push({o:l.o, c:l.c, t0:a, t1:b, lado:l.n});
   }
   return out;
+}
+
+/* Subsolo: aberturas altas (semienterrado) ou voltadas para pátios ingleses (enterrado), com ventilação cruzada obrigatória. */
+function janelasSubsolo(pav, q, S, av){
+  const janelas = [];
+  const W = pav.dim.W, D = pav.dim.D, semi = q.subNivel==='meio', pocos = pav.pocos || [];
+  const E = 0.01;
+  const ladoDe = e => e.o==='v' ? (Math.abs(e.c)<E ? 'x0' : Math.abs(e.c-W)<E ? 'x1' : null) : (Math.abs(e.c)<E ? 'y0' : Math.abs(e.c-D)<E ? 'y1' : null);
+  // trecho de parede que dá para um pátio inglês (enterrado) ou para fora (semienterrado)
+  const trecho = (e, lado) => {
+    if(semi) return [e.t0, e.t1];
+    const p = pocos.find(p => lado==='x0' ? Math.abs(p.x1)<E : lado==='x1' ? Math.abs(p.x0-W)<E : lado==='y0' ? Math.abs(p.y1)<E : Math.abs(p.y0-D)<E);
+    if(!p) return null;
+    const a = e.o==='v' ? Math.max(e.t0, p.y0) : Math.max(e.t0, p.x0), b = e.o==='v' ? Math.min(e.t1, p.y1) : Math.min(e.t1, p.x1);
+    return b - a > 0.8 ? [a, b] : null;
+  };
+  const lados = new Set();
+  if(q.subGaragem) lados.add('y0');          // boca da rampa
+  const h = semi ? 0.6 : 1.2;
+  for(const s of S){
+    if(['escada','rampa'].includes(s.tipo)) continue;
+    const hab = s.tipo==='lazer', A = area(s);
+    const exig = hab ? A/8 : A/20;
+    let obt = 0;
+    const ext = trechosExternos(s, S).map(e => { const l = ladoDe(e); const t = l && trecho(e, l); return t ? {o:e.o, c:e.c, t0:t[0], t1:t[1], lado:l} : null; })
+      .filter(Boolean).sort((a,b) => (lados.has(a.lado)?1:0)-(lados.has(b.lado)?1:0) || (b.t1-b.t0)-(a.t1-a.t0));
+    for(const e of ext){
+      if(obt >= exig && lados.has(e.lado)) continue;
+      const L = e.t1-e.t0;
+      const w = clamp(Math.max(1.0, (exig-obt)/h), 0.8, semi ? L-0.3 : Math.min(4.0, L-0.3));
+      if(w < 0.8) continue;
+      const m = (e.t0+e.t1)/2;
+      janelas.push({o:e.o, c:e.c, t0:r2(m-w/2), t1:r2(m+w/2), alta:semi, h});
+      obt += w*h; lados.add(e.lado);
+    }
+    if(hab){ s.ilum = {exig:r2(exig), obt:r2(obt)}; if(obt < exig-0.01) av.push(`Subsolo: ${rotulo(s)} com ${f2(obt)} m² de abertura; a iluminação pede ${f2(exig)} m² (1/8 do piso).`); }
+  }
+  pav.ladosAbertos = [...lados];
+  pav.cruzada = (lados.has('x0') && lados.has('x1')) || (lados.has('y0') && lados.has('y1'));
+  if(!pav.cruzada) av.push('Subsolo sem ventilação cruzada: faltam aberturas em lados opostos.');
+  return {janelas};
 }
 
 function aberturas(pav, q, ehTerreo){
@@ -723,32 +778,57 @@ function aberturas(pav, q, ehTerreo){
     portas.forEach(p => { if(p.viz) liga(p.sala, p.viz); }); vaos.forEach(v => liga(v.a, v.b));
     const esc = S.find(s=>s.tipo==='escada'); if(esc){ S.filter(o=>o.tipo==='hall'||o.tipo==='circ').forEach(o=>{ if(compartilhado(esc,o)) liga(esc.id,o.id); }); }
     S.filter(s=>s.tipo==='varanda'||s.tipo==='garagem'||s.tipo==='rampa'||s.tipo==='terraco').forEach(s=>{ if(ehTerreo || s.tipo==='rampa') liga(s.id, ini); });
+    if(!ehTerreo){
+      // no subsolo, rampa, manobra e vagas formam uma área contínua, ligada ao hall da escada quando encostam nele
+      const gar = S.filter(o => ['manobra','garagem','rampa','hall','escada'].includes(o.tipo));
+      for(let i=0;i<gar.length;i++) for(let j=i+1;j<gar.length;j++) if(compartilhado(gar[i], gar[j])) liga(gar[i].id, gar[j].id);
+    }
     const vis = new Set([ini]), fila=[ini];
     while(fila.length){ const x=fila.shift(); for(const y of adj.get(x)||[]) if(!vis.has(y)){ vis.add(y); fila.push(y); } }
     for(const s of S) if(!vis.has(s.id) && !['rouparia','deposito','terraco'].includes(s.tipo) && !s.vaga) av.push(`${pav.nome}: ${rotulo(s)} não se liga ao resto da casa.`);
   }
-  // janelas
+  // janelas: área mínima de iluminação = 1/8 da área do piso (ventilação 1/16 = metade de uma janela de correr)
   const fechados = S.filter(o => !TIPOS[o.tipo].aberto);
+  if(pav.nome==='Subsolo') return Object.assign({portas, vaos, avisos:av}, janelasSubsolo(pav, q, S, av));
   for(const s of S){
-    if(TIPOS[s.tipo].aberto || pav.nome==='Subsolo') continue;
+    if(TIPOS[s.tipo].aberto) continue;
     const t = TIPOS[s.tipo];
     if(!(t.hab || t.mol || s.tipo==='circ' || s.tipo==='galeria' || s.tipo==='hall' || s.tipo==='closetMaster')) continue;
-    const ext = trechosExternos(s, fechados).filter(e => e.t1-e.t0 >= 0.8);
+    const ext = trechosExternos(s, fechados).filter(e => e.t1-e.t0 >= 0.8).sort((a,b) => (b.t1-b.t0)-(a.t1-a.t0));
+    const A = area(s);
+    const exig = (t.hab || t.mol) ? A/8 : 0;
     if(!ext.length){
       if(t.hab) av.push(`${pav.nome}: ${rotulo(s)} sem janela para fora.`);
       else if(t.mol) av.push(`${pav.nome}: ${rotulo(s)} sem janela; prever exaustão mecânica.`);
+      if(exig) s.ilum = {exig:r2(exig), obt:0};
       continue;
     }
-    ext.sort((a,b) => (b.t1-b.t0)-(a.t1-a.t0));
-    const e = ext[0], L = e.t1-e.t0;
     const alta = !!t.mol || s.tipo==='closetMaster';
-    const w = alta ? Math.min(0.8, L-0.3) : s.tipo==='galeria' ? L-0.6 : clamp(L*0.45, 0.8, 2.4);
-    const m = (e.t0+e.t1)/2;
-    // não sobrepor porta de entrada
-    const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2);
-    const mm = pe ? (pe.t1 + 0.3 + w/2 <= e.t1 ? pe.t1+0.3+w/2 : pe.t0-0.3-w/2) : m;
-    janelas.push({o:e.o, c:e.c, t0:mm-w/2, t1:mm+w/2, alta, vidro: s.tipo==='galeria'});
-    if(s.tipo==='circ' && ext.length>1 && ext[1].t1-ext[1].t0 >= 2.0) { const e2 = ext[1], m2=(e2.t0+e2.t1)/2; janelas.push({o:e2.o, c:e2.c, t0:m2-0.6, t1:m2+0.6, alta:false}); }
+    const vidro = s.tipo==='galeria';
+    const h = vidro ? 2.1 : alta ? 0.6 : 1.2;
+    let falta = exig, obt = 0;
+    ext.forEach((e, i) => {
+      if(i > 0 && falta <= 0.01 && !(s.tipo==='circ' && i===1 && e.t1-e.t0 >= 2.0)) return;
+      const L = e.t1-e.t0;
+      const wmin = alta ? 0.6 : vidro ? L-0.6 : 1.0;
+      let w = vidro ? L-0.6 : clamp(Math.max(wmin, falta/h), wmin, Math.min(alta ? 1.6 : 3.0, L-0.3));
+      if(w < 0.5) return;
+      const m = (e.t0+e.t1)/2;
+      // não sobrepor porta de entrada
+      const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2);
+      let mm = m;
+      if(pe){ if(pe.t1 + 0.3 + w <= e.t1) mm = pe.t1+0.3+w/2; else if(pe.t0 - 0.3 - w >= e.t0) mm = pe.t0-0.3-w/2; else { w = Math.max(0, Math.max(e.t1-pe.t1, pe.t0-e.t0) - 0.4); mm = e.t1-pe.t1 > pe.t0-e.t0 ? pe.t1+0.2+w/2 : pe.t0-0.2-w/2; } }
+      if(w < 0.5) return;
+      janelas.push({o:e.o, c:e.c, t0:r2(mm-w/2), t1:r2(mm+w/2), alta, vidro, h});
+      obt += w*h; falta = exig - obt;
+    });
+    if(exig){
+      s.ilum = {exig:r2(exig), obt:r2(obt)};
+      if(obt < exig - 0.01){
+        if(t.hab) av.push(`${pav.nome}: ${rotulo(s)} com ${f2(obt)} m² de janela; a iluminação pede ${f2(exig)} m² (1/8 do piso).`);
+        else av.push(`${pav.nome}: ${rotulo(s)} com janela menor que 1/8 do piso; complementar com exaustão mecânica.`);
+      }
+    }
   }
   return {portas, vaos, janelas, avisos:av};
 
@@ -809,7 +889,7 @@ function quadro(v){
   for(const p of v.pav){
     const fech = p.salas.filter(s => !TIPOS[s.tipo].aberto);
     const abertas = p.salas.filter(s => TIPOS[s.tipo].aberto);
-    linhas.push({pav:p.nome, salas: p.salas.map(s => ({nome:s.nome, tipo:s.tipo, zona:s.zona, w:r2(s.x1-s.x0), h:r2(s.y1-s.y0), a:r2(area(s))})),
+    linhas.push({pav:p.nome, salas: p.salas.map(s => ({nome:s.nome, tipo:s.tipo, zona:s.zona, w:r2(s.x1-s.x0), h:r2(s.y1-s.y0), a:r2(area(s)), ilum:s.ilum||null})),
       fechada:r2(fech.reduce((t,s)=>t+area(s),0)), aberta:r2(abertas.reduce((t,s)=>t+area(s),0))});
   }
   const fechada = r2(linhas.reduce((t,l)=>t+l.fechada,0)), aberta = r2(linhas.reduce((t,l)=>t+l.aberta,0));
