@@ -111,6 +111,10 @@ function planta(v, idx, op){
     o.push(`<rect x="${X(lo.x0+lo.rl)}" y="${Y(lo.y0+lo.rf)}" width="${((lo.x1-lo.x0-2*lo.rl)*K).toFixed(1)}" height="${((lo.y1-lo.y0-lo.rf-lo.rb)*K).toFixed(1)}" fill="none" stroke="#5F7350" stroke-width=".7" stroke-dasharray="5 4"><title>Área edificável</title></rect>`);
     o.push(`<text x="${((X(lo.x0)+X(lo.x1))/2).toFixed(1)}" y="${(Y(lo.y0)-6).toFixed(1)}" class="cota" style="font-size:7.4px;font-weight:600;fill:#5F7350">RUA</text>`);
   }
+  // rooftop: pavimento de baixo esmaecido, para dar proporção
+  if(p.base){ for(const b of p.base){ const c = COR[b.zona] || COR.apoio;
+    o.push(`<rect x="${X(b.x0)}" y="${Y(b.y0)}" width="${((b.x1-b.x0)*K).toFixed(1)}" height="${((b.y1-b.y0)*K).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width=".6" opacity=".25"/>`); }
+    o.push(`<text x="${X(Math.min(...p.base.map(b=>b.x0)))}" y="${Y(Math.max(...p.base.map(b=>b.y1))) + 12}" style="font-size:6.6px;fill:#7B828C">pavimento de baixo (esmaecido)</text>`); }
   // pátios (H)
   if(idx===v.pav.findIndex(q => q.nome==='Térreo') && v.patios) for(const pt of v.patios) if(pt.y1-pt.y0>0.5)
     o.push(`<rect x="${X(pt.x0)}" y="${Y(pt.y0)}" width="${((pt.x1-pt.x0)*K).toFixed(1)}" height="${((pt.y1-pt.y0)*K).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}"><title>Pátio</title></rect>`);

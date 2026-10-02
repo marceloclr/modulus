@@ -122,11 +122,13 @@
         </div>
         <label class="chk"><input type="checkbox" name="rooftop">Rooftop (cobertura usável)</label>
         <div id="rtOps">
-          <label class="fld">Área do rooftop (m²)<input type="number" name="rtArea" min="12" max="400" step="2"><small>Limitada à laje do último pavimento; a escada sobe empilhada até lá.</small></label>
-          <label class="chk"><input type="checkbox" name="rtGourmet">Gourmet coberto com churrasqueira</label>
+          <label class="fld">Posição sobre o pavimento de baixo<select name="rtPos"><option value="frente">Na frente</option><option value="centro">No centro</option><option value="fundo">No fundo</option></select><small>A escada sobe empilhada; o rooftop sempre inclui a caixa de escada.</small></label>
+          <label class="fld">Área técnica / caixa d’água (m²)<input type="number" name="rtTecnicaA" min="0" max="60" step="1"></label>
+          <label class="fld">Varanda gourmet coberta (m²)<input type="number" name="rtGourmetA" min="0" max="120" step="1"></label>
+          <label class="fld">Varanda coberta (m²)<input type="number" name="rtVarandaA" min="0" max="200" step="1"></label>
+          <label class="fld">Terraço descoberto (m²)<input type="number" name="rtTerracoA" min="0" max="300" step="1"></label>
           <label class="chk"><input type="checkbox" name="rtBanho">Banho</label>
-          <label class="chk"><input type="checkbox" name="rtSpa">Spa</label>
-          <label class="chk"><input type="checkbox" name="rtTecnica">Área técnica / caixa d’água</label>
+          <label class="chk"><input type="checkbox" name="rtSpa">Spa (no terraço)</label>
         </div>
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
