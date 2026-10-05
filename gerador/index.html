@@ -529,6 +529,21 @@ function atualizaHash(){
 }
 function variante(){ const v = res.variantes[vi]; return v && esp ? Desenho.espelha(v) : v; }
 
+// dica do card Pontuação: como a nota é calculada (Motor.avalia) e quanto esta variante perdeu
+function dicaNota(v){
+  const faixa = v.score >= 80 ? 'boa (verde-azulado, 80 ou mais)' : v.score >= 60 ? 'razoável (dourado, 60 a 79)' : 'fraca (avermelhado, abaixo de 60)';
+  const beta = document.documentElement.classList.contains('beta') ? ';\n• conflito com o sistema estrutural' : '';
+  return `Nota de 0 a 100 para a qualidade da variante. Começa em 100 e perde pontos a cada problema:
+• cômodo abaixo da área ou da largura mínima, ou alongado demais;
+• cômodo longe das medidas pedidas;
+• cômodo sem janela, sem porta ou desligado da casa (6 cada);
+• casa maior que a área edificável, ocupação acima do limite ou permeabilidade abaixo do mínimo;
+• corredores e halls acima de 14 % da área;
+• falta de aberturas do lado do vento ou do lado oposto (8 cada);
+• quarto com janela a oeste (25), a sudoeste ou noroeste (6) ou sem janela a nascente (3)${beta}.
+Esta variante: ${v.score} (perdeu ${100 - v.score}), nota ${faixa}. Os motivos estão em “Pontos de atenção”.`;
+}
+
 function render(){
   const q = res.entrada, v = variante();
   const st = document.getElementById('stats');
@@ -538,7 +553,7 @@ function render(){
     ['Área fechada', `${f2(v.quadro.fechada)} m²`, 'var(--slate)'],
     ['Ocupação', `${f2(v.ocupacao)} %`, v.ocupacao > q.taxa ? 'var(--rust)' : 'var(--brass)'],
     ['Pontuação', `${v.score} / 100`, v.score >= 80 ? 'var(--patina)' : v.score >= 60 ? 'var(--brass)' : 'var(--rust)'],
-  ].map(([k,val,c]) => `<div class="stat" style="--c:${c}"><div class="k">${k}</div><div class="v">${val}</div></div>`).join('');
+  ].map(([k,val,c]) => `<div class="stat" style="--c:${c}"${k==='Pontuação' ? ` tabindex="0" data-tip="${esc(dicaNota(v)).replace(/"/g, '&quot;')}"` : ''}><div class="k">${k}</div><div class="v">${val}</div></div>`).join('');
   document.getElementById('avisosGerais').innerHTML = res.avisos.length ? `<div class="warn">${res.avisos.map(esc).join('<br>')}</div>` : '';
   document.getElementById('vtabs').innerHTML = res.variantes.map((x,i) =>
     `<button class="btn vtab" type="button" role="tab" aria-selected="${i===vi}" aria-pressed="${i===vi}" data-v="${i}">${x.nome}<span class="score">${x.score}</span><small>${x.tipologia}</small><small class="vdim"><span data-tip="Terreno: frente × fundo = área do lote">Terreno ${f2(q.frente)} × ${f2(q.fundo)} m · ${f2(q.frente*q.fundo)} m²</span><span data-tip="Construção: largura × profundidade da casa; área = soma das áreas fechadas de todos os pavimentos">Casa ${f2(x.W)} × ${f2(x.D)} m · ${f2(x.quadro.fechada)} m² construídos</span></small></button>`).join('');
