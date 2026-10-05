@@ -299,6 +299,16 @@ t('brises: sol de Fortaleza, geometria das lâminas e estudo da variante', () =>
   ok(B.estudar(M.gerar(q2).variantes[0], q2).faces.every(fc => fc.rumo === 'S'), 'escolha manual');
 });
 
+t('vento: dados/vento.json válido, 12 meses e alísios de leste/sudeste', () => {
+  const VT = require('../dados/vento.json');
+  igual(VS.validar(VT, require('../dados/vento.schema.json')), [], 'esquema:');
+  igual(VT.meses.map(m => m.mes), [1,2,3,4,5,6,7,8,9,10,11,12]);
+  for(const m of VT.meses){ ok(m.rosa.length === VT.setores && m.velHora.length === 24, 'mês ' + m.mes);
+    ok(Math.abs(m.rosa.reduce((t, x) => t + x.freq, 0) + m.calmaria - 100) < 1.5, 'frequências somam 100 % no mês ' + m.mes);
+    ok(m.dirPredominante >= 45 && m.dirPredominante <= 157.5, 'predomínio de NE a SSE no mês ' + m.mes); }
+  const set = VT.meses[8], mar = VT.meses[2]; ok(set.velMedia > mar.velMedia, 'setembro venta mais que março');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
