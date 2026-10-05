@@ -45,6 +45,42 @@
 .dimrow input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .vtab{flex-direction:column;align-items:flex-start;gap:2px;line-height:1.25}
 .vtab small{font-size:11.5px;color:inherit;opacity:.8;font-weight:400}
+/* blocos guiados (beta, gerador/ui-blocos.js) */
+.blocos{display:flex;flex-direction:column;gap:10px;margin:4px 0 12px}
+.bloco{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;background:var(--surface-2)}
+.bloco>summary{list-style:none;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-radius:9px;background:color-mix(in srgb,var(--c) 9%,var(--surface-2))}
+.bloco>summary::-webkit-details-marker{display:none}
+.bloco>summary:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+.bloco[open]>summary{border-radius:9px 9px 0 0;border-bottom:1px solid var(--line)}
+.bloco[data-estado="bloqueado"]>summary{cursor:not-allowed}
+.bloco[data-estado="bloqueado"] .bl-tit{color:var(--ink-2)}
+.bl-num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:600 13px/1 'IBM Plex Sans',sans-serif;color:var(--ink);background:var(--surface-2);border:2px solid var(--c)}
+.bl-txt{min-width:0}
+.bl-tit{display:block;font:500 14px/1.25 'IBM Plex Sans',sans-serif;color:var(--ink)}
+.bl-res{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;font-size:12px;line-height:1.35;color:var(--ink-2)}
+.bl-chip{display:inline-flex;align-items:center;gap:6px;font:500 11.5px/1 'IBM Plex Sans',sans-serif;color:var(--ink);padding:5px 8px;border-radius:999px;border:1px solid var(--line);background:var(--surface-2);white-space:nowrap}
+.bl-chip::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.bl-chip[data-estado="em-edicao"]::before{background:var(--steel)}
+.bl-chip[data-estado="pronto"]::before{background:var(--brass)}
+.bl-chip[data-estado="concluido"]::before{background:var(--moss)}
+.bl-chip[data-estado="revisar"]::before{background:var(--rust)}
+.bl-chip[data-estado="bloqueado"]::before{background:transparent;border:1px solid var(--ink-3)}
+.bl-corpo{padding:10px 10px 12px}
+.bl-corpo .fs{background:var(--surface)}
+.bl-vazio{font-size:13px;color:var(--ink-2);margin:2px 2px 4px}
+.bl-acoes{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.bl-erro{border-left:3px solid var(--rust);background:var(--surface);border-radius:10px;padding:8px 12px;margin:6px 0;font-size:13px;color:var(--ink)}
+.bl-erro ul{margin:4px 0 0;padding-left:18px}
+.bl-concluir.pronto{background:var(--graphite);color:var(--bg);border-color:var(--graphite)}
+details.sub{margin:0 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details.sub>summary{padding:9px 12px;font:500 13px 'IBM Plex Sans',sans-serif;color:var(--ink);cursor:pointer;border-radius:12px}
+details.sub>summary:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
+details.sub>.fs{border:0;margin:0;padding-top:0;background:transparent}
+details.sub>.fs>legend{display:none}
+[aria-invalid="true"]{outline:2px solid var(--rust)!important;outline-offset:1px}
+.bloco-res:empty{display:none}
+.bloco-res{margin:-2px 0 4px}
+.bloco-res .panel{max-width:none;margin:0}
 @media (max-width:899px){
   .gen aside.sb{position:static;transform:none;height:auto;width:auto;box-shadow:none;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px}
   .gen main{padding:20px 16px 48px}
@@ -71,7 +107,7 @@
         <button class="btn" type="button" id="link" data-tip="Copia um link com estes campos preenchidos">Copiar link</button>
       </div>
 
-      <fieldset class="fs"><legend>Terreno</legend>
+      <fieldset class="fs" data-secao="terreno"><legend>Terreno</legend>
         <p class="fld wide"><small><strong>Para onde a frente do terreno (a rua) está voltada?</strong> Clique no rumo.</small></p>
         <div class="rosa-sel" role="radiogroup" aria-label="Para onde a frente do terreno está voltada">
           <svg class="rosa-centro" viewBox="-60 -60 120 120" aria-hidden="true">
@@ -98,7 +134,7 @@
         <label class="fld">Taxa de ocupação máx. (%)<input type="number" name="taxa" min="20" max="100" step="5"><small>Recuos e taxa variam por município: confira a lei de uso do solo.</small></label>
       </fieldset>
 
-      <fieldset class="fs"><legend>Tipo da casa</legend>
+      <fieldset class="fs" data-secao="tipo"><legend>Tipo da casa</legend>
         <div class="seg" role="radiogroup" aria-label="Pavimentos">
           <label><input type="radio" name="tipo" value="terrea">Térrea</label>
           <label><input type="radio" name="tipo" value="sobrado">Sobrado</label>
@@ -141,7 +177,7 @@
         </div>
       </fieldset>
 
-      <fieldset class="fs"><legend>Quartos e banheiros</legend>
+      <fieldset class="fs" data-secao="quartos"><legend>Quartos e banheiros</legend>
         <label class="fld">Quartos (total)<input type="number" name="quartos" min="1" max="8" step="1"></label>
         <label class="fld">Dos quais suítes<input type="number" name="suites" min="0" max="8" step="1"></label>
         <label class="chk"><input type="checkbox" name="master">Uma das suítes é master</label>
@@ -150,7 +186,7 @@
         <label class="chk"><input type="checkbox" name="lavabo">Lavabo</label>
       </fieldset>
 
-      <fieldset class="fs"><legend>Salas e serviço</legend>
+      <fieldset class="fs" data-secao="salas"><legend>Salas e serviço</legend>
         <label class="chk"><input type="checkbox" name="estar">Sala de estar</label>
         <label class="chk"><input type="checkbox" name="jantar">Sala de jantar</label>
         <label class="chk"><input type="checkbox" name="tv">Sala de TV</label>
@@ -160,7 +196,7 @@
         <label class="chk"><input type="checkbox" name="despensa">Despensa</label>
       </fieldset>
 
-      <fieldset class="fs"><legend>Dimensões dos cômodos (opcional)</legend>
+      <fieldset class="fs" data-secao="dimensoes"><legend>Dimensões dos cômodos (opcional)</legend>
           <p class="fld wide"><small>Largura × comprimento em metros, ou só a área. Em branco, o gerador decide. A nota mostra quanto cada variante se afasta do pedido.</small></p>
           <div class="dimrow" data-t="quarto"><span>Quarto</span><input type="number" name="d_quarto_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Quarto: largura (m)"><i>×</i><input type="number" name="d_quarto_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Quarto: comprimento (m)"><i>ou</i><input type="number" name="d_quarto_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Quarto: área (m²)"></div>
           <div class="dimrow" data-t="suite"><span>Suíte (quarto)</span><input type="number" name="d_suite_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Suíte (quarto): largura (m)"><i>×</i><input type="number" name="d_suite_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Suíte (quarto): comprimento (m)"><i>ou</i><input type="number" name="d_suite_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Suíte (quarto): área (m²)"></div>
@@ -179,7 +215,7 @@
           <div class="dimrow" data-t="gourmet"><span>Varanda gourmet</span><input type="number" name="d_gourmet_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Varanda gourmet: largura (m)"><i>×</i><input type="number" name="d_gourmet_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Varanda gourmet: comprimento (m)"><i>ou</i><input type="number" name="d_gourmet_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Varanda gourmet: área (m²)"></div>
       </fieldset>
 
-      <fieldset class="fs"><legend>Garagem e áreas externas</legend>
+      <fieldset class="fs" data-secao="garagem"><legend>Garagem e áreas externas</legend>
         <label class="fld">Onde ficam as vagas<select name="garagemLocal"><option value="terreo">No térreo</option><option value="subsolo">Só no subsolo</option><option value="ambos">No subsolo e no térreo</option></select><small id="garNota">As opções com subsolo aparecem quando o subsolo está marcado.</small></label>
         <label class="fld"><span id="vagasRot">Vagas</span><input type="number" name="vagas" min="0" max="20" step="1"></label>
         <label class="fld" id="vagasTOps">Vagas no térreo<input type="number" name="vagasTerreo" min="0" max="4" step="1"></label>
@@ -189,7 +225,7 @@
         <label class="chk"><input type="checkbox" name="gourmet">Varanda gourmet junto à casa</label>
       </fieldset>
 
-      <fieldset class="fs"><legend>Anexos no quintal</legend>
+      <fieldset class="fs" data-secao="anexos"><legend>Anexos no quintal</legend>
         <label class="chk"><input type="checkbox" name="gourmetDest">Varanda gourmet destacada da casa</label>
         <label class="fld">Edícula<select name="edicula"><option value="nenhuma">Sem edícula</option><option value="1">1 pavimento</option><option value="2">2 pavimentos</option></select></label>
         <div id="edOps">
@@ -288,11 +324,12 @@
 <script src="motor.js"></script>
 <script src="desenho.js"></script>
 <script src="estado.js"></script>
+<script src="ui-blocos.js"></script>
 <script>
 (function(){
 'use strict';
 const form = document.getElementById('form'), f2 = Motor.f2, est = Estado.criar(Motor.PADRAO);
-let res = null, vi = 0, pi = 0, esp = false;
+let res = null, vi = 0, pi = 0, esp = false, blocos = null;
 
 function lerForm(){
   const d = {};
@@ -313,6 +350,7 @@ function preencher(d){
     else el.value = d[el.name];
   }
   sincroniza();
+  if(blocos) blocos.pintar();
 }
 function sincroniza(){
   document.getElementById('subOps').hidden = !form.elements.subsolo.checked;
@@ -468,6 +506,7 @@ if(window.plantasBeta && !location.hash) try{ salvo = Estado.deLocal(localStorag
 const ini = Estado.deHash(location.hash, Motor.PADRAO) || salvo;
 if(ini) est.substituir(ini);
 let inicial = ini ? ini.ui : null;
+if(window.plantasBeta) blocos = UiBlocos.montar(form, est, {primeiraVisita: !ini, persistir: () => { if(res) atualizaHash(); }});
 preencher(Object.assign({}, Motor.PADRAO, ini ? ini.entrada : {}));
 gerar();
 })();
