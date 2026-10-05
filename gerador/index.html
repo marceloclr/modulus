@@ -91,8 +91,9 @@ details.sub>.fs>legend{display:none}
 .bloco-res:empty{display:none}
 .bloco-res{margin:-2px 0 4px}
 .bloco-res .panel{max-width:none;margin:0}
-html.beta section.panel:not(#analises){--c:var(--card-variante)!important}
-#analises{margin-top:28px}
+html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!important}
+#analises,#energia{margin-top:28px}
+.grid-energia .card{margin:0;max-width:940px}
 .grid-analise{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px;align-items:start}
 .grid-analise .card{margin:0}
 .selo{font-size:12.5px;color:var(--ink-2);margin:2px 0 0;max-width:none}
@@ -102,7 +103,7 @@ html.beta section.panel:not(#analises){--c:var(--card-variante)!important}
 .grid-analise .stat .v.v-menor{font-size:14px;white-space:normal}
 .vistas{margin:4px 0 8px}
 .vistas .btn{padding:7px 10px;font-size:12.5px}
-.graf{width:100%;height:auto;display:block;overflow:visible}
+.graf{width:100%;height:auto;display:block;overflow:visible;margin:0 auto}
 .g-rot{font:500 12px 'IBM Plex Sans',sans-serif;fill:var(--ink)}
 .g-val{font:600 12px 'IBM Plex Sans',sans-serif;fill:var(--ink);font-variant-numeric:tabular-nums}
 .g-eixo{font:400 11px 'IBM Plex Sans',sans-serif;fill:var(--ink-3);font-variant-numeric:tabular-nums}
@@ -410,6 +411,10 @@ html.beta section.panel:not(#analises){--c:var(--card-variante)!important}
       <div class="panel-head"><p class="eyebrow">Análises da variante escolhida</p><h2 id="tAnalises">Custo e estrutura</h2></div>
       <div id="cardsAnalise" class="grid-analise"><p class="note">Carregando os valores de custo…</p></div>
     </section>
+    <section class="panel so-beta" id="energia" style="--c:var(--card-solar)" aria-labelledby="tEnergia">
+      <div class="panel-head"><p class="eyebrow">Energia da variante escolhida</p><h2 id="tEnergia">Energia solar</h2></div>
+      <div id="cardsEnergia" class="grid-energia"><p class="note">Carregando os valores…</p></div>
+    </section>
   </main>
 </div>
 <footer><div>Gerador experimental de estudos preliminares. Medidas pelo eixo das paredes, sem valor de projeto executivo.</div></footer>
@@ -436,6 +441,7 @@ const form = document.getElementById('form'), f2 = Motor.f2, est = Estado.criar(
 let dadosCusto = null, historicoCusto = null, sinapiVivo = null;
 // vista do gráfico de custo: conveniência deste navegador
 let vistaCusto = 'parcelas'; try{ vistaCusto = localStorage.getItem('plantas-vista-custo') || 'parcelas'; }catch(e){}
+let vistaSolar = 'mensal'; try{ vistaSolar = localStorage.getItem('plantas-vista-solar') || 'mensal'; }catch(e){}
 let res = null, vi = 0, pi = 0, esp = false, blocos = null;
 
 function lerForm(){
@@ -584,8 +590,15 @@ function renderAnalises(){
   if(!dadosCusto || !res || !res.variantes[vi]){ box.innerHTML = '<p class="note">Carregando os valores de custo…</p>'; return; }
   const v = res.variantes[vi], q = res.entrada;
   const porVariante = res.variantes.map(x => ({nome:x.nome, r:Custos.calcular(x, q, dadosCusto)}));
+  const be = document.getElementById('cardsEnergia');
+  be.innerHTML = dadosCusto.solar ? Cartoes.cartaoSolar(Solar.calcular(v, q, dadosCusto), {vista:vistaSolar}) : '<p class="note">Valores de energia solar indisponíveis.</p>';
   box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto, sinapiVivo}) + Cartoes.cartaoEstrutura(v, dadosCusto);
 }
+document.getElementById('cardsEnergia').addEventListener('click', e => {
+  const b = e.target.closest('[data-vista-solar]'); if(!b) return;
+  vistaSolar = b.dataset.vistaSolar; try{ localStorage.setItem('plantas-vista-solar', vistaSolar); }catch(err){}
+  renderAnalises(); const nb = document.querySelector(`#cardsEnergia [data-vista-solar="${vistaSolar}"]`); if(nb) nb.focus();
+});
 document.getElementById('cardsAnalise').addEventListener('click', e => {
   const sb = e.target.closest('[data-acao=sinapi]');
   if(sb){ sb.disabled = true; sb.textContent = 'Consultando…';

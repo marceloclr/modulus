@@ -231,6 +231,16 @@ t('solar: interpolação do R$/Wp, Fio B pelo ano, cobertura insuficiente e carg
   ok(SO.calcular(M.gerar({}).variantes[0], {municipio:'portoDasDunas'}, DADOS).avisos.some(a => a.includes('inox')), 'aviso do litoral');
 });
 
+t('cards: card solar com as três vistas, fórmulas e normas', () => {
+  const r = SO.calcular(M.gerar({}).variantes[0], {}, DADOS);
+  for(const vista of ['mensal', 'retorno', 'cargas']){
+    const h = CA.cartaoSolar(r, {vista});
+    ok(h.includes('<svg class="graf"') && (h.match(/data-tip="/g) || []).length >= 12, 'vista ' + vista);
+  }
+  const h = CA.cartaoSolar(r, {});
+  ok(h.includes('NBR 16690') && h.includes('kWp = (') && h.includes('cobertura provisória'), 'normas, fórmula do kWp e aviso de cobertura provisória');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

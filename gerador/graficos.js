@@ -15,7 +15,7 @@ function barrasFaixa(itens, fmt, op){
   const W = op.largura || 440, rot = op.rotulo || 150, valW = 78, alt = 26, gap = 8, x0 = rot + 8, x1 = W - valW - 8;
   const max = Math.max(...itens.map(i => i.max || i.med), 1), X = v => x0 + (x1 - x0) * v / max;
   const H = itens.length * (alt + gap) + 8;
-  const o = [`<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(op.titulo || 'Gráfico de barras')}">`];
+  const o = [`<svg class="graf" viewBox="0 0 ${W} ${H}" style="max-width:${Math.round(W*1.1)}px" role="img" aria-label="${esc(op.titulo || 'Gráfico de barras')}">`];
   o.push(`<line x1="${x0}" y1="0" x2="${x0}" y2="${H - 4}" stroke="var(--line)" stroke-width="1"/>`);
   itens.forEach((it, i) => {
     const y = 4 + i * (alt + gap), cy = y + alt/2, w = Math.max(2, X(it.med) - x0), destaque = op.destaque === i;
@@ -40,7 +40,7 @@ function linhas(series, fmt, op){
   const xs = [...new Set(series.flatMap(s => s.pontos.map(p => p.x)))].sort(), ys = series.flatMap(s => s.pontos.map(p => p.y));
   let lo = Math.min(...ys), hi = Math.max(...ys); const pad = (hi - lo) * .15 || hi * .05; lo -= pad; hi += pad;
   const X = x => m.l + (xs.length > 1 ? (W - m.l - m.r) * xs.indexOf(x) / (xs.length - 1) : (W - m.l - m.r)/2), Y = y => m.t + (H - m.t - m.b) * (1 - (y - lo)/(hi - lo));
-  const o = [`<svg class="graf" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(op.titulo || 'Série mensal')}">`];
+  const o = [`<svg class="graf" viewBox="0 0 ${W} ${H}" style="max-width:${Math.round(W*1.1)}px" role="img" aria-label="${esc(op.titulo || 'Série mensal')}">`];
   for(let k = 0; k <= 3; k++){ const v = lo + (hi - lo) * k/3, y = Y(v);
     o.push(`<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${m.l - 6}" y="${y + 4}" text-anchor="end" class="g-eixo">${esc(fmt(v))}</text>`); }
   for(const x of xs) o.push(`<text x="${X(x)}" y="${H - 8}" text-anchor="middle" class="g-eixo">${esc(op.mes ? op.mes(x) : x)}</text>`);
@@ -55,5 +55,42 @@ function linhas(series, fmt, op){
   return o.join('');
 }
 
-return {barrasFaixa, linhas};
+/* Colunas mensais de uma série (cor --c) com linha de referência tracejada (ex.: consumo). */
+function colunas(valores, op){
+  op = op || {};
+  const W = op.largura || 440, H = op.altura || 210, m = {l:52, r:12, t:16, b:26}, n = valores.length;
+  const hi = Math.max(...valores, op.ref || 0) * 1.15 || 1, Y = v => m.t + (H - m.t - m.b) * (1 - v/hi);
+  const passo = (W - m.l - m.r) / n, larg = Math.max(4, passo - 6);
+  const o = [`<svg class="graf" viewBox="0 0 ${W} ${H}" style="max-width:${Math.round(W*1.1)}px" role="img" aria-label="${esc(op.titulo || 'Colunas mensais')}">`];
+  for(let k = 0; k <= 3; k++){ const v = hi * k/3, y = Y(v); o.push(`<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${m.l - 6}" y="${y + 4}" text-anchor="end" class="g-eixo">${esc(op.fmt ? op.fmt(v) : Math.round(v))}</text>`); }
+  valores.forEach((v, i) => {
+    const x = m.l + i * passo + (passo - larg)/2, y = Y(v), h = Y(0) - y, r = Math.min(4, larg/2, h);
+    o.push(`<g class="marca" tabindex="0" data-tip="${esc(op.dica ? op.dica(i) : v)}"><rect x="${m.l + i*passo}" y="${m.t}" width="${passo}" height="${H - m.t - m.b}" fill="transparent"/>`);
+    o.push(`<path d="M${x},${Y(0)} V${y + r} Q${x},${y} ${x + r},${y} H${x + larg - r} Q${x + larg},${y} ${x + larg},${y + r} V${Y(0)} Z" fill="var(--c)"/></g>`);
+    o.push(`<text x="${m.l + i*passo + passo/2}" y="${H - 8}" text-anchor="middle" class="g-eixo">${esc(op.rotulos ? op.rotulos[i] : i + 1)}</text>`);
+  });
+  if(op.ref){ const y = Y(op.ref); o.push(`<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${W - m.r}" y="${y - 5}" text-anchor="end" class="g-rot">${esc(op.refRotulo || '')}</text>`); }
+  o.push('</svg>');
+  return o.join('');
+}
+
+/* Uma série ao longo do tempo (cor --c), com a linha do zero e um marco opcional (ex.: payback). */
+function linhaUnica(pontos, op){
+  op = op || {};
+  const W = op.largura || 440, H = op.altura || 210, m = {l:62, r:14, t:16, b:26};
+  const ys = pontos.map(p => p.y), lo = Math.min(0, ...ys), hi = Math.max(0, ...ys), x0 = pontos[0].x, x1 = pontos[pontos.length-1].x;
+  const X = x => m.l + (W - m.l - m.r) * (x - x0)/(x1 - x0 || 1), Y = y => m.t + (H - m.t - m.b) * (1 - (y - lo)/((hi - lo) || 1));
+  const o = [`<svg class="graf" viewBox="0 0 ${W} ${H}" style="max-width:${Math.round(W*1.1)}px" role="img" aria-label="${esc(op.titulo || 'Série')}">`];
+  for(let k = 0; k <= 3; k++){ const v = lo + (hi - lo) * k/3, y = Y(v); o.push(`<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${m.l - 6}" y="${y + 4}" text-anchor="end" class="g-eixo">${esc(op.fmt ? op.fmt(v) : Math.round(v))}</text>`); }
+  o.push(`<line x1="${m.l}" y1="${Y(0)}" x2="${W - m.r}" y2="${Y(0)}" stroke="var(--ink-3)" stroke-width="1.5"/>`);
+  for(const p of pontos) if(p.x % 5 === 0) o.push(`<text x="${X(p.x)}" y="${H - 8}" text-anchor="middle" class="g-eixo">${esc(op.xRot ? op.xRot(p.x) : p.x)}</text>`);
+  o.push(`<polyline points="${pontos.map(p => `${X(p.x)},${Y(p.y)}`).join(' ')}" fill="none" stroke="var(--c)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`);
+  for(const p of pontos) o.push(`<g class="marca" tabindex="0" data-tip="${esc(op.dica ? op.dica(p) : p.y)}"><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="8" fill="transparent"/><circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${p.x % 5 === 0 ? 3.5 : 2}" fill="var(--c)"/></g>`);
+  if(op.marco !== undefined && op.marco !== null && op.marco <= x1){ const x = X(op.marco);
+    o.push(`<line x1="${x}" y1="${m.t}" x2="${x}" y2="${H - m.b}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="3 3"/><text x="${x + 4}" y="${m.t + 10}" class="g-rot">${esc(op.marcoRotulo || '')}</text>`); }
+  o.push('</svg>');
+  return o.join('');
+}
+
+return {barrasFaixa, linhas, colunas, linhaUnica};
 });
