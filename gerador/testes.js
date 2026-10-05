@@ -87,7 +87,7 @@ function rodar(){
       if(c.subsolo && c.garagemLocal!=='terreo' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'), v1 = M.gerar(Object.assign({}, c, {vagas:1})).variantes[0], sb1 = v1 && v1.pav.find(p => p.nome==='Subsolo');
         if(sb && !sb.vagas) erros.push(`${v.nome}: subsolo sem vagas`);
         if(sb && sb1 && sb1.vagas !== sb.vagas) erros.push(`${v.nome}: o campo de vagas mudou o subsolo (${sb1.vagas} × ${sb.vagas})`); }
-      if(c.torreCalor && !v.torre) erros.push(`${v.nome}: sem torre de calor`);
+      if((c.torreCalor || (c.torreTipo && c.torreTipo !== 'nenhuma')) && !v.torre) erros.push(`${v.nome}: sem torre de ar`);
       const ter = v.pav.find(p => p.nome==='Térreo');
       if(ter && !ter.portas.some(d => d.entrada)) erros.push(`${v.nome}: térreo sem entrada`);
       if(c.orientacao && v===r.variantes[0] && ter && !ter.portas.some(d => d.saida)) erros.push(`${v.nome}: térreo sem saída de fundos`);

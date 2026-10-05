@@ -258,6 +258,14 @@ t('subsolo: sem teto cabe o máximo; com teto, o subsolo encolhe para essas vaga
   ok(t3.dim.W * t3.dim.D < livre.dim.W * livre.dim.D, 'subsolo menor com teto');
 });
 
+t('torre de ar: recomendação por tipologia e links antigos (torreCalor)', () => {
+  const tipo = e => (M.gerar(Object.assign({torreTipo:'auto'}, e)).variantes[0].torre || {}).tipo;
+  igual(tipo({}), 'succao', 'térrea:'); igual(tipo({tipo:'sobrado'}), 'hibrida', 'sobrado:'); igual(tipo({tipo:'sobrado', rooftop:true}), 'combinado', 'rooftop:');
+  igual(tipo({frente:22, fundo:30, formato:'H', quartos:3, suites:3}), 'shed', 'H:');
+  igual(M.normaliza({torreCalor:true}).torreTipo, 'chamine', 'torreCalor antigo:'); igual(M.normaliza({}).torreTipo, 'nenhuma'); igual(M.normaliza({torreTipo:'xyz'}).torreTipo, 'nenhuma');
+  ok(!M.gerar({}).variantes[0].torre, 'sem torre por padrão');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

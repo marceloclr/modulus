@@ -210,7 +210,7 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
           <label class="chk"><input type="checkbox" name="supTv">Sala de TV / sala íntima</label>
           <label class="chk"><input type="checkbox" name="supServico">Lavanderia</label>
         </div>
-        <label class="chk"><input type="checkbox" name="torreCalor">Torre de calor (exaustão por efeito chaminé)</label>
+        <label class="fld">Torre de ar<select name="torreTipo"><option value="nenhuma">Nenhuma</option><option value="auto" class="so-beta">Recomendada para esta casa</option><option value="chamine">Chaminé (efeito chaminé)</option><option value="succao" class="so-beta">Coroamento de sucção</option><option value="solar" class="so-beta">Chaminé solar</option><option value="captador" class="so-beta">Captador de vento</option><option value="combinado" class="so-beta">Captador e exaustão combinados</option><option value="hibrida" class="so-beta">Híbrida (sucção, chaminé solar e exaustor EC)</option><option value="shed" class="so-beta">Captador com shed</option></select><small>Na zona bioclimática 8 o vento rende mais que o efeito chaminé. <a href="../torre/" target="_blank" rel="noopener">Veja o dossiê das torres</a>.</small></label>
         <label class="chk"><input type="checkbox" name="rooftop">Rooftop (cobertura usável)</label>
         <div id="rtOps">
           <label class="fld">Posição sobre o pavimento de baixo<select name="rtPos"><option value="frente">Na frente</option><option value="centro">No centro</option><option value="fundo">No fundo</option></select><small>A escada sobe empilhada; o rooftop sempre inclui a caixa de escada.</small></label>
@@ -455,6 +455,7 @@ function lerForm(){
   return d;
 }
 function preencher(d){
+  if(d && d.torreCalor && (!d.torreTipo || d.torreTipo === 'nenhuma')) d = Object.assign({}, d, {torreTipo:'chamine'});   // links antigos
   for(const el of form.elements){
     if(!el.name || !(el.name in d)) continue;
     if(el.type==='checkbox') el.checked = !!d[el.name];
