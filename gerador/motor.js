@@ -74,6 +74,7 @@ const PADRAO = {
   torreTipo:'nenhuma',
   rooftop:false, rtPos:'centro', rtTecnicaA:4, rtGourmetA:12, rtVarandaA:10, rtTerracoA:20, rtBanho:true, rtSpa:false,
   subRecuos:'nenhum', permeab:20, subVagasMax:0,
+  brises:false, brisesTipo:'auto', brisesFaces:'auto', brisesFace_N:false, brisesFace_NE:false, brisesFace_L:false, brisesFace_SE:false, brisesFace_S:false, brisesFace_SO:false, brisesFace_O:false, brisesFace_NO:false,
   subsolo:false, subNivel:'meio', garagemLocal:'subsolo', vagasTerreo:1, subLazer:false, inclinacao:20,
 };
 
@@ -123,6 +124,12 @@ function normaliza(p){
   }
   if(!['nenhum','lateraisFundo','todos'].includes(q.subRecuos)) q.subRecuos = 'nenhum';
   q.subVagasMax = clamp(Math.round(+q.subVagasMax || 0), 0, 40);      // teto opcional de vagas no subsolo (0 = o máximo que couber)
+  // brises (Fase 4): estudo em gerador/brises.js; o motor só normaliza os campos
+  const sim = x => x===true||x==='true'||x===1||x==='1'||x==='on';
+  q.brises = sim(q.brises);
+  if(!['auto','horizontal','vertical','misto','movel'].includes(q.brisesTipo)) q.brisesTipo = 'auto';
+  if(q.brisesFaces !== 'escolha') q.brisesFaces = 'auto';
+  for(const k of Object.keys(RUMOS)) q['brisesFace_' + k] = sim(q['brisesFace_' + k]);
   q.permeab = clamp(isNaN(+q.permeab) ? 20 : +q.permeab, 0, 80);
   // onde ficam as vagas: só no térreo, só no subsolo ou nos dois
   if(!['terreo','subsolo','ambos'].includes(q.garagemLocal)) q.garagemLocal = (p && p.subGaragem===false) ? 'terreo' : 'subsolo';
