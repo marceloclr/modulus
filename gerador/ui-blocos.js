@@ -9,7 +9,7 @@
 const BLOCOS = [
   {id:'b1', num:1, titulo:'Dimensões', cor:'var(--patina)'},
   {id:'b2', num:2, titulo:'Tipo de estrutura e padrão de custos', cor:'var(--moss)'},
-  {id:'b3', num:3, titulo:'Energia solar', cor:'var(--brass)', vazio:'Os níveis de atendimento N1 a N4, a geração, as baterias e o retorno do investimento chegam numa fase seguinte, calculados sobre a planta escolhida.'},
+  {id:'b3', num:3, titulo:'Energia solar', cor:'var(--brass)'},
   {id:'b4', num:4, titulo:'Estilo arquitetônico', cor:'var(--plum)', vazio:'A galeria comparativa de estilos (casa com cara de casa, farm, inglês, moderna contemporânea e ecológica), as fachadas e o muro chegam numa fase seguinte.', trava:'Conclua o bloco 1 para liberar a escolha do estilo.'},
 ];
 const ROTULO = {'a-definir':'a definir', 'em-edicao':'em edição', 'pronto':'pronto', 'concluido':'concluído', 'revisar':'revisar', 'bloqueado':'bloqueado'};
@@ -60,6 +60,10 @@ function resumo(id, form){
     if(E.cubTipo && E.cubTipo.value === 'desonerado') partes.push('CUB desonerado');
     return partes.filter(Boolean).join(' · ');
   }
+  if(id === 'b3'){
+    const nv = E.solNivel ? E.solNivel.value : 'N2', cons = +(E.solConsumo && E.solConsumo.value) || 0;
+    return [`${nv} na falta da rede`, `${E.solAutonomia ? E.solAutonomia.value : 8} h de bateria`, cons ? `${cons} kWh/mês informados` : 'consumo estimado', E.solVE && E.solVE.checked ? 'veículo elétrico' : ''].filter(Boolean).join(' · ');
+  }
   return 'Em preparação';
 }
 
@@ -93,6 +97,8 @@ function montar(form, est, opts){
     .forEach(n => corpos.b1.appendChild(n));
   // bloco 2: sistema estrutural e padrão e local da obra
   [sec('estrutura'), sec('custo'), sec('valores')].filter(Boolean).forEach(n => corpos.b2.appendChild(n));
+  // bloco 3: energia solar
+  [sec('solar')].filter(Boolean).forEach(n => corpos.b3.appendChild(n));
   caixa.after(rodape);
   // conclusão: só pelo botão (a conclusão automática fecharia o bloco no meio da digitação)
   for(const b of BLOCOS){
@@ -190,7 +196,7 @@ function montar(form, est, opts){
   }
 
   // celular: os cards de cada bloco concluído descem para logo abaixo dele (no desktop ficam na coluna principal)
-  const RESULTADOS = {b1: ['#main > .panel:not(#analises)'], b2: ['#analises']};
+  const RESULTADOS = {b1: ['#main > .panel:not(#analises):not(#energia)'], b2: ['#analises'], b3: ['#energia']};
   const estreito = window.matchMedia ? window.matchMedia('(max-width: 899px)') : {matches:false};
   const origem = {};
   function posicionar(){
