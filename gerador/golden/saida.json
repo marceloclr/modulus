@@ -391,11 +391,11 @@
   }
  },
  "Frente para o sul, torre de calor e rooftop no fundo, 12 × 30": {
-  "motor": "422ec64a7ef7f54d",
+  "motor": "88054705af488724",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,00 × 16,23 m, 177,26 m², nota 93",
    "Variante B: Bloco único, corredor central, 8,00 × 17,95 m, 210,94 m², nota 82",
-   "Variante C: Em L, 9,00 × 14,16 m, 236,90 m², nota 80"
+   "Variante C: Em L, 9,00 × 14,16 m, 236,90 m², nota 77"
   ],
   "svg": {
    "Variante A/Térreo": "60904c46cef52e23",
@@ -409,7 +409,7 @@
    "Variante B/espelhada/Térreo": "3f47030cf74c84d0",
    "Variante B/lote": "64bc9400342ab2b4",
    "Variante C/Térreo": "36f923f3ddd30783",
-   "Variante C/Superior": "02424cb3d4f8d7bf",
+   "Variante C/Superior": "e25355859c9d3ec6",
    "Variante C/Rooftop": "cc42d2cc3af9e544",
    "Variante C/espelhada/Térreo": "459e77a447770cd4",
    "Variante C/lote": "bbcda01f09a8b203"
@@ -565,28 +565,28 @@
   }
  },
  "Frente para oeste, 12 × 30": {
-  "motor": "a8ccb08ececcb317",
+  "motor": "72143a4170cf6309",
   "resumo": [
-   "Variante A: Bloco único, corredor central, 8,50 × 19,45 m, 153,53 m², nota 85",
-   "Variante B: Bloco único, corredor lateral, 6,50 × 22,67 m, 134,35 m², nota 67",
-   "Variante C: Em L, 9,00 × 25,09 m, 147,77 m², nota 9"
+   "Variante A: Bloco único, corredor central, 8,50 × 19,45 m, 153,53 m², nota 79",
+   "Variante B: Bloco único, corredor lateral, 6,50 × 22,67 m, 134,35 m², nota 61",
+   "Variante C: Em L, 9,00 × 25,09 m, 147,77 m², nota 3"
   ],
   "svg": {
-   "Variante A/Térreo": "0ff180037384822f",
-   "Variante A/espelhada/Térreo": "4701fdde74e7b1ff",
+   "Variante A/Térreo": "45edbd314cab8929",
+   "Variante A/espelhada/Térreo": "2d1d63c94736fb00",
    "Variante A/lote": "1536568596b5eaa9",
    "Variante B/Térreo": "092b891e7904824b",
    "Variante B/espelhada/Térreo": "6c4cbbc1809cb8aa",
    "Variante B/lote": "2e6097efd8cb639d",
-   "Variante C/Térreo": "f163e888ebaab8c9",
-   "Variante C/espelhada/Térreo": "4034044503f06b65",
+   "Variante C/Térreo": "08fb3c7053163a29",
+   "Variante C/espelhada/Térreo": "7ccb8aa50ad15962",
    "Variante C/lote": "9c5cf94af3cc217a"
   }
  },
  "Frente para nordeste com varanda em L, 14 × 30": {
-  "motor": "e9b7620bfdbb589a",
+  "motor": "92de4b2d1bcf662d",
   "resumo": [
-   "Variante A: Bloco único, corredor central, 9,00 × 18,31 m, 143,55 m², nota 56",
+   "Variante A: Bloco único, corredor central, 9,00 × 18,31 m, 143,55 m², nota 47",
    "Variante B: Bloco único, corredor lateral, 6,50 × 22,67 m, 126,06 m², nota 45",
    "Variante C: Em L, 9,00 × 25,09 m, 139,33 m², nota 0"
   ],
@@ -594,8 +594,8 @@
    "Variante A/Térreo": "d282be8033e7d3eb",
    "Variante A/espelhada/Térreo": "99b501f2fc837dee",
    "Variante A/lote": "90804197e8234c0b",
-   "Variante B/Térreo": "6466ed5e5dc2301c",
-   "Variante B/espelhada/Térreo": "1768570546aa0779",
+   "Variante B/Térreo": "512f4d291e736c67",
+   "Variante B/espelhada/Térreo": "753d290eebfe278b",
    "Variante B/lote": "ab79e21f49546a03",
    "Variante C/Térreo": "82be86d2e44e7770",
    "Variante C/espelhada/Térreo": "36d5b047e72ca574",

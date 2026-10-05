@@ -62,6 +62,24 @@ t('blocos: mudar o bloco 1 manda os seguintes concluídos para "revisar"', () =>
   igual(U.aposAlterar(tudo, 'b2', 'x', true), tudo, 'bloco 2 não invalida os outros');
 });
 
+// ---------- sol nos quartos (motor) ----------
+t('sol: nenhum quarto com janela voltada para o poente, nos 8 rumos e nos formatos', () => {
+  const rf = (lado, F, esp) => { let a = {y0:0, x1:90, y1:180, x0:270}[lado]; if(esp && (lado==='x0'||lado==='x1')) a = 360 - a; return (F + a) % 360; };
+  const dif = (a, b) => Math.abs(((a - b) % 360 + 540) % 360 - 180), E = 0.001, erros = [];
+  const lado = (j, s) => j.o==='v' ? (j.t0 >= s.y0-E && j.t1 <= s.y1+E ? (Math.abs(j.c-s.x0)<E ? 'x0' : Math.abs(j.c-s.x1)<E ? 'x1' : null) : null)
+    : (j.t0 >= s.x0-E && j.t1 <= s.x1+E ? (Math.abs(j.c-s.y0)<E ? 'y0' : Math.abs(j.c-s.y1)<E ? 'y1' : null) : null);
+  const formatos = [{}, {tipo:'sobrado', quartos:4, suites:2}, {frente:16, fundo:34, formato:'L'}, {frente:22, fundo:30, formato:'U'}, {frente:22, fundo:30, formato:'H'}];
+  for(const c of formatos) for(const R of Object.keys(M.RUMOS)){
+    const r = M.gerar(Object.assign({orientacao:R}, c));
+    for(const v of r.variantes) for(const p of v.pav){
+      if(p.nome==='Subsolo' || p.nome==='Rooftop') continue;
+      for(const s of p.salas.filter(x => ['quarto','suite','master'].includes(x.tipo)))
+        for(const j of (p.janelas||[])){ const l = lado(j, s); if(l && dif(rf(l, M.RUMOS[R], v.espelharVento), 270) <= 22.5) erros.push(`${JSON.stringify(c)} frente ${R} ${v.nome}/${p.nome}: ${s.nome||s.tipo}`); }
+    }
+  }
+  ok(!erros.length, erros.slice(0, 3).join('; '));
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

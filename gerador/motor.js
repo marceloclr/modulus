@@ -1132,7 +1132,7 @@ function janelasSubsolo(pav, q, S, av){
   return {janelas};
 }
 
-function aberturas(pav, q, ehTerreo){
+function aberturas(pav, q, ehTerreo, espelho){
   const S = pav.salas, portas = [], vaos = [], janelas = [], av = [];
   const aberto = (a,b) => ABERTOS.some(([p,r]) => (a.tipo===p&&b.tipo===r)||(a.tipo===r&&b.tipo===p))
     || (q.cozinha==='aberta' && ((a.tipo==='cozinha'&&b.tipo==='jantar')||(a.tipo==='jantar'&&b.tipo==='cozinha')));
@@ -1212,7 +1212,13 @@ function aberturas(pav, q, ehTerreo){
     if(TIPOS[s.tipo].aberto) continue;
     const t = TIPOS[s.tipo];
     if(!(t.hab || t.mol || s.tipo==='circ' || s.tipo==='galeria' || s.tipo==='hall' || s.tipo==='closetMaster')) continue;
-    const ext = trechosExternos(s, fechados).filter(e => e.t1-e.t0 >= 0.8).sort((a,b) => (b.t1-b.t0)-(a.t1-a.t0));
+    let ext = trechosExternos(s, fechados).filter(e => e.t1-e.t0 >= 0.8).sort((a,b) => (b.t1-b.t0)-(a.t1-a.t0));
+    if(QUARTOS.includes(s.tipo) && RUMOS[q.orientacao] !== undefined){
+      // quarto: nada de janela a oeste se houver outra face; as faces a nascente vêm primeiro
+      const nota = e => classeSol(rumoFace(e.lado, RUMOS[q.orientacao], espelho));
+      const semPoente = ext.filter(e => nota(e) < 3); if(semPoente.length) ext = semPoente;
+      ext.sort((a,b) => nota(a) - nota(b) || (b.t1-b.t0)-(a.t1-a.t0));
+    }
     const A = area(s);
     const exig = (t.hab || t.mol) ? A/8 : 0;
     if(!ext.length){
@@ -1257,6 +1263,34 @@ function faceDe(e, S){
   if(e.o==='h') return dentro(m, e.c - 0.05) ? 'y1' : 'y0';
   return dentro(e.c - 0.05, m) ? 'x1' : 'x0';
 }
+/* Sol nos quartos (regra do usuário): nunca janela de quarto voltada para o poente (face O); SO e NO só em parte do ano;
+   prioridade ao nascente (NE, L, SE). Em Fortaleza o sol se põe entre 247° e 293° de azimute ao longo do ano. */
+const QUARTOS = ['quarto', 'suite', 'master'];
+function classeSol(az){ const dO = difAng(az, 270); if(dO <= 22.5) return 3; if(dO <= 67.5) return 2; return difAng(az, 90) <= 67.5 ? 0 : 1; }
+const rumoDe = az => Object.keys(RUMOS).find(k => RUMOS[k] === ((az % 360) + 360) % 360);
+function ladoDaJanela(j, s){
+  const E = 0.001;
+  if(j.o === 'v'){ if(j.t0 < s.y0 - E || j.t1 > s.y1 + E) return null; return Math.abs(j.c - s.x0) < E ? 'x0' : Math.abs(j.c - s.x1) < E ? 'x1' : null; }
+  if(j.t0 < s.x0 - E || j.t1 > s.x1 + E) return null; return Math.abs(j.c - s.y0) < E ? 'y0' : Math.abs(j.c - s.y1) < E ? 'y1' : null;
+}
+function avaliaSol(v, q, espelho){
+  const F = RUMOS[q.orientacao]; if(F === undefined) return {pen:0, av:[]};
+  let pen = 0; const av = [];
+  v.quartosPoente = 0;
+  for(const p of v.pav){
+    if(p.nome === 'Subsolo' || p.nome === 'Rooftop') continue;
+    for(const s of p.salas.filter(x => QUARTOS.includes(x.tipo))){
+      const azs = (p.janelas || []).map(j => ladoDaJanela(j, s)).filter(Boolean).map(l => rumoFace(l, F, espelho));
+      if(!azs.length) continue;
+      const cls = azs.map(classeSol), nome = `${p.nome}: ${rotulo(s)}`;
+      if(cls.includes(3)){ pen += 25; v.quartosPoente = (v.quartosPoente || 0) + 1; av.push(`${nome} com janela voltada para o poente (oeste): sol forte da tarde o ano todo.`); }
+      else if(cls.includes(2)){ const az = azs[cls.indexOf(2)]; pen += 6; av.push(`${nome} com janela voltada para ${NOMES_RUMO[rumoDe(az)].toLowerCase()}: sol da tarde em parte do ano.`); }
+      if(!cls.includes(0)) pen += 3;   // prioridade ao nascente
+    }
+  }
+  return {pen, av};
+}
+
 /* Ventilação cruzada pelo vento de L/SE: aberturas a barlavento e a sotavento em cada pavimento. */
 function avaliaVento(v, q, espelho){
   const F = RUMOS[q.orientacao] !== undefined ? RUMOS[q.orientacao] : 0;
@@ -1308,7 +1342,20 @@ function avalia(v, q){
     else { const rel = Math.abs(a - d.a)/d.a; dif = rel; txt = `${f2(a)} m² (pedido ${f2(d.a)} m²)`; if(rel > 0.2) pen += 10*rel; }
     if((d.w ? dif > 0.5 : dif > 0.2) && !avisados.has(s.tipo)){ avisados.add(s.tipo); av.push(`${p.nome}: ${rotulo(s)} ficou com ${txt}.`); }
   }
-  for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo'); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas; av.push(...ab.avisos); pen += 6*ab.avisos.length; }
+  const abrir = esp => { const avs = []; for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo', esp); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas; avs.push(...ab.avisos); } return avs; };
+  let ori = null;
+  if(RUMOS[q.orientacao] === undefined){
+    // sem orientação, as janelas não dependem do espelho: abre uma vez e compara só o vento
+    const avAb = abrir(false), vn = avaliaVento(v, q, false), ve = avaliaVento(v, q, true), sl = {pen:0, av:[]};
+    ori = ve.pen < vn.pen ? {esp:true, avAb, vt:ve, sl} : {esp:false, avAb, vt:vn, sl};
+  } else {
+    for(const esp of [false, true]){
+      const avAb = abrir(esp), vt = avaliaVento(v, q, esp), sl = avaliaSol(v, q, esp), pn = 6*avAb.length + vt.pen + sl.pen;
+      if(!ori || pn < ori.pn) ori = {esp, avAb, vt, sl, pn};
+    }
+    if(!ori.esp){ abrir(false); avaliaSol(v, q, false); }   // a última rodada foi a espelhada: refaz a escolhida
+  }   // a última rodada foi a espelhada: refaz as aberturas da escolhida
+  av.push(...ori.avAb); pen += 6*ori.avAb.length;
   // terreno
   const B = q.frente - 2*q.recLat, Dmax = q.fundo - q.recFrente - q.recFundo;
   if(v.W > B + 0.01){ pen += 40*(v.W-B); av.push(`A casa (${f2(v.W)} m) é mais larga que a área edificável (${f2(B)} m).`); }
@@ -1336,10 +1383,9 @@ function avalia(v, q){
   const circ = v.pav.reduce((s,p)=>s+p.salas.filter(x=>['circ','hall','galeria'].includes(x.tipo)).reduce((t,x)=>t+area(x),0),0);
   if(circ/tot > 0.14) pen += 60*(circ/tot-0.14);
   // vento de L/SE: compara a planta normal com a espelhada e sugere a melhor
-  const vn = avaliaVento(v, q, false), ve = avaliaVento(v, q, true);
-  const vv = ve.pen < vn.pen ? ve : vn; v.espelharVento = ve.pen < vn.pen;
-  pen += vv.pen; av.push(...vv.av);
-  if(v.espelharVento) av.push('A versão espelhada recebe melhor o vento de leste/sudeste; ela já aparece espelhada.');
+  v.espelharVento = ori.esp;
+  pen += ori.vt.pen + ori.sl.pen; av.push(...ori.vt.av, ...ori.sl.av);
+  if(v.espelharVento) av.push(RUMOS[q.orientacao] !== undefined ? 'A versão espelhada recebe melhor o vento de leste/sudeste e o sol; ela já aparece espelhada.' : 'A versão espelhada recebe melhor o vento de leste/sudeste; ela já aparece espelhada.');
   v.score = Math.max(0, Math.round(100 - pen));
   v.avisos = (v.avisos||[]).concat(av);
   v.ocupacao = r2(taxa); v.projecao = r2(proj); v.circPct = r2(100*circ/tot);
@@ -1425,8 +1471,11 @@ function gerar(entrada){
   todas.sort((a,b) => b.score-a.score || a.W*a.D-b.W*b.D);
   // até 3 variantes, preferindo tipologias diferentes
   const escolhidas = [];
-  for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
-  for(const v of todas){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
+  // quarto voltado para o poente nunca: essas variantes só aparecem se nenhuma outra escapar
+  const semPoente = todas.filter(v => !v.quartosPoente), elegiveis = semPoente.length ? semPoente : todas;
+  if(!semPoente.length && todas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
+  for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
+  for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
   escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recLat:q.recLat, recFundo:q.recFundo}; });
   const lm = loteMinimo(q, P);
   if(escolhidas.length && escolhidas[0].score < 60) avisos.push('O programa não cabe bem neste terreno. Veja o terreno mínimo sugerido.');
