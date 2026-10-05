@@ -129,5 +129,75 @@ function cartaoSolar(r, extra){
   return h;
 }
 
-return {selo, cartaoCusto, cartaoEstrutura, cartaoSolar, VISTAS, VISTAS_SOLAR, mesTxt};
+/* Card da torre de ar (r de Torre.calcular; null quando a variante não tem torre). */
+function cartaoTorre(r, raiz){
+  const m3h = n => Math.round(n).toLocaleString('pt-BR') + ' m³/h', f1 = n => (Math.round(n*10)/10).toFixed(1).replace('.', ',');
+  let h = `<div class="card res" style="--c:var(--card-torre)"><div class="res-head"><h3>Torre de ar</h3><p class="selo">${esc(r.nome)} sobre ${r.sobre === 'escada' ? 'a escada' : 'o estar'}${r.auto ? ' · recomendada para esta casa' : ''}</p></div>`;
+  h += `<div class="tbl-wrap"><table><tbody>`;
+  if(!r.auto && r.recomendada !== r.tipo) h += `<tr><td>Recomendada para esta tipologia</td><td class="n">${esc(r.nomeRecomendada)}</td></tr>`;
+  h += `<tr><td>Altura de tiragem</td><td class="n"><span class="calc" data-tip="Da entrada de ar (1 m acima do piso) até a saída da torre, 1,5 m acima da cobertura">${f2(r.H)} m</span></td></tr>`;
+  h += `<tr><td>Área efetiva de saída</td><td class="n">${f2(r.A)} m²</td></tr>`;
+  if(r.dT) h += `<tr><td>Efeito chaminé (ΔT ${r.dT} K)</td><td class="n"><span class="calc" data-tip="${esc(r.formulas.cham)}">${m3h(r.qCham)}</span></td></tr>`;
+  if(r.dCp) h += `<tr><td>Vento de 4 m/s (ΔCp ${f2(r.dCp)})</td><td class="n"><span class="calc" data-tip="${esc(r.formulas.vento)}">${m3h(r.qVento)}</span> · com 2 m/s, ${m3h(r.qVentoFraco)}</td></tr>`;
+  if(r.ec) h += `<tr><td>Exaustor EC (horas sem vento)</td><td class="n">${m3h(r.ec)}</td></tr>`;
+  h += `<tr><td>Volume ventilado</td><td class="n">${f2(r.volume)} m³</td></tr>`;
+  h += `<tr class="total"><td>Trocas de ar por hora</td><td class="n"><span class="calc" data-tip="${esc(r.formulas.trocas)}">${f1(r.trocas)}</span> · mínimo ${f1(r.trocasMin)}</td></tr>`;
+  h += `</tbody></table></div>`;
+  h += `<p class="note">Na zona bioclimática 8 (Fortaleza) a diferença de temperatura entre dentro e fora é de 1 a 3 K: o vento de leste/sudeste rende várias vezes mais que o efeito chaminé. Estimativa para estudo preliminar; confirme com simulação. <a href="${raiz || '../'}torre/" target="_blank" rel="noopener">Dossiê das torres</a>.</p>`;
+  return h + '</div>';
+}
+
+/* Carta solar estereográfica de uma face, com a máscara de sombra do brise (B = módulo Brises). */
+function cartaSolar(fc, B, tam){
+  const R = (tam || 200)/2 - 22, cx = R + 22, cy = R + 22, rad = g => g*Math.PI/180;
+  const pt = (az, h) => { const r = R * Math.tan(rad((90 - h)/2)); return [+(cx + r*Math.sin(rad(az))).toFixed(1), +(cy - r*Math.cos(rad(az))).toFixed(1)]; };
+  let o = `<svg class="carta" viewBox="0 0 ${2*cx} ${2*cy}" width="${2*cx}" height="${2*cy}" role="img" aria-label="Carta solar da face ${esc(fc.nome)} com a máscara de sombra">`;
+  o += `<circle cx="${cx}" cy="${cy}" r="${R}" fill="var(--surface)" stroke="var(--line)"/>`;
+  // máscara: cada célula do céu (5° × 5°) pintada pela fração de sol barrada; atrás da face, cinza
+  const p = {ds:fc.ds, beta:fc.beta, dsV:fc.dsV, betaV:fc.betaV};
+  for(let az = 0; az < 360; az += 5) for(let h = 0; h < 90; h += 5){
+    const hsa = B.norm180(az + 2.5 - fc.azimute);
+    let cor, op;
+    if(Math.abs(hsa) >= 90){ cor = 'var(--ink-3)'; op = 0.10; }
+    else { const hc = h + 2.5, vsa = Math.atan(Math.tan(rad(hc)) / Math.cos(rad(hsa))) * 180/Math.PI, i = {hsa, vsa};
+      const luz = fc.tipo === 'movel' ? B.luzMovel(i, p) : B.luz(fc.tipo, p, i); cor = 'var(--card-brises)'; op = +(0.55*(1 - luz)).toFixed(2); if(op < 0.02) continue; }
+    const a = pt(az, h), b = pt(az + 5, h), c = pt(az + 5, h + 5), d = pt(az, h + 5);
+    o += `<path d="M${a}L${b}L${c}L${d}Z" fill="${cor}" fill-opacity="${op}"/>`;
+  }
+  for(const h of [30, 60]){ const r = R*Math.tan(rad((90 - h)/2)); o += `<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="none" stroke="var(--line)" stroke-dasharray="2 2"/>`; }
+  for(const [k, az] of [['N', 0], ['L', 90], ['S', 180], ['O', 270]]){ const x = +(cx + (R + 11)*Math.sin(rad(az))).toFixed(1), y = +(cy - (R + 11)*Math.cos(rad(az))).toFixed(1); o += `<text x="${x}" y="${y + 3}" text-anchor="middle" style="font-size:9px;fill:var(--ink-3)">${k}</text>`; }
+  // a face: linha do plano da fachada e seta da normal
+  const [f0x, f0y] = pt(fc.azimute - 90, 0), [f1x, f1y] = pt(fc.azimute + 90, 0), [nx, ny] = pt(fc.azimute, 0);
+  o += `<line x1="${f0x}" y1="${f0y}" x2="${f1x}" y2="${f1y}" stroke="var(--ink-2)" stroke-width="1.4"/><circle cx="${nx}" cy="${ny}" r="3" fill="var(--card-brises)"/>`;
+  // trajetórias do sol: 21/jun, 21/mar (≈ set), 21/dez; pontos das 7h às 17h
+  for(const [n, nome] of [[172, 'jun'], [80, 'mar/set'], [355, 'dez']]){
+    const pts = []; for(let t = 6; t <= 18.001; t += 0.25){ const s2 = B.sol(n, t); if(s2.h > 0) pts.push(pt(s2.az, s2.h)); }
+    o += `<polyline points="${pts.map(q => q.join(',')).join(' ')}" fill="none" stroke="var(--brass)" stroke-width="1.3"/>`;
+    for(let t = 7; t <= 17; t++){ const s2 = B.sol(n, t); if(s2.h <= 0) continue; const [x, y] = pt(s2.az, s2.h); o += `<circle cx="${x}" cy="${y}" r="1.6" fill="var(--brass)"><title>21/${nome} ${t}h: altura ${Math.round(s2.h)}°, azimute ${Math.round(s2.az)}°</title></circle>`; }
+    const [lx, ly] = pt(B.sol(n, 12).az, B.sol(n, 12).h); o += `<text x="${lx + 4}" y="${ly - 3}" style="font-size:8px;fill:var(--ink-3)">${nome}</text>`;
+  }
+  return o + '</svg>';
+}
+/* Card "Brises" (r de Brises.estudar). */
+function cartaoBrises(r, B, dados){
+  let h = `<div class="card res" style="--c:var(--card-brises)"><div class="res-head"><h3>Brises</h3><p class="selo">Sol de Fortaleza (${f2(Math.abs(B.LAT))}° S), dia 21 de cada mês, das 7h às 17h · radiação direta</p></div>`;
+  if(r.semOrientacao) return h + '<p class="note">Informe para onde a frente do terreno está voltada (bloco 1, Terreno) para estudar os brises.</p></div>';
+  if(r.semFaces) return h + '<p class="note">Nenhuma face com janelas recebe sol crítico nesta variante, ou nenhuma face foi escolhida.</p></div>';
+  const pct = n => f2(n).replace(/,00$/, '') + ' %';
+  h += `<div class="cartas">${r.faces.map(fc => `<figure>${cartaSolar(fc, B, 240)}<figcaption>Face ${esc(fc.nome.toLowerCase())} · ${esc(fc.nomeTipo.toLowerCase())}</figcaption></figure>`).join('')}</div>`;
+  h += `<div class="tbl-wrap"><table><thead><tr><th>Face</th><th>Solução</th><th class="n">Lâmina (a cada ${f2(B.S_PADRAO)} m)</th><th class="n">Sombra anual</th><th class="n">Horas de sol na janela</th></tr></thead><tbody>`;
+  for(const fc of r.faces){
+    const lam = fc.tipo === 'movel' ? `${f2(fc.profundidade)} m, giro de −45° a +45°` : `${f2(fc.profundidade)} m a ${fc.beta}°${fc.tipo === 'misto' ? ` + verticais ${f2(fc.profundidadeV)} m a ${fc.betaV}°` : ''}`;
+    h += `<tr><td>${esc(fc.nome)}${fc.barlavento ? ' <small>(barlavento)</small>' : ''}</td><td>${esc(fc.nomeTipo)}${fc.alternativa ? `<br><small>lâminas móveis: ${pct(fc.alternativa.pct)} com vista livre</small>` : ''}</td>`;
+    h += `<td class="n"><span class="calc" data-tip="${esc(fc.formula)}">${lam}</span><br><small>d/s ${f2(fc.ds)} · vista livre ${pct(100*fc.vista)}</small></td>`;
+    h += `<td class="n">${pct(fc.pct)}</td><td class="n"><span class="calc" data-tip="Horas por ano com mais da metade do sol direto passando pelo brise, contra as horas sem brise (${fc.horasSemBrise} h de ${fc.horasSol} h com sol na face)">${fc.horasSemProtecao} h (sem brise, ${fc.horasSemBrise} h)</span></td></tr>`;
+  }
+  h += `</tbody></table></div>`;
+  const ad = dados && dados.adicionais && dados.adicionais.brises;
+  if(ad) h += `<p class="note">Área protegida ≈ 1,5 × ${f2(r.area)} m² de janelas = ${f2(1.5*r.area)} m²; custo no card de custo (${Custos.brl(ad.min)} a ${Custos.brl(ad.max)}/m², estimativa).</p>`;
+  h += `<p class="note">Só a radiação direta: difusa e reflexos do entorno ficam fora. Não substitui simulação (Apolux, EnergyPlus). Linhas tracejadas azuis na planta marcam as janelas com brise.</p>`;
+  return h + '</div>';
+}
+
+return {selo, cartaoCusto, cartaoEstrutura, cartaoSolar, cartaoTorre, cartaoBrises, cartaSolar, VISTAS, VISTAS_SOLAR, mesTxt};
 });

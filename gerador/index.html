@@ -19,6 +19,11 @@
 .form-acts .btn{padding:8px 10px}
 .fld:has(select){grid-template-columns:minmax(0,1fr) 168px}
 .fld small{grid-column:1/-1;color:var(--ink-3);font-size:11.5px;margin-top:-2px}
+.faces-brise{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 10px}
+.cartas{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 12px}
+.cartas figure{margin:0;text-align:center}
+.cartas figcaption{font-size:12px;color:var(--ink-3)}
+.carta{max-width:100%;height:auto}
 .sub-nota{color:var(--ink-3);font-size:12px;margin:2px 0 8px;line-height:1.45}
 .lote-wrap{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
 .lote-wrap svg{width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:#FBFAF7}
@@ -92,8 +97,8 @@ details.sub>.fs>legend{display:none}
 .bloco-res:empty{display:none}
 .bloco-res{margin:-2px 0 4px}
 .bloco-res .panel{max-width:none;margin:0}
-html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!important}
-#analises,#energia{margin-top:28px}
+html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variante)!important}
+#analises,#energia,#conforto{margin-top:28px}
 .grid-energia .card{margin:0;max-width:940px}
 .grid-analise{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px;align-items:start}
 .grid-analise .card{margin:0}
@@ -210,7 +215,15 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
           <label class="chk"><input type="checkbox" name="supTv">Sala de TV / sala íntima</label>
           <label class="chk"><input type="checkbox" name="supServico">Lavanderia</label>
         </div>
-        <label class="chk"><input type="checkbox" name="torreCalor">Torre de calor (exaustão por efeito chaminé)</label>
+        <label class="fld">Torre de ar<select name="torreTipo"><option value="nenhuma">Nenhuma</option><option value="auto" class="so-beta">Recomendada para esta casa</option><option value="chamine">Chaminé (efeito chaminé)</option><option value="succao" class="so-beta">Coroamento de sucção</option><option value="solar" class="so-beta">Chaminé solar</option><option value="captador" class="so-beta">Captador de vento</option><option value="combinado" class="so-beta">Captador e exaustão combinados</option><option value="hibrida" class="so-beta">Híbrida (sucção, chaminé solar e exaustor EC)</option><option value="shed" class="so-beta">Captador com shed</option></select><small>Na zona bioclimática 8 o vento rende mais que o efeito chaminé. <a href="../torre/" target="_blank" rel="noopener">Veja o dossiê das torres</a>.</small></label>
+        <div id="brisesOps" class="so-beta">
+          <label class="chk"><input type="checkbox" name="brises">Brises (estudo do tipo e do ângulo pela geometria solar)</label>
+          <div id="brisesDet">
+            <label class="fld">Tipo de brise<select name="brisesTipo"><option value="auto">Automático (o mais simples que sombreia bem)</option><option value="horizontal">Lâminas horizontais</option><option value="vertical">Lâminas verticais</option><option value="misto">Grelha (horizontais e verticais)</option><option value="movel">Lâminas móveis</option></select></label>
+            <label class="fld">Faces com brise<select name="brisesFaces"><option value="auto">Automático (faces com sol crítico)</option><option value="escolha">Escolher as faces</option></select></label>
+            <div id="brisesFacesOps" class="faces-brise"><label class="chk"><input type="checkbox" name="brisesFace_N">Norte</label><label class="chk"><input type="checkbox" name="brisesFace_NE">Nordeste</label><label class="chk"><input type="checkbox" name="brisesFace_L">Leste</label><label class="chk"><input type="checkbox" name="brisesFace_SE">Sudeste</label><label class="chk"><input type="checkbox" name="brisesFace_S">Sul</label><label class="chk"><input type="checkbox" name="brisesFace_SO">Sudoeste</label><label class="chk"><input type="checkbox" name="brisesFace_O">Oeste</label><label class="chk"><input type="checkbox" name="brisesFace_NO">Noroeste</label></div>
+          </div>
+        </div>
         <label class="chk"><input type="checkbox" name="rooftop">Rooftop (cobertura usável)</label>
         <div id="rtOps">
           <label class="fld">Posição sobre o pavimento de baixo<select name="rtPos"><option value="frente">Na frente</option><option value="centro">No centro</option><option value="fundo">No fundo</option></select><small>A escada sobe empilhada; o rooftop sempre inclui a caixa de escada.</small></label>
@@ -414,6 +427,10 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
       <div class="panel-head"><p class="eyebrow">Energia da variante escolhida</p><h2 id="tEnergia">Energia solar</h2></div>
       <div id="cardsEnergia" class="grid-energia"><p class="note">Carregando os valores…</p></div>
     </section>
+    <section class="panel so-beta" id="conforto" style="--c:var(--card-torre)" aria-labelledby="tConforto">
+      <div class="panel-head"><p class="eyebrow">Conforto passivo da variante escolhida</p><h2 id="tConforto">Torre de ar e brises</h2></div>
+      <div id="cardsConforto" class="grid-analise"></div>
+    </section>
   </main>
 </div>
 <footer><div>Gerador experimental de estudos preliminares. Medidas pelo eixo das paredes, sem valor de projeto executivo.</div></footer>
@@ -424,6 +441,8 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
 <script src="estrutura.js"></script>
 <script src="custos.js"></script>
 <script src="solar.js"></script>
+<script src="torre.js"></script>
+<script src="brises.js"></script>
 <script src="../tools/valida-schema.js"></script>
 <script src="valores.js"></script>
 <script src="graficos.js"></script>
@@ -455,6 +474,7 @@ function lerForm(){
   return d;
 }
 function preencher(d){
+  if(d && d.torreCalor && (!d.torreTipo || d.torreTipo === 'nenhuma')) d = Object.assign({}, d, {torreTipo:'chamine'});   // links antigos
   for(const el of form.elements){
     if(!el.name || !(el.name in d)) continue;
     if(el.type==='checkbox') el.checked = !!d[el.name];
@@ -560,7 +580,9 @@ function render(){
     `<button class="btn vtab" type="button" role="tab" aria-selected="${i===vi}" aria-pressed="${i===vi}" data-v="${i}">${x.nome}<span class="score">${x.score}</span><small>${x.tipologia}</small><small class="vdim"><span data-tip="Terreno: frente × fundo = área do lote">Terreno ${f2(q.frente)} × ${f2(q.fundo)} m · ${f2(q.frente*q.fundo)} m²</span><span data-tip="Construção: largura × profundidade da casa; área = soma das áreas fechadas de todos os pavimentos">Casa ${f2(x.W)} × ${f2(x.D)} m · ${f2(x.quadro.fechada)} m² construídos</span></small></button>`).join('');
   document.getElementById('ptabs').innerHTML = v.pav.map((p,i) =>
     `<button class="btn" type="button" role="tab" aria-selected="${i===pi}" aria-pressed="${i===pi}" data-p="${i}">${p.nome}</button>`).join('');
-  document.getElementById('plan').innerHTML = Desenho.planta(v, pi);
+  const estBrises = window.plantasBeta && q.brises ? Brises.estudar(v, q) : null;
+  document.getElementById('plan').innerHTML = Desenho.planta(v, pi, estBrises && estBrises.janelas ? {brises: estBrises.janelas} : undefined);
+  brisesVisiveis();
   const av = v.avisos.filter((a,i,arr) => arr.indexOf(a)===i);
   document.getElementById('avisos').innerHTML = av.length
     ? `<div class="warn"><strong>Pontos de atenção desta variante</strong><ul>${av.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`
@@ -596,12 +618,21 @@ function render(){
   document.getElementById('crumbSec').textContent = `${v.nome} · ${v.pav[pi].nome}`;
   if(window.plantasBeta) renderAnalises();
 }
+// conforto passivo (beta): torre de ar e brises da variante escolhida
+function renderConforto(v, q){
+  const t = Torre.calcular(v, q), cards = [], b = Brises.estudar(v, q);
+  if(t) cards.push(Cartoes.cartaoTorre(t));
+  if(b) cards.push(Cartoes.cartaoBrises(b, Brises, dadosCusto));
+  document.getElementById('cardsConforto').innerHTML = cards.length ? cards.join('') : '<p class="note">Escolha uma torre de ar ou brises em “Conforto passivo”, no bloco 1, para ver o estudo desta variante.</p>';
+}
 // cards de custo e estrutura (beta): custo da variante escolhida e de todas, para comparar
 function renderAnalises(){
   const box = document.getElementById('cardsAnalise');
   if(!dadosCusto || !res || !res.variantes[vi]){ box.innerHTML = '<p class="note">Carregando os valores de custo…</p>'; return; }
   const v = res.variantes[vi], q = res.entrada;
+  for(const x of res.variantes) x.brises = Brises.estudar(x, q);                 // área de janelas com brise, para o custo
   const porVariante = res.variantes.map(x => ({nome:x.nome, r:Custos.calcular(x, q, dadosCusto)}));
+  renderConforto(v, q);
   const be = document.getElementById('cardsEnergia');
   be.innerHTML = dadosCusto.solar ? Cartoes.cartaoSolar(Solar.calcular(v, q, dadosCusto), {vista:vistaSolar}) : '<p class="note">Valores de energia solar indisponíveis.</p>';
   box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto, sinapiVivo}) + Cartoes.cartaoEstrutura(v, dadosCusto);
@@ -642,6 +673,12 @@ form.addEventListener('input', e => {
   const meu = ++pedido;
   espera = setTimeout(() => { if(meu !== pedido || !faixasOk()) return; sincroniza(); gerar(); }, 200);
 });
+// brises: detalhes só com a opção marcada; faces só na escolha manual (fora de sincroniza, que fica como está)
+function brisesVisiveis(){
+  const E = form.elements; document.getElementById('brisesDet').hidden = !E.brises.checked;
+  document.getElementById('brisesFacesOps').hidden = E.brisesFaces.value !== 'escolha';
+}
+form.addEventListener('change', e => { if(/^brises/.test(e.target.name || '')) brisesVisiveis(); });
 // subsolo: ao marcar, as vagas vão para o subsolo (antes ficavam no térreo e o subsolo saía sem rampa nem vagas)
 form.elements.subsolo.addEventListener('change', e => { if(e.target.checked && form.elements.garagemLocal.value==='terreo') form.elements.garagemLocal.value = 'subsolo'; });
 document.getElementById('restaurar').addEventListener('click', () => { preencher(PADRAO); gerar(); });

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="../assets/logo.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Torres de ar · Modulus</title>
+<meta name="description" content="Dossiê das torres de ar para casas na zona bioclimática 8 (Fortaleza): física, soluções, recomendação por tipologia e fórmulas usadas pelo gerador.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/base.js"></script>
+<style>
+.dossie{max-width:900px}
+.dossie h2{margin:30px 0 10px}
+.dossie p,.dossie li{color:var(--ink-2);font-size:15.5px;line-height:1.6}
+.dossie .formula{font-family:'IBM Plex Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--steel);border-radius:8px;padding:10px 14px;margin:10px 0;color:var(--ink)}
+.dossie table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0 4px}
+.dossie th,.dossie td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.dossie th{color:var(--ink-3);font-weight:500;font-size:12.5px}
+.dossie .tbl-wrap{overflow-x:auto}
+.nota-zb8{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:1px 8px;border:1px solid currentColor}
+.ok{color:var(--patina)}.medio{color:var(--brass-ink)}.ruim{color:var(--rust)}
+</style>
+</head>
+<body data-nav="gerador" data-root="../">
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+      <div class="crumb"><span class="chip" style="--c:var(--steel)">Dossiê</span><span class="sec">Torres de ar</span></div>
+    </div>
+    <button class="btn" id="themeBtn" type="button" data-tip="Alterna entre o tema claro e o escuro. A escolha fica guardada neste navegador">Tema escuro</button>
+  </div>
+</header>
+
+<main class="page">
+  <section class="panel dossie" style="--c:var(--steel)">
+    <div class="panel-head">
+      <p class="eyebrow">Conforto passivo · zona bioclimática 8 (Fortaleza)</p>
+      <h1 style="font-size:clamp(26px,4vw,36px)">Torres de ar: o que funciona no clima quente e úmido</h1>
+      <p>Resumo das soluções de torre para ventilar casas no litoral do Ceará, com as fórmulas que o gerador usa no card “Torre de ar”. Estudo preliminar: confirme com simulação (CFD ou EnergyPlus) e com um responsável técnico.</p>
+    </div>
+
+    <h2>1. A física em Fortaleza</h2>
+    <p>Na zona bioclimática 8 a estratégia indicada pela NBR 15220-3 é <strong>ventilação cruzada permanente</strong> e sombreamento das aberturas. Dentro e fora a temperatura difere pouco, de 1 a 3 K, e é isso que move o efeito chaminé. O vento, por outro lado, é constante: alísios de leste/sudeste com média perto de 4 m/s.</p>
+    <div class="formula">Efeito chaminé: Q = Cd · A · √(2 · g · H · ΔT / T)<br>H = 6 m, ΔT = 2 K, T = 301 K, Cd = 0,6 → cerca de <strong>1.900 m³/h por m²</strong> de abertura</div>
+    <div class="formula">Vento: Q = Cd · A · v · √ΔCp<br>v = 4 m/s, ΔCp = 1 → cerca de <strong>8.600 m³/h por m²</strong> de abertura</div>
+    <p>Conclusão: a torre rende mais quando trabalha <strong>a favor do vento</strong> (sucção no topo ou captação a barlavento). A chaminé pura serve para as horas sem vento e para tirar o ar quente acumulado junto ao forro.</p>
+
+    <h2>2. Soluções analisadas</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Solução</th><th>Como funciona</th><th>Na ZB8</th></tr></thead>
+      <tbody>
+        <tr><td>Chaminé</td><td>Saídas altas; o ar quente sobe e sai.</td><td><span class="nota-zb8 medio">fraca sozinha</span> ΔT pequeno.</td></tr>
+        <tr><td>Coroamento de sucção</td><td>O vento passa sobre o topo e cria pressão negativa que puxa o ar de dentro (sheds e “chapéus” dos hospitais Sarah, de João Filgueiras Lima, o Lelé).</td><td><span class="nota-zb8 ok">indicada</span> funciona com vento de qualquer direção dominante.</td></tr>
+        <tr><td>Chaminé solar</td><td>Face norte envidraçada ou massa escura aquece o ar da torre e aumenta o ΔT.</td><td><span class="nota-zb8 medio">complemento</span> ajuda nas horas de sol forte.</td></tr>
+        <tr><td>Captador de vento</td><td>Boca voltada para L/SE desce o vento para os ambientes.</td><td><span class="nota-zb8 ok">indicada</span> exige proteção contra chuva de vento.</td></tr>
+        <tr><td>Captador e exaustão combinados</td><td>Uma metade capta, a outra (a sotavento) exaure.</td><td><span class="nota-zb8 ok">indicada</span> boa no rooftop.</td></tr>
+        <tr><td>Híbrida com exaustor EC</td><td>Sucção e chaminé solar, com exaustor EC (cerca de 20 W) para as horas sem vento.</td><td><span class="nota-zb8 ok">indicada</span> sobrados e casas compactas.</td></tr>
+        <tr><td>Exaustor eólico (“cata-vento”)</td><td>Turbina girada pelo vento.</td><td><span class="nota-zb8 medio">limitado</span> vazão pequena e ruído.</td></tr>
+        <tr><td>Torre evaporativa</td><td>Água resfria o ar que desce.</td><td><span class="nota-zb8 ruim">inadequada</span> ar já úmido (UR acima de 70 %).</td></tr>
+        <tr><td>Dutos enterrados</td><td>O ar passa sob o solo antes de entrar.</td><td><span class="nota-zb8 ruim">pouco ganho</span> solo quente e risco de condensação.</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>3. Recomendação por tipologia (usada em “Recomendada para esta casa”)</h2>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Tipologia</th><th>Solução</th><th>Onde</th></tr></thead>
+      <tbody>
+        <tr><td>Térrea</td><td>Coroamento de sucção, com exaustor EC opcional</td><td>Sobre o estar</td></tr>
+        <tr><td>Sobrado</td><td>Híbrida: sucção, chaminé solar e exaustor EC</td><td>Sobre a escada, que vira o duto</td></tr>
+        <tr><td>Com rooftop</td><td>Captador para L/SE com exaustão pela torre (combinado)</td><td>Na caixa de escada</td></tr>
+        <tr><td>Casa em H</td><td>Captador na ala a barlavento e shed no núcleo</td><td>Entre as alas</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>4. Regras de desenho</h2>
+    <ul>
+      <li>Seção livre de pelo menos 1 m² (torre de 1,50 × 1,50 m no gerador), saída 1,5 m acima da cobertura.</li>
+      <li>Entradas de ar baixas a barlavento (L/SE) e saída pelo topo; portas internas com bandeira ou grelha para o ar chegar à torre.</li>
+      <li>Venezianas com proteção contra chuva de vento e tela contra insetos; registro para fechar em dias de chuva.</li>
+      <li>Na chaminé solar, vidro ou chapa escura na face norte, que recebe sol o ano inteiro nessa latitude.</li>
+      <li>Exaustor EC de baixo consumo dimensionado para a vazão sem vento (cerca de 1.500 m³/h).</li>
+    </ul>
+
+    <h2>5. O que o gerador calcula</h2>
+    <p>Para a variante escolhida: altura de tiragem (pavimentos × pé-direito + 1,5 m − 1,0 m da entrada), vazão por efeito chaminé com o ΔT do tipo (2 K, ou 5 K com chaminé solar), vazão por vento a 4 m/s e a 2 m/s com o ΔCp do tipo (0,3 a 1,0), vazão do exaustor quando houver, e trocas de ar por hora sobre o volume dos ambientes fechados. Os coeficientes são estimativas de literatura para estudo preliminar.</p>
+    <p><a href="../gerador/?beta=1">Abrir o gerador</a></p>
+  </section>
+</main>
+<footer><div>Estudo conceitual, sem valor de projeto executivo. Referências: NBR 15220-3 (zoneamento bioclimático), NBR 15575 (desempenho), Givoni, <em>Climate Considerations in Building and Urban Design</em>; obra de João Filgueiras Lima (Lelé) na rede Sarah.</div></footer>
+</body>
+</html>

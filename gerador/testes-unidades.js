@@ -258,6 +258,47 @@ t('subsolo: sem teto cabe o máximo; com teto, o subsolo encolhe para essas vaga
   ok(t3.dim.W * t3.dim.D < livre.dim.W * livre.dim.D, 'subsolo menor com teto');
 });
 
+t('torre de ar: recomendação por tipologia e links antigos (torreCalor)', () => {
+  const tipo = e => (M.gerar(Object.assign({torreTipo:'auto'}, e)).variantes[0].torre || {}).tipo;
+  igual(tipo({}), 'succao', 'térrea:'); igual(tipo({tipo:'sobrado'}), 'hibrida', 'sobrado:'); igual(tipo({tipo:'sobrado', rooftop:true}), 'combinado', 'rooftop:');
+  igual(tipo({frente:22, fundo:30, formato:'H', quartos:3, suites:3}), 'shed', 'H:');
+  igual(M.normaliza({torreCalor:true}).torreTipo, 'chamine', 'torreCalor antigo:'); igual(M.normaliza({}).torreTipo, 'nenhuma'); igual(M.normaliza({torreTipo:'xyz'}).torreTipo, 'nenhuma');
+  ok(!M.gerar({}).variantes[0].torre, 'sem torre por padrão');
+});
+
+t('torre de ar: vazões pelas fórmulas do dossiê (conta à mão) e card', () => {
+  const TO = require('./torre.js'), CA = require('./cartoes.js');
+  const e = {tipo:'sobrado', torreTipo:'chamine'}, v = M.gerar(e).variantes[0], r = TO.calcular(v, M.normaliza(e));
+  igual(Math.round(r.H*100)/100, 6.5, 'H = 2 × 3,0 + 1,5 − 1,0:');
+  ok(Math.abs(r.qCham - 1988) < 2, 'chaminé 0,6·1·√(2·9,81·6,5·2/301)·3600 ≈ 1988: ' + r.qCham);
+  ok(Math.abs(r.qVento - 0.6*4*Math.sqrt(0.3)*3600) < 1, 'vento');
+  const h = CA.cartaoTorre(r); ok(h.includes('Torre de ar') && h.includes('Trocas de ar por hora') && h.includes('torre/'), 'card');
+  igual(TO.calcular(M.gerar({}).variantes[0], M.normaliza({})), null, 'sem torre:');
+});
+
+t('brises: sol de Fortaleza, geometria das lâminas e estudo da variante', () => {
+  const B = require('./brises.js'), CA = require('./cartoes.js'), CU = require('./custos.js');
+  // ao meio-dia solar a altura é 90° − |φ − δ|: 21/jun δ ≈ 23,45° → h ≈ 62,8° ao norte; 21/dez δ ≈ −23,4° → h ≈ 70,3° ao sul
+  const jun = B.sol(172, 12), dez = B.sol(355, 12);
+  ok(Math.abs(jun.h - 62.8) < 0.2 && Math.abs(jun.az) < 0.5, 'junho ' + JSON.stringify(jun));
+  ok(Math.abs(dez.h - 70.3) < 0.3 && Math.abs(dez.az - 180) < 0.5, 'dezembro ' + JSON.stringify(dez));
+  // lâmina horizontal d/s = 1, β = 0: com VSA de 45°, tan = 1 → nenhum sol passa; com VSA de 26,57° (tan 0,5) passa a metade
+  ok(B.passa(1, 0, 45) < 1e-9 && Math.abs(B.passa(1, 0, 26.565) - 0.5) < 1e-3, 'fração que passa');
+  ok(Math.abs(B.vista(1, 30) - 0.5) < 1e-9, 'vista livre 1 − d/s·|sen β|');
+  // faces norte e sul: brise horizontal reto e curto; leste e oeste: lâminas inclinadas ou móveis
+  const n = B.otimizar('horizontal', 0), l = B.otimizar('horizontal', 90);
+  ok(n.p.beta === 0 && n.r.pct > 95, 'norte ' + JSON.stringify(n.p)); ok(l.p.beta > 0 && l.vista < n.vista, 'leste ' + JSON.stringify(l.p));
+  const e = {orientacao:'N', brises:true}, q = M.normaliza(e), v = M.gerar(e).variantes[0], r = B.estudar(v, q);
+  ok(r.faces.length && r.faces.every(fc => fc.pct > 90 && fc.vista >= 0.4 - 1e-9), 'faces ' + r.faces.map(fc => fc.rumo + ' ' + fc.pct).join(', '));
+  ok(r.faces.every(fc => !['S'].includes(fc.rumo)), 'a face sul não é crítica');
+  const h = CA.cartaoBrises(r, B, DADOS); ok(h.includes('<svg class="carta"') && h.includes('Sombra anual'), 'card');
+  v.brises = r; ok(CU.calcular(v, q, DADOS).parcelas.some(p => p.id === 'brises'), 'custo dos brises');
+  igual(B.estudar(v, M.normaliza({})), null, 'sem brises:');
+  igual(B.estudar(v, M.normaliza({brises:true})).semOrientacao, true, 'sem orientação:');
+  const q2 = M.normaliza({orientacao:'N', brises:true, brisesFaces:'escolha', brisesFace_S:true});
+  ok(B.estudar(M.gerar(q2).variantes[0], q2).faces.every(fc => fc.rumo === 'S'), 'escolha manual');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

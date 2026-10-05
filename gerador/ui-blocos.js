@@ -20,7 +20,7 @@ const DICA = {'a-definir':'Ainda não preenchido', 'em-edicao':'Em preenchimento
 const ORDEM = BLOCOS.map(b => b.id);
 // o estilo (bloco 4) depende de toda a geometria do bloco 1; o solar (bloco 3), só do que muda carga ou cobertura.
 // O custo (bloco 2) é recalculado sozinho a cada mudança de área, sem pedir revisão.
-const CAMPOS_SOLAR = /^(quartos|suites|master|tipo|formato|frente|fundo|rec|taxa|piscina|elevador|rooftop|rt[A-Z]|supModo|sec[A-Z]|torreCalor|gourmet|edicula|ed[A-Z]|subsolo|peDireito)/;
+const CAMPOS_SOLAR = /^(quartos|suites|master|tipo|formato|frente|fundo|rec|taxa|piscina|elevador|rooftop|rt[A-Z]|supModo|sec[A-Z]|torre[A-Z]|gourmet|edicula|ed[A-Z]|subsolo|peDireito)/;
 function dependentes(bloco, campo){
   if(bloco === 'b1') return (CAMPOS_SOLAR.test(campo || '') ? ['b3'] : []).concat(['b4']);
   return [];
@@ -91,7 +91,7 @@ function montar(form, est, opts){
   }
   // bloco 1: as seções atuais, com o subsolo e o conforto passivo como subseções próprias
   const subsolo = subsecao('Subsolo', [rotuloDe('subsolo'), document.getElementById('subOps')]);
-  const conforto = subsecao('Conforto passivo', [rotuloDe('torreCalor')]);
+  const conforto = subsecao('Conforto passivo', [rotuloDe('torreTipo'), document.getElementById('brisesOps')]);
   [sec('terreno'), sec('tipo'), subsolo, sec('quartos'), sec('salas'), recolhida(sec('dimensoes')), sec('garagem'), recolhida(sec('anexos')), conforto]
     .forEach(n => corpos.b1.appendChild(n));
   // bloco 2: sistema estrutural e padrão e local da obra

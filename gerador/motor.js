@@ -71,9 +71,10 @@ const PADRAO = {
   elevador:false, vaoMax:10,
   supModo:'corresp', secFrente:true, secMeio:true, secFundo:true, secAlaE:true, secAlaD:false,
   supQuartos:-1, supEscritorio:false, supTv:false, supServico:false,
-  torreCalor:false,
+  torreTipo:'nenhuma',
   rooftop:false, rtPos:'centro', rtTecnicaA:4, rtGourmetA:12, rtVarandaA:10, rtTerracoA:20, rtBanho:true, rtSpa:false,
   subRecuos:'nenhum', permeab:20, subVagasMax:0,
+  brises:false, brisesTipo:'auto', brisesFaces:'auto', brisesFace_N:false, brisesFace_NE:false, brisesFace_L:false, brisesFace_SE:false, brisesFace_S:false, brisesFace_SO:false, brisesFace_O:false, brisesFace_NO:false,
   subsolo:false, subNivel:'meio', garagemLocal:'subsolo', vagasTerreo:1, subLazer:false, inclinacao:20,
 };
 
@@ -86,7 +87,11 @@ function normaliza(p){
   if(p && p.rtGourmet===false && p.rtGourmetA===undefined) q.rtGourmetA = 0;
   if(p && p.rtTecnica===false && p.rtTecnicaA===undefined) q.rtTecnicaA = 0;
   for(const k of ['rtTecnicaA','rtGourmetA','rtVarandaA','rtTerracoA']) q[k] = clamp(+q[k] || 0, 0, 300);
-  q.torreCalor = q.torreCalor===true||q.torreCalor==='true'||q.torreCalor==='on'||q.torreCalor===1;
+  // torre de ar (Fase 4): torreTipo substitui torreCalor (true passa a valer chaminé)
+  const torreAntiga = p && (p.torreCalor===true||p.torreCalor==='true'||p.torreCalor==='on'||p.torreCalor===1);
+  if(!TORRES[q.torreTipo] && q.torreTipo !== 'auto') q.torreTipo = 'nenhuma';
+  if(torreAntiga && (!p.torreTipo || p.torreTipo === 'nenhuma')) q.torreTipo = 'chamine';
+  q.torreCalor = q.torreTipo !== 'nenhuma';
   for(const k of ['secFrente','secMeio','secFundo','secAlaE','secAlaD','supEscritorio','supTv','supServico','rooftop','rtDeck','rtGourmet','rtBanho','rtSpa','rtTecnica']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   if(q.supModo!=='parcial') q.supModo = 'corresp';
   q.supQuartos = Math.round(+q.supQuartos); if(!(q.supQuartos >= 0) || q.supQuartos > q.quartos) q.supQuartos = q.quartos;
@@ -119,6 +124,12 @@ function normaliza(p){
   }
   if(!['nenhum','lateraisFundo','todos'].includes(q.subRecuos)) q.subRecuos = 'nenhum';
   q.subVagasMax = clamp(Math.round(+q.subVagasMax || 0), 0, 40);      // teto opcional de vagas no subsolo (0 = o máximo que couber)
+  // brises (Fase 4): estudo em gerador/brises.js; o motor só normaliza os campos
+  const sim = x => x===true||x==='true'||x===1||x==='1'||x==='on';
+  q.brises = sim(q.brises);
+  if(!['auto','horizontal','vertical','misto','movel'].includes(q.brisesTipo)) q.brisesTipo = 'auto';
+  if(q.brisesFaces !== 'escolha') q.brisesFaces = 'auto';
+  for(const k of Object.keys(RUMOS)) q['brisesFace_' + k] = sim(q['brisesFace_' + k]);
   q.permeab = clamp(isNaN(+q.permeab) ? 20 : +q.permeab, 0, 80);
   // onde ficam as vagas: só no térreo, só no subsolo ou nos dois
   if(!['terreo','subsolo','ambos'].includes(q.garagemLocal)) q.garagemLocal = (p && p.subGaragem===false) ? 'terreo' : 'subsolo';
@@ -1558,17 +1569,38 @@ function acessos(v, q){
 }
 
 /* ---------- Geração ---------- */
+/* ---------- Torre de ar (dossiê em torre/index.html) ----------
+   Na ZB8 o vento manda; a chaminé pura rende pouco (ΔT de 1 a 3 K). Recomendação por tipologia:
+   térrea → coroamento de sucção sobre o estar; sobrado → híbrida sobre a escada; rooftop → combinado na caixa de escada;
+   casa em H → captador na ala a barlavento com shed no núcleo. */
+const TORRES = {
+  chamine:   {nome:'Chaminé (efeito chaminé)', curto:'chaminé', dCp:0.3, dT:2, ec:0, aviso:'exaustão do ar quente por efeito chaminé, com saídas altas nas quatro faces.'},
+  succao:    {nome:'Coroamento de sucção', curto:'sucção', dCp:0.6, dT:2, ec:0, aviso:'o vento passa sobre o coroamento e cria sucção que puxa o ar de dentro (solução de Lelé); a saída fica a sotavento.'},
+  solar:     {nome:'Chaminé solar', curto:'chaminé solar', dCp:0.3, dT:5, ec:0, aviso:'face a norte envidraçada e massa escura aquecem o ar da torre e reforçam a tiragem nas horas de sol.'},
+  captador:  {nome:'Captador de vento', curto:'captador', dCp:1.0, dT:0, ec:0, aviso:'boca voltada para leste/sudeste capta o vento predominante e o desce para os ambientes; a saída é pelas janelas a sotavento.'},
+  combinado: {nome:'Captador e exaustão combinados', curto:'combinado', dCp:1.0, dT:2, ec:0, aviso:'metade da torre capta o vento de leste/sudeste e a outra metade, a sotavento, exaure o ar quente.'},
+  hibrida:   {nome:'Híbrida: sucção, chaminé solar e exaustor EC', curto:'híbrida', dCp:0.6, dT:5, ec:1500, aviso:'coroamento de sucção com chaminé solar e um exaustor EC de baixo consumo para as horas sem vento.'},
+  shed:      {nome:'Captador com shed', curto:'shed', dCp:0.8, dT:2, ec:0, aviso:'captador na ala a barlavento e shed (aberturas altas a sotavento) no núcleo, para a ventilação cruzada entre as alas.'},
+};
+function torreRecomendada(v, q){
+  if(q.rooftop) return 'combinado';
+  if(q.tipo === 'sobrado') return 'hibrida';
+  if(/em H/i.test(v.tipologia || "")) return "shed";
+  return 'succao';
+}
 function comTorre(v, q){
-  if(!q.torreCalor) return v;
+  if(q.torreTipo === 'nenhuma') return v;
+  const tipo = q.torreTipo === 'auto' ? torreRecomendada(v, q) : q.torreTipo, T = TORRES[tipo];
   const casa = v.pav.filter(p => !p.anexo && p.nome!=='Subsolo' && p.nome!=='Rooftop');
   const topo = casa[casa.length-1];
   const esc = topo.salas.find(s => s.tipo==='escada');
   const estar = casa[0].salas.find(s => s.tipo==='estar') || casa[0].salas.find(s => s.tipo==='jantar');
-  const base = esc && casa.length > 1 ? esc : estar;
+  const base = esc && (casa.length > 1 || q.rooftop) ? esc : estar;
   if(!base) return v;
   const cx = (base.x0+base.x1)/2, cy = (base.y0+base.y1)/2, t = 1.5;
-  v.torre = {x0:r2(cx-t/2), y0:r2(cy-t/2), x1:r2(cx+t/2), y1:r2(cy+t/2), sobre: base===esc ? 'escada' : 'estar'};
-  v.avisos.push(base===esc ? 'Torre de calor sobre a escada: o vão da escada leva o ar quente para fora, por efeito chaminé.' : 'Torre de calor sobre o estar: exaustão do ar quente por efeito chaminé, com aberturas altas a sotavento.');
+  v.torre = {x0:r2(cx-t/2), y0:r2(cy-t/2), x1:r2(cx+t/2), y1:r2(cy+t/2), sobre: base===esc ? 'escada' : 'estar', tipo, nome:T.nome, curto:T.curto,
+    auto: q.torreTipo === 'auto', recomendada: torreRecomendada(v, q), pavimentos: casa.length};
+  v.avisos.push(`Torre de ar (${T.nome.toLowerCase()}) sobre ${base===esc ? 'a escada' : 'o estar'}: ${T.aviso}`);
   return v;
 }
 
@@ -1719,5 +1751,5 @@ function loteMinimo(q0, P){
   return {minimo:best, comFrente};
 }
 
-return {gerar, acessos, edicula, normaliza, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
+return {gerar, acessos, edicula, normaliza, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
 });

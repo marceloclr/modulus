@@ -276,6 +276,12 @@ function planta(v, idx, op){
     if(e.vidro){ seg(e, JAN, 4, 'stroke-opacity=".28"'); seg(e, JAN, 1.2); }
     else seg(e, JAN, 1.4, e.alta ? 'stroke-dasharray="3 2"' : '');
   }
+  // brises (op.brises, de Brises.estudar): linha tracejada 0,30 m para fora de cada janela protegida
+  for(const b of (op.brises || []).filter(b => b.pav === p.nome)){
+    const fora = b.lado === 'x0' || b.lado === 'y0' ? -0.3 : 0.3;
+    const c = b.c + fora, a = b.t0 - 0.15, z = b.t1 + 0.15, [x0, y0, x1, y1] = b.o === 'h' ? [a, c, z, c] : [c, a, c, z];
+    o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="#4C6E8F" stroke-width="1.8" stroke-dasharray="4 2"><title>Brise ${esc(b.nomeTipo || '')}</title></line>`);
+  }
   for(const d of (ehSub ? [] : (p.portas||[]))){
     seg(d, d.entrada ? '#FFFFFF' : PISO, 4.6);
     const w = d.t1 - d.t0, s = d.dentro || 1;
@@ -329,8 +335,8 @@ function planta(v, idx, op){
   if(p.nome==='Térreo') for(let i=0;i<ys.length-1;i++) if(ys[i+1]-ys[i] > 0.6) cota(ys[i], ys[i+1], -0.75, f2(ys[i+1]-ys[i]), true);
 
   if(v.torre && !p.anexo && p.nome!=='Subsolo'){ const t = v.torre;
-    o.push(`<rect x="${X(t.x0)}" y="${Y(t.y0)}" width="${((t.x1-t.x0)*K).toFixed(1)}" height="${((t.y1-t.y0)*K).toFixed(1)}" fill="#F2E3DC" fill-opacity="${p.nome==='Rooftop'?0.9:0.35}" stroke="#9A5B45" stroke-width="1.4" stroke-dasharray="${p.nome==='Rooftop'?'':'4 2'}"><title>Torre de calor (exaustão por efeito chaminé)</title></rect>`);
-    o.push(`<text x="${((X(t.x0)+X(t.x1))/2).toFixed(1)}" y="${(Y(t.y1)+8).toFixed(1)}" class="rd" style="font-size:6px;font-weight:600;fill:#9A5B45">TORRE DE CALOR</text>`); }
+    o.push(`<rect x="${X(t.x0)}" y="${Y(t.y0)}" width="${((t.x1-t.x0)*K).toFixed(1)}" height="${((t.y1-t.y0)*K).toFixed(1)}" fill="#F2E3DC" fill-opacity="${p.nome==='Rooftop'?0.9:0.35}" stroke="#9A5B45" stroke-width="1.4" stroke-dasharray="${p.nome==='Rooftop'?'':'4 2'}"><title>Torre de ar: ${t.nome || 'chaminé'}</title></rect>`);
+    o.push(`<text x="${((X(t.x0)+X(t.x1))/2).toFixed(1)}" y="${(Y(t.y1)+8).toFixed(1)}" class="rd" style="font-size:6px;font-weight:600;fill:#9A5B45">TORRE · ${(t.curto || 'chaminé').toUpperCase()}</text>`); }
   const fora = [];
   const legY = () => 0;
   if(ehSub){ let lx = 0, ly = 0;
