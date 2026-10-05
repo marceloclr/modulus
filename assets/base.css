@@ -290,11 +290,14 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 @media (prefers-reduced-motion:reduce){.atalho{transition:none}.atalho:hover{transform:none}}
 .btn.prim{background:var(--graphite);color:var(--bg);border-color:var(--graphite)}
 
-/* Marca GerPlantas */
+/* logo completo na página inicial (nome e subtítulo na cor do tema) */
+.marca-h1{margin:.2rem 0 .6rem;line-height:0}
+.marca-h1 svg{width:clamp(150px,20vw,200px);height:auto;display:block}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Marca Modulus: ícone em assets/logo.svg e logo completo em assets/logo-completo.svg; nome em uma cor só */
 .brand-logo{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);flex:none}
 .brand-logo img{width:28px;height:28px;display:block}
-.wordmark{font:600 18px/1 'IBM Plex Serif',Georgia,serif;letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
-.wordmark b{font-weight:600;color:var(--brass)}
+.wordmark{font:600 18px/1 'IBM Plex Sans',system-ui,sans-serif;letter-spacing:.01em;color:var(--ink);white-space:nowrap}
 @media (max-width:420px){.wordmark{display:none}}
 
 /* Zonas da planta: cores fortes e distintas (mesma paleta do desenho) */

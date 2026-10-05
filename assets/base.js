@@ -12,10 +12,10 @@ window.plantasBeta=beta;
 function currentTheme(){var t=root.getAttribute('data-theme'); if(t) return t; return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
 window.plantasTema=currentTheme;
 document.addEventListener('DOMContentLoaded',function(){
-  // marca GerPlantas no lugar do quadradinho
+  // marca Modulus no lugar do quadradinho
   var bm=document.querySelector('.brand-mark');
-  if(bm){ var rz=document.body.getAttribute('data-root')||''; var lk=document.createElement('a'); lk.className='brand-logo'; lk.href=rz||'./'; lk.setAttribute('aria-label','GerPlantas, página inicial');
-    lk.innerHTML='<img src="'+rz+'assets/logo.svg" alt=""><span class="wordmark">Ger<b>Plantas</b></span>'; bm.replaceWith(lk); }
+  if(bm){ var rz=document.body.getAttribute('data-root')||''; var lk=document.createElement('a'); lk.className='brand-logo'; lk.href=rz||'./'; lk.setAttribute('aria-label','Modulus, página inicial');
+    lk.innerHTML='<img src="'+rz+'assets/logo.svg" alt=""><span class="wordmark">Modulus</span>'; bm.replaceWith(lk); }
   // menu geral: <body data-nav="inicio|gerador|banco" data-root="../">
   var nav=document.body.getAttribute('data-nav'), barIn=document.querySelector('.bar-in');
   if(nav!==null && barIn){

@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="250 105 300 300" role="img" aria-label="Modulus">
-  <title>Modulus</title>
-  <defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="240 105 320 420" role="img" aria-label="Modulus · sistema">
+  <title>Modulus · sistema</title>
+  <defs><filter id="mdSombra" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity=".12"/></filter></defs>
+  <g filter="url(#mdSombra)">
+<defs>
     <linearGradient id="mdBlueL" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1E88E5"/><stop offset="100%" stop-color="#0066B2"/></linearGradient>
     <linearGradient id="mdBlueD" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0066B2"/><stop offset="100%" stop-color="#003366"/></linearGradient>
     <linearGradient id="mdOrangeR" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF7A00"/><stop offset="100%" stop-color="#E64A19"/></linearGradient>
@@ -22,4 +24,7 @@
   <polygon points="400,340 490,280 490,310 400,370" fill="url(#mdOrangeD)"/>
   <polygon points="490,170 540,200 540,350 490,320" fill="url(#mdOrangeR)"/>
   <polygon points="490,230 540,200 540,350 490,380" fill="url(#mdOrangeD)" opacity=".9"/>
+  </g>
+  <text x="400" y="470" text-anchor="middle" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="600" letter-spacing="2" fill="#1E2430">Modulus</text>
+  <text x="405" y="510" text-anchor="middle" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="10" fill="#5C6B73">SISTEMA</text>
 </svg>
