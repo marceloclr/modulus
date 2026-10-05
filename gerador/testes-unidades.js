@@ -205,6 +205,42 @@ t('valores: ajustes sobre os oficiais (mín e máx acompanham), diferenças e ed
   igual(VS.validar(ef, require('../dados/custos.schema.json')).length, 0, 'valores ajustados continuam válidos:');
 });
 
+// ---------- solar ----------
+const SO = require('./solar.js');
+t('solar: dimensionamento conferido à mão (600 kWh/mês informados, N2)', () => {
+  const v = M.gerar({}).variantes[0], r = SO.calcular(v, {solConsumo:600, solNivel:'N2'}, DADOS);
+  perto(r.kWpNecessario, 3.71, 'kWp = (600 − 100) ÷ (5,76 × 30 × 0,78):');
+  igual(r.modulosNecessarios, 7, 'módulos de 610 Wp:'); perto(r.kWp, 4.27);
+  perto(r.areaModulos, 18.2, 'área 7 × 2,6:');
+  const critDia = r.criticoMes / 30; perto(r.bateriaKwh, Math.ceil(critDia * 8/24 / (0.9*0.95) / 2.5) * 2.5, 'bateria:');
+  ok(r.criticoMes === r.cargas.filter(c => c.critica).reduce((t, c) => t + c.kwhMes, 0), 'carga crítica = soma das críticas');
+  ok(r.cargas.filter(c => c.critica).every(c => ['N1', 'N2'].includes(c.nivel)), 'N2 só leva N1 e N2');
+  ok(r.inversorKw >= r.kWp / 1.25 && r.inversorKw * 2000 >= r.picoW, 'inversor cobre o kit e a partida');
+  ok(r.paybackSimples > 0 && r.paybackDescontado >= r.paybackSimples, 'payback descontado ≥ simples');
+  igual(r.meses.length, 12); ok(r.meses[9].geracao > r.meses[3].geracao, 'outubro gera mais que abril');
+});
+t('solar: interpolação do R$/Wp, Fio B pelo ano, cobertura insuficiente e cargas condicionais', () => {
+  perto(SO.rsWpPara(3, DADOS.solar.rsWp), 3.14, 'entre 2 kWp (3,62) e 4 kWp (2,66):');
+  igual(SO.rsWpPara(50, DADOS.solar.rsWp), 2.02);
+  const sala = (tipo, x0, y0, x1, y1) => ({tipo, x0, y0, x1, y1});
+  const pequena = {pav:[{nome:'Térreo', salas:[sala('quarto', 0, 0, 4, 4)]}], quadro:{fechada:16}};
+  const r = SO.calcular(pequena, {solConsumo:900}, DADOS);
+  igual(r.modulos, Math.floor(16 * 0.6 / 2.6), 'só cabem os módulos da cobertura:'); ok(r.avisos.some(a => a.includes('comporta')));
+  const ids = q => SO.cargas(q, DADOS.solar, 100).map(c => c.id);
+  ok(!ids({}).includes('piscina') && ids({piscina:true}).includes('piscina') && ids({solVE:true}).includes('ve'), 'cargas condicionais');
+  ok(SO.calcular(M.gerar({}).variantes[0], {municipio:'portoDasDunas'}, DADOS).avisos.some(a => a.includes('inox')), 'aviso do litoral');
+});
+
+t('cards: card solar com as três vistas, fórmulas e normas', () => {
+  const r = SO.calcular(M.gerar({}).variantes[0], {}, DADOS);
+  for(const vista of ['mensal', 'retorno', 'cargas']){
+    const h = CA.cartaoSolar(r, {vista});
+    ok(h.includes('<svg class="graf"') && (h.match(/data-tip="/g) || []).length >= 12, 'vista ' + vista);
+  }
+  const h = CA.cartaoSolar(r, {});
+  ok(h.includes('NBR 16690') && h.includes('kWp = (') && h.includes('cobertura provisória'), 'normas, fórmula do kWp e aviso de cobertura provisória');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

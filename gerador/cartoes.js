@@ -93,5 +93,40 @@ function cartaoEstrutura(v, dados){
   return h;
 }
 
-return {selo, cartaoCusto, cartaoEstrutura, VISTAS, mesTxt};
+/* Card de energia solar (r de Solar.calcular). */
+const VISTAS_SOLAR = [['mensal', 'Geração × consumo', 'Geração estimada mês a mês (irradiação da NASA POWER) contra o consumo'], ['retorno', 'Retorno', 'Economia acumulada menos o investimento, em 25 anos'], ['cargas', 'Cargas', 'Consumo mensal estimado de cada carga; as críticas ficam ligadas na falta da rede']];
+const f1 = n => (Math.round(n*10)/10).toFixed(1).replace('.', ',');
+const MES_CURTO = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+function cartaoSolar(r, extra){
+  const vista = (extra && extra.vista) || 'mensal', F = r.formulas, kwh = n => `${Math.round(n).toLocaleString('pt-BR')} kWh`;
+  let h = `<div class="card res" style="--c:var(--card-solar)"><div class="res-head"><h3>Energia solar com bateria</h3>`;
+  h += `<p class="selo">On-grid com comutação para o quadro crítico · ${esc(r.nivel)} na falta da rede${r.provisorio ? ' · <span tabindex="0" data-tip="Até o estilo ser escolhido (bloco 4), a cobertura é tratada como laje com platibanda; o tipo de telhado do estilo muda a área útil e a inclinação">cobertura provisória</span>' : ''}</p></div>`;
+  h += `<div class="stats s3">`;
+  h += `<div class="stat" style="--c:var(--card-solar)" tabindex="0" data-tip="${esc(F.kWp)}"><div class="k">Geração</div><div class="v">${f2(r.kWp)} kWp</div></div>`;
+  h += `<div class="stat" style="--c:var(--card-solar)" tabindex="0" data-tip="${esc(F.bateria + ' · ' + F.inversor)}"><div class="k">Bateria · inversor</div><div class="v v-menor">${f2(r.bateriaKwh)} kWh · ${f2(r.inversorKw)} kW</div></div>`;
+  h += `<div class="stat" style="--c:var(--card-solar)" tabindex="0" data-tip="${esc(F.custo)}"><div class="k">Investimento</div><div class="v">${brlCurto(r.custo.med)}</div></div>`;
+  h += `<div class="stat" style="--c:var(--card-solar)" tabindex="0" data-tip="${esc(F.economia)}"><div class="k">Economia no 1º ano</div><div class="v v-menor">${brl(r.economiaAno)} · ${Math.round(100*r.economiaPct)} % da conta</div></div>`;
+  h += `<div class="stat" style="--c:var(--card-solar)" tabindex="0" data-tip="${esc(F.payback)}"><div class="k">Retorno</div><div class="v v-menor">${r.paybackSimples === null ? '—' : f1(r.paybackSimples) + ' anos'}${r.paybackDescontado === null ? '' : ' · ' + f1(r.paybackDescontado) + ' descontado'}</div></div>`;
+  h += `<div class="stat" style="--c:var(--card-solar)" tabindex="0" data-tip="${esc(F.area)}"><div class="k">Área de módulos</div><div class="v v-menor">${f2(r.areaModulos)} de ${f2(r.areaDisponivel)} m² <span class="medidor" aria-hidden="true" style="--card-estrutura:var(--card-solar)"><i style="width:${Math.min(100, r.areaDisponivel ? 100*r.areaModulos/r.areaDisponivel : 100)}%"></i></span></div></div></div>`;
+  h += `<p class="nota-custo">${r.modulos} módulos de ${r.potenciaModuloW} Wp · consumo ${r.consumoInformado ? 'informado' : 'estimado'} de <span class="calc" data-tip="${esc(r.cargas.map(c => `${c.nome}: ${f2(c.kwhMes)}`).join(' · '))}">${kwh(r.consumo)}/mês</span> · críticas: <span class="calc" data-tip="${esc(r.nivelTexto)}">${kwh(r.criticoMes)}/mês</span> · tarifa com tributos <span class="calc" data-tip="Tarifa B1 da Enel CE sem tributos × fator de tributos estimado (confira na fatura)">R$ ${f2(r.tarifaComTributos)}/kWh</span> · Fio B a ${Math.round(100*r.fioBPct)} % em ${r.ano}</p>`;
+  h += `<div class="tabs vistas" role="group" aria-label="Visualização do gráfico solar">${VISTAS_SOLAR.map(([id, nome, dica]) => `<button class="btn" type="button" data-vista-solar="${id}" aria-pressed="${id === vista}" data-tip="${esc(dica)}">${nome}</button>`).join('')}</div>`;
+  h += `<div class="graf-caixa">`;
+  if(vista === 'retorno') h += Graficos.linhaUnica(r.acumulado.map(p => ({x:p.ano, y:p.valor})), {titulo:'Retorno do investimento', fmt:brlCurto, xRot:x => x + ' a',
+    dica:p => `Ano ${p.x}: ${brl(p.y)} acumulados (economia − investimento)`, marco:r.paybackSimples, marcoRotulo:r.paybackSimples === null ? '' : `retorno em ${f1(r.paybackSimples)} anos`});
+  else if(vista === 'cargas') h += Graficos.barrasFaixa(r.cargas.slice().sort((a, b) => b.kwhMes - a.kwhMes).map(c => ({nome:c.nome + (c.critica ? ' ●' : ''), min:c.kwhMes, med:c.kwhMes, max:c.kwhMes,
+    dica:`${c.nome}: ${f2(c.kwhMes)} kWh/mês · ${f2(c.potenciaW/1000)} kW${c.critica ? ' · crítica (fica ligada na falta da rede)' : ''}`})), v => Math.round(v) + ' kWh', {titulo:'Cargas da casa', rotulo:190});
+  else h += Graficos.colunas(r.meses.map(m => m.geracao), {titulo:'Geração mensal', fmt:v => Math.round(v), rotulos:MES_CURTO, ref:r.consumo, refRotulo:`consumo ${kwh(r.consumo)}`,
+    dica:i => { const m = r.meses[i]; return `${MESES[i]}: gera ${kwh(m.geracao)} · consome ${kwh(m.consumo)} · usa na hora ou da bateria ${kwh(m.autoconsumo)} · compensa ${kwh(m.compensado)} · economia ${brl(m.economia)}`; }});
+  h += `</div>`;
+  if(vista === 'cargas') h += `<p class="note">● carga crítica: fica ligada pela bateria quando a rede cai (nível ${esc(r.nivel)}).</p>`;
+  h += `<details class="tabela-custo"><summary>Ver a tabela mês a mês</summary><div class="tbl-wrap"><table><thead><tr><th>Mês</th><th class="n">Geração</th><th class="n">Consumo</th><th class="n">Na hora/bateria</th><th class="n">Compensado</th><th class="n">Economia</th></tr></thead><tbody>`;
+  r.meses.forEach((m, i) => { h += `<tr><td>${MESES[i]}</td><td class="n">${kwh(m.geracao)}</td><td class="n">${kwh(m.consumo)}</td><td class="n">${kwh(m.autoconsumo)}</td><td class="n">${kwh(m.compensado)}</td><td class="n">${brl(m.economia)}</td></tr>`; });
+  h += `<tr class="total"><td>Ano</td><td class="n">${kwh(r.meses.reduce((t, m) => t + m.geracao, 0))}</td><td class="n">${kwh(r.meses.reduce((t, m) => t + m.consumo, 0))}</td><td></td><td></td><td class="n">${brl(r.economiaAno)}</td></tr></tbody></table></div>`;
+  h += `<p class="note">Investimento de ${brl(r.custo.min)} a ${brl(r.custo.max)}. Irradiação: NASA POWER (2001–2020). Preços: Greener (1º sem. 2026) e estimativas de bateria e inversor a confirmar.</p></details>`;
+  if(r.avisos.length) h += `<div class="warn"><ul>${r.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`;
+  h += `<p class="note">Normas: ${esc(r.normas.join('; '))}. Projeto e instalação exigem responsável técnico com ART e parecer de acesso da Enel Ceará.</p></div>`;
+  return h;
+}
+
+return {selo, cartaoCusto, cartaoEstrutura, cartaoSolar, VISTAS, VISTAS_SOLAR, mesTxt};
 });

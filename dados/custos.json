@@ -12,107 +12,768 @@
     "coletadoEm": "2026-10-05",
     "arquivo": "https://sindusconce.com.br/wp-content/uploads/2026/09/2026-8-Relatorio-5-composicao-cub-m2-valores-em-reais-1.zip",
     "sha256Zip": "8f6225860897bfea385d5057d4fa698572986331b74ea3c7353354c7a1a27061",
-    "onerado": {"R1-B": 2400.49, "R1-N": 2905.13, "R1-A": 3472.63, "R8-N": 2458.13},
-    "desonerado": {"R1-B": 2269.16, "R1-N": 2723.15, "R1-A": 3275.17, "R8-N": 2313.49},
-    "variacaoMes": {"R1-B": 1.43, "R1-N": 1.15, "R1-A": 0.82, "R8-N": 1.32},
+    "onerado": {
+      "R1-B": 2400.49,
+      "R1-N": 2905.13,
+      "R1-A": 3472.63,
+      "R8-N": 2458.13
+    },
+    "desonerado": {
+      "R1-B": 2269.16,
+      "R1-N": 2723.15,
+      "R1-A": 3275.17,
+      "R8-N": 2313.49
+    },
+    "variacaoMes": {
+      "R1-B": 1.43,
+      "R1-N": 1.15,
+      "R1-A": 0.82,
+      "R8-N": 1.32
+    },
     "composicao": {
-      "R1-B": {"materiais": 1089.80, "maoDeObra": 1178.94, "administracao": 127.78, "equipamentos": 3.97},
-      "R1-N": {"materiais": 1151.26, "maoDeObra": 1633.61, "administracao": 119.98, "equipamentos": 0.28},
-      "R1-A": {"materiais": 1586.25, "maoDeObra": 1772.62, "administracao": 113.42, "equipamentos": 0.34}
+      "R1-B": {
+        "materiais": 1089.8,
+        "maoDeObra": 1178.94,
+        "administracao": 127.78,
+        "equipamentos": 3.97
+      },
+      "R1-N": {
+        "materiais": 1151.26,
+        "maoDeObra": 1633.61,
+        "administracao": 119.98,
+        "equipamentos": 0.28
+      },
+      "R1-A": {
+        "materiais": 1586.25,
+        "maoDeObra": 1772.62,
+        "administracao": 113.42,
+        "equipamentos": 0.34
+      }
     },
     "naoInclui": "Fundações, elevadores, equipamentos e instalações especiais, piscinas, urbanização e paisagismo, impostos e taxas, projetos e remuneração do construtor (NBR 12721)."
   },
   "referencias": {
-    "sinapi": {"fonte": "IBGE · SINAPI (SIDRA)", "tabela": 2296, "variavel": 48, "uf": 23, "mesRef": "2026-08", "valor": 1883.20,
+    "sinapi": {
+      "fonte": "IBGE · SINAPI (SIDRA)",
+      "tabela": 2296,
+      "variavel": 48,
+      "uf": 23,
+      "mesRef": "2026-08",
+      "valor": 1883.2,
       "url": "https://apisidra.ibge.gov.br/values/t/2296/n3/23/v/48/p/last%201",
-      "nota": "Custo médio do m² no Ceará; outra cesta de referência, usada só para conferir a tendência."},
-    "incc": {"indice": "INCC-M", "fonte": "FGV IBRE", "url": "https://portal.fgv.br/noticias/incc-m-setembro-2026",
-      "mesRef": "2026-09", "mes": 0.25, "acumAno": 5.86, "acum12m": 6.61, "serie": {"2026-08": 0.85, "2026-09": 0.25}}
+      "nota": "Custo médio do m² no Ceará; outra cesta de referência, usada só para conferir a tendência."
+    },
+    "incc": {
+      "indice": "INCC-M",
+      "fonte": "FGV IBRE",
+      "url": "https://portal.fgv.br/noticias/incc-m-setembro-2026",
+      "mesRef": "2026-09",
+      "mes": 0.25,
+      "acumAno": 5.86,
+      "acum12m": 6.61,
+      "serie": {
+        "2026-08": 0.85,
+        "2026-09": 0.25
+      }
+    }
   },
   "padroes": {
-    "simples": {"nome": "Simples", "cub": "R1-B"},
-    "intermediario": {"nome": "Intermediário", "cub": "R1-N"},
-    "alto": {"nome": "Alto", "cub": "R1-A"}
+    "simples": {
+      "nome": "Simples",
+      "cub": "R1-B"
+    },
+    "intermediario": {
+      "nome": "Intermediário",
+      "cub": "R1-N"
+    },
+    "alto": {
+      "nome": "Alto",
+      "cub": "R1-A"
+    }
   },
   "municipios": {
-    "fortaleza": {"nome": "Fortaleza"},
-    "eusebio": {"nome": "Eusébio"},
-    "aquiraz": {"nome": "Aquiraz (sede)"},
-    "portoDasDunas": {"nome": "Porto das Dunas (Aquiraz)"}
+    "fortaleza": {
+      "nome": "Fortaleza"
+    },
+    "eusebio": {
+      "nome": "Eusébio"
+    },
+    "aquiraz": {
+      "nome": "Aquiraz (sede)"
+    },
+    "portoDasDunas": {
+      "nome": "Porto das Dunas (Aquiraz)"
+    }
   },
   "coeficientes": {
-    "garagem": {"nome": "Garagem coberta e subsolo de garagem", "min": 0.50, "med": 0.60, "max": 0.75, "origem": "NBR 12721: garagem (subsolo) de 0,50 a 0,75"},
-    "varanda": {"nome": "Varandas", "min": 0.75, "med": 0.85, "max": 1.00, "origem": "NBR 12721: varandas de 0,75 a 1,00"},
-    "terraco": {"nome": "Terraços e áreas descobertas sobre laje", "min": 0.30, "med": 0.45, "max": 0.60, "origem": "NBR 12721: terraços ou áreas descobertas sobre lajes de 0,30 a 0,60"},
-    "areaTecnica": {"nome": "Caixa d'água e área técnica", "min": 0.50, "med": 0.60, "max": 0.75, "origem": "NBR 12721: caixa d'água e casa de máquinas de 0,50 a 0,75"},
-    "piscina": {"nome": "Piscina (lâmina)", "min": 0.50, "med": 0.60, "max": 0.75, "origem": "NBR 12721: piscinas de 0,50 a 0,75"},
-    "jardim": {"nome": "Quintais, calçadas e jardins", "min": 0.10, "med": 0.20, "max": 0.30, "origem": "NBR 12721: quintais, calçadas e jardins de 0,10 a 0,30"}
+    "garagem": {
+      "nome": "Garagem coberta e subsolo de garagem",
+      "min": 0.5,
+      "med": 0.6,
+      "max": 0.75,
+      "origem": "NBR 12721: garagem (subsolo) de 0,50 a 0,75"
+    },
+    "varanda": {
+      "nome": "Varandas",
+      "min": 0.75,
+      "med": 0.85,
+      "max": 1,
+      "origem": "NBR 12721: varandas de 0,75 a 1,00"
+    },
+    "terraco": {
+      "nome": "Terraços e áreas descobertas sobre laje",
+      "min": 0.3,
+      "med": 0.45,
+      "max": 0.6,
+      "origem": "NBR 12721: terraços ou áreas descobertas sobre lajes de 0,30 a 0,60"
+    },
+    "areaTecnica": {
+      "nome": "Caixa d'água e área técnica",
+      "min": 0.5,
+      "med": 0.6,
+      "max": 0.75,
+      "origem": "NBR 12721: caixa d'água e casa de máquinas de 0,50 a 0,75"
+    },
+    "piscina": {
+      "nome": "Piscina (lâmina)",
+      "min": 0.5,
+      "med": 0.6,
+      "max": 0.75,
+      "origem": "NBR 12721: piscinas de 0,50 a 0,75"
+    },
+    "jardim": {
+      "nome": "Quintais, calçadas e jardins",
+      "min": 0.1,
+      "med": 0.2,
+      "max": 0.3,
+      "origem": "NBR 12721: quintais, calçadas e jardins de 0,10 a 0,30"
+    }
   },
   "fatores": {
     "logistica": {
-      "fortaleza": {"min": 1.00, "med": 1.00, "max": 1.00, "origem": "Referência: o CUB-CE é apurado na região de Fortaleza."},
-      "eusebio": {"min": 1.01, "med": 1.02, "max": 1.03, "origem": "Estimativa: deslocamento de equipes e fretes curtos a partir de Fortaleza."},
-      "aquiraz": {"min": 1.02, "med": 1.035, "max": 1.05, "origem": "Estimativa: menor oferta local de mão de obra e materiais; fretes mais longos."},
-      "portoDasDunas": {"min": 1.03, "med": 1.045, "max": 1.06, "origem": "Estimativa: logística litorânea, oferta local restrita e mão de obra que se desloca."}
+      "fortaleza": {
+        "min": 1,
+        "med": 1,
+        "max": 1,
+        "origem": "Referência: o CUB-CE é apurado na região de Fortaleza."
+      },
+      "eusebio": {
+        "min": 1.01,
+        "med": 1.02,
+        "max": 1.03,
+        "origem": "Estimativa: deslocamento de equipes e fretes curtos a partir de Fortaleza."
+      },
+      "aquiraz": {
+        "min": 1.02,
+        "med": 1.035,
+        "max": 1.05,
+        "origem": "Estimativa: menor oferta local de mão de obra e materiais; fretes mais longos."
+      },
+      "portoDasDunas": {
+        "min": 1.03,
+        "med": 1.045,
+        "max": 1.06,
+        "origem": "Estimativa: logística litorânea, oferta local restrita e mão de obra que se desloca."
+      }
     },
     "condominio": {
-      "fortaleza": {"min": 1.01, "med": 1.02, "max": 1.03, "origem": "Estimativa: horário restrito, controle de acesso, caução e aprovação do projeto no condomínio."},
-      "eusebio": {"min": 1.02, "med": 1.03, "max": 1.04, "origem": "Estimativa: condomínios horizontais com regras de obra, taxa de obra e aprovação prévia."},
-      "aquiraz": {"min": 1.01, "med": 1.02, "max": 1.03, "origem": "Estimativa: regras de obra do condomínio."},
-      "portoDasDunas": {"min": 1.02, "med": 1.03, "max": 1.04, "origem": "Estimativa: condomínios com regras de obra, horários e aprovação prévia."}
+      "fortaleza": {
+        "min": 1.01,
+        "med": 1.02,
+        "max": 1.03,
+        "origem": "Estimativa: horário restrito, controle de acesso, caução e aprovação do projeto no condomínio."
+      },
+      "eusebio": {
+        "min": 1.02,
+        "med": 1.03,
+        "max": 1.04,
+        "origem": "Estimativa: condomínios horizontais com regras de obra, taxa de obra e aprovação prévia."
+      },
+      "aquiraz": {
+        "min": 1.01,
+        "med": 1.02,
+        "max": 1.03,
+        "origem": "Estimativa: regras de obra do condomínio."
+      },
+      "portoDasDunas": {
+        "min": 1.02,
+        "med": 1.03,
+        "max": 1.04,
+        "origem": "Estimativa: condomínios com regras de obra, horários e aprovação prévia."
+      }
     },
     "marinho": {
-      "ate500": {"nome": "Até 500 m do mar", "min": 1.05, "med": 1.065, "max": 1.08, "origem": "NBR 6118, classe de agressividade III/IV: cobrimentos de 35–50 mm, concreto C30–C40, a/c ≤ 0,55–0,45; esquadrias com pintura marinha e fixação em inox 316. Estimativa do acréscimo."},
-      "de500a2000": {"nome": "De 500 m a 2 km do mar", "min": 1.01, "med": 1.02, "max": 1.03, "origem": "NBR 6118, classe II/III conforme a exposição; estimativa do acréscimo."},
-      "acima2000": {"nome": "A mais de 2 km do mar", "min": 1.00, "med": 1.00, "max": 1.00, "origem": "Classe II (urbana), sem acréscimo."}
+      "ate500": {
+        "nome": "Até 500 m do mar",
+        "min": 1.05,
+        "med": 1.065,
+        "max": 1.08,
+        "origem": "NBR 6118, classe de agressividade III/IV: cobrimentos de 35–50 mm, concreto C30–C40, a/c ≤ 0,55–0,45; esquadrias com pintura marinha e fixação em inox 316. Estimativa do acréscimo."
+      },
+      "de500a2000": {
+        "nome": "De 500 m a 2 km do mar",
+        "min": 1.01,
+        "med": 1.02,
+        "max": 1.03,
+        "origem": "NBR 6118, classe II/III conforme a exposição; estimativa do acréscimo."
+      },
+      "acima2000": {
+        "nome": "A mais de 2 km do mar",
+        "min": 1,
+        "med": 1,
+        "max": 1,
+        "origem": "Classe II (urbana), sem acréscimo."
+      }
     },
     "estrutural": {
-      "alvenariaEstrutural": {"nome": "Alvenaria estrutural", "norma": "NBR 16868", "min": 0.93, "med": 0.95, "max": 0.97, "vaoEcon": [4, 5], "vaoMax": 6, "balanco": 1.0, "prazo": "−10 a −15 %", "oferta": "Boa no Ceará", "restricoes": "Modulação de 15 ou 20 cm; paredes do superior sobre as do térreo; paredes não podem ser removidas em reformas.", "origem": "Estimativa: economia de 10 a 20 % na estrutura, que pesa de 15 a 20 % do custo."},
-      "concretoArmado": {"nome": "Concreto armado", "norma": "NBR 6118", "min": 1.00, "med": 1.00, "max": 1.00, "vaoEcon": [4, 6], "vaoMax": 8, "balanco": 2.0, "prazo": "Referência", "oferta": "Ampla", "restricoes": "—", "origem": "Referência: o CUB R1 supõe estrutura convencional de concreto armado."},
-      "lajeNervurada": {"nome": "Laje nervurada", "norma": "NBR 6118", "min": 1.02, "med": 1.035, "max": 1.05, "vaoEcon": [7, 10], "vaoMax": 12, "balanco": 2.5, "prazo": "Semelhante", "oferta": "Boa (cubetas e treliças)", "restricoes": "Altura de laje maior; pede forro ou pé-direito maior.", "origem": "Estimativa."},
-      "protendido": {"nome": "Concreto protendido", "norma": "NBR 6118", "min": 1.06, "med": 1.08, "max": 1.10, "vaoEcon": [8, 12], "vaoMax": 15, "balanco": 4.0, "prazo": "Semelhante", "oferta": "Média (cordoalha engraxada)", "restricoes": "Projetista e equipe especializados; mobilização pesa em obra pequena.", "origem": "Estimativa."},
-      "metalica": {"nome": "Estrutura metálica", "norma": "NBR 8800", "min": 1.08, "med": 1.115, "max": 1.15, "acrescimoLitoral": 0.03, "vaoEcon": [6, 10], "vaoMax": 15, "balanco": 5.0, "prazo": "−20 a −30 %", "oferta": "Média", "restricoes": "Proteção anticorrosiva (C4/C5 no litoral) e contra fogo.", "origem": "Estimativa."},
-      "steelFrame": {"nome": "Steel frame e sistemas mistos", "norma": "NBR 14762", "min": 1.00, "med": 1.05, "max": 1.10, "vaoEcon": [3, 5], "vaoMax": 6, "balanco": 1.2, "prazo": "−30 a −40 %", "oferta": "Restrita no Ceará", "restricoes": "Galvanização Z275 ou maior no litoral; atenção à acústica.", "origem": "Estimativa."},
-      "madeira": {"nome": "Madeira engenheirada (CLT/MLC), referência", "norma": "NBR 7190", "min": 1.20, "med": 1.275, "max": 1.35, "vaoEcon": [4, 6], "vaoMax": 8, "balanco": 2.0, "prazo": "−30 %", "oferta": "Muito baixa no Ceará (frete do Sul)", "restricoes": "Umidade e cupim; só como referência.", "origem": "Estimativa."}
+      "alvenariaEstrutural": {
+        "nome": "Alvenaria estrutural",
+        "norma": "NBR 16868",
+        "min": 0.93,
+        "med": 0.95,
+        "max": 0.97,
+        "vaoEcon": [
+          4,
+          5
+        ],
+        "vaoMax": 6,
+        "balanco": 1,
+        "prazo": "−10 a −15 %",
+        "oferta": "Boa no Ceará",
+        "restricoes": "Modulação de 15 ou 20 cm; paredes do superior sobre as do térreo; paredes não podem ser removidas em reformas.",
+        "origem": "Estimativa: economia de 10 a 20 % na estrutura, que pesa de 15 a 20 % do custo."
+      },
+      "concretoArmado": {
+        "nome": "Concreto armado",
+        "norma": "NBR 6118",
+        "min": 1,
+        "med": 1,
+        "max": 1,
+        "vaoEcon": [
+          4,
+          6
+        ],
+        "vaoMax": 8,
+        "balanco": 2,
+        "prazo": "Referência",
+        "oferta": "Ampla",
+        "restricoes": "—",
+        "origem": "Referência: o CUB R1 supõe estrutura convencional de concreto armado."
+      },
+      "lajeNervurada": {
+        "nome": "Laje nervurada",
+        "norma": "NBR 6118",
+        "min": 1.02,
+        "med": 1.035,
+        "max": 1.05,
+        "vaoEcon": [
+          7,
+          10
+        ],
+        "vaoMax": 12,
+        "balanco": 2.5,
+        "prazo": "Semelhante",
+        "oferta": "Boa (cubetas e treliças)",
+        "restricoes": "Altura de laje maior; pede forro ou pé-direito maior.",
+        "origem": "Estimativa."
+      },
+      "protendido": {
+        "nome": "Concreto protendido",
+        "norma": "NBR 6118",
+        "min": 1.06,
+        "med": 1.08,
+        "max": 1.1,
+        "vaoEcon": [
+          8,
+          12
+        ],
+        "vaoMax": 15,
+        "balanco": 4,
+        "prazo": "Semelhante",
+        "oferta": "Média (cordoalha engraxada)",
+        "restricoes": "Projetista e equipe especializados; mobilização pesa em obra pequena.",
+        "origem": "Estimativa."
+      },
+      "metalica": {
+        "nome": "Estrutura metálica",
+        "norma": "NBR 8800",
+        "min": 1.08,
+        "med": 1.115,
+        "max": 1.15,
+        "acrescimoLitoral": 0.03,
+        "vaoEcon": [
+          6,
+          10
+        ],
+        "vaoMax": 15,
+        "balanco": 5,
+        "prazo": "−20 a −30 %",
+        "oferta": "Média",
+        "restricoes": "Proteção anticorrosiva (C4/C5 no litoral) e contra fogo.",
+        "origem": "Estimativa."
+      },
+      "steelFrame": {
+        "nome": "Steel frame e sistemas mistos",
+        "norma": "NBR 14762",
+        "min": 1,
+        "med": 1.05,
+        "max": 1.1,
+        "vaoEcon": [
+          3,
+          5
+        ],
+        "vaoMax": 6,
+        "balanco": 1.2,
+        "prazo": "−30 a −40 %",
+        "oferta": "Restrita no Ceará",
+        "restricoes": "Galvanização Z275 ou maior no litoral; atenção à acústica.",
+        "origem": "Estimativa."
+      },
+      "madeira": {
+        "nome": "Madeira engenheirada (CLT/MLC), referência",
+        "norma": "NBR 7190",
+        "min": 1.2,
+        "med": 1.275,
+        "max": 1.35,
+        "vaoEcon": [
+          4,
+          6
+        ],
+        "vaoMax": 8,
+        "balanco": 2,
+        "prazo": "−30 %",
+        "oferta": "Muito baixa no Ceará (frete do Sul)",
+        "restricoes": "Umidade e cupim; só como referência.",
+        "origem": "Estimativa."
+      }
     },
-    "vaosMaiores": {"min": 1.03, "med": 1.045, "max": 1.06, "origem": "Estimativa: vigas e lajes mais altas para vencer o vão máximo do sistema sem pilar intermediário."},
+    "vaosMaiores": {
+      "min": 1.03,
+      "med": 1.045,
+      "max": 1.06,
+      "origem": "Estimativa: vigas e lajes mais altas para vencer o vão máximo do sistema sem pilar intermediário."
+    },
     "estilo": {
-      "caraDeCasa": {"nome": "Casa com cara de casa", "min": 0.98, "med": 1.00, "max": 1.03, "origem": "Estimativa."},
-      "farm": {"nome": "Farm", "min": 1.02, "med": 1.04, "max": 1.06, "origem": "Estimativa."},
-      "ingles": {"nome": "Inglês", "min": 1.06, "med": 1.09, "max": 1.12, "origem": "Estimativa."},
-      "moderna": {"nome": "Moderna contemporânea", "min": 1.06, "med": 1.09, "max": 1.12, "origem": "Estimativa."},
-      "ecologica": {"nome": "Ecológica", "min": 1.02, "med": 1.05, "max": 1.08, "origem": "Estimativa."}
+      "caraDeCasa": {
+        "nome": "Casa com cara de casa",
+        "min": 0.98,
+        "med": 1,
+        "max": 1.03,
+        "origem": "Estimativa."
+      },
+      "farm": {
+        "nome": "Farm",
+        "min": 1.02,
+        "med": 1.04,
+        "max": 1.06,
+        "origem": "Estimativa."
+      },
+      "ingles": {
+        "nome": "Inglês",
+        "min": 1.06,
+        "med": 1.09,
+        "max": 1.12,
+        "origem": "Estimativa."
+      },
+      "moderna": {
+        "nome": "Moderna contemporânea",
+        "min": 1.06,
+        "med": 1.09,
+        "max": 1.12,
+        "origem": "Estimativa."
+      },
+      "ecologica": {
+        "nome": "Ecológica",
+        "min": 1.02,
+        "med": 1.05,
+        "max": 1.08,
+        "origem": "Estimativa."
+      }
     }
   },
   "adicionais": {
-    "fundacaoTerrea": {"nome": "Fundação (térrea, radier ou sapata corrida em solo arenoso)", "unidade": "m2Projecao", "min": 180, "med": 220, "max": 260, "origem": "Estimativa para o solo arenoso do litoral leste; confirmar com sondagem."},
-    "fundacaoSobrado": {"nome": "Fundação (sobrado, estaca hélice contínua ou radier estaqueado)", "unidade": "m2Projecao", "min": 300, "med": 375, "max": 450, "origem": "Estimativa; confirmar com sondagem SPT."},
-    "subsolo": {"nome": "Subsolo: contenção e impermeabilização", "unidade": "m2Subsolo", "min": 1500, "med": 2000, "max": 2500, "origem": "Estimativa."},
-    "elevador": {"nome": "Elevador unifamiliar", "unidade": "un", "min": 90000, "med": 135000, "max": 180000, "origem": "Estimativa de mercado."},
-    "piscinaLamina": {"nome": "Piscina (estrutura e revestimento)", "unidade": "m2Lamina", "min": 1800, "med": 2400, "max": 3000, "origem": "Estimativa."},
-    "piscinaEquipamentos": {"nome": "Piscina (bomba, filtro e casa de máquinas)", "unidade": "vb", "min": 8000, "med": 11500, "max": 15000, "origem": "Estimativa."},
-    "brises": {"nome": "Brises de alumínio", "unidade": "m2Fachada", "min": 600, "med": 1050, "max": 1500, "origem": "Estimativa."},
-    "projetosTaxas": {"nome": "Projetos, ART e taxas", "unidade": "pct", "min": 4, "med": 6, "max": 8, "origem": "Estimativa usual de mercado."},
-    "bdi": {"nome": "BDI (empreitada)", "unidade": "pct", "min": 20.34, "med": 22.12, "max": 25.00, "origem": "TCU, Acórdão 2622/2013: quartis para construção de edifícios."}
+    "fundacaoTerrea": {
+      "nome": "Fundação (térrea, radier ou sapata corrida em solo arenoso)",
+      "unidade": "m2Projecao",
+      "min": 180,
+      "med": 220,
+      "max": 260,
+      "origem": "Estimativa para o solo arenoso do litoral leste; confirmar com sondagem."
+    },
+    "fundacaoSobrado": {
+      "nome": "Fundação (sobrado, estaca hélice contínua ou radier estaqueado)",
+      "unidade": "m2Projecao",
+      "min": 300,
+      "med": 375,
+      "max": 450,
+      "origem": "Estimativa; confirmar com sondagem SPT."
+    },
+    "subsolo": {
+      "nome": "Subsolo: contenção e impermeabilização",
+      "unidade": "m2Subsolo",
+      "min": 1500,
+      "med": 2000,
+      "max": 2500,
+      "origem": "Estimativa."
+    },
+    "elevador": {
+      "nome": "Elevador unifamiliar",
+      "unidade": "un",
+      "min": 90000,
+      "med": 135000,
+      "max": 180000,
+      "origem": "Estimativa de mercado."
+    },
+    "piscinaLamina": {
+      "nome": "Piscina (estrutura e revestimento)",
+      "unidade": "m2Lamina",
+      "min": 1800,
+      "med": 2400,
+      "max": 3000,
+      "origem": "Estimativa."
+    },
+    "piscinaEquipamentos": {
+      "nome": "Piscina (bomba, filtro e casa de máquinas)",
+      "unidade": "vb",
+      "min": 8000,
+      "med": 11500,
+      "max": 15000,
+      "origem": "Estimativa."
+    },
+    "brises": {
+      "nome": "Brises de alumínio",
+      "unidade": "m2Fachada",
+      "min": 600,
+      "med": 1050,
+      "max": 1500,
+      "origem": "Estimativa."
+    },
+    "projetosTaxas": {
+      "nome": "Projetos, ART e taxas",
+      "unidade": "pct",
+      "min": 4,
+      "med": 6,
+      "max": 8,
+      "origem": "Estimativa usual de mercado."
+    },
+    "bdi": {
+      "nome": "BDI (empreitada)",
+      "unidade": "pct",
+      "min": 20.34,
+      "med": 22.12,
+      "max": 25,
+      "origem": "TCU, Acórdão 2622/2013: quartis para construção de edifícios."
+    }
   },
   "solar": {
-    "hsp": {"valor": 5.6, "min": 5.5, "max": 5.7, "origem": "CRESESB SunData, Fortaleza, plano inclinado (a confirmar a série mensal)."},
-    "pr": {"min": 0.75, "med": 0.78, "max": 0.80},
-    "rsWp": [{"kWp": 2, "valor": 3.62}, {"kWp": 4, "valor": 2.66}, {"kWp": 8, "valor": 2.30}, {"kWp": 30, "valor": 2.02}],
-    "rsWpOrigem": "Greener, estudo estratégico de GD, 1º semestre de 2026 (pv magazine, 25/09/2026).",
-    "bateriaRsKwh": {"min": 2500, "med": 3200, "max": 4000, "origem": "Estimativa, a confirmar com distribuidores."},
-    "inversorHibridoRsKw": {"min": 1000, "med": 1400, "max": 1800, "origem": "Estimativa, a confirmar."},
+    "irradiacao": {
+      "fonte": "NASA POWER, climatologia 2001–2020 (ALLSKY_SFC_SW_DWN), Fortaleza (−3,73; −38,52), plano horizontal",
+      "url": "https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN&community=RE&longitude=-38.52&latitude=-3.73&format=JSON",
+      "coletadoEm": "2026-10-05",
+      "unidade": "kWh/m²·dia",
+      "mensal": [
+        5.63,
+        5.42,
+        5.25,
+        4.84,
+        5.12,
+        5.13,
+        5.51,
+        6.24,
+        6.66,
+        6.69,
+        6.49,
+        6.11
+      ],
+      "anual": 5.76,
+      "nota": "Na latitude de Fortaleza (3,7° S) o plano horizontal fica próximo do inclinado; confira com o CRESESB SunData no projeto."
+    },
+    "pr": {
+      "min": 0.75,
+      "med": 0.78,
+      "max": 0.8,
+      "origem": "Desempenho global usual (perdas por temperatura, cabos, sujeira e inversor)."
+    },
+    "modulo": {
+      "potenciaW": 610,
+      "areaM2": 2.6,
+      "origem": "Módulo bifacial de 610 Wp (2,38 × 1,13 m) usual em 2026."
+    },
+    "rsWp": [
+      {
+        "kWp": 2,
+        "valor": 3.62
+      },
+      {
+        "kWp": 4,
+        "valor": 2.66
+      },
+      {
+        "kWp": 8,
+        "valor": 2.3
+      },
+      {
+        "kWp": 30,
+        "valor": 2.02
+      }
+    ],
+    "rsWpOrigem": "Greener, estudo estratégico de GD, 1º semestre de 2026 (pv magazine, 25/09/2026): sistema on-grid instalado; entre os tamanhos, interpolação.",
+    "parteInversorNoKit": 0.15,
+    "inversorHibridoRsKw": {
+      "min": 1000,
+      "med": 1400,
+      "max": 1800,
+      "origem": "Estimativa, a confirmar com distribuidores."
+    },
+    "bateriaRsKwh": {
+      "min": 2500,
+      "med": 3200,
+      "max": 4000,
+      "origem": "LiFePO₄ instalada, estimativa a confirmar com distribuidores."
+    },
+    "quadroCritico": {
+      "min": 3000,
+      "med": 4500,
+      "max": 6000,
+      "origem": "Quadro de cargas críticas, chave de transferência (EPS/UPS) e proteções; estimativa."
+    },
+    "bateria": {
+      "dod": 0.9,
+      "eficiencia": 0.95,
+      "origem": "LiFePO₄: profundidade de descarga de 90 % e eficiência de ida e volta de 95 %."
+    },
+    "partida": {
+      "min": 3,
+      "max": 5,
+      "origem": "Corrente de partida de motores (geladeira, bombas, portão, elevador) de 3 a 5 vezes a nominal."
+    },
     "tarifaB1SemTributos": 0.702,
-    "tarifaOrigem": "Enel Distribuição Ceará, vigente desde 26/08/2026 (ANEEL); tributos a confirmar na fatura.",
-    "fioB": {"2026": 0.60, "2027": 0.75, "2028": 0.90}
+    "tarifaOrigem": "Enel Distribuição Ceará, B1 residencial, vigente desde 26/08/2026 (ANEEL).",
+    "tributos": {
+      "min": 1.25,
+      "med": 1.33,
+      "max": 1.4,
+      "origem": "ICMS, PIS e Cofins sobre a tarifa: estimativa, confira na fatura."
+    },
+    "fioB": {
+      "2023": 0.15,
+      "2024": 0.3,
+      "2025": 0.45,
+      "2026": 0.6,
+      "2027": 0.75,
+      "2028": 0.9
+    },
+    "fioBOrigem": "Lei 14.300/2022: parcela do Fio B paga sobre a energia compensada (GD II); de 2029 em diante segue a regra da ANEEL (aqui mantida em 90 %).",
+    "fioBIntegralRsKwh": {
+      "min": 0.25,
+      "med": 0.29,
+      "max": 0.33,
+      "origem": "Estimativa: a 60 % (2026) o Fio B fica entre R$ 0,15 e 0,20 por kWh compensado conforme a distribuidora; confirmar na Enel CE."
+    },
+    "disponibilidadeKwh": 100,
+    "disponibilidadeOrigem": "Custo de disponibilidade da ligação trifásica (100 kWh/mês), que a geração não compensa.",
+    "simultaneidade": 0.3,
+    "simultaneidadeOrigem": "Parte da geração consumida na hora, sem bateria, em residência ocupada de dia (estimativa).",
+    "financeiro": {
+      "reajusteTarifa": 0.05,
+      "degradacao": 0.005,
+      "taxaDesconto": 0.08,
+      "vidaUtil": 25,
+      "origem": "Premissas usuais: reajuste de 5 % a.a., degradação de 0,5 % a.a., taxa de 8 % a.a., 25 anos."
+    },
+    "aproveitamento": {
+      "laje": 0.6,
+      "duasAguas": 0.45,
+      "quatroAguas": 0.35,
+      "verde": 0.3,
+      "origem": "Fração da cobertura usável por módulos (afastamentos, sombras, acessos e faces voltadas ao sul); estimativa até o estilo ser escolhido."
+    },
+    "cargas": [
+      {
+        "id": "geladeira",
+        "nome": "Geladeira",
+        "nivel": "N1",
+        "kwhMes": 40,
+        "potenciaW": 150,
+        "motor": true
+      },
+      {
+        "id": "iluminacao",
+        "nome": "Iluminação LED básica",
+        "nivel": "N1",
+        "kwhMes": 20,
+        "potenciaW": 200
+      },
+      {
+        "id": "portao",
+        "nome": "Portão automático",
+        "nivel": "N1",
+        "kwhMes": 4,
+        "potenciaW": 400,
+        "motor": true
+      },
+      {
+        "id": "rede",
+        "nome": "Roteador e carregadores",
+        "nivel": "N1",
+        "kwhMes": 10,
+        "potenciaW": 60
+      },
+      {
+        "id": "ventiladores",
+        "nome": "Ventiladores",
+        "nivel": "N2",
+        "kwhMes": 15,
+        "potenciaW": 70,
+        "motor": true,
+        "porQuarto": true,
+        "mais": 1
+      },
+      {
+        "id": "tv",
+        "nome": "TV",
+        "nivel": "N2",
+        "kwhMes": 15,
+        "potenciaW": 120
+      },
+      {
+        "id": "bomba",
+        "nome": "Bomba ou pressurizador",
+        "nivel": "N2",
+        "kwhMes": 25,
+        "potenciaW": 750,
+        "motor": true
+      },
+      {
+        "id": "computador",
+        "nome": "Computador",
+        "nivel": "N2",
+        "kwhMes": 25,
+        "potenciaW": 200
+      },
+      {
+        "id": "arQuartos",
+        "nome": "Ar-condicionado inverter nos quartos (noite)",
+        "nivel": "N3",
+        "kwhMes": 120,
+        "potenciaW": 1100,
+        "porQuarto": true
+      },
+      {
+        "id": "lavar",
+        "nome": "Máquina de lavar",
+        "nivel": "N3",
+        "kwhMes": 12,
+        "potenciaW": 500,
+        "motor": true
+      },
+      {
+        "id": "arSala",
+        "nome": "Ar-condicionado das salas",
+        "nivel": "N4",
+        "kwhMes": 150,
+        "potenciaW": 1800
+      },
+      {
+        "id": "cooktop",
+        "nome": "Cooktop de indução e forno",
+        "nivel": "N4",
+        "kwhMes": 90,
+        "potenciaW": 5000
+      },
+      {
+        "id": "demais",
+        "nome": "Demais cargas da casa",
+        "nivel": "N4",
+        "kwhMesPorM2": 0.6,
+        "potenciaW": 1500
+      },
+      {
+        "id": "piscina",
+        "nome": "Bomba da piscina",
+        "nivel": "N4",
+        "kwhMes": 85,
+        "potenciaW": 750,
+        "motor": true,
+        "se": "piscina"
+      },
+      {
+        "id": "elevador",
+        "nome": "Elevador",
+        "nivel": "N4",
+        "kwhMes": 20,
+        "potenciaW": 3700,
+        "motor": true,
+        "se": "elevador"
+      },
+      {
+        "id": "ve",
+        "nome": "Carregador de veículo elétrico",
+        "nivel": "N4",
+        "kwhMes": 165,
+        "potenciaW": 7000,
+        "se": "solVE"
+      }
+    ],
+    "cargasOrigem": "Consumos típicos estimados (kWh/mês); ajuste pelo consumo da sua conta no campo de consumo informado.",
+    "niveis": {
+      "N1": "Geladeira, iluminação LED básica, portão, roteador e carregadores",
+      "N2": "N1 + ventiladores, TV, bomba e computador",
+      "N3": "N2 + ar-condicionado nos quartos à noite e máquina de lavar",
+      "N4": "Casa inteira: ar das salas, cooktop, piscina, elevador e, se marcado, carregador de veículo"
+    },
+    "normas": [
+      "ABNT NBR 16690 (instalações elétricas de arranjos fotovoltaicos)",
+      "ABNT NBR 16149 e NBR 16150 (interface com a rede)",
+      "Proteção anti-ilhamento (IEC 62116)",
+      "NR-10 (segurança em instalações elétricas)",
+      "Lei 14.300/2022 e regras de acesso da Enel Ceará"
+    ],
+    "litoral": "Na orla: estrutura de alumínio com fixação em aço inox, caixas e conectores IP65 ou superior e inspeção semestral de corrosão."
   },
   "muro": {
-    "alvenaria2m": {"nome": "Alvenaria rebocada e pintada, 2 m, com fundação corrida", "unidade": "m", "min": 900, "med": 1250, "max": 1600},
-    "gradil": {"nome": "Gradil de alumínio", "unidade": "m2", "min": 700, "med": 950, "max": 1200},
-    "cobogo": {"nome": "Cobogó", "unidade": "m2", "min": 350, "med": 475, "max": 600},
-    "portaoSocial": {"nome": "Portão social", "unidade": "un", "min": 3000, "med": 5000, "max": 7000},
-    "portaoVeiculos": {"nome": "Portão de veículos automático", "unidade": "un", "min": 8000, "med": 13000, "max": 18000},
-    "padraoEntrada": {"nome": "Padrão de entrada Enel e abrigo", "unidade": "un", "min": 2500, "med": 3750, "max": 5000},
+    "alvenaria2m": {
+      "nome": "Alvenaria rebocada e pintada, 2 m, com fundação corrida",
+      "unidade": "m",
+      "min": 900,
+      "med": 1250,
+      "max": 1600
+    },
+    "gradil": {
+      "nome": "Gradil de alumínio",
+      "unidade": "m2",
+      "min": 700,
+      "med": 950,
+      "max": 1200
+    },
+    "cobogo": {
+      "nome": "Cobogó",
+      "unidade": "m2",
+      "min": 350,
+      "med": 475,
+      "max": 600
+    },
+    "portaoSocial": {
+      "nome": "Portão social",
+      "unidade": "un",
+      "min": 3000,
+      "med": 5000,
+      "max": 7000
+    },
+    "portaoVeiculos": {
+      "nome": "Portão de veículos automático",
+      "unidade": "un",
+      "min": 8000,
+      "med": 13000,
+      "max": 18000
+    },
+    "padraoEntrada": {
+      "nome": "Padrão de entrada Enel e abrigo",
+      "unidade": "un",
+      "min": 2500,
+      "med": 3750,
+      "max": 5000
+    },
     "origem": "Estimativas de mercado em Fortaleza, a confirmar."
   }
 }
