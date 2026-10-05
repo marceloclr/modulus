@@ -25,9 +25,9 @@
 
 <main class="page">
   <section class="panel" style="--c:var(--brass)">
-    <div class="hero">
-      <div>
-        <p class="kicker">Gerador de plantas humanizadas · estudos preliminares de residências</p>
+    <div class="hero-marca">
+      <p class="kicker">Gerador de plantas humanizadas · estudos preliminares de residências</p>
+      <div class="hero-linha">
         <h1 class="marca-h1"><span class="vh">Modulus</span><svg viewBox="240 105 320 420" aria-hidden="true" focusable="false">
 <defs>
     <linearGradient id="mdHBlueL" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1E88E5"/><stop offset="100%" stop-color="#0066B2"/></linearGradient>
@@ -56,11 +56,6 @@
 </svg></h1>
         <p class="lede">Projetos de casas desenhados em escala, com quadro de áreas, terreno mínimo e estratégias de conforto, e um gerador que propõe plantas a partir do terreno e do programa de necessidades.</p>
       </div>
-      <div class="carimbo" aria-label="Resumo da coleção">
-        <div class="title">Coleção</div>
-        <div class="row"><div class="cell"><span class="k">Conteúdo</span><span class="v">Gerador e banco de projetos</span></div><div class="cell"><span class="k">Fase</span><span class="v">Estudo preliminar</span></div></div>
-        <div class="row"><div class="cell"><span class="k">Medidas</span><span class="v">Pelo eixo das paredes</span></div><div class="cell"><span class="k">Responsável técnico</span><span class="v">A definir</span></div></div>
-      </div>
     </div>
 
     <div class="atalhos">
@@ -77,11 +72,15 @@
         <span class="go">Abrir o banco →</span>
       </a>
     </div>
-    <h2 style="margin:6px 0 14px">Estudos em destaque</h2>
-    <div class="projs">
+    <div class="sec-dest">
+      <h2>Estudos em destaque</h2>
+      <p>Um exemplo de cada formato com 3 suítes e 3 vagas, gerado agora pelo Modulus com as regras atuais (corredor que termina no quarto, cozinha integrada, sol e vento), e os estudos desenhados à mão. <a href="banco/">Ver todos no banco →</a></p>
+    </div>
+    <div class="projs" id="destaque">
       <a class="proj" href="casa-simetrica/" style="--c:var(--patina)">
         <div class="thumb"><img src="casa-simetrica/planta_A_v2_norte.svg" alt="Miniatura da planta da residência simétrica, opção A" loading="lazy"></div>
         <div class="body">
+          <span class="tag-ex">Estudo desenhado à mão</span>
           <h2>Residência simétrica do nascente</h2>
           <p>Casa térrea espelhada, em quatro opções, com duas suítes voltadas para o sol da manhã, sala alta e torres extratoras.</p>
           <dl><dt>Casa</dt><dd>7,00 × 22,65 a 11,20 × 21,80 m</dd><dt>Área fechada</dt><dd>133,35 a 201,60 m²</dd><dt>Lote</dt><dd>a partir de 10 × 30 m</dd></dl>
@@ -91,6 +90,7 @@
       <a class="proj" href="casa-h/" style="--c:var(--slate)">
         <div class="thumb"><img src="casa-h/planta_H_v1.svg" alt="Miniatura da planta da casa em H" loading="lazy"></div>
         <div class="body">
+          <span class="tag-ex">Estudo desenhado à mão</span>
           <h2>Casa em H</h2>
           <p>Ala íntima com três suítes, ala social com escritório e banho reversível, e ligação pela cozinha e pela área de serviço.</p>
           <dl><dt>Casa</dt><dd>18,80 × 19,00 m</dd><dt>Área fechada</dt><dd>244,28 m²</dd><dt>Lote</dt><dd>mínimo de 21,80 × 27,00 m</dd></dl>
@@ -101,5 +101,12 @@
   </section>
 </main>
 <footer><div>Estudos conceituais, sem valor de projeto executivo. Medidas pelo eixo das paredes; recuos e índices urbanísticos a confirmar na legislação do município.</div></footer>
+<script src="gerador/motor.js"></script>
+<script src="gerador/desenho.js"></script>
+<script src="assets/exemplos.js"></script>
+<script>
+// exemplos gerados ao vivo antes dos estudos desenhados à mão
+(function(){ try{ const g = Exemplos.gerar(''); const d = document.getElementById('destaque'); d.insertAdjacentHTML('afterbegin', g.map(x => Exemplos.cartao(x)).join('')); Exemplos.ajustar(d); }catch(e){ /* sem o motor, ficam só os estudos */ } })();
+</script>
 </body>
 </html>
