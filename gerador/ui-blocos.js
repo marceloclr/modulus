@@ -8,7 +8,7 @@
 
 const BLOCOS = [
   {id:'b1', num:1, titulo:'Dimensões', cor:'var(--patina)'},
-  {id:'b2', num:2, titulo:'Tipo de estrutura e padrão de custos', cor:'var(--moss)', vazio:'O sistema estrutural (alvenaria estrutural, concreto armado, laje nervurada, protendido, metálica, steel frame), o município e o padrão de acabamento chegam na próxima fase, com a estimativa de custo.'},
+  {id:'b2', num:2, titulo:'Tipo de estrutura e padrão de custos', cor:'var(--moss)'},
   {id:'b3', num:3, titulo:'Energia solar', cor:'var(--brass)', vazio:'Os níveis de atendimento N1 a N4, a geração, as baterias e o retorno do investimento chegam numa fase seguinte, calculados sobre a planta escolhida.'},
   {id:'b4', num:4, titulo:'Estilo arquitetônico', cor:'var(--plum)', vazio:'A galeria comparativa de estilos (casa com cara de casa, farm, inglês, moderna contemporânea e ecológica), as fachadas e o muro chegam numa fase seguinte.', trava:'Conclua o bloco 1 para liberar a escolha do estilo.'},
 ];
@@ -53,6 +53,13 @@ function resumo(id, form){
     if(rumo) partes.push('frente ' + rumo);
     return partes.join(' · ');
   }
+  if(id === 'b2'){
+    const txt = n => { const el = E[n]; return el && el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0].textContent : ''; };
+    const partes = [txt('estSistema'), txt('padrao'), txt('municipio')];
+    if(E.condominio && E.condominio.checked) partes.push('condomínio');
+    if(E.cubTipo && E.cubTipo.value === 'desonerado') partes.push('CUB desonerado');
+    return partes.filter(Boolean).join(' · ');
+  }
   return 'Em preparação';
 }
 
@@ -84,6 +91,8 @@ function montar(form, est, opts){
   const conforto = subsecao('Conforto passivo', [rotuloDe('torreCalor')]);
   [sec('terreno'), sec('tipo'), subsolo, sec('quartos'), sec('salas'), recolhida(sec('dimensoes')), sec('garagem'), recolhida(sec('anexos')), conforto]
     .forEach(n => corpos.b1.appendChild(n));
+  // bloco 2: sistema estrutural e padrão e local da obra
+  [sec('estrutura'), sec('custo')].filter(Boolean).forEach(n => corpos.b2.appendChild(n));
   caixa.after(rodape);
   // conclusão: só pelo botão (a conclusão automática fecharia o bloco no meio da digitação)
   for(const b of BLOCOS){
@@ -217,7 +226,7 @@ function montar(form, est, opts){
   form.addEventListener('change', aoAlterar);
   form.addEventListener('input', aoAlterar);
   // "Restaurar" volta os campos e também o percurso dos blocos ao início
-  const pad = document.getElementById('padrao');
+  const pad = document.getElementById('restaurar');
   if(pad) pad.addEventListener('click', () => {
     BLOCOS.forEach(b => { document.getElementById('bl-'+b.id).open = b.id === 'b1'; mostrarErros(b.id, []); });
     est.escrever('ui.abertos', ['b1']); gravaBlocos(Object.assign({}, est.ler().ui.blocos, {b1:'a-definir', b2:'a-definir', b3:'a-definir', b4:'bloqueado'}));
