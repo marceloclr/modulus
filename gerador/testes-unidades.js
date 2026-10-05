@@ -42,6 +42,26 @@ t('estado: navegador (localStorage) ida e volta e repositório com assinatura', 
   igual(Estado.deLocal('lixo', P), null);
 });
 
+// ---------- blocos (lógica pura) ----------
+const U = require('./ui-blocos.js');
+const INI = Estado.blocosIniciais();
+t('blocos: editar o bloco 1 deixa "pronto" ou "em edição"; concluir libera o estilo', () => {
+  igual(U.aposAlterar(INI, 'b1', 'frente', true).b1, 'pronto');
+  igual(U.aposAlterar(INI, 'b1', 'frente', false).b1, 'em-edicao');
+  igual(U.travas(INI).b4, 'bloqueado');
+  const c = U.aposConcluir(INI, 'b1'); igual(c.b1, 'concluido'); igual(c.b4, 'a-definir');
+  igual(U.proximo(INI, 'b1'), 'b2'); igual(U.proximo(Object.assign({}, INI, {b2:'concluido', b3:'concluido'}), 'b3'), null, 'bloco 4 travado não é o próximo');
+  igual(U.proximo(c, 'b3'), 'b4');
+});
+t('blocos: mudar o bloco 1 manda os seguintes concluídos para "revisar"', () => {
+  const tudo = {b1:'concluido', b2:'concluido', b3:'concluido', b4:'concluido'};
+  igual(U.aposAlterar(tudo, 'b1', 'formato', true), {b1:'concluido', b2:'concluido', b3:'revisar', b4:'revisar'});
+  igual(U.aposAlterar(tudo, 'b1', 'd_quarto_w', true), {b1:'concluido', b2:'concluido', b3:'concluido', b4:'revisar'}, 'dimensão de cômodo não mexe no solar');
+  igual(U.aposAlterar(tudo, 'b1', 'quartos', true).b3, 'revisar');
+  igual(U.aposAlterar(tudo, 'b1', 'frente', false), {b1:'em-edicao', b2:'concluido', b3:'revisar', b4:'bloqueado'}, 'bloco 1 inválido trava o estilo');
+  igual(U.aposAlterar(tudo, 'b2', 'x', true), tudo, 'bloco 2 não invalida os outros');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

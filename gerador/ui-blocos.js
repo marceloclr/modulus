@@ -17,7 +17,28 @@ const DICA = {'a-definir':'Ainda não preenchido', 'em-edicao':'Em preenchimento
   'concluido':'Bloco concluído; pode ser reaberto a qualquer momento', 'revisar':'Um bloco anterior mudou: confira este bloco e conclua de novo', 'bloqueado':'Conclua o bloco 1 para liberar'};
 
 /* ---------- lógica pura ---------- */
+const ORDEM = BLOCOS.map(b => b.id);
+// o estilo (bloco 4) depende de toda a geometria do bloco 1; o solar (bloco 3), só do que muda carga ou cobertura.
+// O custo (bloco 2) é recalculado sozinho a cada mudança de área, sem pedir revisão.
+const CAMPOS_SOLAR = /^(quartos|suites|master|tipo|formato|frente|fundo|rec|taxa|piscina|elevador|rooftop|rt[A-Z]|supModo|sec[A-Z]|torreCalor|gourmet|edicula|ed[A-Z]|subsolo|peDireito)/;
+function dependentes(bloco, campo){
+  if(bloco === 'b1') return (CAMPOS_SOLAR.test(campo || '') ? ['b3'] : []).concat(['b4']);
+  return [];
+}
 function travas(b){ const o = Object.assign({}, b); o.b4 = o.b1 === 'concluido' ? (o.b4 === 'bloqueado' ? 'a-definir' : o.b4) : 'bloqueado'; return o; }
+// alteração de um campo: o próprio bloco fica "pronto" ou "em edição" (um concluído só reabre se ficar inválido);
+// os blocos seguintes já concluídos que dependem do campo voltam a "revisar"
+function aposAlterar(blocos, bloco, campo, valido){
+  const b = Object.assign({}, blocos);
+  if(b[bloco] !== 'bloqueado'){
+    if(b[bloco] === 'concluido'){ if(!valido) b[bloco] = 'em-edicao'; }
+    else b[bloco] = valido ? 'pronto' : 'em-edicao';
+  }
+  for(const d of dependentes(bloco, campo)) if(b[d] === 'concluido') b[d] = 'revisar';
+  return travas(b);
+}
+function aposConcluir(blocos, bloco){ const b = Object.assign({}, blocos); b[bloco] = 'concluido'; return travas(b); }
+function proximo(blocos, bloco){ const t = travas(blocos); for(let k = ORDEM.indexOf(bloco) + 1; k < ORDEM.length; k++) if(t[ORDEM[k]] !== 'bloqueado') return ORDEM[k]; return null; }
 
 /* ---------- DOM ---------- */
 const NOMES_FMT = {auto:'formato automático', bloco:'bloco único', L:'em L', U:'em U', H:'em H'};
@@ -64,6 +85,16 @@ function montar(form, est, opts){
   [sec('terreno'), sec('tipo'), subsolo, sec('quartos'), sec('salas'), recolhida(sec('dimensoes')), sec('garagem'), recolhida(sec('anexos')), conforto]
     .forEach(n => corpos.b1.appendChild(n));
   caixa.after(rodape);
+  // conclusão: só pelo botão (a conclusão automática fecharia o bloco no meio da digitação)
+  for(const b of BLOCOS){
+    if(b.vazio) continue;
+    const corpo = corpos[b.id];
+    corpo.appendChild(el('div', {class:'bl-erro', id:'erro-'+b.id, role:'alert', hidden:''}));
+    const ac = el('div', {class:'bl-acoes'});
+    ac.appendChild(el('button', {type:'button', class:'btn bl-concluir', 'data-bloco':b.id,
+      'data-tip':'Confere os campos obrigatórios, fecha este bloco e abre o seguinte. O bloco pode ser reaberto depois'}, 'Concluir bloco'));
+    corpo.appendChild(ac);
+  }
   // botão principal vira "Gerar novamente": a planta já se atualiza a cada alteração
   const ger = topo.querySelector('button[type=submit]');
   if(ger) ger.setAttribute('data-tip', 'Refaz o cálculo com os campos atuais. A planta já se atualiza sozinha a cada alteração');
@@ -76,11 +107,74 @@ function montar(form, est, opts){
       chip.dataset.estado = st; chip.textContent = vazioAberto ? 'em breve' : ROTULO[st];
       chip.setAttribute('title', vazioAberto ? 'Este bloco ganha campos numa fase seguinte' : DICA[st]);
       d.dataset.estado = st;
+      const bt = d.querySelector('.bl-concluir'); if(bt) bt.classList.toggle('pronto', st === 'pronto');
       document.getElementById('sum-'+x.id).setAttribute('aria-disabled', st === 'bloqueado' ? 'true' : 'false');
       const tv = d.querySelector('.bl-vazio'); if(tv) tv.textContent = st === 'bloqueado' && x.trava ? x.trava : x.vazio;
       document.getElementById('res-'+x.id).textContent = st === 'bloqueado' && x.trava ? x.trava : resumo(x.id, form);
     }
   }
+  // validação: obrigatórios e faixas (min/max) dos campos visíveis; o passo (step) não bloqueia
+  const OBRIG = {b1:['frente', 'fundo', 'quartos']};
+  const visivel = i => !i.disabled && !i.closest('[hidden]');
+  function rotulo(i){
+    if(i.name === 'orientacao') return 'Orientação da frente';
+    if(i.getAttribute('aria-label')) return i.getAttribute('aria-label');
+    const l = i.closest('label'); if(!l) return i.name;
+    const c = l.cloneNode(true); c.querySelectorAll('small,select,input').forEach(x => x.remove()); return c.textContent.trim();
+  }
+  const num = v => String(v).replace('.', ',');
+  function validar(id){
+    const corpo = corpos[id], probs = [];
+    if(id === 'b1' && !form.querySelector('input[name=orientacao]:checked'))
+      probs.push({el: form.querySelector('input[name=orientacao]'), msg: 'Escolha na rosa dos ventos para onde a frente do terreno (a rua) está voltada.'});
+    for(const i of corpo.querySelectorAll('input[type=number]')){
+      if(!visivel(i)) continue;
+      const v = i.validity;
+      if((OBRIG[id] || []).includes(i.name) && i.value === '') probs.push({el:i, msg:`${rotulo(i)}: informe um valor.`});
+      else if(v.badInput) probs.push({el:i, msg:`${rotulo(i)}: número inválido.`});
+      else if(v.rangeUnderflow || v.rangeOverflow) probs.push({el:i, msg:`${rotulo(i)}: use um valor entre ${num(i.min)} e ${num(i.max)}.`});
+    }
+    return probs;
+  }
+  function mostrarErros(id, probs){
+    const box = document.getElementById('erro-'+id); if(!box) return;
+    corpos[id].querySelectorAll('[aria-invalid="true"]').forEach(i => { i.removeAttribute('aria-invalid'); desliga(i, 'erro-'+id); });
+    if(!probs.length){ box.hidden = true; box.innerHTML = ''; return; }
+    box.innerHTML = `<strong>Antes de concluir este bloco:</strong><ul>${probs.map(p => `<li>${p.msg}</li>`).join('')}</ul>`;
+    box.hidden = false;
+    probs.forEach(p => { p.el.setAttribute('aria-invalid', 'true'); liga(p.el, 'erro-'+id); });
+  }
+  function liga(i, idErro){ const a = (i.getAttribute('aria-describedby') || '').split(' ').filter(Boolean); if(!a.includes(idErro)) a.push(idErro); i.setAttribute('aria-describedby', a.join(' ')); }
+  function desliga(i, idErro){ const a = (i.getAttribute('aria-describedby') || '').split(' ').filter(x => x && x !== idErro); if(a.length) i.setAttribute('aria-describedby', a.join(' ')); else i.removeAttribute('aria-describedby'); }
+  function focar(i){ const sub = i.closest('details.sub'); if(sub) sub.open = true; const d = i.closest('details.bloco'); if(d) d.open = true; i.focus(); if(i.scrollIntoView) i.scrollIntoView({block:'center'}); }
+  function primeiroCampo(id){
+    const c = [...corpos[id].querySelectorAll('input:not([type=file]),select,textarea')].find(i => visivel(i) && !(i.closest('details.sub') && !i.closest('details.sub').open));
+    return c || document.getElementById('sum-'+id);
+  }
+  function gravaBlocos(novos){ est.escrever('ui.blocos', novos); pintar(); if(opts.persistir) opts.persistir(); }
+  function concluir(id){
+    const probs = validar(id);
+    mostrarErros(id, probs);
+    if(probs.length){ gravaBlocos(aposAlterar(est.ler().ui.blocos, id, '', false)); focar(probs[0].el); return false; }
+    const novos = aposConcluir(est.ler().ui.blocos, id);
+    document.getElementById('bl-'+id).open = false;
+    gravaBlocos(novos);
+    const nx = proximo(novos, id);
+    if(nx){ const d = document.getElementById('bl-'+nx); d.open = true; const alvo = primeiroCampo(nx); alvo.focus(); if(alvo.scrollIntoView) alvo.scrollIntoView({block:'nearest'}); }
+    else document.getElementById('sum-'+id).focus();
+    if(opts.aoConcluir) opts.aoConcluir(id);
+    return true;
+  }
+  function aoAlterar(e){
+    const d = e.target.closest && e.target.closest('details.bloco'); if(!d || e.target.closest('.bloco-res')) return;
+    const id = d.dataset.bloco, probs = validar(id);
+    const box = document.getElementById('erro-'+id);
+    if(box && !box.hidden) mostrarErros(id, probs);   // com a lista aberta, ela acompanha as correções
+    else if(e.target.getAttribute && e.target.getAttribute('aria-invalid') === 'true' && !probs.some(p => p.el === e.target)){ e.target.removeAttribute('aria-invalid'); desliga(e.target, 'erro-'+id); }
+    const novos = aposAlterar(est.ler().ui.blocos, id, e.target.name, !probs.length);
+    if(JSON.stringify(novos) !== JSON.stringify(est.ler().ui.blocos)) gravaBlocos(novos); else pintar();
+  }
+
   function guardaAbertos(){ est.escrever('ui.abertos', BLOCOS.map(b => b.id).filter(id => document.getElementById('bl-'+id).open)); if(opts.persistir) opts.persistir(); }
 
   // abertura inicial: a sessão restaurada manda; na primeira visita, o bloco 1 abre sozinho (sem autofoco)
@@ -94,11 +188,18 @@ function montar(form, est, opts){
     if(sm && sm.getAttribute('aria-disabled') === 'true') e.preventDefault();
   });
   caixa.addEventListener('toggle', e => { if(e.target.classList && e.target.classList.contains('bloco')) guardaAbertos(); }, true);
-  form.addEventListener('change', () => pintar());
-  form.addEventListener('input', () => pintar());
+  caixa.addEventListener('click', e => { const bt = e.target.closest('.bl-concluir'); if(bt) concluir(bt.dataset.bloco); });
+  form.addEventListener('change', aoAlterar);
+  form.addEventListener('input', aoAlterar);
+  // "Restaurar" volta os campos e também o percurso dos blocos ao início
+  const pad = document.getElementById('padrao');
+  if(pad) pad.addEventListener('click', () => {
+    BLOCOS.forEach(b => { document.getElementById('bl-'+b.id).open = b.id === 'b1'; mostrarErros(b.id, []); });
+    est.escrever('ui.abertos', ['b1']); gravaBlocos(Object.assign({}, est.ler().ui.blocos, {b1:'a-definir', b2:'a-definir', b3:'a-definir', b4:'bloqueado'}));
+  });
   pintar();
-  return {pintar, corpos};
+  return {pintar, corpos, concluir, validar};
 }
 
-return {BLOCOS, ROTULO, travas, resumo, montar};
+return {BLOCOS, ROTULO, ORDEM, dependentes, travas, aposAlterar, aposConcluir, proximo, resumo, montar};
 });
