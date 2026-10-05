@@ -396,8 +396,8 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
       </fieldset>
 
       <div class="form-acts">
-        <button class="btn" type="button" id="salvar" data-tip="Baixa os campos em um arquivo JSON">Salvar programa</button>
-        <label class="btn" data-tip="Carrega um programa salvo antes">Carregar<input type="file" id="carregar" accept="application/json,.json" hidden></label>
+        <button class="btn" type="button" id="salvar" data-tip="Baixa um arquivo com o programa, a variante escolhida, o resumo e o custo estimado. Guarde onde quiser: computador, Drive, Dropbox…">Salvar arquivo do projeto</button>
+        <label class="btn" data-tip="Abre um arquivo de projeto salvo antes (também aceita o programa.json antigo e a exportação do banco)">Abrir arquivo<input type="file" id="carregar" accept="application/json,.json" hidden></label>
       </div>
     </form>
   </aside>
@@ -419,7 +419,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <button class="btn" type="button" id="espelhar" aria-pressed="false" data-tip="Inverte a planta da esquerda para a direita">Espelhar</button>
         <button class="btn" type="button" id="baixarSvg" data-tip="Baixa o pavimento atual em SVG">Baixar SVG</button>
         <button class="btn" type="button" id="baixarPng" data-tip="Baixa o pavimento atual em PNG (2×)">Baixar PNG</button>
-        <span class="salvar-banco"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto para o banco" maxlength="80"><button class="btn prim" type="button" id="salvarBanco" data-tip="Guarda esta variante no banco de projetos deste navegador">Salvar no banco</button></span>
+        <span class="salvar-banco"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto para o banco" maxlength="80"><button class="btn prim" type="button" id="salvarBanco" data-tip="Guarda esta variante no banco de projetos deste navegador">Salvar no banco</button><button class="btn" type="button" id="salvarArquivo" data-tip="Baixa o arquivo do projeto (programa, variante, resumo e custo) para guardar onde quiser">Salvar arquivo</button></span>
       </div>
       <div class="plan-box" id="plan"></div>
       <div class="legenda-zonas" aria-label="Legenda de cores">
@@ -493,6 +493,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
 <script src="insolacao.js"></script>
 <script src="vento.js"></script>
 <script src="animacao.js"></script>
+<script src="projeto.js"></script>
 <script src="../tools/valida-schema.js"></script>
 <script src="valores.js"></script>
 <script src="graficos.js"></script>
@@ -738,10 +739,30 @@ document.getElementById('link').addEventListener('click', async function(){
   const url = location.href; try{ await navigator.clipboard.writeText(url); this.textContent = 'Link copiado'; }catch(e){ this.textContent = 'Copie da barra'; }
   setTimeout(() => this.textContent = 'Copiar link', 1800);
 });
-document.getElementById('salvar').addEventListener('click', () => baixar('programa.json', new Blob([JSON.stringify(Motor.normaliza(lerForm()), null, 2)], {type:'application/json'})));
+// arquivo do projeto (gerador/projeto.js): o usuário decide onde guardar; não há conta nem servidor
+function salvarArquivo(){
+  const v = res && res.variantes[vi], nome = (document.getElementById('nomeBanco').value || '').trim();
+  let custo = null; try{ if(v && dadosCusto) custo = Custos.calcular(res.variantes[vi], res.entrada, dadosCusto); }catch(e){}
+  const arq = Projeto.criar(lerForm(), {nome, v, variante: vi, espelhada: esp, pavimento: pi, custo, mesRef: dadosCusto && dadosCusto.cub ? dadosCusto.cub.mesRef : null});
+  baixar(Projeto.nomeArquivo(arq.nome, arq.criadoEm), new Blob([JSON.stringify(arq, null, 2)], {type:'application/json'}));
+}
+document.getElementById('salvar').addEventListener('click', salvarArquivo);
+document.getElementById('salvarArquivo').addEventListener('click', salvarArquivo);
 document.getElementById('carregar').addEventListener('change', e => {
   const f = e.target.files[0]; if(!f) return;
-  f.text().then(t => { try{ preencher(Object.assign({}, PADRAO, JSON.parse(t))); gerar(); }catch(err){ document.getElementById('avisosGerais').innerHTML = '<div class="warn">Arquivo inválido.</div>'; } });
+  f.text().then(t => {
+    try{
+      const a = Projeto.ler(t);
+      preencher(Object.assign({}, PADRAO, a.entrada)); gerar(true);
+      if(res && res.variantes.length){
+        vi = Math.min(a.escolha.variante || 0, res.variantes.length - 1); esp = !!a.escolha.espelhada;
+        const v = res.variantes[vi]; pi = a.escolha.pavimento != null && v.pav[a.escolha.pavimento] ? a.escolha.pavimento : Math.max(0, v.pav.findIndex(p => p.nome==='Térreo'));
+        document.getElementById('espelhar').setAttribute('aria-pressed', esp); atualizaHash(); render();
+      }
+      if(a.nome) document.getElementById('nomeBanco').value = a.nome;
+      document.getElementById('avisosGerais').insertAdjacentHTML('afterbegin', `<div class="warn ok">Projeto aberto${a.nome ? ': ' + esc(a.nome) : ''}.${a.motor && a.motor !== Motor.VERSAO ? ` Foi salvo com o motor de ${esc(a.motor)}; a planta foi gerada de novo com as regras atuais (${Motor.VERSAO}).` : ''}</div>`);
+    }catch(err){ document.getElementById('avisosGerais').innerHTML = `<div class="warn">Não foi possível abrir: ${esc(err.message)}</div>`; }
+  });
   e.target.value = '';
 });
 document.getElementById('vtabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if(!b) return; vi = +b.dataset.v; const v = res.variantes[vi]; pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo')); esp = !!v.espelharVento; document.getElementById('espelhar').setAttribute('aria-pressed', esp); atualizaHash(); render(); });

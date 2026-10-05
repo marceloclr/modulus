@@ -408,6 +408,20 @@ t('lote grande: U e H com largura real, sem variante de nota 0 e rampa livre at�
   }
 });
 
+t('arquivo do projeto: salvar, abrir, formatos antigos e item do banco', () => {
+  const P = require('./projeto.js'), CU = require('./custos.js');
+  const q = M.normaliza({quartos:4, frente:14}), v = M.gerar(q).variantes[1], custo = CU.calcular(v, q, DADOS);
+  const arq = P.criar(q, {v, variante:1, espelhada:true, pavimento:0, custo, mesRef:DADOS.cub.mesRef, nome:'Casa da praia'});
+  igual([arq.tipo, arq.motor, arq.nome, arq.escolha.variante, arq.escolha.espelhada], ['modulus-projeto', M.VERSAO, 'Casa da praia', 1, true]);
+  ok(arq.custo.med > 0 && arq.custo.min <= arq.custo.med && arq.custo.med <= arq.custo.max && arq.custo.mesRef === DADOS.cub.mesRef, 'custo com o mês de referência');
+  const lido = P.ler(JSON.stringify(arq)); igual([lido.origem, lido.entrada.quartos, lido.escolha.variante], ['projeto', 4, 1]);
+  igual(P.ler(JSON.stringify({frente:15, quartos:2})).origem, 'programa', 'programa.json antigo:');
+  const item = P.paraBanco(arq); ok(item.programa.quartos === 4 && item.variante === 1 && item.resumo.area > 0, 'item do banco');
+  igual(P.ler(JSON.stringify([item])).origem, 'banco', 'exportação do banco:');
+  let erro = ''; try{ P.ler('{"x":1}'); }catch(e){ erro = e.message; } ok(/não reconhecido/.test(erro), 'formato desconhecido: ' + erro);
+  igual(P.nomeArquivo('Casa · Praia', '2026-10-05T10:00:00Z'), 'modulus-casa-praia-2026-10-05.json');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
