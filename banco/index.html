@@ -27,6 +27,7 @@
 .proj .acts .btn{padding:7px 10px;font-size:12.5px}
 .proj.salvo{cursor:default}
 .proj.salvo:hover{transform:none}
+.sec-p{margin:-6px 0 14px;color:var(--ink-3);font-size:14px;max-width:80ch}
 .vazio{color:var(--ink-3);font-size:14.5px;background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--radius);padding:22px;text-align:center}
 .nome-edit{font:500 18px 'IBM Plex Serif',Georgia,serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 8px;width:100%}
 </style>
@@ -58,7 +59,11 @@
       <label>Frente do meu lote (m)<input type="number" name="frente" min="0" max="80" step="0.5" placeholder="qualquer"></label>
     </form>
 
-    <div class="sec-h"><h2>Estudos publicados</h2></div>
+    <div class="sec-h"><h2>Exemplos por formato · 3 suítes e 3 vagas</h2></div>
+    <p class="sec-p">Um exemplo de cada formato de planta (bloco único, L, U e H), térreo, com 3 suítes e 3 vagas. São gerados agora pelo motor e acompanham as regras atuais do sistema; abra no gerador para ajustar.</p>
+    <div class="projs" id="exemplos"></div>
+
+    <div class="sec-h" style="margin-top:30px"><h2>Estudos publicados</h2></div>
     <div class="projs" id="estudos"></div>
 
     <div class="sec-h" style="margin-top:30px">
@@ -76,6 +81,7 @@
 
 <script src="../gerador/motor.js"></script>
 <script src="../gerador/desenho.js"></script>
+<script src="../assets/exemplos.js"></script>
 <script>
 (function(){
 'use strict';
@@ -115,6 +121,17 @@ function renderEstudos(){
         <span class="go">Abrir o estudo →</span>
       </div>
     </a>`).join('') : '<p class="vazio">Nenhum estudo publicado atende aos filtros.</p>';
+}
+
+// exemplos por formato (assets/exemplos.js), gerados uma vez e filtrados como os demais
+let exemplos = null;
+function renderExemplos(){
+  const alvo = document.getElementById('exemplos');
+  if(!exemplos){ try{ exemplos = Exemplos.gerar('../'); }catch(e){ exemplos = []; } }
+  const f = filtro();
+  const lista = exemplos.filter(g => passa(f, {titulo: g.ex.nome + ' 3 suítes 3 vagas', resumo: g.ex.resumo, formato: g.ex.formato, pavimentos: 'Térrea', quartos: 3, loteFrente: g.programa.frente}));
+  alvo.innerHTML = lista.length ? lista.map(g => Exemplos.cartao(g, {acoes:true})).join('') : '<p class="vazio">Nenhum exemplo atende aos filtros.</p>';
+  Exemplos.ajustar(alvo);
 }
 
 function miniatura(item){
@@ -186,7 +203,8 @@ document.getElementById('importar').addEventListener('change', e => {
   });
   e.target.value = '';
 });
-filtros.addEventListener('input', () => { renderEstudos(); renderSalvos(); });
+filtros.addEventListener('input', () => { renderExemplos(); renderEstudos(); renderSalvos(); });
+renderExemplos();
 
 fetch('../assets/projetos.json').then(r => r.json()).then(l => { estudos = l; renderEstudos(); })
   .catch(() => { document.getElementById('estudos').innerHTML = '<p class="vazio">Não foi possível carregar a lista de estudos.</p>'; });

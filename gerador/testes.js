@@ -49,11 +49,12 @@ function rodar(){
           esc = es; }
         if(p.nome==='Subsolo'){
           const m = p.manobra;
-          if(m){ for(const pl of (p.pilares||[])) if(pl.y > m.y0+0.2 && pl.y < m.y1-0.2 && pl.x > Xp0+0.2 && pl.x < Xp1-0.2) erros.push(`${v.nome}: pilar dentro da manobra`);
-            for(const s of S) if(!['manobra','rampa','jardim'].includes(s.tipo) && s.y0 < m.y1-E && s.y1 > m.y0+E) erros.push(`${v.nome}: ${s.nome} invade a manobra`); }
+          if(m){ const mx0 = m.x0 !== undefined ? m.x0 : Xp0, mx1 = m.x1 !== undefined ? m.x1 : Xp1;   // faixa de lado a lado ou corredor ao longo do lote (vagas perpendiculares)
+            for(const pl of (p.pilares||[])) if(pl.y > m.y0+0.2 && pl.y < m.y1-0.2 && pl.x > mx0+0.2 && pl.x < mx1-0.2) erros.push(`${v.nome}: pilar dentro da manobra`);
+            for(const s of S) if(!['manobra','rampa','jardim'].includes(s.tipo) && s.y0 < m.y1-E && s.y1 > m.y0+E && s.x0 < mx1-E && s.x1 > mx0+E) erros.push(`${v.nome}: ${s.nome} invade a manobra`); }
           for(const mm of (p.manobras||[])) for(const pl of (p.pilares||[])) if(pl.y > mm.y0+0.2 && pl.y < mm.y1-0.2 && pl.x > mm.x0+0.2 && pl.x < mm.x1-0.2) erros.push(`${v.nome}: pilar dentro de manobra`);
           if(S.some(s => s.tipo==='deposito' && s.nome==='Depósito')) erros.push(`${v.nome}: subsolo com depósito`);
-          for(const vg of S.filter(s => s.vaga)) if(Math.abs((vg.x1-vg.x0) - 3.0) > E || Math.abs((vg.y1-vg.y0) - 5.0) > E) erros.push(`${v.nome}: vaga fora de 3,00 × 5,00 m`);
+          for(const vg of S.filter(s => s.vaga)) if(Math.abs(Math.min(vg.x1-vg.x0, vg.y1-vg.y0) - 3.0) > E || Math.abs(Math.max(vg.x1-vg.x0, vg.y1-vg.y0) - 5.0) > E) erros.push(`${v.nome}: vaga fora de 3,00 × 5,00 m`);
           const rp = S.find(s => s.tipo==='rampa'); if(rp && Math.abs((rp.x1-rp.x0) - 3.5) > E) erros.push(`${v.nome}: rampa sem 3,50 m de largura`);
           const n = p.nucleo; if(n && !(n.x0 < E || n.x1 > v.W-E || n.x0 < Xp0+E || n.x1 > Xp1-E || n.y1 > p.dim.y0+p.dim.D-E)) erros.push(`${v.nome}: núcleo do subsolo no meio`);
         }
@@ -82,7 +83,10 @@ function rodar(){
         else if(els.some(e => Math.abs(e.x0-els[0].x0)>E || Math.abs(e.y0-els[0].y0)>E)) erros.push(`${v.nome}: elevador fora de prumo`); }
       if(c.formato && c.formato!=='auto' && c.subsolo && !v.pav.some(p => p.nome==='Subsolo')) erros.push(`${v.nome}: formato sem subsolo`);
       if(c.subRecuos && c.subRecuos!=='nenhum' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(!sb || sb.vagas < c.vagas) erros.push(`${v.nome}: subsolo com ${sb ? sb.vagas : 0} de ${c.vagas} vagas`); }
-      if(c.subsolo && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(sb && sb.vagas > (c.vagas||2)) erros.push(`${v.nome}: subsolo com mais vagas que o pedido (custo)`); }
+      // regra de 05/10/2026: com subsolo, ele comporta o máximo de vagas e o campo de vagas não conta
+      if(c.subsolo && c.garagemLocal!=='terreo' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'), v1 = M.gerar(Object.assign({}, c, {vagas:1})).variantes[0], sb1 = v1 && v1.pav.find(p => p.nome==='Subsolo');
+        if(sb && !sb.vagas) erros.push(`${v.nome}: subsolo sem vagas`);
+        if(sb && sb1 && sb1.vagas !== sb.vagas) erros.push(`${v.nome}: o campo de vagas mudou o subsolo (${sb1.vagas} × ${sb.vagas})`); }
       if(c.torreCalor && !v.torre) erros.push(`${v.nome}: sem torre de calor`);
       const ter = v.pav.find(p => p.nome==='Térreo');
       if(ter && !ter.portas.some(d => d.entrada)) erros.push(`${v.nome}: térreo sem entrada`);

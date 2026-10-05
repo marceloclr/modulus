@@ -166,7 +166,7 @@ ul.clean li::before{content:"";position:absolute;left:0;top:17px;width:7px;heigh
 
 footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;padding:18px 24px 28px}
 
-#tip{position:fixed;z-index:60;max-width:280px;background:var(--ink);color:var(--bg);font:400 12.5px/1.45 'IBM Plex Sans',system-ui,sans-serif;padding:8px 11px;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.22);pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s;left:0;top:0}
+#tip{position:fixed;z-index:60;max-width:300px;white-space:pre-line;background:var(--ink);color:var(--bg);font:400 12.5px/1.45 'IBM Plex Sans',system-ui,sans-serif;padding:8px 11px;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.22);pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s;left:0;top:0}
 #tip.on{opacity:1;transform:none}
 
 svg .z-suite{fill:var(--suite-f);stroke:var(--suite-s);stroke-width:.6}
@@ -235,6 +235,8 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .proj .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .proj h2{font-size:20px;margin:0}
 .proj p{margin:0;color:var(--ink-2);font-size:14.5px}
+.proj .tag-ex{align-self:flex-start;font-size:11.5px;font-weight:600;color:var(--c,var(--plum));border:1px solid currentColor;border-radius:999px;padding:1px 9px;margin-bottom:2px}
+.proj .thumb>svg{width:100%;height:100%}
 .proj dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0 0;font-size:13px}
 .proj dt{color:var(--ink-3)}.proj dd{margin:0;font-variant-numeric:tabular-nums}
 .proj .go{margin-top:auto;padding-top:10px;font-size:13.5px;font-weight:500;color:var(--c,var(--brass))}
@@ -292,6 +294,15 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 
 /* logo completo na página inicial (nome e subtítulo na cor do tema) */
 .marca-h1{margin:.2rem 0 .6rem;line-height:0}
+/* página inicial: logo e apresentação lado a lado */
+.hero-marca{margin-bottom:26px}
+.hero-linha{display:flex;align-items:center;gap:clamp(20px,4vw,48px)}
+.hero-linha .marca-h1{flex:none;margin:0}
+.hero-linha .lede{margin:0;max-width:56ch;font-size:clamp(17px,1.6vw,20px)}
+@media (max-width:640px){.hero-linha{flex-direction:column;align-items:flex-start}}
+.sec-dest{display:flex;flex-direction:column;gap:4px;margin:6px 0 14px}
+.sec-dest h2{margin:0}
+.sec-dest p{margin:0;color:var(--ink-3);font-size:14px;max-width:80ch}
 .marca-h1 svg{width:clamp(150px,20vw,200px);height:auto;display:block}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* Marca Modulus: ícone em assets/logo.svg e logo completo em assets/logo-completo.svg; nome em uma cor só */
