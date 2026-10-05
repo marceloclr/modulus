@@ -331,6 +331,21 @@ t('insolação: sombra de um cubo, mancha de sol pela janela e incidência por f
   ok(I.horasSolComodos(v, qq, 3).length > 0, 'horas de sol por cômodo');
 });
 
+t('vento na variante: janelas de entrada e saída, linhas de corrente e camada da planta', () => {
+  const VE = require('./vento.js'), D = require('./desenho.js'), VT = require('../dados/vento.json');
+  // casa com frente para o norte e vento de leste (90°): a face x1 (leste) é entrada e a x0 (oeste) é saída
+  const q = {orientacao:'N'}, sala = {id:1, tipo:'estar', x0:0, y0:0, x1:4, y1:4};
+  const p = {salas:[sala], janelas:[{o:'v', c:4, t0:1, t1:2, h:1.2}, {o:'v', c:0, t0:1, t1:2, h:1.2}, {o:'h', c:0, t0:1, t1:2, h:1.2}]};
+  igual(VE.janelas({}, q, p, 90).map(j => j.papel), ['entrada', 'saida', 'lateral']);
+  // linhas paralelas ao vento: vento de leste corre para oeste (−x), y constante
+  const ls = VE.linhas({x0:0, y0:0, x1:10, y1:20}, 90, 0, 5);
+  igual(ls.length, 5); ok(ls.every(l => Math.abs(l.a[1] - l.b[1]) < 1e-9 && l.b[0] < l.a[0]), 'sentido do escoamento');
+  const rs = VE.resumo(VT, 9); ok(rs.velMedia > 5 && rs.principais.length === 3 && rs.velHora.length === 24, 'resumo de setembro');
+  const v = M.gerar({orientacao:'N'}).variantes[0];
+  ok(/<g id="svCamada" data-ox="[0-9.-]+" data-oy="[0-9.-]+" data-k="30"/.test(D.planta(v, 0, {camadaId:'svCamada'})), 'grupo da camada animada');
+  ok(!D.planta(v, 0).includes('svCamada'), 'sem a opção, a planta não muda');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
