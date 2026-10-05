@@ -346,6 +346,23 @@ t('vento na variante: janelas de entrada e saída, linhas de corrente e camada d
   ok(!D.planta(v, 0).includes('svCamada'), 'sem a opção, a planta não muda');
 });
 
+t('janelas: quartos de canto com duas janelas distantes (ventilação cruzada)', () => {
+  const casos = [{orientacao:'N'}, {orientacao:'L', tipo:'sobrado'}, {frente:22, fundo:30, formato:'U', quartos:3, suites:3, orientacao:'S'}, {frente:22, fundo:30, formato:'H', quartos:3, suites:3, orientacao:'N'}, {frente:16, fundo:34, formato:'L', orientacao:'SE'}];
+  let quartosDeCanto = 0;
+  for(const e of casos) for(const v of M.gerar(e).variantes) for(const p of v.pav){
+    for(const sq of p.salas.filter(x => ['quarto','suite','master'].includes(x.tipo))){
+      const js = (p.janelas || []).filter(j => !j.alta).map(j => ({j, lado: M.ladoDaJanela(j, sq)})).filter(x => x.lado);
+      const lados = new Set(js.map(x => x.lado)); if(lados.size < 2) continue;
+      quartosDeCanto++;
+      const c = x => x.j.o === 'h' ? [(x.j.t0 + x.j.t1)/2, x.j.c] : [x.j.c, (x.j.t0 + x.j.t1)/2];
+      let d = 0; for(const a of js) for(const b of js) if(a.lado !== b.lado) d = Math.max(d, Math.hypot(c(a)[0]-c(b)[0], c(a)[1]-c(b)[1]));
+      const diag = Math.hypot(sq.x1 - sq.x0, sq.y1 - sq.y0);
+      ok(d >= 0.6 * diag - 1e-9, `${JSON.stringify(e)} ${v.nome} ${p.nome} ${sq.nome}: ${d.toFixed(2)} m entre janelas, diagonal ${diag.toFixed(2)} m`);
+    }
+  }
+  ok(quartosDeCanto >= 5, 'há quartos de canto com duas janelas: ' + quartosDeCanto);
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

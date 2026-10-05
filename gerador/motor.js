@@ -1299,21 +1299,60 @@ function aberturas(pav, q, ehTerreo, espelho){
     const vidro = s.tipo==='galeria';
     const h = vidro ? 2.1 : alta ? 0.6 : 1.2;
     let falta = exig, obt = 0;
-    ext.forEach((e, i) => {
-      if(i > 0 && falta <= 0.01 && !(s.tipo==='circ' && i===1 && e.t1-e.t0 >= 2.0)) return;
+    // premissa (05/10/2026): sempre que possível, janelas em pontos distantes entre si, para a ventilação cruzada.
+    // 1) escolhe as faces e as larguras; um cômodo de permanência com duas faces externas sempre ganha janela na segunda face
+    const cruzada = !!t.hab && !alta && !vidro, sel = [];
+    // trecho livre de cada face: o maior pedaço fora da porta de entrada (com 0,20 m de folga)
+    const livre = e => { let seg = [[e.t0, e.t1]];
+      for(const p of portas.filter(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001)) seg = seg.flatMap(([a,b]) => [[a, Math.min(b, p.t0-0.2)], [Math.max(a, p.t1+0.2), b]]).filter(([a,b]) => b-a > 0.05);
+      const m = seg.sort((x,y) => (y[1]-y[0]) - (x[1]-x[0]))[0]; return m ? Object.assign({}, e, {t0:m[0], t1:m[1]}) : null; };
+    ext.forEach((e0, i) => {
+      const e = livre(e0); if(!e) return;
+      // a janela extra de ventilação não vai para face de sol da tarde (SO, O, NO) num quarto
+      const tarde = QUARTOS.includes(s.tipo) && RUMOS[q.orientacao] !== undefined && classeSol(rumoFace(e.lado, RUMOS[q.orientacao], espelho)) >= 2;
+      const outraFace = cruzada && sel.length === 1 && !sel.some(x => x.e.lado === e.lado) && !tarde;
+      if(i > 0 && falta <= 0.01 && !outraFace && !(s.tipo==='circ' && i===1 && e.t1-e.t0 >= 2.0)) return;
+      if(cruzada && sel.some(x => x.e.lado === e.lado) && falta <= 0.01) return;
       const L = e.t1-e.t0;
       const wmin = alta ? 0.6 : vidro ? L-0.6 : 1.0;
-      let w = vidro ? L-0.6 : clamp(Math.max(wmin, falta/h), wmin, Math.min(alta ? 1.6 : 3.0, L-0.3));
+      const w = vidro ? L-0.6 : clamp(Math.max(wmin, falta/h), wmin, Math.min(alta ? 1.6 : 3.0, L-0.3));
       if(w < 0.5) return;
-      const m = (e.t0+e.t1)/2;
+      sel.push({e, e0, w}); obt += w*h; falta = exig - obt;
+    });
+    // 2) posição: em faces vizinhas, cada janela na ponta longe do canto comum; em faces opostas, em pontas contrárias;
+    //    com uma janela só, na ponta longe da porta do cômodo; sempre 0,30 m de boneca
+    const pontas = (e, w) => [e.t0 + Math.min(0.3, (e.t1-e.t0-w)/2) + w/2, e.t1 - Math.min(0.3, (e.t1-e.t0-w)/2) - w/2];
+    const ponto = (e, t) => e.o === 'h' ? [t, e.c] : [e.c, t];
+    const dist = (p, q) => Math.hypot(p[0]-q[0], p[1]-q[1]);
+    const centros = sel.map(({e, w}) => (e.t0+e.t1)/2);
+    if(cruzada && sel.length >= 2){
+      const [A, B] = sel, pa = pontas(A.e, A.w), pb = pontas(B.e, B.w);
+      let melhor = null;
+      for(const ta of pa) for(const tb of pb){ const d = dist(ponto(A.e, ta), ponto(B.e, tb)); if(!melhor || d > melhor.d + 0.001) melhor = {d, ta, tb}; }
+      centros[0] = melhor.ta; centros[1] = melhor.tb;
+    } else if(cruzada && sel.length === 1){
+      const dp = portas.find(p => (p.sala === s.id || p.viz === s.id) && !p.entrada);
+      if(dp){ const pd = ponto(dp, (dp.t0+dp.t1)/2), pa = pontas(sel[0].e, sel[0].w);
+        centros[0] = dist(ponto(sel[0].e, pa[0]), pd) >= dist(ponto(sel[0].e, pa[1]), pd) ? pa[0] : pa[1]; }
+    }
+    obt = 0;
+    sel.forEach(({e, w}, i) => {
+      let mm = centros[i];
       // não sobrepor porta de entrada
-      const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2);
-      let mm = m;
+      const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>mm-w/2 && p.t0<mm+w/2);
       if(pe){ if(pe.t1 + 0.3 + w <= e.t1) mm = pe.t1+0.3+w/2; else if(pe.t0 - 0.3 - w >= e.t0) mm = pe.t0-0.3-w/2; else { w = Math.max(0, Math.max(e.t1-pe.t1, pe.t0-e.t0) - 0.4); mm = e.t1-pe.t1 > pe.t0-e.t0 ? pe.t1+0.2+w/2 : pe.t0-0.2-w/2; } }
       if(w < 0.5) return;
       janelas.push({o:e.o, c:e.c, t0:r2(mm-w/2), t1:r2(mm+w/2), alta, vidro, h});
-      obt += w*h; falta = exig - obt;
+      obt += w*h;
     });
+    falta = exig - obt;
+    // 3) se a porta de entrada encurtou alguma janela, completa a área nas faces que sobraram (centradas)
+    for(const e of ext){
+      if(falta <= 0.01 || sel.some(x => x.e0 === e)) continue;
+      const L = e.t1-e.t0, w = clamp(Math.max(alta ? 0.6 : 1.0, falta/h), alta ? 0.6 : 1.0, Math.min(alta ? 1.6 : 3.0, L-0.3)), m = (e.t0+e.t1)/2;
+      if(w < 0.5 || portas.some(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2)) continue;
+      janelas.push({o:e.o, c:e.c, t0:r2(m-w/2), t1:r2(m+w/2), alta, vidro, h}); obt += w*h; falta = exig - obt;
+    }
     if(exig){
       s.ilum = {exig:r2(exig), obt:r2(obt)};
       if(obt < exig - 0.01){
