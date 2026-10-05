@@ -174,6 +174,23 @@ t('custos: variante real tem fórmula em cada parcela e faixa crescente', () => 
   ok(['construcao', 'fundacao', 'subsolo', 'elevador', 'projetos'].every(id => r.parcelas.some(p => p.id === id)), r.parcelas.map(p => p.id).join(','));
 });
 
+// ---------- cards ----------
+const CA = require('./cartoes.js');
+t('cards: selo de atualidade (alerta acima de 45 dias do fim do mês) e card com fórmulas e quatro vistas', () => {
+  igual(CA.selo(DADOS, new Date(Date.UTC(2026, 9, 5))).velho, false, 'em 05/10/2026, agosto ainda vale:');
+  igual(CA.selo(DADOS, new Date(Date.UTC(2026, 9, 20))).velho, true, 'em 20/10/2026, sem setembro, alerta:');
+  const vs = M.gerar({}).variantes, pv = vs.map(x => ({nome:x.nome, r:CU.calcular(x, {}, DADOS)}));
+  for(const vista of ['parcelas', 'composicao', 'variantes', 'serie']){
+    const h = CA.cartaoCusto(pv[0].r, {dados:DADOS, historico:HIST, porVariante:pv, atual:0, vista, hoje:new Date(Date.UTC(2026, 9, 5))});
+    ok(h.includes('<svg class="graf"'), 'vista ' + vista + ' sem gráfico');
+    ok((h.match(/data-tip="/g) || []).length >= 8, 'poucas dicas na vista ' + vista);
+  }
+  const h = CA.cartaoCusto(pv[0].r, {dados:DADOS, historico:HIST, porVariante:pv, atual:0});
+  ok(h.includes('Total = construção') && h.includes('não é orçamento'), 'fórmula do total e aviso');
+  const ve = EST.avaliar(M.gerar({}).variantes[0], {estSistema:'protendido'}, DADOS);
+  ok(CA.cartaoEstrutura(ve, DADOS).includes('Concreto protendido'), 'card da estrutura');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

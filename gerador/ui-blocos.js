@@ -190,7 +190,7 @@ function montar(form, est, opts){
   }
 
   // celular: os cards de cada bloco concluído descem para logo abaixo dele (no desktop ficam na coluna principal)
-  const RESULTADOS = {b1: ['#main > .panel']};
+  const RESULTADOS = {b1: ['#main > .panel:not(#analises)'], b2: ['#analises']};
   const estreito = window.matchMedia ? window.matchMedia('(max-width: 899px)') : {matches:false};
   const origem = {};
   function posicionar(){

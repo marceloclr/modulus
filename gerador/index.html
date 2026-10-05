@@ -91,7 +91,33 @@ details.sub>.fs>legend{display:none}
 .bloco-res:empty{display:none}
 .bloco-res{margin:-2px 0 4px}
 .bloco-res .panel{max-width:none;margin:0}
-html.beta section.panel{--c:var(--card-variante)!important}
+html.beta section.panel:not(#analises){--c:var(--card-variante)!important}
+#analises{margin-top:28px}
+.grid-analise{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px;align-items:start}
+.grid-analise .card{margin:0}
+.selo{font-size:12.5px;color:var(--ink-2);margin:2px 0 0;max-width:none}
+.selo.velho{color:var(--rust);font-weight:500}
+.nota-custo{font-size:13px;color:var(--ink-2);margin:0 0 10px;max-width:none}
+.grid-analise .stat .v{font-size:18px;white-space:nowrap}
+.grid-analise .stat .v.v-menor{font-size:14px;white-space:normal}
+.vistas{margin:4px 0 8px}
+.vistas .btn{padding:7px 10px;font-size:12.5px}
+.graf{width:100%;height:auto;display:block;overflow:visible}
+.g-rot{font:500 12px 'IBM Plex Sans',sans-serif;fill:var(--ink)}
+.g-val{font:600 12px 'IBM Plex Sans',sans-serif;fill:var(--ink);font-variant-numeric:tabular-nums}
+.g-eixo{font:400 11px 'IBM Plex Sans',sans-serif;fill:var(--ink-3);font-variant-numeric:tabular-nums}
+.marca{cursor:default;outline:none}
+.marca:hover path,.marca:focus path{fill-opacity:.82}
+.marca:focus-visible>rect:first-child,.marca:focus-visible>circle:first-child{stroke:var(--steel);stroke-width:2}
+.tabela-custo{margin:10px 0 4px}
+.tabela-custo summary{cursor:pointer;font-size:13px;color:var(--ink-2)}
+.tabela-custo summary:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+.medidor{display:inline-block;width:80px;height:6px;border-radius:3px;background:var(--line);vertical-align:middle;margin-left:6px;overflow:hidden}
+.medidor i{display:block;height:100%;background:var(--card-estrutura)}
+/* rampa ordinal da série do CUB (validada: um tom, claro → escuro, contra a superfície de cada tema) */
+:root{--rampa-1:#9DB88A;--rampa-2:#5F7350;--rampa-3:#33422A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rampa-1:#4F6342;--rampa-2:#7E9A6C;--rampa-3:#B4CDA3}}
+:root[data-theme="dark"]{--rampa-1:#4F6342;--rampa-2:#7E9A6C;--rampa-3:#B4CDA3}
 @media (max-width:899px){
   .gen aside.sb{position:static;transform:none;height:auto;width:auto;box-shadow:none;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px}
   .gen main{padding:20px 16px 48px}
@@ -353,6 +379,10 @@ html.beta section.panel{--c:var(--card-variante)!important}
         </div>
       </div>
     </section>
+    <section class="panel so-beta" id="analises" style="--c:var(--card-custo)" aria-labelledby="tAnalises">
+      <div class="panel-head"><p class="eyebrow">Análises da variante escolhida</p><h2 id="tAnalises">Custo e estrutura</h2></div>
+      <div id="cardsAnalise" class="grid-analise"><p class="note">Carregando os valores de custo…</p></div>
+    </section>
   </main>
 </div>
 <footer><div>Gerador experimental de estudos preliminares. Medidas pelo eixo das paredes, sem valor de projeto executivo.</div></footer>
@@ -362,6 +392,8 @@ html.beta section.panel{--c:var(--card-variante)!important}
 <script src="estado.js"></script>
 <script src="estrutura.js"></script>
 <script src="custos.js"></script>
+<script src="graficos.js"></script>
+<script src="cartoes.js"></script>
 <script src="ui-blocos.js"></script>
 <script src="zoom.js"></script>
 <script>
@@ -371,7 +403,9 @@ html.beta section.panel{--c:var(--card-variante)!important}
 const PADRAO = Object.assign({}, Motor.PADRAO, Estrutura.PADRAO, Custos.PADRAO);
 const form = document.getElementById('form'), f2 = Motor.f2, est = Estado.criar(PADRAO);
 // valores de custo (dados/custos.json); no beta entram na avaliação estrutural e no card de custo
-let dadosCusto = null;
+let dadosCusto = null, historicoCusto = null;
+// vista do gráfico de custo: conveniência deste navegador
+let vistaCusto = 'parcelas'; try{ vistaCusto = localStorage.getItem('plantas-vista-custo') || 'parcelas'; }catch(e){}
 let res = null, vi = 0, pi = 0, esp = false, blocos = null;
 
 function lerForm(){
@@ -511,7 +545,21 @@ function render(){
   if(sub && sub.rampa && q.subGaragem) t += `<tr><td>Rampa</td><td class="n">${f2(sub.rampa.L)} m a ${q.inclinacao} % (${f2(sub.rampa.Lout)} m no recuo)</td></tr>`;
   document.getElementById('terreno').innerHTML = t + '</tbody>';
   document.getElementById('crumbSec').textContent = `${v.nome} · ${v.pav[pi].nome}`;
+  if(window.plantasBeta) renderAnalises();
 }
+// cards de custo e estrutura (beta): custo da variante escolhida e de todas, para comparar
+function renderAnalises(){
+  const box = document.getElementById('cardsAnalise');
+  if(!dadosCusto || !res || !res.variantes[vi]){ box.innerHTML = '<p class="note">Carregando os valores de custo…</p>'; return; }
+  const v = res.variantes[vi], q = res.entrada;
+  const porVariante = res.variantes.map(x => ({nome:x.nome, r:Custos.calcular(x, q, dadosCusto)}));
+  box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto}) + Cartoes.cartaoEstrutura(v, dadosCusto);
+}
+document.getElementById('cardsAnalise').addEventListener('click', e => {
+  const b = e.target.closest('[data-vista]'); if(!b) return;
+  vistaCusto = b.dataset.vista; try{ localStorage.setItem('plantas-vista-custo', vistaCusto); }catch(err){}
+  renderAnalises(); const nb = document.querySelector(`#cardsAnalise [data-vista="${vistaCusto}"]`); if(nb) nb.focus();
+});
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
 
 function baixar(nome, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
@@ -583,7 +631,8 @@ let inicial = ini ? ini.ui : null;
 if(window.plantasBeta) blocos = UiBlocos.montar(form, est, {primeiraVisita: !ini, persistir: () => { if(res) atualizaHash(); }});
 preencher(Object.assign({}, PADRAO, ini ? ini.entrada : {}));
 gerar();
-if(window.plantasBeta) fetch('../dados/custos.json', {cache:'no-cache'}).then(r => r.json()).then(d => { dadosCusto = d; sincroniza(); gerar(true); })
+if(window.plantasBeta) Promise.all(['custos', 'custos-historico'].map(n => fetch('../dados/' + n + '.json', {cache:'no-cache'}).then(r => { if(!r.ok) throw new Error(n); return r.json(); })))
+  .then(([d, h]) => { dadosCusto = d; historicoCusto = h; sincroniza(); gerar(true); })
   .catch(() => { document.getElementById('avisosGerais').insertAdjacentHTML('beforeend', '<div class="warn">Não foi possível carregar os valores de custo (dados/custos.json).</div>'); });
 })();
 </script>
