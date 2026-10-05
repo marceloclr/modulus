@@ -1,9 +1,9 @@
-# GerPlantas — instruções de continuidade
+# Modulus — instruções de continuidade
 
 Atualizado em 05/10/2026. Cole este arquivo num chat novo (ou peça "leia docs/CONTINUIDADE.md") para retomar.
 
 ## 1. Objetivo
-O **GerPlantas** é um gerador de plantas residenciais por regras. É um site estático (HTML/JS, sem servidor e sem IA) publicado no GitHub Pages: https://marceloclr.github.io/plantas/. O repositório é `marceloclr/plantas`, branch `main`.
+O **Modulus** (antes GerPlantas; nome trocado em 05/10/2026) é um gerador de plantas residenciais por regras. É um site estático (HTML/JS, sem servidor e sem IA) publicado no GitHub Pages: https://marceloclr.github.io/plantas/. O repositório é `marceloclr/plantas`, branch `main`.
 
 O usuário preenche um formulário com terreno, recuos, orientação, cômodos, banheiros, garagem, sobrado, subsolo, rooftop, edícula e piscina. O site devolve variantes de planta em escala, com quadro de áreas, implantação no lote e avisos.
 
@@ -38,7 +38,7 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
 - **Edícula:** sem hall; na de 2 pavimentos, o banho de cima fica sobre o de baixo.
 - **Dimensões:** opcionais por cômodo, em largura × comprimento ou área.
 - **Rodada em curso (05/10/2026):** plano `docs/planos/2026-10-05-blocos-custos-solar-estilos.md`, em 8 fases (0 a 7), cada uma num branch próprio e com aprovação do usuário antes da seguinte. Decisões: quatro blocos (Dimensões · Tipo de estrutura e padrão de custos · Energia solar · Estilo arquitetônico); concluir bloco só pelo botão; solar antes do estilo, com cobertura provisória; coleta do CUB por GitHub Action que abre pull request; token `--plum`; fatores de custo como estimativas editáveis; subsolo em térrea e sobrado; brises com estudo do melhor ângulo.
-- **Visual:** marca GerPlantas (`assets/logo.svg`); paleta forte por zona; barra superior escura, com contraste em relação ao conteúdo.
+- **Visual:** marca Modulus: ícone (M modular azul e laranja com folhas) em `assets/logo.svg`, logo completo com "Modulus" e o subtítulo "SISTEMA" em `assets/logo-completo.svg` e embutido na página inicial; nome em uma cor só, em IBM Plex Sans. O repositório e o endereço continuam `plantas`; paleta forte por zona; barra superior escura, com contraste em relação ao conteúdo.
 
 ## 3. Estado atual
 - **Rodadas concluídas:** veja os planos em `docs/planos/`. A última concluída é `2026-10-02-norte-ventos-rooftop.md`. Em curso: `2026-10-05-blocos-custos-solar-estilos.md`, com a **Fase 0 concluída e na `main`** e a **Fase 1 concluída** no branch `fase-1-blocos-estado-ao-vivo`, aguardando aprovação para entrar na `main`. Depois da Fase 1, uma rodada de premissas (branch `premissas-sol-subsolo-acessos`): sol nos quartos, vagas do subsolo, destaque de rampa e manobra, carros no H, acessos e portões, cards com terreno e casa, zoom. Próxima: Fase 2 (estrutura e custos).
