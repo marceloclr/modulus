@@ -35,10 +35,11 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
 - **Visual:** marca GerPlantas (`assets/logo.svg`); paleta forte por zona; barra superior escura, com contraste em relação ao conteúdo.
 
 ## 3. Estado atual
-- **Rodadas concluídas:** veja os planos em `docs/planos/`. A última concluída é `2026-10-02-norte-ventos-rooftop.md`. Em curso: `2026-10-05-blocos-custos-solar-estilos.md`, com a **Fase 0 concluída** no branch `fase-0-rede-de-seguranca`, aguardando aprovação para entrar na `main`. Próxima: Fase 1 (blocos, estado único, ao vivo e cores).
+- **Rodadas concluídas:** veja os planos em `docs/planos/`. A última concluída é `2026-10-02-norte-ventos-rooftop.md`. Em curso: `2026-10-05-blocos-custos-solar-estilos.md`, com a **Fase 0 concluída e na `main`** e a **Fase 1 concluída** no branch `fase-1-blocos-estado-ao-vivo`, aguardando aprovação para entrar na `main`. Próxima: Fase 2 (estrutura e custos).
 - **Testes:** `node gerador/testes.js` roda 21 casos de regras (também em `gerador/testes.html`), o **golden** (`gerador/golden.js`: 31 casos, saída canônica do motor e SHA-256 de cada planta, espelhada e implantação, gravados em `gerador/golden/saida.json`) e o tempo de geração (avisa acima de 150 ms; hoje o máximo é ~65–80 ms). Para regravar o golden de propósito: `node gerador/testes.js --atualizar-golden`, com justificativa no commit.
 - **Portão de commit:** `.githooks/pre-commit` roda `node --check` em todo JS, os testes com golden e `node tools/verifica-html.js` (equilíbrio de tags e sintaxe dos scripts embutidos). Ative uma vez por clone: `git config core.hooksPath .githooks`.
 - **Beta:** `?beta=1` liga e `?beta=0` desliga (localStorage `plantas-beta`); as classes `.so-beta` e `.sem-beta` controlam o que aparece. Os recursos novos entram ocultos até a Fase 7.
+- **Fase 1 (no beta):** `gerador/estado.js` (estado único; link `#s=` só com o que difere do padrão; links antigos `#q=` aceitos; `localStorage` `plantas-estado` restaura a sessão no beta) e `gerador/ui-blocos.js` (blocos 1 Dimensões · 2 Tipo de estrutura e padrão de custos · 3 Energia solar · 4 Estilo, montados a partir dos `fieldset[data-secao]`; chips a definir/em edição/pronto/concluído/revisar/bloqueado; "Concluir bloco" só pelo botão; o 4 trava até o 1 ser concluído; mudar o 1 manda 3 e 4 para "revisar"; no celular o painel do resultado desce para baixo do bloco concluído). Ao vivo: `input` nos números com espera de 200 ms; com número fora da faixa, espera a correção; tempo em `#plan[data-ms]` (30–60 ms no navegador). Tokens novos `--plum`, `--brass-ink` e `--card-*` em `base.css`. Testes unitários em `gerador/testes-unidades.js` (7).
 - **Arquivos:**
   - `gerador/motor.js`: funções puras. Destaques: `gerar`, `normaliza`, `programa`, `linear` (bloco/L), `emU`, `emH`, `nucleo`, `subsolo`, `comRooftop`, `comTorre`, `comAnexos`, `edicula`, `aberturas` (portas, janelas, saída de fundos), `janelasSubsolo`, `avaliaVento`, `avalia`, `loteMinimo`.
   - `gerador/desenho.js`: `planta` (terreno, rotação, rótulos legíveis, rosa, setas de vento), `lote`, `rosa`, `girado`, `textosLegiveis`, `espelha`.
@@ -66,6 +67,8 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
 - **Lógica nova da interface** vai para módulos próprios (`gerador/estado.js`, `ui-blocos.js`…), nunca para `sincroniza()`.
 - **CUB-CE:** os zips do Sinduscon mudam de nome a cada mês e trazem PDFs duplicados "(1)"; leia com `pdftotext -raw` o Relatório 5 (com `-layout`, os rótulos saem deslocados das colunas). O site do Sinduscon não libera CORS; a API do SIDRA libera.
 - **Capturas:** Edge headless com `--remote-debugging-port=9333` e um mini-cliente CDP em Node (WebSocket nativo); o tema se força com `Emulation.setEmulatedMedia` (prefers-color-scheme).
+- **CDP:** navegar só trocando o hash não recarrega a página; acrescente um `?x=n` diferente. A captura headless com rolagem omite a barra fixa do topo (artefato; acontece também fora do beta).
+- **ui-blocos:** ele move nós do formulário (subsolo, torre) e, no celular, o painel de resultado para dentro do `<form>`; os ouvintes do formulário ignoram eventos vindos de `.bloco-res`.
 - **Servidor de teste:** `python -m http.server 8765 --bind 127.0.0.1`; para encerrar, `pkill -f "http.server 8765"`.
 
 ## 6. Como retomar
