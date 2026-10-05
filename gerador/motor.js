@@ -850,7 +850,7 @@ function subsolo(q, W0, D0, cel0, av){
     }
     const fim = Math.max(y, ny1);
     if(fim - y > 0.3) f.push({y0:y, y1:fim, t:'livre'});
-    return {f, fim, corredor};
+    return {f, fim, corredor, blocos};
   }
   const obstaculos = pl => [obsN].concat(obsRf() ? [obsRf()] : [], pl.corredor ? [pl.corredor] : []);
   const contaVagas = pl => pl.f.filter(b => b.t==='vagas').reduce((t,b) => t + corta(obstaculos(pl).filter(o => o.y0 < b.y1-0.001 && o.y1 > b.y0+0.001).map(o => [o.x0, o.x1])).reduce((u,[m,n]) => u + Math.floor((n-m+0.001)/VW), 0), 0);
@@ -897,6 +897,7 @@ function subsolo(q, W0, D0, cel0, av){
         const p0 = plano(c, nB), n = contaVagas(p0), cabe = p0.fim <= limite + 0.01;
         const cand = {wt, c, nB, p0, n, cabe, custo: wt * p0.fim};
         if(!melhor || melhorQue(cand, melhor)) melhor = cand;
+        if(p0.blocos < nB) break;                                  // mais blocos não cabem: as próximas tentativas repetiriam esta
       }
     }
     for(const cols of [1, 2]){ const wt = r2(VP*(cols + 1)); if(wt > Wfull + 0.01) continue;
