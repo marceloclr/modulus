@@ -1,0 +1,12 @@
+#!/bin/sh
+# Portão obrigatório antes de todo commit do GerPlantas.
+# Ativar uma vez por clone: git config core.hooksPath .githooks
+set -e
+cd "$(git rev-parse --show-toplevel)"
+echo "pre-commit: node --check em todo JS"
+git ls-files '*.js' '*.mjs' | while read -r f; do node --check "$f" || exit 1; done
+echo "pre-commit: testes do motor e golden"
+node gerador/testes.js > /tmp/gerplantas-testes.log 2>&1 || { cat /tmp/gerplantas-testes.log | grep -v '^ok ' ; echo "pre-commit: testes falharam"; exit 1; }
+grep -E '^(todos|golden|tempo|AVISO)' /tmp/gerplantas-testes.log
+echo "pre-commit: páginas HTML"
+node tools/verifica-html.js

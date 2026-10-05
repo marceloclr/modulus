@@ -102,9 +102,18 @@ function rodar(){
   return {out, falhas};
 }
 if(typeof module==='object' && module.exports){
-  const {out, falhas} = rodar();
-  for(const t of out){ console.log((t.ok?'ok   ':'FALHA ')+t.nome+' → '+t.resumo); t.erros.slice(0,8).forEach(e => console.log('      - '+e)); }
-  console.log(falhas ? `${falhas} caso(s) com falha` : 'todos os casos passaram');
-  process.exitCode = falhas ? 1 : 0;
+  module.exports = {CASOS, rodar};
+  if(require.main === module){
+    const {out, falhas} = rodar();
+    for(const t of out){ console.log((t.ok?'ok   ':'FALHA ')+t.nome+' → '+t.resumo); t.erros.slice(0,8).forEach(e => console.log('      - '+e)); }
+    console.log(falhas ? `${falhas} caso(s) com falha` : 'todos os casos passaram');
+    // rede de segurança: saída do motor e dos desenhos comparada com a gravada (gerador/golden/)
+    const G = require('./golden.js'), atualizar = process.argv.includes('--atualizar-golden');
+    const g = atualizar ? G.gravar() : G.verificar();
+    g.linhas.forEach(l => console.log(l));
+    const tm = G.tempos();
+    tm.linhas.forEach(l => console.log(l));
+    process.exitCode = (falhas || g.falhas) ? 1 : 0;
+  }
 } else root.TestesMotor = rodar;
 })(this);

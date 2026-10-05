@@ -1,0 +1,638 @@
+{
+ "Térrea 10 × 30, 2 quartos": {
+  "motor": "7d3e7ef54c5b94d2",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 6,00 × 19,35 m, 104,10 m², nota 84",
+   "Variante B: Bloco único, corredor central, 7,00 × 21,90 m, 144,50 m², nota 67",
+   "Variante C: Bloco único, corredor lateral, 7,00 × 19,95 m, 130,85 m², nota 61"
+  ],
+  "svg": {
+   "Variante A/Térreo": "cb67adad75834657",
+   "Variante A/espelhada/Térreo": "035b547da65e8d7f",
+   "Variante A/lote": "c45fbd454cc4f465",
+   "Variante B/Térreo": "43e2bd88a370b851",
+   "Variante B/espelhada/Térreo": "998567a70935db6b",
+   "Variante B/lote": "0911b29af712ecf7",
+   "Variante C/Térreo": "076f2094f80193d2",
+   "Variante C/espelhada/Térreo": "892a60fe4d1d2683",
+   "Variante C/lote": "25bf41c1b7565b7b"
+  }
+ },
+ "Térrea 12 × 30, 3 suítes, 2 vagas": {
+  "motor": "dd4a96c254e4bea9",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 9,00 × 20,38 m, 170,62 m², nota 84",
+   "Variante B: Bloco único, corredor lateral, 6,50 × 23,41 m, 139,16 m², nota 58",
+   "Variante C: Em L, 9,00 × 25,63 m, 150,46 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Térreo": "f4f975d716b041d8",
+   "Variante A/espelhada/Térreo": "1fbb5c0b0b41677d",
+   "Variante A/lote": "adeb87cf784d329c",
+   "Variante B/Térreo": "8e042f3e00b2cd34",
+   "Variante B/espelhada/Térreo": "9929427cc4c7b4c4",
+   "Variante B/lote": "f8a6f7f0e29e3491",
+   "Variante C/Térreo": "7616d1ee5b3e701b",
+   "Variante C/espelhada/Térreo": "166e19de0a12a05e",
+   "Variante C/lote": "cbc932c90ba839ad"
+  }
+ },
+ "Casa em H, 22 × 30": {
+  "motor": "be0b610de3cc661f",
+  "resumo": [
+   "Variante A: Em H, 16,00 × 17,30 m, 184,60 m², nota 92",
+   "Variante B: Em H, 17,00 × 17,30 m, 188,27 m², nota 92",
+   "Variante C: Em H, 18,00 × 17,30 m, 192,47 m², nota 92"
+  ],
+  "svg": {
+   "Variante A/Térreo": "fdef41b3dce0d41a",
+   "Variante A/espelhada/Térreo": "310cc1061bb90819",
+   "Variante A/lote": "09f9219dd72f8a06",
+   "Variante B/Térreo": "af61f4ba66bf8618",
+   "Variante B/espelhada/Térreo": "b8fd924656c72c06",
+   "Variante B/lote": "4a69a8c3d6ca3b4f",
+   "Variante C/Térreo": "a8be8f20f13dbe97",
+   "Variante C/espelhada/Térreo": "134a0ed461fe68c3",
+   "Variante C/lote": "82e8e02a2c4010ab"
+  }
+ },
+ "Sobrado 10 × 25, 4 quartos, subsolo 2 vagas": {
+  "motor": "cec02edb7bfaceb5",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 7,00 × 16,62 m, 256,21 m², nota 71",
+   "Variante B: Bloco único, corredor lateral, 6,00 × 18,99 m, 261,06 m², nota 20"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "7f18ff2c034e9e1c",
+   "Variante A/Térreo": "9adef6d722b1b8c9",
+   "Variante A/Superior": "97caa46abd89badb",
+   "Variante A/espelhada/Térreo": "c3bd2bbe1e2007f8",
+   "Variante A/lote": "54905c75aacb8250",
+   "Variante B/Subsolo": "be04a61f011e1b41",
+   "Variante B/Térreo": "b0bf4705ff8fe3b7",
+   "Variante B/Superior": "747d91d3fa90e7ba",
+   "Variante B/espelhada/Térreo": "ef2ff95c98bfe7c0",
+   "Variante B/lote": "bd766ada96db0971"
+  }
+ },
+ "Térrea com subsolo, 15 × 30": {
+  "motor": "85d1e72471d526db",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 9,00 × 19,87 m, 280,65 m², nota 91",
+   "Variante B: Bloco único, corredor lateral, 7,50 × 23,88 m, 283,92 m², nota 19",
+   "Variante C: Em L, 9,00 × 26,65 m, 276,43 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "b0a8c702fef262cf",
+   "Variante A/Térreo": "3200a446166f8cd4",
+   "Variante A/espelhada/Térreo": "29adfe4836a4014d",
+   "Variante A/lote": "1600ba29092e1a56",
+   "Variante B/Subsolo": "8223d8c591bd121e",
+   "Variante B/Térreo": "af18d0dfdf3d78e2",
+   "Variante B/espelhada/Térreo": "b870fd7b06f22e3e",
+   "Variante B/lote": "b04bb55d9d6048fc",
+   "Variante C/Subsolo": "5bd89a512aa1fac4",
+   "Variante C/Térreo": "7cc3a0344fcf20a0",
+   "Variante C/espelhada/Térreo": "5bf895ff043383e0",
+   "Variante C/lote": "c95ebd736e7ce42f"
+  }
+ },
+ "Em U, 22 × 30": {
+  "motor": "23ab3c78159d6991",
+  "resumo": [
+   "Variante A: Em U, 18,50 × 20,13 m, 180,43 m², nota 98"
+  ],
+  "svg": {
+   "Variante A/Térreo": "0ff965150eb22f65",
+   "Variante A/espelhada/Térreo": "0f156a1f22de9c99",
+   "Variante A/lote": "7eb147a17592bd71"
+  }
+ },
+ "Edícula 2 pav. e piscina, 16 × 42": {
+  "motor": "e87c9b997c4f6d55",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 13,00 × 15,80 m, 240,73 m², nota 61",
+   "Variante B: Bloco único, corredor lateral, 7,00 × 24,25 m, 211,88 m², nota 0",
+   "Variante C: Em L, 9,00 × 25,09 m, 198,70 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Térreo": "021fd868a228a3ae",
+   "Variante A/Edícula térreo": "96c3c4f7dd63e80f",
+   "Variante A/Edícula superior": "cc521c6ca51a2e80",
+   "Variante A/espelhada/Térreo": "0eab84b40e70392a",
+   "Variante A/lote": "a7262695896154ea",
+   "Variante B/Térreo": "5f26b5d774b9f883",
+   "Variante B/Edícula térreo": "a7df4f165e74881c",
+   "Variante B/Edícula superior": "b7bded1e4dd9dd25",
+   "Variante B/espelhada/Térreo": "ed13573d2eb56fd6",
+   "Variante B/lote": "37a40027d81adc69",
+   "Variante C/Térreo": "81138a278df39c68",
+   "Variante C/Edícula térreo": "34e4a7c271d85830",
+   "Variante C/Edícula superior": "a1e52cc7e6e01576",
+   "Variante C/espelhada/Térreo": "f82440371427b31f",
+   "Variante C/lote": "faa291bae0b91745"
+  }
+ },
+ "Subsolo enterrado, 12 × 32": {
+  "motor": "a95b0f4c2ec8ad5a",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 8,50 × 20,52 m, 281,14 m², nota 98",
+   "Variante B: Bloco único, corredor lateral, 7,50 × 23,88 m, 287,82 m², nota 65",
+   "Variante C: Em L, 9,00 × 26,65 m, 280,33 m², nota 4"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "20cc034bb8157129",
+   "Variante A/Térreo": "89ed64790e2943b0",
+   "Variante A/espelhada/Térreo": "1f83429cad188070",
+   "Variante A/lote": "64879337ac02a8bf",
+   "Variante B/Subsolo": "889f564f22dea5d1",
+   "Variante B/Térreo": "32859c7735bbaf4a",
+   "Variante B/espelhada/Térreo": "b5761a97f71ef45a",
+   "Variante B/lote": "67de92e696c5caf3",
+   "Variante C/Subsolo": "0d6f574b8987811b",
+   "Variante C/Térreo": "8c3d52a67eeabbe5",
+   "Variante C/espelhada/Térreo": "b3bc81c684a2ede9",
+   "Variante C/lote": "b123e740ee4e183b"
+  }
+ },
+ "Sobrado em L, só a frente sobe, 16 × 32": {
+  "motor": "e9435ac2b8b92f73",
+  "resumo": [
+   "Variante A: Em L, 9,00 × 15,37 m, 206,56 m², nota 75",
+   "Variante B: Em L, 11,50 × 15,44 m, 263,37 m², nota 52",
+   "Variante C: Em L, 12,50 × 14,85 m, 268,76 m², nota 51"
+  ],
+  "svg": {
+   "Variante A/Térreo": "61245a182bc61fd0",
+   "Variante A/Superior": "07110255b70c02cd",
+   "Variante A/espelhada/Térreo": "ae97d6567b29f0ea",
+   "Variante A/lote": "3d90e0df90b15392",
+   "Variante B/Térreo": "884ccf86b71d7f3f",
+   "Variante B/Superior": "8aa990e8e26ef6eb",
+   "Variante B/espelhada/Térreo": "43abf283fe622381",
+   "Variante B/lote": "1028e91a6cf79219",
+   "Variante C/Térreo": "0e2de3b5a1c0d092",
+   "Variante C/Superior": "eeba77eae928bcbe",
+   "Variante C/espelhada/Térreo": "abaa8bcf55fe18e0",
+   "Variante C/lote": "87e439b2dd93b8e5"
+  }
+ },
+ "Sobrado em U, frente e ala esquerda, 22 × 30": {
+  "motor": "7194ed8f2a7b1d1b",
+  "resumo": [
+   "Variante A: Em U, 19,00 × 14,36 m, 288,48 m², nota 85"
+  ],
+  "svg": {
+   "Variante A/Térreo": "8ff1e6eab060ea24",
+   "Variante A/Superior": "9763116be3752f3a",
+   "Variante A/espelhada/Térreo": "2a5f7b41444f43c5",
+   "Variante A/lote": "f37053194196de72"
+  }
+ },
+ "Sobrado correspondente com TV e escritório em cima, 12 × 30": {
+  "motor": "26e146a2094630d0",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 6,50 × 19,70 m, 196,56 m², nota 94",
+   "Variante B: Bloco único, corredor central, 9,00 × 15,10 m, 233,14 m², nota 74",
+   "Variante C: Em L, 9,00 × 14,66 m, 218,78 m², nota 58"
+  ],
+  "svg": {
+   "Variante A/Térreo": "51485339783cda8a",
+   "Variante A/Superior": "4356fc051887d731",
+   "Variante A/espelhada/Térreo": "c868cca3f65b91d1",
+   "Variante A/lote": "71da1b20b1d7abb8",
+   "Variante B/Térreo": "630d631d904a04f9",
+   "Variante B/Superior": "e63ad773b1297945",
+   "Variante B/espelhada/Térreo": "704acfb5d0cc7ed7",
+   "Variante B/lote": "050ef56fd996a1a2",
+   "Variante C/Térreo": "b7d2f5cfb58102bf",
+   "Variante C/Superior": "073203993516d499",
+   "Variante C/espelhada/Térreo": "fb09d9a84126760e",
+   "Variante C/lote": "51008a1776a5b0c4"
+  }
+ },
+ "Térrea com rooftop e spa, 14 × 30": {
+  "motor": "c6b86f9f06ccc76d",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 11,00 × 19,44 m, 222,55 m², nota 67",
+   "Variante B: Bloco único, corredor lateral, 6,50 × 24,61 m, 161,89 m², nota 14",
+   "Variante C: Em L, 9,00 × 27,27 m, 187,70 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Térreo": "4e2c659a7b6a3429",
+   "Variante A/Rooftop": "feb09f1839348b6d",
+   "Variante A/espelhada/Térreo": "a8074b11d843de9d",
+   "Variante A/lote": "2b50f469a00b2532",
+   "Variante B/Térreo": "41015cb491d0624e",
+   "Variante B/Rooftop": "a79add17a05c4813",
+   "Variante B/espelhada/Térreo": "be802ce1741c61b2",
+   "Variante B/lote": "a1aab913bcb4fd5d",
+   "Variante C/Térreo": "7fb28dab7a1fd745",
+   "Variante C/Rooftop": "f201b6f391b5fee6",
+   "Variante C/espelhada/Térreo": "f91a5ff224ff4d37",
+   "Variante C/lote": "617ee952973b1bc4"
+  }
+ },
+ "Sobrado com rooftop, 12 × 30": {
+  "motor": "690537ccd41cbedd",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 6,00 × 16,23 m, 177,26 m², nota 93",
+   "Variante B: Bloco único, corredor central, 8,00 × 17,95 m, 210,94 m², nota 82",
+   "Variante C: Em L, 9,00 × 14,16 m, 236,90 m², nota 68"
+  ],
+  "svg": {
+   "Variante A/Térreo": "f8a4c50ed88b3dea",
+   "Variante A/Superior": "7678ed10999e2e9d",
+   "Variante A/Rooftop": "09550e0c8c9d4172",
+   "Variante A/espelhada/Térreo": "e1c9731c925ba033",
+   "Variante A/lote": "02d965e972a0a600",
+   "Variante B/Térreo": "38c4644cefbe53ef",
+   "Variante B/Superior": "95b201c31215a851",
+   "Variante B/Rooftop": "fca93ad2a864773d",
+   "Variante B/espelhada/Térreo": "b7e686c88f53db7a",
+   "Variante B/lote": "6477a1a8583948d7",
+   "Variante C/Térreo": "a9a87d1e6ebb8059",
+   "Variante C/Superior": "3e508a0c11d1027b",
+   "Variante C/Rooftop": "37ed95755afdfcbc",
+   "Variante C/espelhada/Térreo": "5fbcde6dd3e6a916",
+   "Variante C/lote": "56aea4883d5fc3ea"
+  }
+ },
+ "Subsolo com elevador e sobrado, 12 × 32": {
+  "motor": "865c5e6b61e51499",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 7,00 × 14,52 m, 302,51 m², nota 92",
+   "Variante B: Bloco único, corredor central, 8,00 × 13,64 m, 312,60 m², nota 89",
+   "Variante C: Em L, 9,00 × 15,00 m, 324,72 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "9a7d9d7eee6e3fdb",
+   "Variante A/Térreo": "b757e5f1780bed3e",
+   "Variante A/Superior": "da813618a08b1714",
+   "Variante A/espelhada/Térreo": "40028451a854f3ff",
+   "Variante A/lote": "fab0fc7c46bf77bd",
+   "Variante B/Subsolo": "40b9ef367afa572e",
+   "Variante B/Térreo": "0d524c38aef58abb",
+   "Variante B/Superior": "fc37d29289831eb2",
+   "Variante B/espelhada/Térreo": "5331cdbf153343ff",
+   "Variante B/lote": "e4c57978a775079b",
+   "Variante C/Subsolo": "164100a48c11194b",
+   "Variante C/Térreo": "83882baaafc543d3",
+   "Variante C/Superior": "cbd0cebf3e841d9e",
+   "Variante C/espelhada/Térreo": "54ff87e7dc618be3",
+   "Variante C/lote": "e034059419a9aee2"
+  }
+ },
+ "U com subsolo, 22 × 34": {
+  "motor": "32439dd21150afbc",
+  "resumo": [
+   "Variante A: Em U, 13,50 × 24,61 m, 328,57 m², nota 83",
+   "Variante B: Em U, 14,50 × 24,61 m, 332,17 m², nota 83",
+   "Variante C: Em U, 15,50 × 24,61 m, 335,77 m², nota 83"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "2792ff03b3eda0eb",
+   "Variante A/Térreo": "83868cdb2e0966a5",
+   "Variante A/espelhada/Térreo": "b70ce1838a34c570",
+   "Variante A/lote": "7f77ca096217e1fd",
+   "Variante B/Subsolo": "87d4d95a4e76195d",
+   "Variante B/Térreo": "ac74761f843f930e",
+   "Variante B/espelhada/Térreo": "c4dbf373ce115c72",
+   "Variante B/lote": "1148266e5ef93c2c",
+   "Variante C/Subsolo": "ade66c0a8881db06",
+   "Variante C/Térreo": "60f8a0a710b70c86",
+   "Variante C/espelhada/Térreo": "c2c288980dd61d29",
+   "Variante C/lote": "900a9de0d0b43dcc"
+  }
+ },
+ "H com subsolo, 22 × 34": {
+  "motor": "b1d4b3bdcd30de7b",
+  "resumo": [
+   "Variante A: Em H, 16,00 × 19,01 m, 305,33 m², nota 83",
+   "Variante B: Em H, 17,00 × 19,01 m, 309,00 m², nota 82",
+   "Variante C: Em H, 18,00 × 19,01 m, 313,20 m², nota 82"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "ea7d4b72bf8ce4b1",
+   "Variante A/Térreo": "54495f4b58d5503e",
+   "Variante A/espelhada/Térreo": "f5f7a4fc7ce0b916",
+   "Variante A/lote": "0b0188ba8651ca12",
+   "Variante B/Subsolo": "850c52433be8a7c0",
+   "Variante B/Térreo": "aa0427d88208e667",
+   "Variante B/espelhada/Térreo": "ce8ea717db5b51ae",
+   "Variante B/lote": "b50e63ce307aaacf",
+   "Variante C/Subsolo": "0865d1cc17395524",
+   "Variante C/Térreo": "a107c23d8c932942",
+   "Variante C/espelhada/Térreo": "02b2b184257dd486",
+   "Variante C/lote": "7009bdfdbfd865b1"
+  }
+ },
+ "L com subsolo, 16 × 34": {
+  "motor": "63ad56192d5d1a3a",
+  "resumo": [
+   "Variante A: Em L, 9,00 × 26,65 m, 276,43 m², nota 62",
+   "Variante B: Em L, 10,00 × 26,65 m, 284,81 m², nota 60",
+   "Variante C: Em L, 11,00 × 26,65 m, 293,19 m², nota 58"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "6b804aa3c547b41a",
+   "Variante A/Térreo": "8a0f48b87026bc8c",
+   "Variante A/espelhada/Térreo": "396607e0bb987c57",
+   "Variante A/lote": "550b54b9aea9cac7",
+   "Variante B/Subsolo": "92fb933a77d90823",
+   "Variante B/Térreo": "406de1b5d4429d39",
+   "Variante B/espelhada/Térreo": "d9eb5cf4b90c4b2c",
+   "Variante B/lote": "3c66337e3a0bfb95",
+   "Variante C/Subsolo": "e1ded613e588c62f",
+   "Variante C/Térreo": "604441cca1ce7c15",
+   "Variante C/espelhada/Térreo": "74b94ef3c9da9bb7",
+   "Variante C/lote": "1722ddb275281f5d"
+  }
+ },
+ "Subsolo nos recuos laterais e de fundo, 10 × 25": {
+  "motor": "9184191d1b9a5074",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 7,00 × 16,62 m, 284,71 m², nota 81",
+   "Variante B: Bloco único, corredor lateral, 6,00 × 18,99 m, 261,06 m², nota 20"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "e0192c925b17acba",
+   "Variante A/Térreo": "9adef6d722b1b8c9",
+   "Variante A/Superior": "97caa46abd89badb",
+   "Variante A/espelhada/Térreo": "c3bd2bbe1e2007f8",
+   "Variante A/lote": "f9391d8679ee8a08",
+   "Variante B/Subsolo": "d77e52dc2a0ac286",
+   "Variante B/Térreo": "b0bf4705ff8fe3b7",
+   "Variante B/Superior": "747d91d3fa90e7ba",
+   "Variante B/espelhada/Térreo": "ef2ff95c98bfe7c0",
+   "Variante B/lote": "bd766ada96db0971"
+  }
+ },
+ "Subsolo em todos os recuos, 12 × 30": {
+  "motor": "82193c095273135a",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 9,00 × 19,87 m, 310,65 m², nota 91",
+   "Variante B: Bloco único, corredor lateral, 7,50 × 23,88 m, 313,92 m², nota 14",
+   "Variante C: Em L, 9,00 × 26,65 m, 306,43 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "861b5cecf234b209",
+   "Variante A/Térreo": "25d1a0ee5e3dab52",
+   "Variante A/espelhada/Térreo": "a7259dc0968258ef",
+   "Variante A/lote": "a5b7eb360cc3bf56",
+   "Variante B/Subsolo": "81f477c5f851ca5c",
+   "Variante B/Térreo": "563c2ff596bcc85b",
+   "Variante B/espelhada/Térreo": "85a404c796f5cd33",
+   "Variante B/lote": "ec5596b98eaaa46c",
+   "Variante C/Subsolo": "12d97366ec7004af",
+   "Variante C/Térreo": "16f2f803eabea400",
+   "Variante C/espelhada/Térreo": "1b543e4eaba22bad",
+   "Variante C/lote": "c8b7141da971df0d"
+  }
+ },
+ "Frente para o sul, torre de calor e rooftop no fundo, 12 × 30": {
+  "motor": "422ec64a7ef7f54d",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 6,00 × 16,23 m, 177,26 m², nota 93",
+   "Variante B: Bloco único, corredor central, 8,00 × 17,95 m, 210,94 m², nota 82",
+   "Variante C: Em L, 9,00 × 14,16 m, 236,90 m², nota 80"
+  ],
+  "svg": {
+   "Variante A/Térreo": "60904c46cef52e23",
+   "Variante A/Superior": "8e572723235e457a",
+   "Variante A/Rooftop": "9db7ffdbc70ae1f9",
+   "Variante A/espelhada/Térreo": "7193d70347ec581c",
+   "Variante A/lote": "5bd568a714b75501",
+   "Variante B/Térreo": "4f969579b301bae3",
+   "Variante B/Superior": "a7f7b3c8e44b7671",
+   "Variante B/Rooftop": "161ecad10b3bc696",
+   "Variante B/espelhada/Térreo": "3f47030cf74c84d0",
+   "Variante B/lote": "64bc9400342ab2b4",
+   "Variante C/Térreo": "36f923f3ddd30783",
+   "Variante C/Superior": "02424cb3d4f8d7bf",
+   "Variante C/Rooftop": "cc42d2cc3af9e544",
+   "Variante C/espelhada/Térreo": "459e77a447770cd4",
+   "Variante C/lote": "bbcda01f09a8b203"
+  }
+ },
+ "Programa grande demais, 8 × 20": {
+  "motor": "b68b0c2c30795651",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 5,00 × 44,79 m, 213,95 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Térreo": "03c5e22248fb0be0",
+   "Variante A/espelhada/Térreo": "e825fe9e7b55b5cf",
+   "Variante A/lote": "a6a7e60400266b63"
+  }
+ },
+ "Padrão da página": {
+  "motor": "fb5de524a48822ff",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 6,00 × 21,95 m, 119,70 m², nota 84",
+   "Variante B: Bloco único, corredor central, 8,50 × 19,45 m, 153,53 m², nota 84",
+   "Variante C: Em L, 9,00 × 22,95 m, 137,09 m², nota 63"
+  ],
+  "svg": {
+   "Variante A/Térreo": "2b2882d140033896",
+   "Variante A/espelhada/Térreo": "6b4706d8b9b43f50",
+   "Variante A/lote": "e1bdaad15007c940",
+   "Variante B/Térreo": "a6e415948dec10f5",
+   "Variante B/espelhada/Térreo": "2acdbe2008e835b1",
+   "Variante B/lote": "e07e7bb613018086",
+   "Variante C/Térreo": "03c9fccf9c807216",
+   "Variante C/espelhada/Térreo": "2ed22036bd7c5c12",
+   "Variante C/lote": "60b31478e3f411be"
+  }
+ },
+ "Térrea em bloco com subsolo, 12 × 30": {
+  "motor": "40673fa6741cc4bf",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 9,00 × 19,87 m, 280,65 m², nota 91",
+   "Variante B: Bloco único, corredor lateral, 7,50 × 23,88 m, 283,92 m², nota 19",
+   "Variante C: Bloco único, corredor central, 8,00 × 21,26 m, 273,90 m², nota 84"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "7cb63cb016a8758f",
+   "Variante A/Térreo": "25d1a0ee5e3dab52",
+   "Variante A/espelhada/Térreo": "a7259dc0968258ef",
+   "Variante A/lote": "3cfb26625cc739e1",
+   "Variante B/Subsolo": "915ebd1d6e77b2b0",
+   "Variante B/Térreo": "563c2ff596bcc85b",
+   "Variante B/espelhada/Térreo": "85a404c796f5cd33",
+   "Variante B/lote": "2525caa0b0631f30",
+   "Variante C/Subsolo": "1074f55fa83ee44f",
+   "Variante C/Térreo": "cca6974adb258799",
+   "Variante C/espelhada/Térreo": "370f0b05f1664820",
+   "Variante C/lote": "a5490c3a2a1fbbd2"
+  }
+ },
+ "Térrea em L com subsolo semienterrado, 16 × 34": {
+  "motor": "cd6633d25990b2b5",
+  "resumo": [
+   "Variante A: Em L, 9,00 × 26,65 m, 276,43 m², nota 62",
+   "Variante B: Em L, 10,00 × 26,65 m, 284,81 m², nota 60",
+   "Variante C: Em L, 11,00 × 26,65 m, 293,19 m², nota 58"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "6b804aa3c547b41a",
+   "Variante A/Térreo": "8a0f48b87026bc8c",
+   "Variante A/espelhada/Térreo": "396607e0bb987c57",
+   "Variante A/lote": "550b54b9aea9cac7",
+   "Variante B/Subsolo": "92fb933a77d90823",
+   "Variante B/Térreo": "406de1b5d4429d39",
+   "Variante B/espelhada/Térreo": "d9eb5cf4b90c4b2c",
+   "Variante B/lote": "3c66337e3a0bfb95",
+   "Variante C/Subsolo": "e1ded613e588c62f",
+   "Variante C/Térreo": "604441cca1ce7c15",
+   "Variante C/espelhada/Térreo": "74b94ef3c9da9bb7",
+   "Variante C/lote": "1722ddb275281f5d"
+  }
+ },
+ "Sobrado em L com subsolo, 16 × 34": {
+  "motor": "831add0014904a27",
+  "resumo": [
+   "Variante A: Em L, 9,00 × 13,75 m, 323,81 m², nota 62",
+   "Variante B: Em L, 10,50 × 13,55 m, 347,99 m², nota 58",
+   "Variante C: Em L, 11,50 × 13,55 m, 366,75 m², nota 57"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "0db172a6d22008d7",
+   "Variante A/Térreo": "0e0d338674fd00ab",
+   "Variante A/Superior": "3d12979630f47238",
+   "Variante A/espelhada/Térreo": "cda48fde7dfa7615",
+   "Variante A/lote": "b6e098f776e07cad",
+   "Variante B/Subsolo": "759b6d610e65b78b",
+   "Variante B/Térreo": "bef15af65fd44443",
+   "Variante B/Superior": "f505842ee39d0b11",
+   "Variante B/espelhada/Térreo": "366b67ec9c2e7892",
+   "Variante B/lote": "78379a6f1368e0c7",
+   "Variante C/Subsolo": "57d2c0d41403ac33",
+   "Variante C/Térreo": "b8c4c35886decd28",
+   "Variante C/Superior": "dbf700453ea43b30",
+   "Variante C/espelhada/Térreo": "554d54e4e69e2b77",
+   "Variante C/lote": "9330e8841898e0e8"
+  }
+ },
+ "Sobrado em U com subsolo, 22 × 34": {
+  "motor": "aa92f9e7bf1aa29e",
+  "resumo": [
+   "Variante A: Em U, 18,50 × 14,36 m, 437,59 m², nota 64",
+   "Variante B: Em U, 17,50 × 14,36 m, 427,19 m², nota 60",
+   "Variante C: Em U, 13,50 × 14,36 m, 397,57 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "328e9a3d4a31b365",
+   "Variante A/Térreo": "b76ba528a3fa80c1",
+   "Variante A/Superior": "6c18dd2657375b19",
+   "Variante A/espelhada/Térreo": "cbbfd461df611293",
+   "Variante A/lote": "83a7fd1e3f3c3b5b",
+   "Variante B/Subsolo": "b4534fed880f2cc6",
+   "Variante B/Térreo": "156f6504fe7a19ca",
+   "Variante B/Superior": "113193dca768886c",
+   "Variante B/espelhada/Térreo": "6185b157d5eb8ef9",
+   "Variante B/lote": "a82ee8a00a2a6ea6",
+   "Variante C/Subsolo": "f516b23b95c9cba1",
+   "Variante C/Térreo": "6f6d802dac0a334b",
+   "Variante C/Superior": "c95e5018fef3f4a8",
+   "Variante C/espelhada/Térreo": "a4c4b75f0c44e7d2",
+   "Variante C/lote": "e4c8d28997e7f797"
+  }
+ },
+ "Sobrado em bloco, subsolo enterrado e vagas nos dois, 12 × 32": {
+  "motor": "3f2ceeef363a729b",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 6,50 × 14,70 m, 293,84 m², nota 92",
+   "Variante B: Bloco único, corredor central, 9,00 × 12,48 m, 329,71 m², nota 86",
+   "Variante C: Bloco único, corredor central, 8,00 × 17,95 m, 346,10 m², nota 78"
+  ],
+  "svg": {
+   "Variante A/Subsolo": "dd8729facb6bbf55",
+   "Variante A/Térreo": "42b0fb2eb965834c",
+   "Variante A/Superior": "101bece24ba2ecda",
+   "Variante A/espelhada/Térreo": "144e9960837c7abb",
+   "Variante A/lote": "c79a7aac243e168f",
+   "Variante B/Subsolo": "c781565ab527c531",
+   "Variante B/Térreo": "88dd37bcc648af2a",
+   "Variante B/Superior": "7e728972deea0874",
+   "Variante B/espelhada/Térreo": "64862bf09f6fd0a7",
+   "Variante B/lote": "44bbbbf270703e9a",
+   "Variante C/Subsolo": "80236260c78ff79d",
+   "Variante C/Térreo": "ab72968093cc5550",
+   "Variante C/Superior": "d5dee184dfd31cda",
+   "Variante C/espelhada/Térreo": "cd1796c40ec8b630",
+   "Variante C/lote": "d97e87ab210ce38f"
+  }
+ },
+ "Frente para oeste, 12 × 30": {
+  "motor": "a8ccb08ececcb317",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 8,50 × 19,45 m, 153,53 m², nota 85",
+   "Variante B: Bloco único, corredor lateral, 6,50 × 22,67 m, 134,35 m², nota 67",
+   "Variante C: Em L, 9,00 × 25,09 m, 147,77 m², nota 9"
+  ],
+  "svg": {
+   "Variante A/Térreo": "0ff180037384822f",
+   "Variante A/espelhada/Térreo": "4701fdde74e7b1ff",
+   "Variante A/lote": "1536568596b5eaa9",
+   "Variante B/Térreo": "092b891e7904824b",
+   "Variante B/espelhada/Térreo": "6c4cbbc1809cb8aa",
+   "Variante B/lote": "2e6097efd8cb639d",
+   "Variante C/Térreo": "f163e888ebaab8c9",
+   "Variante C/espelhada/Térreo": "4034044503f06b65",
+   "Variante C/lote": "9c5cf94af3cc217a"
+  }
+ },
+ "Frente para nordeste com varanda em L, 14 × 30": {
+  "motor": "e9b7620bfdbb589a",
+  "resumo": [
+   "Variante A: Bloco único, corredor central, 9,00 × 18,31 m, 143,55 m², nota 56",
+   "Variante B: Bloco único, corredor lateral, 6,50 × 22,67 m, 126,06 m², nota 45",
+   "Variante C: Em L, 9,00 × 25,09 m, 139,33 m², nota 0"
+  ],
+  "svg": {
+   "Variante A/Térreo": "d282be8033e7d3eb",
+   "Variante A/espelhada/Térreo": "99b501f2fc837dee",
+   "Variante A/lote": "90804197e8234c0b",
+   "Variante B/Térreo": "6466ed5e5dc2301c",
+   "Variante B/espelhada/Térreo": "1768570546aa0779",
+   "Variante B/lote": "ab79e21f49546a03",
+   "Variante C/Térreo": "82be86d2e44e7770",
+   "Variante C/espelhada/Térreo": "36d5b047e72ca574",
+   "Variante C/lote": "4b5bf0a922e546d6"
+  }
+ },
+ "Edícula de 1 pavimento, 14 × 40": {
+  "motor": "0fa6456ffacf6e15",
+  "resumo": [
+   "Variante A: Em L, 9,00 × 22,95 m, 163,49 m², nota 87",
+   "Variante B: Bloco único, corredor lateral, 6,00 × 21,95 m, 146,10 m², nota 84",
+   "Variante C: Bloco único, corredor central, 8,50 × 19,45 m, 179,93 m², nota 83"
+  ],
+  "svg": {
+   "Variante A/Térreo": "d4314d70bad92904",
+   "Variante A/Edícula térreo": "2d7247c487ae0b4a",
+   "Variante A/espelhada/Térreo": "f29c401cfe66c807",
+   "Variante A/lote": "d01b2f29ba70eb86",
+   "Variante B/Térreo": "20a975d1c1d5a8f8",
+   "Variante B/Edícula térreo": "1ea1ceceefabecb1",
+   "Variante B/espelhada/Térreo": "b422beda1ced4237",
+   "Variante B/lote": "67f2dfdd193206aa",
+   "Variante C/Térreo": "1ebc0b20900336c2",
+   "Variante C/Edícula térreo": "5164145d4ecf9ee5",
+   "Variante C/espelhada/Térreo": "e2763e8f586582d8",
+   "Variante C/lote": "b0758f8df09b9443"
+  }
+ },
+ "Programa mínimo, 8 × 20": {
+  "motor": "6e56b5d613db20d8",
+  "resumo": [
+   "Variante A: Bloco único, corredor lateral, 5,00 × 13,71 m, 68,55 m², nota 42"
+  ],
+  "svg": {
+   "Variante A/Térreo": "bf4bf7f0b42a9d97",
+   "Variante A/espelhada/Térreo": "ae0bbc77f9fdd359",
+   "Variante A/lote": "732743c63371d8b8"
+  }
+ }
+}
