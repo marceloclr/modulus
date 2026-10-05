@@ -9,13 +9,13 @@
   "svg": {
    "Variante A/Térreo": "d2c7ac7368e6709d",
    "Variante A/espelhada/Térreo": "d49de4747b22e0f3",
-   "Variante A/lote": "678920b715d84424",
+   "Variante A/lote": "21787e92860cab00",
    "Variante B/Térreo": "ecbfac91c13cc755",
    "Variante B/espelhada/Térreo": "766602a3193ee6b0",
-   "Variante B/lote": "fa48e9cd88010383",
+   "Variante B/lote": "3598ad375331ae9e",
    "Variante C/Térreo": "e54eb52c99b215d3",
    "Variante C/espelhada/Térreo": "e98460d498550845",
-   "Variante C/lote": "0356c5a31e2c7141"
+   "Variante C/lote": "5d39a2e5a0002205"
   }
  },
  "Térrea 12 × 30, 3 suítes, 2 vagas": {
@@ -28,13 +28,13 @@
   "svg": {
    "Variante A/Térreo": "8a4ae192160064e6",
    "Variante A/espelhada/Térreo": "51655d70aca0e9d7",
-   "Variante A/lote": "b7433ab563dcc6a1",
+   "Variante A/lote": "7a6fb7907126a353",
    "Variante B/Térreo": "ebf221767d791496",
    "Variante B/espelhada/Térreo": "92fba6fee66c18fd",
-   "Variante B/lote": "9ea7f11b1d946e77",
+   "Variante B/lote": "31099e686c1c104a",
    "Variante C/Térreo": "62611cdbc0e58db9",
    "Variante C/espelhada/Térreo": "7648dd9f9a511607",
-   "Variante C/lote": "fa89b9d84f2c5d3a"
+   "Variante C/lote": "2024638e200971f9"
   }
  },
  "Casa em H, 22 × 30": {
@@ -67,12 +67,12 @@
    "Variante A/Térreo": "658997a762b70e2a",
    "Variante A/Superior": "bb0522e1e05523bd",
    "Variante A/espelhada/Térreo": "e2beaa970c4fa7b2",
-   "Variante A/lote": "41e31e4f0fea0f60",
+   "Variante A/lote": "c1111dc4a2ba5b69",
    "Variante B/Subsolo": "200032f6b39c23c9",
    "Variante B/Térreo": "fe8537dfb980c37c",
    "Variante B/Superior": "d08218d63d25756f",
    "Variante B/espelhada/Térreo": "68737293528a569d",
-   "Variante B/lote": "9464fc64ba324c41"
+   "Variante B/lote": "0d99abb7b9f999c1"
   }
  },
  "Térrea com subsolo, 15 × 30": {
@@ -86,15 +86,15 @@
    "Variante A/Subsolo": "b1bc13f77f3d0461",
    "Variante A/Térreo": "7caeb03d376a99e9",
    "Variante A/espelhada/Térreo": "74f20e912b09435d",
-   "Variante A/lote": "9989568ceccbaa49",
+   "Variante A/lote": "70599f1c4e8d5830",
    "Variante B/Subsolo": "4283bc96af63133b",
    "Variante B/Térreo": "cd91ccd5995b39cc",
    "Variante B/espelhada/Térreo": "c440cc921501a83d",
-   "Variante B/lote": "9eba866886081ce0",
+   "Variante B/lote": "43b482ac2f465536",
    "Variante C/Subsolo": "80c7199f811db957",
    "Variante C/Térreo": "ed68afe1afbb223d",
    "Variante C/espelhada/Térreo": "7004e75b575ce33e",
-   "Variante C/lote": "6eff9675c43668cd"
+   "Variante C/lote": "ac4362a68e8bee48"
   }
  },
  "Em U, 22 × 30": {
@@ -120,17 +120,17 @@
    "Variante A/Edícula térreo": "59b16eff1a8aa1e8",
    "Variante A/Edícula superior": "4d02d8e08d067c11",
    "Variante A/espelhada/Térreo": "c12475fd3fe479dc",
-   "Variante A/lote": "8b0d44e5a995113b",
+   "Variante A/lote": "b733a6d088f9249e",
    "Variante B/Térreo": "14ae7c50e7d4959a",
    "Variante B/Edícula térreo": "75fc0019a3c64621",
    "Variante B/Edícula superior": "2ec4ad7438179563",
    "Variante B/espelhada/Térreo": "8065a18b7ab8f512",
-   "Variante B/lote": "19f190669a08fb17",
+   "Variante B/lote": "c84fbc131cf1c267",
    "Variante C/Térreo": "5ce85b2089a4d958",
    "Variante C/Edícula térreo": "db885a30c05e8005",
    "Variante C/Edícula superior": "33b78927cc37ecf7",
    "Variante C/espelhada/Térreo": "b909961c19e71344",
-   "Variante C/lote": "9c1cf7df06df68f6"
+   "Variante C/lote": "fc78f187244fcff6"
   }
  },
  "Subsolo enterrado, 12 × 32": {
@@ -144,15 +144,15 @@
    "Variante A/Subsolo": "f06466205574ebab",
    "Variante A/Térreo": "1efe7e640c865768",
    "Variante A/espelhada/Térreo": "b41a240960a4b576",
-   "Variante A/lote": "b35ac03a912c6185",
+   "Variante A/lote": "d1fd63d044e8d6e4",
    "Variante B/Subsolo": "199e7309c13a0516",
    "Variante B/Térreo": "c15724c0eb02aa83",
    "Variante B/espelhada/Térreo": "fa412f73eb2129e4",
-   "Variante B/lote": "ab46b15721462116",
+   "Variante B/lote": "64182ed9b401c2cf",
    "Variante C/Subsolo": "5724308d353fa7d3",
    "Variante C/Térreo": "5fc4e15038d38143",
    "Variante C/espelhada/Térreo": "911adb73311c4af7",
-   "Variante C/lote": "8ac9dce158561ee7"
+   "Variante C/lote": "1800a56729b2f204"
   }
  },
  "Sobrado em L, só a frente sobe, 16 × 32": {
@@ -166,15 +166,15 @@
    "Variante A/Térreo": "f531083778ffa354",
    "Variante A/Superior": "36876dc8b9a8a7fb",
    "Variante A/espelhada/Térreo": "68b405414d1bfda5",
-   "Variante A/lote": "1c3369ff6c53c58e",
+   "Variante A/lote": "ef4965555e1cb4dc",
    "Variante B/Térreo": "b5559a9a4d41fd36",
    "Variante B/Superior": "fa87c9b3cfe1a6d7",
    "Variante B/espelhada/Térreo": "fac28a10262bdd34",
-   "Variante B/lote": "74046cd3b0b3aa72",
+   "Variante B/lote": "0ae221d07f02de21",
    "Variante C/Térreo": "9072805895a320e4",
    "Variante C/Superior": "216a80bc42194f01",
    "Variante C/espelhada/Térreo": "66eeb38544ff5eb8",
-   "Variante C/lote": "0f53c340aef119fb"
+   "Variante C/lote": "468edabd9cd4dc10"
   }
  },
  "Sobrado em U, frente e ala esquerda, 22 × 30": {
@@ -200,15 +200,15 @@
    "Variante A/Térreo": "5779f334d094a674",
    "Variante A/Superior": "9eba6b4b4b360a67",
    "Variante A/espelhada/Térreo": "92a851c92c1ff416",
-   "Variante A/lote": "4fed429def408fcc",
+   "Variante A/lote": "ac0d73b0abe7bf54",
    "Variante B/Térreo": "1e1e0113cd283ee9",
    "Variante B/Superior": "445886eda12e5dbf",
    "Variante B/espelhada/Térreo": "675839ffcd1ef102",
-   "Variante B/lote": "3f4bee8334636ef0",
+   "Variante B/lote": "f288de96e8d35795",
    "Variante C/Térreo": "07b21cade1a2875a",
    "Variante C/Superior": "c2742df1f5fde6ef",
    "Variante C/espelhada/Térreo": "3e8786f83d0cc329",
-   "Variante C/lote": "d69573767422e9f2"
+   "Variante C/lote": "a47c3dedc18bbca8"
   }
  },
  "Térrea com rooftop e spa, 14 × 30": {
@@ -222,15 +222,15 @@
    "Variante A/Térreo": "598de090ccd9ac92",
    "Variante A/Rooftop": "7c011ed6ec37553d",
    "Variante A/espelhada/Térreo": "b0229f8c10e8de51",
-   "Variante A/lote": "9a222b30b14f2767",
+   "Variante A/lote": "6408ea16611be0a5",
    "Variante B/Térreo": "f7179b905e11d184",
    "Variante B/Rooftop": "f6e79fd65822cf16",
    "Variante B/espelhada/Térreo": "b916b44afad6dd5f",
-   "Variante B/lote": "e7dc5d89dbe62017",
+   "Variante B/lote": "05556a538b10438d",
    "Variante C/Térreo": "928d4e838bf7839f",
    "Variante C/Rooftop": "96d30f9a203248da",
    "Variante C/espelhada/Térreo": "bbd743e6a86ccdaf",
-   "Variante C/lote": "a690aaa7da0fc59b"
+   "Variante C/lote": "1118524d36f8b3b3"
   }
  },
  "Sobrado com rooftop, 12 × 30": {
@@ -245,17 +245,17 @@
    "Variante A/Superior": "ac254f07eeeee2e4",
    "Variante A/Rooftop": "d03f3c68423fb54b",
    "Variante A/espelhada/Térreo": "5f384081daaf79a9",
-   "Variante A/lote": "6cd92204da85ffe9",
+   "Variante A/lote": "4792d1ed083faddc",
    "Variante B/Térreo": "8c9b3f09512f1acf",
    "Variante B/Superior": "abb0bbb07e743228",
    "Variante B/Rooftop": "3985d93325b74b9f",
    "Variante B/espelhada/Térreo": "2eed1ec9d4450110",
-   "Variante B/lote": "43ac47cfaedddc18",
+   "Variante B/lote": "0abf3e7b7d8a093c",
    "Variante C/Térreo": "347e2407a7bcc873",
    "Variante C/Superior": "3f6c6a0a000baa82",
    "Variante C/Rooftop": "8e8579c73c072acd",
    "Variante C/espelhada/Térreo": "d221a3e414ffd146",
-   "Variante C/lote": "3bfefa1a385c7bd5"
+   "Variante C/lote": "b092b82b93b25ea3"
   }
  },
  "Subsolo com elevador e sobrado, 12 × 32": {
@@ -270,17 +270,17 @@
    "Variante A/Térreo": "5b92e1c3c77c3895",
    "Variante A/Superior": "28b1213455c8d478",
    "Variante A/espelhada/Térreo": "6318e3017c6ade20",
-   "Variante A/lote": "86ca67e476b35885",
+   "Variante A/lote": "2a230dd317a7a938",
    "Variante B/Subsolo": "93df9046f2573225",
    "Variante B/Térreo": "92301867a04a1126",
    "Variante B/Superior": "7cec23bd2124a3d8",
    "Variante B/espelhada/Térreo": "c7dc39e4de238535",
-   "Variante B/lote": "383bf6a425438fe0",
+   "Variante B/lote": "151a1949ce30e8cd",
    "Variante C/Subsolo": "5135dbd954eeeb82",
    "Variante C/Térreo": "8d924613429ff756",
    "Variante C/Superior": "5c5698c636c04235",
    "Variante C/espelhada/Térreo": "57e0c7c97c64b88d",
-   "Variante C/lote": "6d96c35e6b5684ff"
+   "Variante C/lote": "72565c338e6aeee8"
   }
  },
  "U com subsolo, 22 × 34": {
@@ -338,15 +338,15 @@
    "Variante A/Subsolo": "56ebc71eb9172cb4",
    "Variante A/Térreo": "14986f388d237b4a",
    "Variante A/espelhada/Térreo": "61f922cbb684684f",
-   "Variante A/lote": "352de114f5bf2044",
+   "Variante A/lote": "46ee50f2c4fda757",
    "Variante B/Subsolo": "7b32d56c290544aa",
    "Variante B/Térreo": "16325014e21bba4c",
    "Variante B/espelhada/Térreo": "2ca7ee59890a0945",
-   "Variante B/lote": "17ffcce56be87653",
+   "Variante B/lote": "2de095d964de3174",
    "Variante C/Subsolo": "d8854c048dba2f3d",
    "Variante C/Térreo": "0775b1322e024943",
    "Variante C/espelhada/Térreo": "8e95fddc5432fd42",
-   "Variante C/lote": "c09dec6fd0daf5d5"
+   "Variante C/lote": "39736b3a4abc89b0"
   }
  },
  "Subsolo nos recuos laterais e de fundo, 10 × 25": {
@@ -360,12 +360,12 @@
    "Variante A/Térreo": "30a879123e6a7866",
    "Variante A/Superior": "bb0522e1e05523bd",
    "Variante A/espelhada/Térreo": "92404906ea42fabb",
-   "Variante A/lote": "f994a1e877101fc3",
+   "Variante A/lote": "4a14e473cc4f10cf",
    "Variante B/Subsolo": "d9db9a98a5b4b939",
    "Variante B/Térreo": "fe8537dfb980c37c",
    "Variante B/Superior": "d08218d63d25756f",
    "Variante B/espelhada/Térreo": "68737293528a569d",
-   "Variante B/lote": "9464fc64ba324c41"
+   "Variante B/lote": "0d99abb7b9f999c1"
   }
  },
  "Subsolo em todos os recuos, 12 × 30": {
@@ -379,15 +379,15 @@
    "Variante A/Subsolo": "fa3c8a5628a8ba4f",
    "Variante A/Térreo": "7ec7497f2a7a6c76",
    "Variante A/espelhada/Térreo": "7f85d0946a120790",
-   "Variante A/lote": "3208b55f49a5d87e",
+   "Variante A/lote": "db1e916ad9be7251",
    "Variante B/Subsolo": "5564fa9eba12e9a9",
    "Variante B/Térreo": "15416c65dfccce32",
    "Variante B/espelhada/Térreo": "a3eba285818ca3ab",
-   "Variante B/lote": "631e6443b38270cc",
+   "Variante B/lote": "35db9603b0154a49",
    "Variante C/Subsolo": "cf2b529c1e7089e6",
    "Variante C/Térreo": "a6102e6862f70636",
    "Variante C/espelhada/Térreo": "02ef633293aeeda2",
-   "Variante C/lote": "c3c81dda62c5c604"
+   "Variante C/lote": "be714284c90fe9d7"
   }
  },
  "Frente para o sul, torre de calor e rooftop no fundo, 12 × 30": {
@@ -402,17 +402,17 @@
    "Variante A/Superior": "2335cbaaec06bf44",
    "Variante A/Rooftop": "fd9ede84a2758a4e",
    "Variante A/espelhada/Térreo": "cc32c92986b971d9",
-   "Variante A/lote": "252219fad55b24a5",
+   "Variante A/lote": "7105c7d471f9fb4a",
    "Variante B/Térreo": "1e48304645f37765",
    "Variante B/Superior": "5a7d44868615aa66",
    "Variante B/Rooftop": "89973a0fcb6c4c4c",
    "Variante B/espelhada/Térreo": "6445c963613464ac",
-   "Variante B/lote": "8d2e5a834cf24a13",
+   "Variante B/lote": "2e5d1163a2ddf1c3",
    "Variante C/Térreo": "a7c87ed80124056f",
    "Variante C/Superior": "8d0524b4d8a13f18",
    "Variante C/Rooftop": "04cad1f3183da583",
    "Variante C/espelhada/Térreo": "8c8c521485feea3b",
-   "Variante C/lote": "bf5f76354edd28d0"
+   "Variante C/lote": "2874f468db1823c5"
   }
  },
  "Programa grande demais, 8 × 20": {
@@ -423,7 +423,7 @@
   "svg": {
    "Variante A/Térreo": "29c46f1aa0f7d018",
    "Variante A/espelhada/Térreo": "4875487dcd11e6f8",
-   "Variante A/lote": "38c28559422740ef"
+   "Variante A/lote": "8c9415791a8345f0"
   }
  },
  "Padrão da página": {
@@ -436,13 +436,13 @@
   "svg": {
    "Variante A/Térreo": "8e29eea1e472fba6",
    "Variante A/espelhada/Térreo": "73a6a424f7127212",
-   "Variante A/lote": "2ae3f28bc016dddd",
+   "Variante A/lote": "82d0bbdd7d945322",
    "Variante B/Térreo": "c7396ac67eb1b2f7",
    "Variante B/espelhada/Térreo": "74f7b361b077e1b6",
-   "Variante B/lote": "799698ec25ab5c0d",
+   "Variante B/lote": "9e39d101a3a077ab",
    "Variante C/Térreo": "971495277fdbeca7",
    "Variante C/espelhada/Térreo": "055eb35e0ca97e66",
-   "Variante C/lote": "791d6548722df9a0"
+   "Variante C/lote": "0fd3d02392452b85"
   }
  },
  "Térrea em bloco com subsolo, 12 × 30": {
@@ -456,15 +456,15 @@
    "Variante A/Subsolo": "30d58bdcf2df9d49",
    "Variante A/Térreo": "6c2347a4bad654ec",
    "Variante A/espelhada/Térreo": "caaf8629cbbcb30f",
-   "Variante A/lote": "49ded81bfad925bb",
+   "Variante A/lote": "417cb5e26b352dc4",
    "Variante B/Subsolo": "9ee0d556d5b3a695",
    "Variante B/Térreo": "4869f3723628e373",
    "Variante B/espelhada/Térreo": "3e76247e101abdd7",
-   "Variante B/lote": "c2f00588c89f75dd",
+   "Variante B/lote": "b980a9dc870096d9",
    "Variante C/Subsolo": "d4e6b336bf072785",
    "Variante C/Térreo": "091efb2e3fdaf9a3",
    "Variante C/espelhada/Térreo": "dd73bd9cf33e5035",
-   "Variante C/lote": "5ffcd8031492aa07"
+   "Variante C/lote": "326389c1ecd1fedb"
   }
  },
  "Térrea em L com subsolo semienterrado, 16 × 34": {
@@ -478,15 +478,15 @@
    "Variante A/Subsolo": "56ebc71eb9172cb4",
    "Variante A/Térreo": "14986f388d237b4a",
    "Variante A/espelhada/Térreo": "61f922cbb684684f",
-   "Variante A/lote": "352de114f5bf2044",
+   "Variante A/lote": "46ee50f2c4fda757",
    "Variante B/Subsolo": "7b32d56c290544aa",
    "Variante B/Térreo": "16325014e21bba4c",
    "Variante B/espelhada/Térreo": "2ca7ee59890a0945",
-   "Variante B/lote": "17ffcce56be87653",
+   "Variante B/lote": "2de095d964de3174",
    "Variante C/Subsolo": "d8854c048dba2f3d",
    "Variante C/Térreo": "0775b1322e024943",
    "Variante C/espelhada/Térreo": "8e95fddc5432fd42",
-   "Variante C/lote": "c09dec6fd0daf5d5"
+   "Variante C/lote": "39736b3a4abc89b0"
   }
  },
  "Sobrado em L com subsolo, 16 × 34": {
@@ -501,17 +501,17 @@
    "Variante A/Térreo": "a356fe475001bc01",
    "Variante A/Superior": "718d13e291507594",
    "Variante A/espelhada/Térreo": "fa8eb761ac330a07",
-   "Variante A/lote": "e3a12ac0efe936f0",
+   "Variante A/lote": "7ee778fe07eb330e",
    "Variante B/Subsolo": "280b447a3a5cddad",
    "Variante B/Térreo": "7e3634f8f6880c52",
    "Variante B/Superior": "41010c015656b393",
    "Variante B/espelhada/Térreo": "54afdb721b2a654a",
-   "Variante B/lote": "6bee4d41fba91237",
+   "Variante B/lote": "576e0da0bb9b1c49",
    "Variante C/Subsolo": "d6b31d016c206d49",
    "Variante C/Térreo": "31dd107a68dbc362",
    "Variante C/Superior": "0bb15ab7aa74ad3c",
    "Variante C/espelhada/Térreo": "5a85506869bddd93",
-   "Variante C/lote": "49de0a501f962e3f"
+   "Variante C/lote": "ec194a3096bed6af"
   }
  },
  "Sobrado em U com subsolo, 22 × 34": {
@@ -551,17 +551,17 @@
    "Variante A/Térreo": "67cf198162c4c7e4",
    "Variante A/Superior": "648800c78170cb3a",
    "Variante A/espelhada/Térreo": "68358ca95f2aa447",
-   "Variante A/lote": "b407c6179a73c87d",
+   "Variante A/lote": "a2d2d7899d1e1631",
    "Variante B/Subsolo": "3e4b3ef943a8afc6",
    "Variante B/Térreo": "75d5f50cb3584740",
    "Variante B/Superior": "fbd6541aaf7630a5",
    "Variante B/espelhada/Térreo": "f331f1874a96b754",
-   "Variante B/lote": "dea30957447f9f05",
+   "Variante B/lote": "28c46ea8a84c4b19",
    "Variante C/Subsolo": "507e7c698170bd1f",
    "Variante C/Térreo": "7deabdaf272d3da9",
    "Variante C/Superior": "9c50400bb8760d37",
    "Variante C/espelhada/Térreo": "fa349f3a5aae3091",
-   "Variante C/lote": "04805033bc16bf9e"
+   "Variante C/lote": "85c3cc116c557095"
   }
  },
  "Frente para oeste, 12 × 30": {
@@ -613,15 +613,15 @@
    "Variante A/Térreo": "399cd62c37e9da43",
    "Variante A/Edícula térreo": "11a07b5003fdd0ba",
    "Variante A/espelhada/Térreo": "24a64f71632f61b7",
-   "Variante A/lote": "e56c97836231ca96",
+   "Variante A/lote": "d5f9f2257e671308",
    "Variante B/Térreo": "97fa99c8ade0fc47",
    "Variante B/Edícula térreo": "898bd1b1337617fd",
    "Variante B/espelhada/Térreo": "c3a63e8005ed12b5",
-   "Variante B/lote": "51b0948241d82811",
+   "Variante B/lote": "a7b2d24365f6557f",
    "Variante C/Térreo": "91cdfeaf728cdfb3",
    "Variante C/Edícula térreo": "80725e675754f278",
    "Variante C/espelhada/Térreo": "1745e21a4e3e1a70",
-   "Variante C/lote": "feb38260d19a04e0"
+   "Variante C/lote": "19ceb08f62df9d74"
   }
  },
  "Programa mínimo, 8 × 20": {
@@ -632,7 +632,7 @@
   "svg": {
    "Variante A/Térreo": "3b81367ba227aa0b",
    "Variante A/espelhada/Térreo": "775b640450c000dc",
-   "Variante A/lote": "7a48a69432b11538"
+   "Variante A/lote": "d8ba9c484686ebbb"
   }
  }
 }

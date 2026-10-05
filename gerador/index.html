@@ -62,9 +62,17 @@
 .sv-fluxo{animation:svFluxo linear infinite}
 @media (prefers-reduced-motion:reduce){.sv-fluxo{animation:none}}
 .sub-nota{color:var(--ink-3);font-size:12px;margin:2px 0 8px;line-height:1.45}
-.lote-wrap{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
-.lote-wrap svg{width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:#FBFAF7}
-@media (max-width:760px){.lote-wrap{grid-template-columns:minmax(0,1fr)}}
+/* implantação e terreno: a imagem ganha a coluna maior; a tabela vira uma lista estreita (rótulo e valor) */
+.lote-wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,1fr);gap:20px;align-items:start}
+.lote-col{min-width:0}
+.lote-wrap #terreno td{display:block;padding:2px 12px;text-align:left}
+.lote-wrap #terreno tr{display:block;padding:8px 0;border-bottom:1px solid var(--line)}
+.lote-wrap #terreno td{border:0}
+.lote-wrap #terreno td:first-child{font-size:12.5px;color:var(--ink-3)}
+.lote-wrap #terreno td.n{font-variant-numeric:tabular-nums;font-weight:500}
+.lote-wrap #terreno tr.total td.n{font-weight:600}
+.lote-wrap svg{display:block;width:100%;height:auto;max-height:72vh;margin:0 auto;border:1px solid var(--line);border-radius:12px;background:#FBFAF7}
+@media (max-width:900px){.lote-wrap{grid-template-columns:minmax(0,1fr)}}
 .score{display:inline-block;min-width:34px;text-align:center;font-size:12px;padding:3px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);margin-left:6px}
 .btn[aria-pressed="true"] .score{background:transparent;color:inherit;border-color:currentColor}
 .salvar-banco{display:inline-flex;gap:6px;flex-wrap:wrap}
