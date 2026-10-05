@@ -257,8 +257,8 @@
         "financeiro",
         "aproveitamento",
         "cargas",
-        "niveis",
-        "normas"
+        "normas",
+        "pacote"
       ],
       "properties": {
         "irradiacao": {
@@ -339,19 +339,10 @@
             "required": [
               "id",
               "nome",
-              "nivel",
+              "kwhMes",
               "potenciaW"
             ],
             "properties": {
-              "nivel": {
-                "type": "string",
-                "enum": [
-                  "N1",
-                  "N2",
-                  "N3",
-                  "N4"
-                ]
-              },
               "potenciaW": {
                 "type": "number",
                 "minimum": 1,

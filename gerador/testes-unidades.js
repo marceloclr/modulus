@@ -207,30 +207,28 @@ t('valores: ajustes sobre os oficiais (mín e máx acompanham), diferenças e ed
 
 // ---------- solar ----------
 const SO = require('./solar.js');
-t('solar: dimensionamento conferido à mão (600 kWh/mês informados, N2)', () => {
-  const v = M.gerar({}).variantes[0], r = SO.calcular(v, {solConsumo:600, solNivel:'N2'}, DADOS);
-  perto(r.kWpNecessario, 3.71, 'kWp = (600 − 100) ÷ (5,76 × 30 × 0,78):');
-  igual(r.modulosNecessarios, 7, 'módulos de 610 Wp:'); perto(r.kWp, 4.27);
-  perto(r.areaModulos, 18.2, 'área 7 × 2,6:');
-  const critDia = r.criticoMes / 30; perto(r.bateriaKwh, Math.ceil(critDia * 8/24 / (0.9*0.95) / 2.5) * 2.5, 'bateria:');
-  ok(r.criticoMes === r.cargas.filter(c => c.critica).reduce((t, c) => t + c.kwhMes, 0), 'carga crítica = soma das críticas');
-  ok(r.cargas.filter(c => c.critica).every(c => ['N1', 'N2'].includes(c.nivel)), 'N2 só leva N1 e N2');
+t('solar: pacote básico conferido à mão (3 quartos)', () => {
+  const v = M.gerar({}).variantes[0], r = SO.calcular(v, {quartos:3}, DADOS);
+  igual(r.cargas.map(c => c.id), ['portao', 'luzInterna', 'luzExterna', 'cameras', 'geladeira', 'ar', 'ventiladores'], 'só o pacote básico:');
+  perto(r.consumo, 4 + 15 + 29 + 25 + 40 + 120 + 4*15, 'consumo (4 ventiladores: 3 quartos + sala):');
+  perto(r.kWpNecessario, Math.round(293 / (5.76*30*0.78) * 100)/100, 'kWp = 293 ÷ (5,76 × 30 × 0,78):');
+  igual(r.modulos, Math.ceil(r.kWpNecessario*1000/610)); perto(r.kWp, r.modulos*0.61);
+  perto(r.bateriaKwh, Math.ceil((293/30) * 8/24 / (0.9*0.95) / 2.5) * 2.5, 'bateria:');
+  ok(r.cargas.every(c => c.critica), 'todas ficam ligadas pela bateria');
   ok(r.inversorKw >= r.kWp / 1.25 && r.inversorKw * 2000 >= r.picoW, 'inversor cobre o kit e a partida');
+  ok(r.custo.min < r.custo.med && r.custo.med < r.custo.max, 'faixa do investimento');
   ok(r.paybackSimples > 0 && r.paybackDescontado >= r.paybackSimples, 'payback descontado ≥ simples');
   igual(r.meses.length, 12); ok(r.meses[9].geracao > r.meses[3].geracao, 'outubro gera mais que abril');
 });
-t('solar: interpolação do R$/Wp, Fio B pelo ano, cobertura insuficiente e cargas condicionais', () => {
+t('solar: interpolação do R$/Wp, Fio B pelo ano, cobertura insuficiente e orla', () => {
   perto(SO.rsWpPara(3, DADOS.solar.rsWp), 3.14, 'entre 2 kWp (3,62) e 4 kWp (2,66):');
   igual(SO.rsWpPara(50, DADOS.solar.rsWp), 2.02);
   const sala = (tipo, x0, y0, x1, y1) => ({tipo, x0, y0, x1, y1});
-  const pequena = {pav:[{nome:'Térreo', salas:[sala('quarto', 0, 0, 4, 4)]}], quadro:{fechada:16}};
-  const r = SO.calcular(pequena, {solConsumo:900}, DADOS);
-  igual(r.modulos, Math.floor(16 * 0.6 / 2.6), 'só cabem os módulos da cobertura:'); ok(r.avisos.some(a => a.includes('comporta')));
-  const ids = q => SO.cargas(q, DADOS.solar, 100).map(c => c.id);
-  ok(!ids({}).includes('piscina') && ids({piscina:true}).includes('piscina') && ids({solVE:true}).includes('ve'), 'cargas condicionais');
+  const pequena = {pav:[{nome:'Térreo', salas:[sala('quarto', 0, 0, 2, 2)]}], quadro:{fechada:4}};
+  const r = SO.calcular(pequena, {quartos:3}, DADOS);
+  igual(r.modulos, Math.floor(4 * 0.6 / 2.6), 'só cabem os módulos da cobertura:'); ok(r.avisos.some(a => a.includes('comporta')));
   ok(SO.calcular(M.gerar({}).variantes[0], {municipio:'portoDasDunas'}, DADOS).avisos.some(a => a.includes('inox')), 'aviso do litoral');
 });
-
 t('cards: card solar com as três vistas, fórmulas e normas', () => {
   const r = SO.calcular(M.gerar({}).variantes[0], {}, DADOS);
   for(const vista of ['mensal', 'retorno', 'cargas']){
@@ -238,7 +236,7 @@ t('cards: card solar com as três vistas, fórmulas e normas', () => {
     ok(h.includes('<svg class="graf"') && (h.match(/data-tip="/g) || []).length >= 12, 'vista ' + vista);
   }
   const h = CA.cartaoSolar(r, {});
-  ok(h.includes('NBR 16690') && h.includes('kWp = (') && h.includes('cobertura provisória'), 'normas, fórmula do kWp e aviso de cobertura provisória');
+  ok(h.includes('NBR 16690') && h.includes('kWp = ') && h.includes('cobertura provisória') && h.includes('Projeção de custo'), 'normas, fórmula do kWp, cobertura provisória e título');
 });
 
 function rodar(){

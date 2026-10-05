@@ -325,12 +325,9 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
         <label class="chk"><input type="checkbox" name="custoIncc">Projetar pelo INCC-M até hoje (estimado)</label>
       </fieldset>
 
-      <fieldset class="fs so-beta" data-secao="solar"><legend>Energia solar com bateria</legend>
-        <p class="fld wide"><small>Sistema híbrido: conectado à rede, com bateria e um quadro de cargas críticas que segue ligado quando a rede cai.</small></p>
-        <label class="fld">Nível de atendimento na falta da rede<select name="solNivel"><option value="N1">N1 · essencial</option><option value="N2">N2 · conforto básico</option><option value="N3">N3 · ar nos quartos à noite</option><option value="N4">N4 · casa inteira</option></select><small id="solNivelInfo"></small></label>
-        <label class="fld">Consumo da conta (kWh/mês)<input type="number" name="solConsumo" min="0" max="20000" step="10"><small>0 = estimar pelo programa da casa.</small></label>
+      <fieldset class="fs so-beta" data-secao="solar"><legend>Energia solar básica</legend>
+        <p class="fld wide"><small>Projeção de custo do sistema básico: portão automático, iluminação interna e externa, câmeras de segurança, geladeira, um ar-condicionado e ventiladores, com bateria para seguirem ligados quando a rede cai.</small></p>
         <label class="fld">Autonomia da bateria<select name="solAutonomia"><option value="4">4 horas</option><option value="8">8 horas</option><option value="12">12 horas</option><option value="24">24 horas</option></select></label>
-        <label class="chk"><input type="checkbox" name="solVE">Carregador de veículo elétrico</label>
       </fieldset>
 
       <fieldset class="fs so-beta" data-secao="valores"><legend>Valores e atualização</legend>
@@ -503,7 +500,6 @@ function sincroniza(){
   if(ed==='2'){ form.elements.edGourmet.checked = true; form.elements.edQuarto.checked = true; }
   document.getElementById('pisOps').hidden = !form.elements.piscina.checked;
   form.elements.suites.max = form.elements.quartos.value;
-  if(dadosCusto && dadosCusto.solar) document.getElementById('solNivelInfo').textContent = dadosCusto.solar.niveis[form.elements.solNivel.value] || '';
   if(dadosCusto){ const sis = dadosCusto.fatores.estrutural[form.elements.estSistema.value];
     if(sis) document.getElementById('estInfo').textContent = `${sis.norma} · vão econômico ${f2(sis.vaoEcon[0])}–${f2(sis.vaoEcon[1])} m, máximo ${f2(sis.vaoMax)} m · balanço até ${f2(sis.balanco)} m · prazo ${sis.prazo} · ${sis.oferta}. ${sis.restricoes === '—' ? '' : sis.restricoes}`; }
 }
