@@ -10,7 +10,7 @@ const BLOCOS = [
   {id:'b1', num:1, titulo:'Dimensões', cor:'var(--patina)'},
   {id:'b2', num:2, titulo:'Tipo de estrutura e padrão de custos', cor:'var(--moss)', vazio:'O sistema estrutural (alvenaria estrutural, concreto armado, laje nervurada, protendido, metálica, steel frame), o município e o padrão de acabamento chegam na próxima fase, com a estimativa de custo.'},
   {id:'b3', num:3, titulo:'Energia solar', cor:'var(--brass)', vazio:'Os níveis de atendimento N1 a N4, a geração, as baterias e o retorno do investimento chegam numa fase seguinte, calculados sobre a planta escolhida.'},
-  {id:'b4', num:4, titulo:'Estilo arquitetônico', cor:'var(--plum, var(--slate))', vazio:'A galeria comparativa de estilos (casa com cara de casa, farm, inglês, moderna contemporânea e ecológica), as fachadas e o muro chegam numa fase seguinte.', trava:'Conclua o bloco 1 para liberar a escolha do estilo.'},
+  {id:'b4', num:4, titulo:'Estilo arquitetônico', cor:'var(--plum)', vazio:'A galeria comparativa de estilos (casa com cara de casa, farm, inglês, moderna contemporânea e ecológica), as fachadas e o muro chegam numa fase seguinte.', trava:'Conclua o bloco 1 para liberar a escolha do estilo.'},
 ];
 const ROTULO = {'a-definir':'a definir', 'em-edicao':'em edição', 'pronto':'pronto', 'concluido':'concluído', 'revisar':'revisar', 'bloqueado':'bloqueado'};
 const DICA = {'a-definir':'Ainda não preenchido', 'em-edicao':'Em preenchimento: há campos obrigatórios pendentes ou fora da faixa', 'pronto':'Campos obrigatórios completos: use “Concluir bloco”',

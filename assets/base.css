@@ -1,7 +1,7 @@
 :root{
   --bg:#EEF0F1;--surface:#F6F7F8;--surface-2:#FFFFFF;--glass:rgba(248,249,250,.76);
   --ink:#1E2430;--ink-2:#4A515C;--ink-3:#7B828C;--line:#D5D9DD;
-  --brass:#A07F4B;--moss:#5F7350;--patina:#4E7A74;--slate:#5E6386;--rust:#9A5B45;--steel:#4C6E8F;--graphite:#3A3F47;
+  --brass:#A07F4B;--moss:#5F7350;--patina:#4E7A74;--slate:#5E6386;--rust:#9A5B45;--steel:#4C6E8F;--graphite:#3A3F47;--plum:#7A5470;--brass-ink:#7E6338;
   --suite-f:#E3EEEC;--suite-s:#4E7A74;--social-f:#E7E7F0;--social-s:#5E6386;--apoio-f:#ECECE8;--apoio-s:#77776F;
   --var-f:#F3EBDD;--var-s:#A07F4B;--torre-f:#F2E3DC;--torre-s:#9A5B45;--recuo-f:#E6ECDF;--recuo-s:#5F7350;
   --glass-f:#E1EAF2;--win:#3E6A92;--door:#A07F4B;--flow:#4C86C6;--axis:#9AA0A6;--struct-f:#DCDDD9;--struct-s:#6F716C;
@@ -15,7 +15,7 @@
   :root:not([data-theme="light"]){
     --bg:#14171C;--surface:#1A1E24;--surface-2:#222730;--glass:rgba(27,31,37,.76);
     --ink:#E6E8EB;--ink-2:#B4BAC2;--ink-3:#848B95;--line:#343A43;
-    --brass:#C9A56B;--moss:#92A882;--patina:#7FB0A8;--slate:#9A9FCB;--rust:#D08D72;--steel:#79A7D6;--graphite:#C5CAD1;
+    --brass:#C9A56B;--moss:#92A882;--patina:#7FB0A8;--slate:#9A9FCB;--rust:#D08D72;--steel:#79A7D6;--graphite:#C5CAD1;--plum:#C9A0BE;--brass-ink:#D4B27A;
     --suite-f:#233633;--suite-s:#7FB0A8;--social-f:#2A2B3D;--social-s:#9A9FCB;--apoio-f:#2B2B28;--apoio-s:#A9A99F;
     --var-f:#3A3122;--var-s:#C9A56B;--torre-f:#3D2A23;--torre-s:#D08D72;--recuo-f:#26301F;--recuo-s:#92A882;
     --glass-f:#22303D;--win:#79A7D6;--door:#C9A56B;--flow:#6FA8E8;--axis:#6E747C;--struct-f:#34363A;--struct-s:#9A9C97;
@@ -25,7 +25,7 @@
 :root[data-theme="dark"]{
   --bg:#14171C;--surface:#1A1E24;--surface-2:#222730;--glass:rgba(27,31,37,.76);
   --ink:#E6E8EB;--ink-2:#B4BAC2;--ink-3:#848B95;--line:#343A43;
-  --brass:#C9A56B;--moss:#92A882;--patina:#7FB0A8;--slate:#9A9FCB;--rust:#D08D72;--steel:#79A7D6;--graphite:#C5CAD1;
+  --brass:#C9A56B;--moss:#92A882;--patina:#7FB0A8;--slate:#9A9FCB;--rust:#D08D72;--steel:#79A7D6;--graphite:#C5CAD1;--plum:#C9A0BE;--brass-ink:#D4B27A;
   --suite-f:#233633;--suite-s:#7FB0A8;--social-f:#2A2B3D;--social-s:#9A9FCB;--apoio-f:#2B2B28;--apoio-s:#A9A99F;
   --var-f:#3A3122;--var-s:#C9A56B;--torre-f:#3D2A23;--torre-s:#D08D72;--recuo-f:#26301F;--recuo-s:#92A882;
   --glass-f:#22303D;--win:#79A7D6;--door:#C9A56B;--flow:#6FA8E8;--axis:#6E747C;--struct-f:#34363A;--struct-s:#9A9C97;
@@ -313,6 +313,13 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .legenda-zonas span{display:inline-flex;align-items:center;gap:6px}
 .legenda-zonas i{width:14px;height:14px;border-radius:4px;border:1.5px solid;display:inline-block}
 [hidden]{display:none!important}
+/* cor fixa de cada tipo de card de resultado e de cada bloco do gerador (a mesma nos filtros do banco).
+   Contraste como borda ou faixa (3:1) em claro/escuro: patina 4,82/6,19 · moss 5,18/5,81 · slate 5,83/5,85 · brass 3,73/6,48 ·
+   steel 5,34/5,93 · plum 6,31/6,61 · rust 5,31/5,52 · graphite 10,60/9,10. Texto na cor do latão usa --brass-ink (5,63/7,46). */
+:root{--card-variante:var(--patina);--card-custo:var(--moss);--card-estrutura:var(--slate);--card-solar:var(--brass);--card-torre:var(--steel);--card-brises:var(--steel);--card-estilo:var(--plum);--card-fachadas:var(--rust);--card-muro:var(--graphite)}
+.card.res{border-top:3px solid var(--c);padding-top:0;overflow:hidden}
+.card.res>.res-head{margin:0 -22px 14px;padding:12px 22px;background:color-mix(in srgb,var(--c) 9%,var(--surface-2));border-bottom:1px solid var(--line)}
+.card.res>.res-head h3{margin:0}
 /* sinalizador beta (assets/base.js): .so-beta só aparece com ?beta=1; .sem-beta some quando o beta está ligado */
 html:not(.beta) .so-beta,html.beta .sem-beta{display:none!important}
 
