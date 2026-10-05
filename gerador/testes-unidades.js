@@ -101,6 +101,110 @@ t('acessos: portões no lote, portão social longe dos veículos e caminho saind
   ok(!erros.length, erros.slice(0, 4).join('; '));
 });
 
+// ---------- dados de custo ----------
+const VS = require('../tools/valida-schema.js'), DADOS = require('../dados/custos.json'), HIST = require('../dados/custos-historico.json');
+t('dados: custos.json e custos-historico.json seguem os esquemas', () => {
+  const e1 = VS.validar(DADOS, require('../dados/custos.schema.json')), e2 = VS.validar(HIST, require('../dados/custos-historico.schema.json'));
+  ok(!e1.length && !e2.length, e1.concat(e2).slice(0, 4).join('; '));
+  const ruim = JSON.parse(JSON.stringify(DADOS)); ruim.cub.onerado['R1-N'] = 'caro'; delete ruim.fatores.marinho.ate500; ruim.cub.mesRef = '2026-13';
+  igual(VS.validar(ruim, require('../dados/custos.schema.json')).length, 3, 'o validador acusa os três erros plantados:');
+});
+t('dados: faixas coerentes (mín ≤ méd ≤ máx), padrões existentes e série histórica fechando com o CUB vigente', () => {
+  const erros = [];
+  (function varre(o, cam){ if(!o || typeof o !== 'object') return;
+    if(typeof o.min === 'number' && typeof o.med === 'number' && typeof o.max === 'number' && !(o.min <= o.med && o.med <= o.max)) erros.push(cam);
+    for(const [k, v] of Object.entries(o)) varre(v, cam + '.' + k); })(DADOS, '$');
+  for(const p of Object.values(DADOS.padroes)) if(!(p.cub in DADOS.cub.onerado) || !(p.cub in DADOS.cub.desonerado)) erros.push('padrão ' + p.cub);
+  const ult = HIST.serie[HIST.serie.length - 1];
+  if(ult.mesRef !== DADOS.cub.mesRef) erros.push('série termina em ' + ult.mesRef);
+  for(const k of ['R1-B','R1-N','R1-A']) if(ult.onerado[k] !== DADOS.cub.onerado[k] || ult.desonerado[k] !== DADOS.cub.desonerado[k]) erros.push('série ≠ CUB em ' + k);
+  for(let i = 1; i < HIST.serie.length; i++) for(const k of ['R1-B','R1-N','R1-A']){ const v = 100*(HIST.serie[i].onerado[k]/HIST.serie[i-1].onerado[k] - 1); if(Math.abs(v) > 5) erros.push(`variação de ${v.toFixed(2)} % em ${k} (${HIST.serie[i].mesRef})`); }
+  for(const k of ['R1-B','R1-N','R1-A']){ const c = DADOS.cub.composicao[k], s = c.materiais + c.maoDeObra + c.administracao + c.equipamentos; if(Math.abs(s - DADOS.cub.onerado[k]) > 0.02) erros.push('composição ≠ total em ' + k); }
+  ok(!erros.length, erros.join('; '));
+});
+
+// ---------- estrutura ----------
+const EST = require('./estrutura.js');
+t('estrutura: paredes fundidas e parede sobre parede (igual = 100 %, deslocada = menos)', () => {
+  const sala = (tipo, x0, y0, x1, y1) => ({tipo, x0, y0, x1, y1});
+  const ter = {salas:[sala('quarto', 0, 0, 4, 3), sala('quarto', 4, 0, 8, 3)]};
+  const pw = EST.paredes(ter);
+  igual(pw.filter(w => w.o==='h').length, 2, 'duas linhas horizontais (y=0 e y=3), cada uma fundida de 0 a 8:'); ok(pw.some(w => w.o==='h' && w.c===0 && w.t0===0 && w.t1===8));
+  igual(EST.paredeSobreParede(ter, ter).pct, 100);
+  const sup = {salas:[sala('quarto', 0, 0, 5, 3), sala('quarto', 5, 0, 8, 3)]};   // divisória a 1,00 m da de baixo
+  const pp = EST.paredeSobreParede(sup, ter); ok(pp.pct < 100 && pp.soltos.some(s => s.o==='v' && s.c===5), 'a divisória deslocada fica sem apoio');
+  const sup2 = {salas:[sala('quarto', 0, 0, 4.1, 3), sala('quarto', 4.1, 0, 8, 3)]};   // 0,10 m: dentro da tolerância
+  igual(EST.paredeSobreParede(sup2, ter).pct, 100);
+});
+t('estrutura: gancho posAvalia só penaliza a alvenaria estrutural e não muda nada sem o gancho', () => {
+  const c = {tipo:'sobrado', quartos:4, suites:2}, gancho = {posAvalia:[(v, q) => EST.avaliar(v, q, DADOS)]};
+  const base = M.gerar(c), ca = M.gerar(Object.assign({estSistema:'concretoArmado'}, c), gancho), ae = M.gerar(Object.assign({estSistema:'alvenariaEstrutural'}, c), gancho);
+  igual(ca.variantes.map(v => v.score), base.variantes.map(v => v.score), 'concreto armado sem penalidade:');
+  ok(ae.variantes[0].estrutura.paredeSobreParede && ae.variantes[0].score <= base.variantes[0].score, 'alvenaria avalia parede sobre parede');
+  ok(!('estrutura' in base.variantes[0]), 'sem gancho, a variante não ganha o campo estrutura');
+});
+
+// ---------- custos ----------
+const CU = require('./custos.js');
+const perto = (a, b, msg) => ok(Math.abs(a - b) < 0.05, `${msg || ''} esperado ${b}, obtido ${a}`);
+t('custos: conta conferida à mão (100 m² fechados + 20 m² de varanda, térrea, Fortaleza, R1-N onerado)', () => {
+  const v = {pav:[{nome:'Térreo', salas:[{tipo:'quarto', x0:0, y0:0, x1:10, y1:10}, {tipo:'varanda', x0:0, y0:10, x1:10, y1:12}]}], projecao:120, quadro:{fechada:100}};
+  const r = CU.calcular(v, {}, DADOS);
+  perto(r.Aeq.med, 117, 'área equivalente 100 + 20 × 0,85:'); perto(r.Aeq.min, 115); perto(r.Aeq.max, 120);
+  perto(r.parcelas[0].valor.med, 117 * 2905.13, 'construção:');
+  perto(r.adicionais[0].valor.med, 120 * 220, 'fundação térrea:');
+  perto(r.total.med, (117 * 2905.13 + 26400) * 1.06, 'total com projetos de 6 %:');
+  perto(r.total.min, (115 * 2905.13 + 120 * 180) * 1.04, 'mínimo:');
+  perto(r.total.max, (120 * 2905.13 + 120 * 260) * 1.08, 'máximo:');
+  perto(r.porM2.med, r.total.med / 100);
+});
+t('custos: fatores (Porto das Dunas, condomínio, até 500 m do mar, metálica, vãos maiores), desonerado, BDI e INCC', () => {
+  const v = {pav:[{nome:'Térreo', salas:[{tipo:'quarto', x0:0, y0:0, x1:10, y1:10}]}], projecao:100, quadro:{fechada:100}};
+  const q = {municipio:'portoDasDunas', condominio:true, distMar:'ate500', estSistema:'metalica', estVaos:'maiores', cubTipo:'desonerado', padrao:'alto', empreitada:true, custoIncc:true};
+  const r = CU.calcular(v, q, DADOS), fl = 1.045 * 1.03 * 1.065, fe = (1.115 + 0.03) * 1.045;
+  perto(r.fatores.local.med, fl, 'fator local:'); perto(r.fatores.estrutura.med, fe, 'fator estrutural com acréscimo do litoral:');
+  igual(r.cub, 3275.17, 'CUB R1-A desonerado:');
+  const obra = 100 * 3275.17 * fl * fe + 100 * 220, proj = obra * 0.06, bdi = (obra + proj) * 0.2212;
+  perto(r.total.med, (obra + proj + bdi) * 1.0025, 'total com BDI e INCC de setembro (0,25 %):');
+  ok(r.parcelas.some(p => p.id === 'incc' && p.estimado), 'projeção marcada como estimada');
+});
+t('custos: variante real tem fórmula em cada parcela e faixa crescente', () => {
+  const v = M.gerar({tipo:'sobrado', subsolo:true, vagas:2, elevador:true}).variantes[0], r = CU.calcular(v, {elevador:true}, DADOS);
+  ok(r.parcelas.every(p => p.formula && p.valor.min <= p.valor.med && p.valor.med <= p.valor.max), 'parcelas sem fórmula ou faixa invertida');
+  ok(['construcao', 'fundacao', 'subsolo', 'elevador', 'projetos'].every(id => r.parcelas.some(p => p.id === id)), r.parcelas.map(p => p.id).join(','));
+});
+
+// ---------- cards ----------
+const CA = require('./cartoes.js');
+t('cards: selo de atualidade (alerta acima de 45 dias do fim do mês) e card com fórmulas e quatro vistas', () => {
+  igual(CA.selo(DADOS, new Date(Date.UTC(2026, 9, 5))).velho, false, 'em 05/10/2026, agosto ainda vale:');
+  igual(CA.selo(DADOS, new Date(Date.UTC(2026, 9, 20))).velho, true, 'em 20/10/2026, sem setembro, alerta:');
+  const vs = M.gerar({}).variantes, pv = vs.map(x => ({nome:x.nome, r:CU.calcular(x, {}, DADOS)}));
+  for(const vista of ['parcelas', 'composicao', 'variantes', 'serie']){
+    const h = CA.cartaoCusto(pv[0].r, {dados:DADOS, historico:HIST, porVariante:pv, atual:0, vista, hoje:new Date(Date.UTC(2026, 9, 5))});
+    ok(h.includes('<svg class="graf"'), 'vista ' + vista + ' sem gráfico');
+    ok((h.match(/data-tip="/g) || []).length >= 8, 'poucas dicas na vista ' + vista);
+  }
+  const h = CA.cartaoCusto(pv[0].r, {dados:DADOS, historico:HIST, porVariante:pv, atual:0});
+  ok(h.includes('Total = construção') && h.includes('não é orçamento'), 'fórmula do total e aviso');
+  const ve = EST.avaliar(M.gerar({}).variantes[0], {estSistema:'protendido'}, DADOS);
+  ok(CA.cartaoEstrutura(ve, DADOS).includes('Concreto protendido'), 'card da estrutura');
+});
+
+// ---------- valores (camadas) ----------
+const VA = require('./valores.js');
+t('valores: ajustes sobre os oficiais (mín e máx acompanham), diferenças e editáveis válidos', () => {
+  const ef = VA.aplicarAjustes(DADOS, {'cub.onerado.R1-N': 3000, 'fatores.logistica.eusebio.med': 1.04, 'fatores.logistica.fortaleza.med': 1.01, 'x.y': 3});
+  igual(ef.cub.onerado['R1-N'], 3000); igual(DADOS.cub.onerado['R1-N'], 2905.13, 'o oficial não muda:');
+  perto(ef.fatores.logistica.eusebio.min, 1.01 * 1.04 / 1.02, 'mín acompanha:'); perto(ef.fatores.logistica.eusebio.max, 1.03 * 1.04 / 1.02, 'máx acompanha:');
+  igual([ef.fatores.logistica.fortaleza.min, ef.fatores.logistica.fortaleza.max], [1.01, 1.01], 'faixa de ponto único acompanha o valor:');
+  const dif = VA.diferencas(DADOS, ef).map(d => d.caminho);
+  ok(dif.includes('cub.onerado.R1-N') && dif.includes('fatores.logistica.eusebio.med'), dif.join(','));
+  igual(VA.diferencas(DADOS, JSON.parse(JSON.stringify(DADOS))).length, 0);
+  const ed = VA.editaveis(DADOS); ok(ed.length >= 30 && ed.every(([cam]) => typeof cam.split('.').reduce((o, k) => o[k], DADOS) === 'number'), 'editável sem número');
+  igual(VS.validar(ef, require('../dados/custos.schema.json')).length, 0, 'valores ajustados continuam válidos:');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

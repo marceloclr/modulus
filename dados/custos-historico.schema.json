@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "custos-historico.schema.json",
+  "title": "Série mensal do CUB-CE e das referências",
+  "type": "object",
+  "required": ["versao", "fonte", "serie"],
+  "properties": {
+    "versao": {"type": "integer", "minimum": 1},
+    "fonte": {"type": "string"},
+    "serie": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["mesRef", "onerado", "desonerado"],
+        "properties": {
+          "mesRef": {"type": "string", "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])$"},
+          "onerado": {"$ref": "#/$defs/tabelaCub"},
+          "desonerado": {"$ref": "#/$defs/tabelaCub"},
+          "sinapi": {"type": ["number", "null"]},
+          "incc": {"type": ["number", "null"]},
+          "sha256Zip": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "tabelaCub": {"type": "object", "required": ["R1-B", "R1-N", "R1-A"], "additionalProperties": {"type": "number", "minimum": 500, "maximum": 20000}}
+  }
+}

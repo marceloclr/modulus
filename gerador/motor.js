@@ -1542,7 +1542,7 @@ function geraTodas(q, P, Ws){
   return out;
 }
 
-function gerar(entrada){
+function gerar(entrada, opts){
   const q = normaliza(entrada);
   const P = programa(q);
   const B = r2(q.frente - 2*q.recLat), Dmax = r2(q.fundo - q.recFrente - q.recFundo);
@@ -1554,7 +1554,8 @@ function gerar(entrada){
   if(!Ws.length) Ws.push(B);
   const NOMES = {bloco:'bloco único', L:'em L', U:'em U', H:'em H'};
   if(q.formato==='H' && q.tipo==='sobrado') avisos.push('O formato em H está disponível só para casa térrea (com ou sem subsolo).');
-  const todas = geraTodas(q, P, Ws).map(v => avalia(comAnexos(v, q), q));
+  // opts.posAvalia: avaliações extras (estrutura etc.), aplicadas antes da ordenação; sem elas o resultado não muda
+  const todas = geraTodas(q, P, Ws).map(v => avalia(comAnexos(v, q), q)).map(v => { for(const fn of ((opts && opts.posAvalia) || [])) fn(v, q); return v; });
   if(!todas.length && q.formato!=='auto') avisos.push(`O formato ${NOMES[q.formato]} não cabe na área edificável de ${f2(B)} m de largura. Veja o terreno mínimo para este formato ou escolha outro.`);
   todas.sort((a,b) => b.score-a.score || a.W*a.D-b.W*b.D);
   // até 3 variantes, preferindo tipologias diferentes
