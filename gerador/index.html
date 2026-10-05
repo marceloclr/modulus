@@ -19,6 +19,7 @@
 .form-acts .btn{padding:8px 10px}
 .fld:has(select){grid-template-columns:minmax(0,1fr) 168px}
 .fld small{grid-column:1/-1;color:var(--ink-3);font-size:11.5px;margin-top:-2px}
+.sub-nota{color:var(--ink-3);font-size:12px;margin:2px 0 8px;line-height:1.45}
 .lote-wrap{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
 .lote-wrap svg{width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:#FBFAF7}
 @media (max-width:760px){.lote-wrap{grid-template-columns:minmax(0,1fr)}}
@@ -223,7 +224,7 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
-          <label class="fld" id="subVagasOps">Vagas no subsolo<input type="number" id="subVagas" min="1" max="20" step="1" data-obrig aria-describedby="subVagasNota"><small id="subVagasNota">Quantos carros o subsolo deve comportar: ele é dimensionado para essas vagas (3,00 × 5,00 m cada).</small></label>
+          <p class="sub-nota" id="subVagasNota">Vagas no subsolo: o máximo que cabe (3,00 × 5,00 m cada), de preferência perpendiculares ao comprimento do lote, dos dois lados de um corredor de manobra. A quantidade de vagas só é pedida quando não há subsolo.</p>
           <label class="fld">Nível do subsolo<select name="subNivel"><option value="meio">Semienterrado (1,40 m)</option><option value="inteiro">Enterrado</option></select></label>
           <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><small>Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</small></label>
           <label class="fld">Inclinação da rampa (%)<input type="number" name="inclinacao" min="8" max="25" step="1"></label>
@@ -271,7 +272,7 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
 
       <fieldset class="fs" data-secao="garagem"><legend>Garagem e áreas externas</legend>
         <label class="fld">Onde ficam as vagas<select name="garagemLocal"><option value="terreo">No térreo</option><option value="subsolo">Só no subsolo</option><option value="ambos">No subsolo e no térreo</option></select><small id="garNota">As opções com subsolo aparecem quando o subsolo está marcado.</small></label>
-        <label class="fld"><span id="vagasRot">Vagas</span><input type="number" name="vagas" min="0" max="20" step="1"></label>
+        <label class="fld" id="vagasOps"><span id="vagasRot">Vagas</span><input type="number" name="vagas" min="0" max="20" step="1"></label>
         <label class="fld" id="vagasTOps">Vagas no térreo<input type="number" name="vagasTerreo" min="0" max="4" step="1"></label>
         <label class="fld">Garagem<select name="garagem"><option value="coberta">Coberta, na casa</option><option value="descoberta">Descoberta, no recuo</option><option value="nenhuma">Sem garagem</option></select></label>
         <label class="chk"><input type="checkbox" name="varanda">Varanda frontal</label>
@@ -396,7 +397,7 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
             <li>Áreas e lados mínimos de um código de obras genérico (quarto 8 m² e 2,60 m; suíte 9 m² e 2,80 m; banho 2,4 m² e 1,20 m).</li>
             <li>Suítes com banho na fachada e closet para dentro; banhos vizinhos encostados para concentrar a hidráulica.</li>
             <li>Escada reta pela fórmula de Blondel; rampa de garagem pela inclinação informada.</li>
-            <li>Subsolo dimensionado pelo número de vagas pedido (o menor retângulo que as comporta, para reduzir custo): escada na lateral junto ao elevador, manobra contínua de 5 m, rampa desenhada em escala e jardim de inverno a céu aberto, oposto à rampa.</li>
+            <li>Subsolo com o máximo de vagas que cabe, de preferência perpendiculares ao comprimento do lote (o campo de vagas só vale sem subsolo): escada na lateral junto ao elevador, manobra contínua de 5 m, rampa desenhada em escala e jardim de inverno a céu aberto, oposto à rampa.</li>
             <li>Vento predominante de leste/sudeste: cada pavimento precisa de aberturas na face que recebe o vento e na oposta; entrada e saída de fundos em faces opostas; a versão espelhada é sugerida quando favorece o fluxo. Torre de calor opcional sobre a escada ou o estar.</li>
             <li>Janelas dimensionadas por 1/8 da área do piso (luz) e 1/16 (ventilação). Subsolo sempre com ventilação cruzada: janelas altas no semienterrado, pátios ingleses de 1,50 m em lados opostos no enterrado.</li>
             <li>Estudo automático: confira acessibilidade, estrutura e legislação com um responsável técnico.</li>
@@ -482,10 +483,9 @@ function sincroniza(){
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
   if(!sub) gl.value = 'terreo';
   document.getElementById('garNota').hidden = sub;
-  document.getElementById('vagasRot').textContent = gl.value==='terreo' ? 'Vagas' : 'Vagas no subsolo (o subsolo é dimensionado para elas)';
+  document.getElementById('vagasOps').hidden = gl.value!=='terreo';          // com subsolo, ele comporta o máximo de vagas
   document.getElementById('vagasTOps').hidden = gl.value!=='ambos';
-  document.getElementById('subVagasOps').hidden = gl.value==='terreo';
-  document.getElementById('subVagas').value = form.elements.vagas.value;
+  document.getElementById('subVagasNota').hidden = gl.value==='terreo';
   document.getElementById('rtOps').hidden = !form.elements.rooftop.checked;
   document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';
   form.querySelectorAll('#secOps .chk').forEach(el => { el.hidden = fmt!=='auto' && !el.classList.contains('sec-' + chave); });
@@ -628,10 +628,6 @@ form.addEventListener('input', e => {
 });
 // subsolo: ao marcar, as vagas vão para o subsolo (antes ficavam no térreo e o subsolo saía sem rampa nem vagas)
 form.elements.subsolo.addEventListener('change', e => { if(e.target.checked && form.elements.garagemLocal.value==='terreo') form.elements.garagemLocal.value = 'subsolo'; });
-// "Vagas no subsolo" é um atalho do campo de vagas: repassa o valor e o evento para ele
-for(const tipo of ['input', 'change']) document.getElementById('subVagas').addEventListener(tipo, e => {
-  e.stopPropagation(); const vg = form.elements.vagas; vg.value = e.target.value; vg.dispatchEvent(new Event(tipo, {bubbles:true}));
-});
 document.getElementById('restaurar').addEventListener('click', () => { preencher(PADRAO); gerar(); });
 document.getElementById('link').addEventListener('click', async function(){
   const url = location.href; try{ await navigator.clipboard.writeText(url); this.textContent = 'Link copiado'; }catch(e){ this.textContent = 'Copie da barra'; }
