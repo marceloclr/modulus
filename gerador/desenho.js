@@ -168,6 +168,8 @@ function planta(v, idx, op){
     const c = COR[s.zona] || COR.apoio, a = Motor.area(s);
     o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width="1"><title>${esc(s.nome)}: ${f2(s.x1-s.x0)} × ${f2(s.y1-s.y0)} = ${f2(a)} m²</title></rect>`);
   }
+  // banho acessível (opção de acessibilidade): giro de 1,50 m no centro
+  for(const s of S.filter(x => x.acessivel)) o.push(`<circle cx="${X((s.x0+s.x1)/2)}" cy="${Y((s.y0+s.y1)/2)}" r="${(0.75*K).toFixed(1)}" fill="#9A5B45" fill-opacity=".06" stroke="#9A5B45" stroke-width="1" stroke-dasharray="4 3"><title>Banho acessível: giro de 1,50 m, transferência lateral à bacia e boxe de 0,90 × 0,95 m (NBR 9050)</title></circle>`);
   // mobiliário mínimo: carros, escadas, rampas, camas
   for(const s of S){
     const w = s.x1-s.x0, h = s.y1-s.y0;

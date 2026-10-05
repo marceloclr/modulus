@@ -289,6 +289,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
         <label class="chk"><input type="checkbox" name="master">Uma das suítes é master</label>
         <label class="fld">Tamanho dos cômodos<select name="tamanho"><option value="compacto">Compacto</option><option value="medio">Médio</option><option value="amplo">Amplo</option></select></label>
         <label class="fld">Banheiros sociais<input type="number" name="banhosSociais" min="0" max="4" step="1"></label>
+        <label class="chk" data-tip="NBR 9050: portas com vão livre de 0,80 m (folha de 0,90 m), um banho acessível de 2,40 × 2,50 m por pavimento com quarto, quartos com lado de 2,80 m, corredores de 1,20 m e rota sem degraus. A pontuação passa a cobrar esses itens"><input type="checkbox" name="acessivel">Acessibilidade (NBR 9050)</label>
         <label class="chk"><input type="checkbox" name="lavabo">Lavabo</label>
       </fieldset>
 
@@ -457,7 +458,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
       </div>
     </section>
     <section class="panel so-beta" id="analises" style="--c:var(--card-custo)" aria-labelledby="tAnalises">
-      <div class="panel-head"><p class="eyebrow">Análises da variante escolhida</p><h2 id="tAnalises">Custo e estrutura</h2></div>
+      <div class="panel-head"><p class="eyebrow">Análises da variante escolhida</p><h2 id="tAnalises">Custo, estrutura e acessibilidade</h2></div>
       <div id="cardsAnalise" class="grid-analise"><p class="note">Carregando os valores de custo…</p></div>
     </section>
     <section class="panel so-beta" id="energia" style="--c:var(--card-solar)" aria-labelledby="tEnergia">
@@ -595,6 +596,7 @@ function variante(){ const v = res.variantes[vi]; return v && esp ? Desenho.espe
 function dicaNota(v){
   const faixa = v.score >= 80 ? 'boa (verde-azulado, 80 ou mais)' : v.score >= 60 ? 'razoável (dourado, 60 a 79)' : 'fraca (avermelhado, abaixo de 60)';
   const beta = document.documentElement.classList.contains('beta') ? ';\n• conflito com o sistema estrutural' : '';
+  const acess = res && res.entrada.acessivel ? ';\n• com a acessibilidade marcada: porta estreita (2), falta de banho acessível (8), quarto com lado abaixo de 2,80 m (3), corredor estreito (3) e degrau na rota (8)' : '';
   return `Nota de 0 a 100 para a qualidade da variante. Começa em 100 e perde pontos a cada problema:
 • cômodo abaixo da área ou da largura mínima, ou alongado demais;
 • cômodo longe das medidas pedidas;
@@ -602,7 +604,7 @@ function dicaNota(v){
 • casa maior que a área edificável, ocupação acima do limite ou permeabilidade abaixo do mínimo;
 • corredores e halls acima de 14 % da área;
 • falta de aberturas do lado do vento ou do lado oposto (8 cada);
-• quarto com janela a oeste (25), a sudoeste ou noroeste (6) ou sem janela a nascente (3)${beta}.
+• quarto com janela a oeste (25), a sudoeste ou noroeste (6) ou sem janela a nascente (3)${beta}${acess}.
 Esta variante: ${v.score} (perdeu ${100 - v.score}), nota ${faixa}. Os motivos estão em “Pontos de atenção”.`;
 }
 
@@ -677,7 +679,7 @@ function renderAnalises(){
   renderConforto(v, q);
   const be = document.getElementById('cardsEnergia');
   be.innerHTML = dadosCusto.solar ? Cartoes.cartaoSolar(Solar.calcular(v, q, dadosCusto), {vista:vistaSolar}) : '<p class="note">Valores de energia solar indisponíveis.</p>';
-  box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto, sinapiVivo}) + Cartoes.cartaoEstrutura(v, dadosCusto);
+  box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto, sinapiVivo}) + Cartoes.cartaoEstrutura(v, dadosCusto) + (v.acessibilidade ? Cartoes.cartaoAcessibilidade(v) : '');
 }
 document.getElementById('cardsEnergia').addEventListener('click', e => {
   const b = e.target.closest('[data-vista-solar]'); if(!b) return;

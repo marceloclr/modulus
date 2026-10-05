@@ -376,6 +376,22 @@ t('casa simétrica: a humanizada sai do mesmo modelo da técnica (janelas e port
   }
 });
 
+t('acessibilidade (opção): portas, banho acessível, quartos, rota e nada muda sem ela', () => {
+  const v = M.gerar({acessivel:true}).variantes[0], T = v.pav.find(p => p.nome === 'Térreo');
+  ok(T.portas.filter(d => !d.saida).every(d => d.t1 - d.t0 >= 0.9 - 0.01), 'portas de 0,90 m no térreo');
+  const b = T.salas.find(x => x.acessivel); ok(b, 'banho acessível marcado');
+  ok(Math.min(b.x1-b.x0, b.y1-b.y0) >= 2.4 - 0.01 && Math.max(b.x1-b.x0, b.y1-b.y0) >= 2.5 - 0.01, 'banho com 2,40 × 2,50 m');
+  ok(v.acessibilidade.every(i => i.ok), v.acessibilidade.filter(i => !i.ok).map(i => i.detalhe).join(' | '));
+  const semi = M.gerar({acessivel:true, subsolo:true, subNivel:'meio'}).variantes[0];
+  ok(semi.acessibilidade.some(i => i.item === 'Rota sem degraus' && !i.ok), 'semienterrado sem elevador pede rampa');
+  ok(M.gerar({acessivel:true, subsolo:true, subNivel:'meio', elevador:true}).variantes[0].acessibilidade.find(i => i.item === 'Rota sem degraus').ok, 'com elevador, a rota atende');
+  ok(M.gerar({acessivel:true, tipo:'sobrado'}).variantes[0].acessibilidade.some(i => i.item === 'Rota sem degraus' && !i.ok), 'sobrado sem elevador e quartos em cima');
+  igual(M.normaliza({acessivel:true, banhosSociais:0}).banhosSociais, 1, 'com acessibilidade, ao menos um banho social:');
+  const sem = M.gerar({}).variantes[0];
+  ok(!sem.acessibilidade && !sem.pav.some(p => p.salas.some(x => x.acessivel)), 'sem a opção, nada é marcado');
+  ok(require('./desenho.js').planta(v, 0).includes('Banho acessível: giro de 1,50 m'), 'giro desenhado');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
