@@ -33,6 +33,13 @@ function cartaoCusto(r, extra){
   h += `<div class="stat" style="--c:var(--card-custo)" tabindex="0" data-tip="Faixa: todos os mínimos combinados (coeficientes, fatores e adicionais) até todos os máximos"><div class="k">Faixa</div><div class="v v-menor">${brlCurto(tot.min)} a ${brlCurto(tot.max)}</div></div>`;
   h += `<div class="stat" style="--c:var(--card-custo)" tabindex="0" data-tip="${esc(r.formulaM2)}"><div class="k">Por m² construído</div><div class="v">${brl(r.porM2.med)}</div></div></div>`;
   h += `<p class="nota-custo">${esc(r.padrao.nome)} · CUB ${esc(r.padrao.cub)} ${r.cubTipo === 'desonerado' ? 'desonerado' : 'não desonerado'} <span class="calc" data-tip="CUB/m² do Sinduscon-CE para o projeto-padrão ${esc(r.padrao.cub)}, ${mesTxt(r.mesRef)}">${brl(r.cub)}/m²</span> · área equivalente <span class="calc" data-tip="${esc(r.linhasAeq.map(l => `${l.nome}: ${f2(l.area)} m² × ${f2(l.coef.med)}`).join(' + '))}">${f2(r.Aeq.med)} m²</span> · fator <span class="calc" data-tip="${esc(`Local ${f2(r.fatores.local.med)} (logística ${f2(r.fatores.logistica.med)} × condomínio ${f2(r.fatores.condominio.med)} × mar ${f2(r.fatores.marinho.med)}) × estrutura ${f2(r.fatores.estrutura.med)} (${r.fatores.sistema}) × estilo ${f2(r.fatores.estilo.med)}`)}">${f2(r.fatores.total.med)}</span></p>`;
+  // referência SINAPI-CE (IBGE): valor guardado e consulta ao vivo
+  const sn = extra.dados.referencias.sinapi, vivo = extra.sinapiVivo;
+  h += `<p class="nota-custo">Referência <span class="calc" data-tip="${esc(sn.nota || '')}">SINAPI-CE</span> (IBGE, tabela ${sn.tabela}): ${brl(sn.valor)}/m² em ${mesTxt(sn.mesRef)}`;
+  h += vivo ? (vivo.erro ? ` · <span class="aviso-vivo">consulta ao IBGE falhou (${esc(vivo.erro)})</span>` : ` · <strong>ao vivo: ${brl(vivo.valor)}/m² em ${esc(vivo.mes)}</strong>`)
+    : ` · <button class="btn btn-mini" type="button" data-acao="sinapi" data-tip="Consulta agora a API do SIDRA/IBGE (tabela ${sn.tabela}, Ceará). O SINAPI mede outra cesta: serve para conferir a tendência, não substitui o CUB">Consultar o IBGE agora</button>`;
+  h += `</p>`;
+  if(r.entrada.custoIncc) h += `<p class="nota-custo"><strong>Projeção pelo INCC-M (estimada):</strong> o total já inclui ${f2(100*((r.parcelas.find(p => p.id === 'incc') || {valor:{med:0}}).valor.med)/r.total.med)} % de reajuste estimado desde ${mesTxt(r.mesRef)}.</p>`;
   // gráfico com troca de vista
   h += `<div class="tabs vistas" role="group" aria-label="Visualização do gráfico">${VISTAS.map(([id, nome, dica]) => `<button class="btn" type="button" data-vista="${id}" aria-pressed="${id === vista}" data-tip="${esc(dica)}">${nome}</button>`).join('')}</div>`;
   h += `<div class="graf-caixa">${grafico(r, extra, vista)}</div>`;

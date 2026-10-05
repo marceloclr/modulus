@@ -125,6 +125,8 @@ html.beta section.panel:not(#analises){--c:var(--card-variante)!important}
 .val-grade .fld input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .val-grade .ajustado input{border-color:var(--brass);box-shadow:inset 3px 0 0 var(--brass)}
 .val-grade .ajustado span::after{content:" · ajustado";color:var(--brass-ink);font-weight:500}
+.btn.btn-mini{padding:4px 8px;font-size:12px;vertical-align:baseline}
+.aviso-vivo{color:var(--rust)}
 .medidor{display:inline-block;width:80px;height:6px;border-radius:3px;background:var(--line);vertical-align:middle;margin-left:6px;overflow:hidden}
 .medidor i{display:block;height:100%;background:var(--card-estrutura)}
 /* rampa ordinal da série do CUB (validada: um tom, claro → escuro, contra a superfície de cada tema) */
@@ -422,7 +424,7 @@ html.beta section.panel:not(#analises){--c:var(--card-variante)!important}
 const PADRAO = Object.assign({}, Motor.PADRAO, Estrutura.PADRAO, Custos.PADRAO);
 const form = document.getElementById('form'), f2 = Motor.f2, est = Estado.criar(PADRAO);
 // valores de custo (dados/custos.json); no beta entram na avaliação estrutural e no card de custo
-let dadosCusto = null, historicoCusto = null;
+let dadosCusto = null, historicoCusto = null, sinapiVivo = null;
 // vista do gráfico de custo: conveniência deste navegador
 let vistaCusto = 'parcelas'; try{ vistaCusto = localStorage.getItem('plantas-vista-custo') || 'parcelas'; }catch(e){}
 let res = null, vi = 0, pi = 0, esp = false, blocos = null;
@@ -572,9 +574,16 @@ function renderAnalises(){
   if(!dadosCusto || !res || !res.variantes[vi]){ box.innerHTML = '<p class="note">Carregando os valores de custo…</p>'; return; }
   const v = res.variantes[vi], q = res.entrada;
   const porVariante = res.variantes.map(x => ({nome:x.nome, r:Custos.calcular(x, q, dadosCusto)}));
-  box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto}) + Cartoes.cartaoEstrutura(v, dadosCusto);
+  box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto, sinapiVivo}) + Cartoes.cartaoEstrutura(v, dadosCusto);
 }
 document.getElementById('cardsAnalise').addEventListener('click', e => {
+  const sb = e.target.closest('[data-acao=sinapi]');
+  if(sb){ sb.disabled = true; sb.textContent = 'Consultando…';
+    const sn = dadosCusto.referencias.sinapi;
+    fetch(`https://apisidra.ibge.gov.br/values/t/${sn.tabela}/n3/${sn.uf}/v/${sn.variavel}/p/last%201`).then(r => { if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(j => { const x = j[1]; if(!x || isNaN(parseFloat(x.V))) throw new Error('resposta inesperada'); sinapiVivo = {valor:parseFloat(x.V), mes:x.D3N}; })
+      .catch(err => { sinapiVivo = {erro:err.message}; }).then(renderAnalises);
+    return; }
   const b = e.target.closest('[data-vista]'); if(!b) return;
   vistaCusto = b.dataset.vista; try{ localStorage.setItem('plantas-vista-custo', vistaCusto); }catch(err){}
   renderAnalises(); const nb = document.querySelector(`#cardsAnalise [data-vista="${vistaCusto}"]`); if(nb) nb.focus();
