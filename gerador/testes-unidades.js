@@ -123,6 +123,27 @@ t('dados: faixas coerentes (mín ≤ méd ≤ máx), padrões existentes e séri
   ok(!erros.length, erros.join('; '));
 });
 
+// ---------- estrutura ----------
+const EST = require('./estrutura.js');
+t('estrutura: paredes fundidas e parede sobre parede (igual = 100 %, deslocada = menos)', () => {
+  const sala = (tipo, x0, y0, x1, y1) => ({tipo, x0, y0, x1, y1});
+  const ter = {salas:[sala('quarto', 0, 0, 4, 3), sala('quarto', 4, 0, 8, 3)]};
+  const pw = EST.paredes(ter);
+  igual(pw.filter(w => w.o==='h').length, 2, 'duas linhas horizontais (y=0 e y=3), cada uma fundida de 0 a 8:'); ok(pw.some(w => w.o==='h' && w.c===0 && w.t0===0 && w.t1===8));
+  igual(EST.paredeSobreParede(ter, ter).pct, 100);
+  const sup = {salas:[sala('quarto', 0, 0, 5, 3), sala('quarto', 5, 0, 8, 3)]};   // divisória a 1,00 m da de baixo
+  const pp = EST.paredeSobreParede(sup, ter); ok(pp.pct < 100 && pp.soltos.some(s => s.o==='v' && s.c===5), 'a divisória deslocada fica sem apoio');
+  const sup2 = {salas:[sala('quarto', 0, 0, 4.1, 3), sala('quarto', 4.1, 0, 8, 3)]};   // 0,10 m: dentro da tolerância
+  igual(EST.paredeSobreParede(sup2, ter).pct, 100);
+});
+t('estrutura: gancho posAvalia só penaliza a alvenaria estrutural e não muda nada sem o gancho', () => {
+  const c = {tipo:'sobrado', quartos:4, suites:2}, gancho = {posAvalia:[(v, q) => EST.avaliar(v, q, DADOS)]};
+  const base = M.gerar(c), ca = M.gerar(Object.assign({estSistema:'concretoArmado'}, c), gancho), ae = M.gerar(Object.assign({estSistema:'alvenariaEstrutural'}, c), gancho);
+  igual(ca.variantes.map(v => v.score), base.variantes.map(v => v.score), 'concreto armado sem penalidade:');
+  ok(ae.variantes[0].estrutura.paredeSobreParede && ae.variantes[0].score <= base.variantes[0].score, 'alvenaria avalia parede sobre parede');
+  ok(!('estrutura' in base.variantes[0]), 'sem gancho, a variante não ganha o campo estrutura');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
