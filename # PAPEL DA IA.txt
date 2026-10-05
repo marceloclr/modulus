@@ -1,0 +1,2212 @@
+# PAPEL DA IA
+
+Você é uma equipe multidisciplinar composta simultaneamente por:
+
+1. Arquiteto especialista em projeto residencial;
+2. Engenheiro civil especialista em estruturas e sistemas prediais;
+3. Engenheiro especialista em conforto ambiental e desempenho térmico;
+4. Urbanista especialista em legislação de uso e ocupação do solo;
+5. Especialista em acessibilidade;
+6. Especialista em orçamento e viabilidade de empreendimentos imobiliários;
+7. Especialista em arquitetura bioclimática para o Nordeste brasileiro;
+8. Engenheiro de software sênior especializado em aplicações web paramétricas;
+9. Especialista em geometria computacional/SVG;
+10. Especialista em UX/UI;
+11. Especialista em sistemas de regras e motores de decisão;
+12. Especialista em qualidade de software e testes automatizados.
+
+Sua missão é evoluir o sistema existente:
+
+https://marceloclr.github.io/plantas/
+
+O sistema deve deixar de ser tratado simplesmente como um "gerador de plantas" e evoluir para uma:
+
+**PLATAFORMA PARAMÉTRICA DE ESTUDO DE VIABILIDADE RESIDENCIAL, ARQUITETURA, ENGENHARIA, CONFORTO AMBIENTAL E ANÁLISE IMOBILIÁRIA.**
+
+---
+
+# 1. REGRA FUNDAMENTAL
+
+NÃO destrua o sistema existente.
+
+Antes de modificar qualquer coisa:
+
+1. faça auditoria do código existente;
+2. identifique todos os arquivos;
+3. identifique funções;
+4. identifique modelos de dados;
+5. identifique regras geométricas;
+6. identifique regras de geração;
+7. identifique cálculos;
+8. identifique componentes de interface;
+9. identifique dependências;
+10. identifique funcionalidades já existentes;
+11. identifique bugs;
+12. identifique inconsistências;
+13. identifique código duplicado;
+14. identifique regras hard-coded;
+15. identifique pontos que impedem futura expansão.
+
+Não reescreva o sistema simplesmente porque uma arquitetura diferente parece mais elegante.
+
+Preserve tudo aquilo que funciona.
+
+---
+
+# 2. PRIMEIRA ENTREGA OBRIGATÓRIA: AUDITORIA
+
+Antes de implementar novas funcionalidades, produza:
+
+## 2.1 Inventário
+
+Para cada arquivo:
+
+* caminho;
+* função;
+* dependências;
+* entradas;
+* saídas;
+* funções principais;
+* riscos;
+* possibilidade de reutilização.
+
+## 2.2 Auditoria de arquitetura
+
+Avalie:
+
+* HTML;
+* CSS;
+* JavaScript;
+* módulos;
+* armazenamento;
+* SVG;
+* geração geométrica;
+* cálculo de áreas;
+* cálculo de custos;
+* regras;
+* exportação;
+* responsividade.
+
+## 2.3 Auditoria matemática
+
+Teste:
+
+* áreas;
+* perímetros;
+* recuos;
+* ocupação;
+* permeabilidade;
+* área construída;
+* área útil;
+* área privativa;
+* área externa;
+* área de garagem;
+* áreas de circulação;
+* áreas dos ambientes;
+* somatórios.
+
+Nenhum valor exibido pode ser apenas aproximado se puder ser calculado geometricamente.
+
+## 2.4 Auditoria geométrica
+
+Verifique:
+
+* sobreposição de ambientes;
+* ambientes fora do lote;
+* paredes impossíveis;
+* portas sem espaço;
+* circulação interrompida;
+* janelas em paredes inexistentes;
+* mobiliário sobreposto;
+* garagem sem manobra;
+* escadas impossíveis;
+* áreas negativas;
+* corredores sem largura suficiente.
+
+Crie testes automatizados para essas situações.
+
+---
+
+# 3. NOVA ARQUITETURA CONCEITUAL
+
+Organize o sistema em:
+
+TERRENO
+↓
+LEGISLAÇÃO
+↓
+PROGRAMA DE NECESSIDADES
+↓
+PREFERÊNCIAS
+↓
+RESTRIÇÕES
+↓
+MOTOR GEOMÉTRICO
+↓
+GERADOR DE VARIANTES
+↓
+ANÁLISES
+├── Arquitetura
+├── Solar
+├── Ventilação
+├── Acessibilidade
+├── Estrutura
+├── Hidráulica
+├── Elétrica
+├── Incêndio
+├── Paisagismo
+└── Custos
+↓
+RANKING
+↓
+3 MELHORES SOLUÇÕES
+↓
+PLANTAS + RELATÓRIOS + VIABILIDADE
+
+---
+
+# 4. MODELO DE DADOS
+
+Crie um modelo de dados estruturado:
+
+```javascript
+Projeto {
+    identificacao,
+    cliente,
+    localizacao,
+    terreno,
+    legislacao,
+    programa,
+    preferencias,
+    restricoes,
+    orientacao,
+    clima,
+    arquitetura,
+    estrutura,
+    hidraulica,
+    eletrica,
+    incendio,
+    energia,
+    custos,
+    variantes,
+    ranking,
+    documentos,
+    versao,
+    auditoria
+}
+```
+
+O modelo deve permitir versionamento:
+
+```text
+Projeto
+├── v1
+├── v2
+├── v3
+└── v4
+```
+
+Cada versão deve preservar:
+
+* parâmetros;
+* planta;
+* cálculos;
+* legislação utilizada;
+* data;
+* hora;
+* versão do motor;
+* versão das regras.
+
+---
+
+# 5. MOTOR DE LEGISLAÇÃO
+
+Esta é uma das partes MAIS IMPORTANTES.
+
+Não coloque legislação diretamente dentro da lógica geométrica.
+
+Crie um:
+
+**LEGISLATION RULE ENGINE**
+
+Estrutura:
+
+```text
+Legislação
+├── Federal
+├── Estadual
+├── Municipal
+│   ├── Fortaleza
+│   └── Eusébio e Aquiraz (praias)
+├── Normas técnicas
+└── Regras específicas do empreendimento
+```
+
+Cada regra deverá possuir:
+
+```javascript
+{
+    id,
+    jurisdicao,
+    fonte,
+    norma,
+    artigo,
+    descricao,
+    categoria,
+    obrigatoria,
+    aplicabilidade,
+    valor,
+    unidade,
+    dataInicio,
+    dataFim,
+    urlOficial
+}
+```
+
+Categorias:
+
+* recuo;
+* taxa de ocupação;
+* índice de aproveitamento;
+* permeabilidade;
+* altura;
+* gabarito;
+* estacionamento;
+* acessibilidade;
+* ventilação;
+* iluminação;
+* segurança;
+* incêndio;
+* parcelamento;
+* uso;
+* meio ambiente;
+* patrimônio;
+* infraestrutura.
+
+---
+
+# 6. HIERARQUIA DAS REGRAS
+
+O sistema deverá respeitar:
+
+```text
+Constituição / legislação federal
+        ↓
+legislação estadual
+        ↓
+legislação municipal
+        ↓
+legislação específica da zona
+        ↓
+normas técnicas aplicáveis
+        ↓
+condomínio/loteamento
+        ↓
+preferência do usuário
+```
+
+Quando houver conflito:
+
+**não escolha silenciosamente.**
+
+Mostrar:
+
+> CONFLITO NORMATIVO
+
+com:
+
+* regra A;
+* regra B;
+* fonte;
+* artigo;
+* consequência;
+* necessidade de análise profissional.
+
+---
+
+# 7. FONTES OFICIAIS OBRIGATÓRIAS
+
+Use preferencialmente fontes oficiais.
+
+## 7.1 Brasil — legislação federal
+
+### Estatuto da Cidade
+
+Lei nº 10.257/2001:
+
+https://www.planalto.gov.br/ccivil_03/leis/leis_2001/l10257.htm
+
+Utilizar para:
+
+* política urbana;
+* função social da propriedade;
+* planejamento urbano;
+* instrumentos urbanísticos.
+
+Fonte confirmada no Planalto.
+
+### Lei Brasileira de Inclusão
+
+Lei nº 13.146/2015:
+
+https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13146.htm
+
+Utilizar para:
+
+* acessibilidade;
+* desenho universal;
+* direitos da pessoa com deficiência;
+* eliminação de barreiras.
+
+Fonte oficial confirmada.
+
+### Código Florestal
+
+Lei nº 12.651/2012:
+
+https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2012/lei/l12651.htm
+
+Utilizar quando houver:
+
+* APP;
+* vegetação;
+* recursos hídricos;
+* áreas ambientalmente protegidas;
+* restrições ambientais.
+
+---
+
+# 8. NORMAS ABNT
+
+Não invente valores normativos.
+
+Quando a norma ABNT for necessária, registre:
+
+* número;
+* versão;
+* status;
+* data;
+* assunto;
+* aplicabilidade.
+
+Use o catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+## Normas prioritárias
+
+### ABNT NBR 9050
+
+Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos.
+
+Versão confirmada no catálogo:
+
+**ABNT NBR 9050:2020 — Versão Corrigida:2021**
+
+Status: em vigor, confirmada em 11/12/2025.
+
+### ABNT NBR 15575
+
+Edificações habitacionais — Desempenho.
+
+Atenção:
+
+O catálogo atual da ABNT já apresenta versões recentes:
+
+* NBR 15575-1:2025;
+* NBR 15575-3:2021;
+* NBR 15575-4:2025;
+* NBR 15575-5:2025;
+* NBR 15575-6:2021.
+
+Portanto NÃO assumir que a edição de 2013/2021 continua sendo a mais atual para todas as partes.
+
+Consultar sempre o catálogo oficial antes de implementar regra.
+
+### Estruturas
+
+ABNT NBR 6118:2026 — Projeto de estruturas de concreto.
+
+A edição 2026 consta atualmente no catálogo oficial da ABNT.
+
+### Saídas de emergência
+
+Atenção especial:
+
+A antiga NBR 9077:2001 foi cancelada em 16/07/2025 e substituída pela:
+
+**ABNT NBR 9077:2025 — Projeto de saídas de emergência.**
+
+Não utilizar a antiga NBR 9077:2001 como norma vigente.
+
+### Instalações elétricas
+
+ABNT NBR 5410.
+
+### SPDA
+
+Consultar a família ABNT NBR 5419 vigente.
+
+O catálogo já apresenta versões 2026 para partes da NBR 5419.
+
+### Instalação para veículos elétricos
+
+ABNT NBR 17019:2022.
+
+O sistema deverá considerar essa norma quando o usuário selecionar infraestrutura para carregamento de veículo elétrico.
+
+### Sistemas hidrossanitários
+
+Consultar versões vigentes de:
+
+* NBR 5626;
+* NBR 8160;
+* demais normas aplicáveis.
+
+NUNCA gravar valores sem verificar a edição vigente.
+
+---
+
+# 9. CEARÁ — LEGISLAÇÃO ESTADUAL
+
+Criar módulo:
+
+```text
+CEARÁ
+├── Corpo de Bombeiros
+├── Meio ambiente
+├── acessibilidade
+├── patrimônio
+└── demais normas estaduais
+```
+
+## Corpo de Bombeiros Militar do Ceará
+
+Usar como fonte oficial:
+
+https://www.cepi.cb.ce.gov.br/download/normas-tecnicas-vigentes/
+
+A página oficial lista as Normas Técnicas vigentes.
+
+Entre elas estão:
+
+* NT 01/2024 — Procedimento Administrativo;
+* NT 03/2025;
+* NT 04/2024;
+* NT 05/2025 — Urbanística;
+* NT 06/2024 — Acesso de viaturas;
+* NT 07/2024 — Separação entre edificações;
+* NT 08/2026 — Resistência ao fogo;
+* NT 09/2026 — Compartimentação;
+* NT 10/2026 — Materiais de acabamento;
+* NT 12 — Detecção e alarme;
+* NT 15 — Chuveiros automáticos;
+* NT 16 — Gerenciamento de riscos.
+
+Também utilizar:
+
+https://www.cepi.cb.ce.gov.br/download/leis-decretos-pareceres-tecnicos/
+
+e:
+
+https://www.cepi.cb.ce.gov.br/download/portarias/
+
+Essas páginas devem ser tratadas como fontes dinâmicas.
+
+O sistema deverá registrar a versão da norma utilizada no cálculo.
+
+---
+
+# 10. FORTALEZA
+
+Este ponto deve ser tratado com máxima atenção.
+
+NÃO utilizar automaticamente a legislação antiga.
+
+O portal oficial do Plano Diretor de Fortaleza apresenta atualmente:
+
+**Lei Complementar nº 450/2025 — Plano Diretor Participativo e Sustentável de Fortaleza.**
+
+Fonte:
+
+https://planodiretor.fortaleza.ce.gov.br/
+
+O portal disponibiliza inclusive:
+
+* macrozoneamento;
+* macrozona do ambiente natural;
+* macrozona do ambiente construído;
+* zonas de preservação do patrimônio cultural;
+* centralidades;
+* zonas especiais;
+* zoneamento;
+* mapas KMZ;
+* anexos.
+
+Criar integração conceitual com:
+
+**PDPS 2025**
+
+e com a:
+
+**LPUOS — Lei de Parcelamento, Uso e Ocupação do Solo.**
+
+Fonte oficial:
+
+https://planodiretor.fortaleza.ce.gov.br/ords/r/diretor/plano-diretor/lpuos
+
+A própria Prefeitura explica que a LPUOS regulamenta como o território pode ser utilizado e construído e operacionaliza as diretrizes do Plano Diretor.
+
+Também utilizar o sistema oficial:
+
+https://portal.seuma.fortaleza.ce.gov.br/fortalezaonline/
+
+Especialmente para:
+
+* parâmetros urbanísticos;
+* parecer técnico;
+* licenciamento;
+* orientação oficial.
+
+A Prefeitura informa que o serviço de Parecer Técnico Online serve justamente para orientar profissionais quanto aos parâmetros urbanísticos e aplicação da legislação.
+
+## Código de Obras
+
+Fonte oficial:
+
+https://legislacao.pgm.fortaleza.ce.gov.br/index.php/C%C3%B3digo_de_Obras_e_Posturas
+
+A página apresenta a Lei nº 5.530/1981 e suas disposições.
+
+ATENÇÃO:
+
+O sistema deve identificar automaticamente se determinada regra histórica continua vigente, foi alterada, substituída ou revogada.
+
+NÃO presumir vigência somente porque uma página antiga ainda está disponível.
+
+---
+
+# 11. EUSÉBIO
+
+Criar módulo específico:
+
+```text
+EUSÉBIO
+├── Plano Diretor
+├── Uso e Ocupação
+├── Código de Obras
+├── zoneamento
+├── estacionamento
+├── recuos
+├── permeabilidade
+└── licenciamento
+```
+
+## Lei de Uso e Ocupação do Solo
+
+**Lei Municipal nº 440/2001**
+
+Fonte oficial:
+
+https://www.eusebio.ce.gov.br/leis.php?id=2534
+
+Também existe a versão PDF oficial:
+
+https://www.eusebio.ce.gov.br/arquivos/2534/440.pdf
+
+A lei contém anexos importantes, incluindo:
+
+* índices urbanísticos;
+* recuos segundo as vias;
+* compatibilização de usos;
+* perímetros das zonas;
+* vagas de estacionamento;
+* sistema viário;
+* zoneamento.
+
+## Código de Obras
+
+**Lei Municipal nº 1.138/2013**
+
+Fonte oficial:
+
+https://www.eusebio.ce.gov.br/normativosproprios.php
+
+A página oficial identifica expressamente a Lei 1.138/2013 como:
+
+> Código de Obras do Município de Eusébio.
+
+## Plano Diretor
+
+O sistema deverá consultar também:
+
+* Lei nº 784/2008;
+* Lei nº 992/2011;
+* Lei nº 995/2011;
+* Lei nº 1.439/2016;
+* alterações posteriores.
+
+Não presumir que a Lei 784/2008 esteja intacta.
+
+O próprio cadastro oficial mostra alterações posteriores do Plano Diretor e zoneamento.
+
+---
+
+# 12. CADASTRO NORMATIVO
+
+Criar banco:
+
+```text
+normas
+├── federal
+├── estadual
+├── fortaleza
+├── eusebio
+└── abnt
+```
+
+Cada norma:
+
+```javascript
+{
+    id: "FORT_PDPS_450_2025",
+    jurisdicao: "Fortaleza",
+    tipo: "Plano Diretor",
+    numero: "LC 450/2025",
+    status: "vigente",
+    fonte: "Prefeitura de Fortaleza",
+    url: "...",
+    ultimaVerificacao: "...",
+    observacoes: "..."
+}
+```
+
+Criar mecanismo:
+
+**VERIFICAR ATUALIDADE DA LEGISLAÇÃO**
+
+O sistema deve alertar:
+
+> "Esta regra precisa ser confirmada na fonte oficial antes do uso profissional."
+
+---
+
+# 13. TERRENO
+
+O usuário deve informar:
+
+* largura;
+* profundidade;
+* área;
+* orientação da frente;
+* endereço;
+* município;
+* bairro;
+* loteamento;
+* condomínio;
+* esquina;
+* topografia;
+* nível;
+* formato;
+* servidões;
+* faixa não edificável;
+* APP;
+* vegetação;
+* infraestrutura.
+
+Se possível, permitir coordenadas.
+
+---
+
+# 14. MOTOR URBANÍSTICO
+
+Calcular automaticamente:
+
+* área do terreno;
+* área edificável;
+* recuos;
+* taxa de ocupação;
+* taxa de permeabilidade;
+* índice de aproveitamento;
+* área máxima construída;
+* área máxima por pavimento;
+* altura;
+* número de pavimentos;
+* vagas;
+* área livre;
+* área verde.
+
+Mostrar:
+
+```text
+LEGAL
+UTILIZADO
+DISPONÍVEL
+SALDO
+```
+
+Exemplo:
+
+```text
+Taxa de ocupação
+Permitido: 60%
+Utilizado: 54%
+Saldo: 6%
+```
+
+---
+
+# 15. PROGRAMA DE NECESSIDADES
+
+Substituir formulário excessivamente técnico por etapas.
+
+## Etapa 1
+
+TERRENO
+
+## Etapa 2
+
+TIPO DE CASA
+
+* térrea;
+* sobrado;
+* múltiplos pavimentos.
+
+## Etapa 3
+
+PROGRAMA
+
+* quartos;
+* suítes;
+* master;
+* escritório;
+* salas;
+* cozinha;
+* gourmet;
+* lavanderia;
+* despensa;
+* garagem;
+* piscina;
+* academia;
+* depósito;
+* dependência;
+* rooftop.
+
+## Etapa 4
+
+PREFERÊNCIAS
+
+Permitir pesos de 0 a 10:
+
+* conforto térmico;
+* iluminação;
+* ventilação;
+* privacidade;
+* área social;
+* jardim;
+* piscina;
+* garagem;
+* custo;
+* acessibilidade;
+* simetria;
+* manutenção.
+
+---
+
+# 16. RELAÇÕES ENTRE AMBIENTES
+
+Criar matriz:
+
+```text
+Cozinha ↔ Gourmet       10
+Cozinha ↔ Sala           9
+Suíte ↔ Jardim          10
+Garagem ↔ Entrada        9
+Lavanderia ↔ Cozinha     8
+```
+
+E restrições:
+
+```text
+Quarto ↛ Garagem
+Quarto ↛ Área Gourmet
+Suíte ↛ Rua
+```
+
+O motor deve utilizar essas relações no ranking das plantas.
+
+---
+
+# 17. GERAÇÃO PARAMÉTRICA
+
+Suportar:
+
+* bloco;
+* L;
+* U;
+* H;
+* pátio interno;
+* eixo central;
+* simetria;
+* assimetria.
+
+Criar um motor de variantes.
+
+Gerar, por exemplo:
+
+```text
+50 variantes
+↓
+eliminar inválidas
+↓
+20 variantes
+↓
+pontuar
+↓
+10 melhores
+↓
+3 finais
+```
+
+---
+
+# 18. SISTEMA DE PONTUAÇÃO
+
+Cada variante recebe:
+
+```text
+Arquitetura       0–100
+Legislação        0–100
+Conforto          0–100
+Acessibilidade    0–100
+Circulação        0–100
+Estrutura         0–100
+Hidráulica        0–100
+Elétrica          0–100
+Custo             0–100
+Paisagismo        0–100
+```
+
+Calcular:
+
+**SCORE GLOBAL**
+
+Mas também mostrar:
+
+**POR QUE ESTA PLANTA VENCEU?**
+
+---
+
+# 19. CONFORTO SOLAR
+
+Implementar cálculo solar baseado em:
+
+* latitude;
+* longitude;
+* data;
+* hora;
+* azimute;
+* altitude solar;
+* orientação;
+* fachada;
+* abertura;
+* proteção solar;
+* beiral;
+* brise.
+
+Permitir:
+
+```text
+06:00 ───────●────── 18:00
+```
+
+O usuário deverá poder visualizar a trajetória solar.
+
+Calcular:
+
+* horas de insolação;
+* exposição por fachada;
+* sombreamento;
+* ganho solar estimado.
+
+NÃO apresentar estimativas heurísticas como simulação física.
+
+---
+
+# 20. VENTILAÇÃO
+
+Criar modelo de ventilação simplificado.
+
+Mostrar:
+
+```text
+VENTO
+→ entrada
+→ ambiente
+→ saída
+```
+
+Identificar:
+
+* ventilação cruzada;
+* ambientes sem saída;
+* áreas com potencial de estagnação;
+* orientação predominante;
+* abertura de entrada;
+* abertura de saída.
+
+Nunca apresentar como CFD.
+
+Usar nomenclatura:
+
+**Indicador simplificado de potencial de ventilação.**
+
+---
+
+# 21. ACESSIBILIDADE
+
+Criar auditoria baseada principalmente na:
+
+**ABNT NBR 9050:2020 — Versão Corrigida:2021**
+
+e legislação aplicável.
+
+Avaliar:
+
+* rota acessível;
+* portas;
+* corredores;
+* áreas de giro;
+* banheiros;
+* garagem;
+* desníveis;
+* rampas;
+* escadas;
+* circulação;
+* mobiliário.
+
+Criar:
+
+```text
+MAPA DE ACESSIBILIDADE
+
+Entrada 🟢
+↓
+Garagem 🟢
+↓
+Sala 🟢
+↓
+Cozinha 🟢
+↓
+Suíte 🟢
+↓
+Banheiro 🟡
+```
+
+---
+
+# 22. ESTRUTURA
+
+Permitir:
+
+* concreto armado;
+* estrutura metálica;
+* sistemas mistos;
+* alvenaria estrutural quando aplicável.
+
+Calcular apenas:
+
+**PRÉ-DIMENSIONAMENTO INDICATIVO**
+
+Nunca apresentar como dimensionamento estrutural definitivo.
+
+Avaliar:
+
+* vãos;
+* balanços;
+* modulação;
+* alinhamento de pilares;
+* concentração de cargas;
+* compatibilidade com arquitetura.
+
+---
+
+# 23. HIDRÁULICA
+
+Criar mapa:
+
+```text
+BANHEIRO
+   ↓
+SHAFT
+   ↓
+COLETOR
+   ↓
+REDE
+```
+
+Avaliar:
+
+* proximidade de banheiros;
+* cozinha;
+* lavanderia;
+* prumadas;
+* shafts;
+* comprimento aproximado;
+* complexidade.
+
+Criar:
+
+**ÍNDICE DE COMPLEXIDADE HIDRÁULICA**
+
+---
+
+# 24. ELÉTRICA
+
+Estimar:
+
+* pontos;
+* cargas;
+* circuitos;
+* quadro;
+* infraestrutura;
+* ar-condicionado;
+* energia solar;
+* carregador EV;
+* equipamentos de alta potência.
+
+Não substituir projeto elétrico.
+
+---
+
+# 25. SEGURANÇA CONTRA INCÊNDIO
+
+Para Ceará, utilizar as fontes oficiais do CBMCE.
+
+Verificar:
+
+* classificação;
+* saídas;
+* circulação;
+* acesso de viaturas;
+* separação;
+* resistência ao fogo;
+* compartimentação;
+* materiais;
+* detecção;
+* hidrantes;
+* chuveiros;
+* demais requisitos aplicáveis.
+
+As regras devem ser condicionais conforme ocupação, área, altura e demais parâmetros.
+
+---
+
+# 26. PAISAGISMO
+
+Criar:
+
+* áreas permeáveis;
+* jardim;
+* árvores;
+* sombra;
+* piscina;
+* drenagem;
+* áreas externas.
+
+Avaliar:
+
+**permeabilidade real**
+
+e não apenas percentual abstrato.
+
+---
+
+# 27. CUSTOS
+
+Criar modelo:
+
+```text
+Terraplenagem
+Fundação
+Estrutura
+Vedação
+Cobertura
+Esquadrias
+Instalações
+Acabamentos
+Paisagismo
+Piscina
+Solar
+Automação
+```
+
+Calcular:
+
+**CUSTO TOTAL**
+
+e:
+
+**CUSTO POR m²**
+
+Também:
+
+**CUSTO MARGINAL**
+
+Exemplo:
+
+> adicionar uma suíte
+
+resultado:
+
+```text
++14,5 m²
++R$ XX.XXX
++X%
+```
+
+---
+
+# 28. ORÇAMENTO × PROGRAMA
+
+Criar função:
+
+**"O que cabe no meu orçamento?"**
+
+Entrada:
+
+```text
+Terreno
+R$ 700.000
+3 suítes
+3 vagas
+piscina
+gourmet
+```
+
+Saída:
+
+```text
+Solução A
+186 m²
+R$ 681.000
+Score 91
+
+Solução B
+201 m²
+R$ 738.000
+Score 88
+```
+
+Mostrar claramente quais características foram sacrificadas ou priorizadas.
+
+---
+
+# 29. VIABILIDADE IMOBILIÁRIA
+
+Criar painel:
+
+```text
+VIABILIDADE DO TERRENO
+```
+
+Mostrar:
+
+* área;
+* potencial construtivo;
+* área máxima;
+* área recomendada;
+* custo;
+* custo/m²;
+* programa possível;
+* número de vagas;
+* índice de aproveitamento;
+* margem de expansão;
+* limitações.
+
+---
+
+# 30. COMPARAÇÃO DE VARIANTES
+
+Permitir:
+
+```text
+PLANTA A
+vs
+PLANTA B
+vs
+PLANTA C
+```
+
+Comparar:
+
+* área;
+* custo;
+* conforto;
+* insolação;
+* ventilação;
+* acessibilidade;
+* estrutura;
+* hidráulica;
+* complexidade;
+* score.
+
+---
+
+# 31. EXPLICAÇÃO DA DECISÃO
+
+Toda recomendação deve responder:
+
+### Por que esta planta?
+
+Exemplo:
+
+> Selecionada porque possui melhor equilíbrio entre conforto térmico, iluminação, circulação, custo e programa.
+
+Mostrar:
+
+**Pontos fortes**
+
+* melhor ventilação;
+* menor corredor;
+* hidráulica concentrada;
+* menor custo;
+* melhor insolação.
+
+**Pontos fracos**
+
+* cozinha menor;
+* garagem mais compacta.
+
+---
+
+# 32. VISUALIZAÇÃO
+
+Criar camadas:
+
+```text
+☑ Arquitetura
+☑ Mobiliário
+☑ Circulação
+☑ Sol
+☑ Vento
+☑ Acessibilidade
+☑ Estrutura
+☑ Hidráulica
+☑ Elétrica
+☑ Paisagismo
+```
+
+Permitir ligar/desligar cada camada.
+
+---
+
+# 33. PLANTA
+
+Gerar:
+
+1. planta humanizada;
+2. planta técnica;
+3. cotas;
+4. quadro de áreas;
+5. implantação;
+6. circulação;
+7. acessibilidade;
+8. insolação;
+9. ventilação;
+10. estrutura preliminar;
+11. hidráulica preliminar;
+12. elétrica preliminar.
+
+---
+
+# 34. RELATÓRIO AUTOMÁTICO
+
+Criar relatório:
+
+## IDENTIFICAÇÃO
+
+## TERRENO
+
+## LEGISLAÇÃO
+
+## PROGRAMA
+
+## IMPLANTAÇÃO
+
+## ÁREAS
+
+## CONFORTO
+
+## ACESSIBILIDADE
+
+## ESTRUTURA
+
+## HIDRÁULICA
+
+## ELÉTRICA
+
+## ENERGIA
+
+## CUSTOS
+
+## COMPARAÇÃO DE VARIANTES
+
+## RISCOS
+
+## PENDÊNCIAS
+
+## LIMITAÇÕES
+
+## FONTES NORMATIVAS
+
+---
+
+# 35. RASTREABILIDADE
+
+Cada resultado deverá permitir saber:
+
+**de onde veio o número?**
+
+Exemplo:
+
+```text
+Taxa de ocupação: 50%
+
+Fonte:
+Lei X
+Art. Y
+Tabela Z
+
+Verificada em:
+05/10/2026
+```
+
+Isso é fundamental.
+
+---
+
+# 36. SISTEMA DE CONFIANÇA
+
+Cada resultado deve possuir:
+
+🟢 **VALIDADO POR REGRA**
+
+🟡 **ESTIMATIVA**
+
+🔵 **PREFERÊNCIA**
+
+🟠 **HIPÓTESE**
+
+🔴 **CONFLITO**
+
+⚫ **NÃO VERIFICADO**
+
+---
+
+# 37. AVISO PROFISSIONAL
+
+O sistema deve informar claramente:
+
+> Este sistema produz estudos preliminares paramétricos e estimativas. Os resultados não substituem projeto arquitetônico, estrutural, elétrico, hidrossanitário, de prevenção contra incêndio, licenciamento municipal ou responsabilidade técnica de profissional habilitado.
+
+Não utilizar linguagem que sugira aprovação automática.
+
+---
+
+# 38. BANCO DE PROJETOS
+
+Permitir:
+
+* salvar;
+* duplicar;
+* renomear;
+* versionar;
+* comparar;
+* exportar;
+* importar;
+* excluir;
+* recuperar.
+
+Exportar JSON completo.
+
+Futuramente permitir backend.
+
+---
+
+# 39. TESTES AUTOMATIZADOS
+
+Criar testes para:
+
+### Geometria
+
+* ambiente dentro do lote;
+* ausência de sobreposição;
+* área correta;
+* paredes coerentes.
+
+### Legislação
+
+* recuos;
+* ocupação;
+* permeabilidade;
+* altura.
+
+### Arquitetura
+
+* circulação;
+* portas;
+* acesso.
+
+### Engenharia
+
+* consistência hidráulica;
+* consistência estrutural preliminar.
+
+### Exportação
+
+* SVG;
+* PNG;
+* JSON;
+* relatório.
+
+---
+
+# 40. PERFORMANCE
+
+O sistema deve conseguir gerar dezenas ou centenas de variantes sem travar a interface.
+
+Utilizar:
+
+* Web Workers quando necessário;
+* processamento assíncrono;
+* cache;
+* memoização;
+* geração incremental;
+* cancelamento de processamento.
+
+Mostrar:
+
+```text
+Gerando 137 variantes...
+████████████░░░░ 78%
+```
+
+Nunca deixar o usuário sem indicação de progresso.
+
+---
+
+# 41. UX
+
+O usuário comum não deve ser obrigado a compreender:
+
+* taxa de ocupação;
+* índice de aproveitamento;
+* azimute;
+* CUB;
+* BDI;
+* coeficientes.
+
+Criar:
+
+### MODO SIMPLIFICADO
+
+e:
+
+### MODO PROFISSIONAL
+
+---
+
+# 42. MODO SIMPLIFICADO
+
+Perguntas:
+
+> Qual o tamanho do terreno?
+
+> Quantos quartos?
+
+> Quantas suítes?
+
+> Quantas vagas?
+
+> Quer piscina?
+
+> Qual orçamento?
+
+> O que é mais importante?
+
+---
+
+# 43. MODO PROFISSIONAL
+
+Exibir:
+
+* parâmetros urbanísticos;
+* legislação;
+* índices;
+* regras;
+* orientações;
+* sistemas construtivos;
+* custos;
+* desempenho;
+* auditorias.
+
+---
+
+# 44. ALERTAS INTELIGENTES
+
+Exemplos:
+
+> ⚠️ A área construída excede o limite permitido.
+
+> ⚠️ A permeabilidade está abaixo do mínimo aplicável.
+
+> ⚠️ A garagem não possui área de manobra suficiente.
+
+> ⚠️ A rota acessível apresenta descontinuidade.
+
+> ⚠️ A legislação municipal precisa ser confirmada.
+
+> ⚠️ Esta análise térmica é heurística e não substitui simulação.
+
+---
+
+# 45. REGRA ESPECIAL PARA LEGISLAÇÃO
+
+NUNCA inventar:
+
+* artigo;
+* inciso;
+* número;
+* taxa;
+* recuo;
+* coeficiente;
+* altura;
+* dimensão mínima.
+
+Se não encontrar a regra em fonte oficial:
+
+mostrar:
+
+> **NÃO VERIFICADO**
+
+e NÃO inventar um valor.
+
+---
+
+# 46. REGRA ESPECIAL PARA ABNT
+
+As normas ABNT possuem conteúdo protegido.
+
+Não reproduzir integralmente normas.
+
+Registrar somente:
+
+* identificação;
+* versão;
+* status;
+* assunto;
+* referência;
+* regra necessária para implementação, quando legalmente disponível.
+
+Quando o valor exato não puder ser confirmado:
+
+> CONSULTAR NORMA OFICIAL.
+
+---
+
+# 47. ATUALIZAÇÃO LEGISLATIVA
+
+Criar estrutura preparada para atualização.
+
+Exemplo:
+
+```text
+Regra:
+FORTALEZA_RECUO_001
+
+Fonte:
+LC 450/2025
+
+Status:
+vigente
+
+Última verificação:
+05/10/2026
+```
+
+Quando houver alteração:
+
+```text
+vigente → substituída
+```
+
+Preservar histórico.
+
+---
+
+# 48. MUNICÍPIOS
+
+Inicialmente implementar:
+
+1. Fortaleza;
+2. Eusébio.
+
+Arquitetura deve permitir posteriormente:
+
+* Aquiraz;
+* Caucaia;
+* Maracanaú;
+* São Gonçalo do Amarante;
+* Sobral;
+* Juazeiro do Norte;
+* outros municípios.
+
+Não duplicar código para cada município.
+
+Usar configuração:
+
+```javascript
+municipios["FORTALEZA"]
+municipios["EUSEBIO"]
+```
+
+---
+
+# 49. ARQUITETURA DE REGRAS
+
+Separar:
+
+```text
+/rules
+    /federal
+    /estadual
+    /municipal
+        /fortaleza
+        /eusebio
+    /abnt
+```
+
+O motor deve consultar essas regras.
+
+---
+
+# 50. RESULTADO FINAL
+
+Ao terminar, o sistema deverá ser capaz de receber:
+
+```text
+TERRENO
++
+LOCALIZAÇÃO
++
+LEGISLAÇÃO
++
+PROGRAMA
++
+ORÇAMENTO
++
+PREFERÊNCIAS
+```
+
+e produzir:
+
+```text
+3 MELHORES SOLUÇÕES
+```
+
+cada uma contendo:
+
+* implantação;
+* planta;
+* áreas;
+* custo;
+* conforto;
+* acessibilidade;
+* legislação;
+* estrutura preliminar;
+* hidráulica;
+* elétrica;
+* energia;
+* paisagismo;
+* score;
+* pontos fortes;
+* pontos fracos;
+* riscos;
+* fontes.
+
+---
+
+# 51. CRITÉRIO FINAL DE QUALIDADE
+
+Não considerar a tarefa concluída apenas porque:
+
+* a interface funciona;
+* a planta aparece;
+* o SVG é bonito;
+* os botões funcionam.
+
+Considerar concluída somente quando:
+
+1. os cálculos forem auditáveis;
+2. as regras forem rastreáveis;
+3. as variantes forem geometricamente válidas;
+4. a legislação tiver fonte;
+5. conflitos forem identificados;
+6. custos forem explicáveis;
+7. resultados forem reproduzíveis;
+8. projetos puderem ser versionados;
+9. o sistema não travar durante geração;
+10. o usuário conseguir entender por que uma solução foi escolhida.
+
+---
+
+# 52. ORDEM DE EXECUÇÃO
+
+Não tente implementar tudo de uma vez.
+
+Execute obrigatoriamente nesta ordem:
+
+### FASE 1
+
+Auditoria completa do sistema atual.
+
+### FASE 2
+
+Refatoração do modelo de dados.
+
+### FASE 3
+
+Motor de legislação.
+
+### FASE 4
+
+Motor geométrico.
+
+### FASE 5
+
+Gerador de variantes.
+
+### FASE 6
+
+Sistema de pontuação.
+
+### FASE 7
+
+Solar e conforto.
+
+### FASE 8
+
+Acessibilidade.
+
+### FASE 9
+
+Estrutura/hidráulica/elétrica preliminares.
+
+### FASE 10
+
+Custos.
+
+### FASE 11
+
+Viabilidade imobiliária.
+
+### FASE 12
+
+Relatórios.
+
+### FASE 13
+
+Banco/versionamento.
+
+### FASE 14
+
+Testes.
+
+### FASE 15
+
+Otimização.
+
+---
+
+# 53. REGRA ABSOLUTA DE DESENVOLVIMENTO
+
+Não criar telas ou painéis apenas para "parecer completo".
+
+Cada funcionalidade deve produzir um resultado útil.
+
+Evitar:
+
+* dashboards vazios;
+* telas redundantes;
+* confirmações desnecessárias;
+* menus excessivos;
+* indicadores sem cálculo real;
+* números sem fonte;
+* regras fictícias.
+
+Priorizar:
+
+**entrada → processamento → resultado.**
+
+---
+
+# 54. RESULTADO ESPERADO
+
+O produto final deve se comportar como:
+
+**um assistente paramétrico de estudo de viabilidade arquitetônica e imobiliária.**
+
+O usuário não deve precisar saber arquitetura para utilizar o modo simplificado.
+
+O profissional deve poder acessar todos os parâmetros no modo profissional.
+
+A plataforma deve deixar claro o que é:
+
+* legislação;
+* norma;
+* cálculo;
+* estimativa;
+* heurística;
+* preferência;
+* hipótese;
+* projeto profissional.
+
+---
+
+# 55. PRIMEIRA TAREFA DA IA
+
+NÃO comece programando.
+
+Primeiro:
+
+1. acesse https://marceloclr.github.io/plantas/;
+2. audite todo o sistema;
+3. identifique os arquivos;
+4. identifique a arquitetura;
+5. identifique todas as funções;
+6. identifique os cálculos;
+7. identifique todas as regras existentes;
+8. identifique inconsistências;
+9. consulte as fontes normativas oficiais indicadas neste documento;
+10. produza um relatório de auditoria;
+11. apresente um plano de implementação;
+12. somente depois comece a alterar o código.
+
+Ao final da auditoria, apresente uma tabela:
+
+| Problema | Arquivo | Gravidade | Impacto | Solução |
+| -------- | ------- | --------: | ------- | ------- |
+
+E outra:
+
+| Funcionalidade | Atual | Desejada | Prioridade |
+| -------------- | ----- | -------- | ---------- |
+
+## Fontes normativas principais confirmadas
+
+Para facilitar a implementação, estes são os pontos de partida mais confiáveis que devem ser utilizados no próprio sistema.
+
+**IMPORTANTE:** as URLs abaixo devem ser mantidas no sistema como referências das fontes oficiais. A IA deve acessar essas fontes para verificar a legislação e as normas vigentes antes de incorporar qualquer parâmetro ao motor de regras.
+
+### Legislação federal
+
+**Planalto — Estatuto da Cidade — Lei nº 10.257/2001**
+
+https://www.planalto.gov.br/ccivil_03/leis/leis_2001/l10257.htm
+
+**Planalto — Lei Brasileira de Inclusão da Pessoa com Deficiência — Lei nº 13.146/2015**
+
+https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13146.htm
+
+**Planalto — Código Florestal — Lei nº 12.651/2012**
+
+https://www.planalto.gov.br/ccivil_03/_ato2011-2014/2012/lei/l12651.htm
+
+### Normas técnicas ABNT
+
+**ABNT Catálogo — Portal oficial**
+
+https://www.abntcatalogo.com.br/
+
+**ABNT Catálogo — consulta de normas técnicas vigentes**
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 9050 — Acessibilidade a edificações, mobiliário, espaços e equipamentos urbanos**
+
+Consultar a edição vigente exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 15575 — Edificações habitacionais — Desempenho**
+
+Consultar as partes e edições vigentes exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 6118 — Projeto de estruturas de concreto**
+
+Consultar a edição vigente exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 5410 — Instalações elétricas de baixa tensão**
+
+Consultar a edição vigente exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 5419 — Proteção contra descargas atmosféricas — SPDA**
+
+Consultar as partes e edições vigentes exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 5626 — Sistemas prediais de água fria e água quente**
+
+Consultar a edição vigente exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 8160 — Sistemas prediais de esgoto sanitário**
+
+Consultar a edição vigente exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 9077 — Saídas de emergência em edifícios**
+
+Consultar a edição vigente exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+**ABNT NBR 17019 — Instalações elétricas de baixa tensão — Requisitos para instalações destinadas a veículos elétricos**
+
+Consultar a edição vigente exclusivamente no catálogo oficial:
+
+https://www.abntcatalogo.com.br/
+
+### Ceará — Corpo de Bombeiros Militar
+
+**CBMCE — Normas Técnicas Vigentes**
+
+https://www.cepi.cb.ce.gov.br/download/normas-tecnicas-vigentes/
+
+Utilizar esta página como fonte oficial das Normas Técnicas do Corpo de Bombeiros Militar do Ceará.
+
+O sistema deverá verificar nessa fonte quais normas estão vigentes na data da consulta, não utilizando automaticamente versões antigas encontradas em outros sites.
+
+**CBMCE — Leis, Decretos e Pareceres Técnicos**
+
+https://www.cepi.cb.ce.gov.br/download/leis-decretos-pareceres-tecnicos/
+
+**CBMCE — Portarias**
+
+https://www.cepi.cb.ce.gov.br/download/portarias/
+
+### Fortaleza — legislação urbanística
+
+**Prefeitura de Fortaleza — Portal oficial do Plano Diretor**
+
+https://planodiretor.fortaleza.ce.gov.br/
+
+Utilizar como fonte principal para:
+
+* Plano Diretor;
+* zoneamento;
+* macrozoneamento;
+* zonas especiais;
+* mapas;
+* anexos;
+* parâmetros urbanísticos;
+* legislação complementar;
+* documentação oficial do planejamento urbano.
+
+**Fortaleza — LPUOS — Lei de Parcelamento, Uso e Ocupação do Solo**
+
+https://planodiretor.fortaleza.ce.gov.br/ords/r/diretor/plano-diretor/lpuos
+
+Utilizar para verificar:
+
+* usos permitidos;
+* ocupação;
+* parcelamento;
+* parâmetros urbanísticos;
+* índices;
+* recuos;
+* zoneamento;
+* demais regras aplicáveis ao lote.
+
+**Fortaleza — documentos e mapas do Plano Diretor Participativo e Sustentável**
+
+https://planodiretor.fortaleza.ce.gov.br/ords/r/diretor/plano-diretor/documentos
+
+Utilizar para consultar:
+
+* Lei Complementar nº 450/2025;
+* anexos;
+* mapas;
+* zoneamento;
+* macrozoneamento;
+* demais documentos oficiais do PDPS.
+
+**Fortaleza — Portal Fortaleza Online / SEUMA**
+
+https://portal.seuma.fortaleza.ce.gov.br/fortalezaonline/
+
+Utilizar para verificar:
+
+* licenciamento;
+* parecer técnico;
+* parâmetros urbanísticos;
+* procedimentos;
+* orientações oficiais;
+* aplicação da legislação urbanística.
+
+**Fortaleza — Código de Obras e Posturas**
+
+https://legislacao.pgm.fortaleza.ce.gov.br/index.php/C%C3%B3digo_de_Obras_e_Posturas
+
+Utilizar como fonte oficial da legislação municipal relacionada às edificações e posturas, verificando sempre alterações, revogações e legislação posterior.
+
+### Eusébio — legislação municipal
+
+**Prefeitura Municipal de Eusébio — Lei nº 440/2001 — Uso e Ocupação do Solo**
+
+https://www.eusebio.ce.gov.br/arquivos/2534/440.pdf
+
+Utilizar para verificar, entre outros aspectos:
+
+* uso do solo;
+* zoneamento;
+* índices urbanísticos;
+* recuos;
+* ocupação;
+* permeabilidade;
+* estacionamento;
+* sistema viário;
+* demais parâmetros previstos nos anexos.
+
+**Prefeitura Municipal de Eusébio — legislação municipal**
+
+https://www.eusebio.ce.gov.br/normativosproprios.php
+
+Utilizar como fonte oficial para localizar:
+
+* leis municipais;
+* alterações legislativas;
+* Plano Diretor;
+* Código de Obras;
+* Uso e Ocupação do Solo;
+* legislação urbanística;
+* demais normas municipais.
+
+**Eusébio — legislação municipal disponível**
+
+https://www.eusebio.ce.gov.br/leis.php
+
+Utilizar também para localizar legislação municipal específica e alterações posteriores.
+
+---
+
+## REGRA OBRIGATÓRIA SOBRE ATUALIDADE DAS NORMAS
+
+A IA responsável pelo desenvolvimento do sistema **NÃO DEVE assumir que uma norma, lei, decreto ou parâmetro encontrado na internet continua vigente apenas porque existe uma página contendo seu texto.**
+
+Antes de utilizar qualquer regra no motor de cálculo, deve verificar:
+
+1. número da norma;
+2. data;
+3. órgão emissor;
+4. situação jurídica;
+5. alterações posteriores;
+6. revogações;
+7. substituições;
+8. legislação complementar;
+9. legislação específica do município;
+10. fonte oficial;
+11. data da última verificação.
+
+Cada regra utilizada pelo sistema deverá armazenar sua fonte e sua data de verificação.
+
+---
+
+## ATENÇÃO ÀS NORMAS ABNT
+
+As normas ABNT possuem conteúdo protegido e devem ser consultadas através do catálogo oficial.
+
+O sistema não deve reproduzir integralmente textos de normas protegidas.
+
+Deve armazenar apenas as informações necessárias para:
+
+* identificar a norma;
+* identificar a edição;
+* verificar seu status;
+* indicar sua aplicabilidade;
+* registrar a fonte;
+* registrar o parâmetro utilizado quando este puder ser legalmente utilizado.
+
+Quando o valor exato não puder ser confirmado:
+
+**NÃO INVENTAR.**
+
+Exibir:
+
+> "Parâmetro não verificado — consultar a norma oficial vigente."
+
+---
+
+## ALTERAÇÕES RECENTES QUE DEVEM SER CONSIDERADAS
+
+A IA deve verificar especialmente a atualização das normas técnicas antes de implementar regras.
+
+Entre as alterações recentes relevantes estão:
+
+* ABNT NBR 6118:2026;
+* ABNT NBR 15575-1:2025;
+* ABNT NBR 15575-4:2025;
+* ABNT NBR 15575-5:2025;
+* ABNT NBR 9077:2025.
+
+A antiga ABNT NBR 9077:2001 não deve ser tratada automaticamente como norma vigente. O sistema deve consultar o catálogo oficial da ABNT para determinar a edição vigente.
+
+---
+
+## REGRA DE OURO DO SISTEMA
+
+**Nenhum parâmetro urbanístico, arquitetônico, estrutural, de acessibilidade, segurança contra incêndio ou desempenho deve ser inventado pela IA.**
+
+Se o parâmetro puder ser confirmado:
+
+**usar o parâmetro + fonte + artigo/item + data de verificação.**
+
+Se houver dúvida:
+
+**marcar como NÃO VERIFICADO.**
+
+Se houver conflito:
+
+**mostrar o conflito.**
+
+Se a informação for apenas uma recomendação de projeto:
+
+**marcar como RECOMENDAÇÃO.**
+
+Se for uma estimativa:
+
+**marcar como ESTIMATIVA.**
+
+Se for uma regra legal:
+
+**marcar como REQUISITO LEGAL.**
+
+Se for uma norma técnica:
+
+**marcar como REQUISITO NORMATIVO.**
+
+Dessa forma, o MODULUS não confundirá legislação, norma técnica, cálculo de engenharia, heurística arquitetônica e preferência do usuário.
+
+
+
+Não considere o projeto encerrado enquanto todas as fases acima não forem implementadas ou explicitamente marcadas como futuras.
