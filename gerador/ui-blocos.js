@@ -100,6 +100,7 @@ function montar(form, est, opts){
   if(ger) ger.setAttribute('data-tip', 'Refaz o cálculo com os campos atuais. A planta já se atualiza sozinha a cada alteração');
 
   function pintar(){
+    posicionar();
     const s = est.ler(), b = travas(s.ui.blocos);
     for(const x of BLOCOS){
       const chip = document.getElementById('chip-'+x.id), d = document.getElementById('bl-'+x.id), st = b[x.id];
@@ -160,8 +161,12 @@ function montar(form, est, opts){
     document.getElementById('bl-'+id).open = false;
     gravaBlocos(novos);
     const nx = proximo(novos, id);
-    if(nx){ const d = document.getElementById('bl-'+nx); d.open = true; const alvo = primeiroCampo(nx); alvo.focus(); if(alvo.scrollIntoView) alvo.scrollIntoView({block:'nearest'}); }
-    else document.getElementById('sum-'+id).focus();
+    const vaga = caixa.querySelector(`.bloco-res[data-para="${id}"]`), comRes = estreito.matches && vaga && vaga.children.length;
+    const alvo = nx ? primeiroCampo(nx) : document.getElementById('sum-'+id);
+    if(nx) document.getElementById('bl-'+nx).open = true;
+    // no celular, a tela mostra o resultado que acabou de descer; o foco já fica no bloco seguinte
+    if(comRes){ alvo.focus({preventScroll:true}); vaga.scrollIntoView({block:'start'}); }
+    else { alvo.focus(); if(nx && alvo.scrollIntoView) alvo.scrollIntoView({block:'nearest'}); }
     if(opts.aoConcluir) opts.aoConcluir(id);
     return true;
   }
@@ -174,6 +179,26 @@ function montar(form, est, opts){
     const novos = aposAlterar(est.ler().ui.blocos, id, e.target.name, !probs.length);
     if(JSON.stringify(novos) !== JSON.stringify(est.ler().ui.blocos)) gravaBlocos(novos); else pintar();
   }
+
+  // celular: os cards de cada bloco concluído descem para logo abaixo dele (no desktop ficam na coluna principal)
+  const RESULTADOS = {b1: ['#main > .panel']};
+  const estreito = window.matchMedia ? window.matchMedia('(max-width: 899px)') : {matches:false};
+  const origem = {};
+  function posicionar(){
+    const b = travas(est.ler().ui.blocos);
+    let algum = false;
+    for(const [id, sels] of Object.entries(RESULTADOS)){
+      const vaga = caixa.querySelector(`.bloco-res[data-para="${id}"]`), desce = estreito.matches && b[id] === 'concluido';
+      for(const sel of sels){
+        const n = document.querySelector(sel) || (origem[sel] && origem[sel].no); if(!n) continue;
+        if(!origem[sel]) origem[sel] = {no:n, pai:n.parentNode, depois:n.nextSibling};
+        if(desce){ if(n.parentNode !== vaga) vaga.appendChild(n); algum = true; }
+        else if(n.parentNode !== origem[sel].pai) origem[sel].pai.insertBefore(n, origem[sel].depois);
+      }
+    }
+    const main = document.getElementById('main'); if(main) main.hidden = algum && !main.querySelector('.panel');
+  }
+  if(estreito.addEventListener) estreito.addEventListener('change', posicionar);
 
   function guardaAbertos(){ est.escrever('ui.abertos', BLOCOS.map(b => b.id).filter(id => document.getElementById('bl-'+id).open)); if(opts.persistir) opts.persistir(); }
 
