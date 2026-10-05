@@ -392,6 +392,22 @@ t('acessibilidade (opção): portas, banho acessível, quartos, rota e nada muda
   ok(require('./desenho.js').planta(v, 0).includes('Banho acessível: giro de 1,50 m'), 'giro desenhado');
 });
 
+t('lote grande: U e H com largura real, sem variante de nota 0 e rampa livre até a manobra', () => {
+  const r = M.gerar({frente:40, fundo:50});
+  const tip = r.variantes.map(v => v.tipologia).join(' | ');
+  ok(/Em U/.test(tip) && /Em H/.test(tip), tip);
+  ok(r.variantes.every(v => v.W <= 25 && v.score > 0), r.variantes.map(v => v.W + ' m, nota ' + v.score).join('; '));
+  for(const e of [{frente:12, fundo:30, formato:'bloco', subsolo:true}, {frente:40, fundo:50, formato:'bloco', subsolo:true}, {frente:15, fundo:30, subsolo:true, quartos:3, suites:2}]){
+    for(const v of M.gerar(e).variantes){
+      const sub = v.pav.find(p => p.nome === 'Subsolo'); if(!sub || sub.arranjo !== 'faixas') continue;
+      const rp = sub.salas.find(x => x.tipo === 'rampa'); if(!rp) continue;
+      const faixa = {x0:rp.x0 + 0.01, x1:rp.x1 - 0.01, y0:rp.y1, y1:sub.manobra.y0};
+      const bloqueia = sub.salas.filter(x => x.vaga && x.x0 < faixa.x1 && x.x1 > faixa.x0 && x.y0 < faixa.y1 - 0.01 && x.y1 > faixa.y0 + 0.01);
+      ok(!bloqueia.length, JSON.stringify(e) + ' ' + v.nome + ': vaga entre a rampa e a manobra');
+    }
+  }
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

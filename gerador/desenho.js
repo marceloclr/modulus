@@ -235,8 +235,16 @@ function planta(v, idx, op){
       if(sh.o === 'h'){ const dir = (vg.y0 + vg.y1)/2 > sh.c ? 1 : -1; seta(mid, sh.c - dir*0.9, mid, sh.c + dir*0.7, AZ, 1.3); }
       else { const dir = (vg.x0 + vg.x1)/2 > sh.c ? 1 : -1; seta(sh.c - dir*0.9, mid, sh.c + dir*0.7, mid, AZ, 1.3); }
     }
-    if(m){ const lx = (X(m.x0) + X(m.x1))/2, ly = (Y(m.y0) + Y(m.y1))/2 - 5;
-      o.push(`<text x="${lx}" y="${ly}" class="rn halo" style="font-size:7.4px;fill:${AZ};paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px">MANOBRA ${f2(m.x1 - m.x0)} × ${f2(m.y1 - m.y0)} m</text>`); }
+    // medidas de cada faixa: manobra, corredor, acesso da rampa e circulações (deitado nas faixas em pé)
+    for(const t of mans){
+      const w = t.x1 - t.x0, h = t.y1 - t.y0, deit = h > w * 1.3, comp = Math.max(w, h), larg = Math.min(w, h);
+      if(comp < 1.8 || larg < 0.8) continue;
+      const nome = t === m ? 'MANOBRA' : (t.nome || 'Circulação').toUpperCase(), principal = t === m || /MANOBRA/.test(nome);
+      const txt = `${nome} ${f2(w)} × ${f2(h)} m`, fs = principal ? 7.4 : 6, cx = (X(t.x0) + X(t.x1))/2, cy = (Y(t.y0) + Y(t.y1))/2;
+      if(txt.length * fs * 0.55 > (deit ? h : w) * K * 0.92) continue;   // não cabe: a dica do retângulo mostra a medida
+      o.push(deit ? `<text transform="translate(${(cx - 5).toFixed(1)},${cy.toFixed(1)}) rotate(-90)" class="rn" style="font-size:${fs}px;fill:${AZ};paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px">${txt}</text>`
+                  : `<text x="${cx.toFixed(1)}" y="${(cy - 5).toFixed(1)}" class="rn" style="font-size:${fs}px;fill:${AZ};paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px">${txt}</text>`);
+    }
   }
   // paredes internas e vãos livres
   const livres = (p.vaos||[]).filter(e => e.livre);
@@ -333,7 +341,7 @@ function planta(v, idx, op){
     else { line(pos, a0, pos, a1, '#55595F', .7); for(const a of [a0,a1]) line(pos-.12, a, pos+.12, a, '#55595F', .7);
       o.push(`<text transform="translate(${X(pos)-3},${((Y(a0)+Y(a1))/2).toFixed(1)}) rotate(-90)" class="cota">${t}</text>`); }
   };
-  if(p.dim && p.dim.x0 !== undefined){ const d = p.dim; cota(d.x0, d.x0 + d.W, Math.min(-0.9, d.y0 - 0.9), f2(d.W)); } else cota(0, W, -0.9, f2(W));
+  if(p.dim && p.dim.x0 !== undefined){ const d = p.dim; cota(d.x0, d.x0 + d.W, Math.min(-0.9, d.y0 - 0.9, p.rampaFora ? p.rampaFora.y0 - 1.3 : 0), f2(d.W)); } else cota(0, W, -0.9, f2(W));
   if(p.dim && p.dim.y0 !== undefined){ const d = p.dim; cota(d.y0, d.y0 + d.D, Math.min(-1.4, d.x0 - 1.4), f2(d.D), true); } else cota(0, D, -1.4, f2(D), true);
   const ys = (v.cotasY||[]).filter(y => y<=D+0.01);
   if(p.nome==='Térreo') for(let i=0;i<ys.length-1;i++) if(ys[i+1]-ys[i] > 0.6) cota(ys[i], ys[i+1], -0.75, f2(ys[i+1]-ys[i]), true);

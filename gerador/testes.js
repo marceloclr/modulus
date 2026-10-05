@@ -84,7 +84,7 @@ function rodar(){
       if(c.formato && c.formato!=='auto' && c.subsolo && !v.pav.some(p => p.nome==='Subsolo')) erros.push(`${v.nome}: formato sem subsolo`);
       if(c.subRecuos && c.subRecuos!=='nenhum' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'); if(!sb || sb.vagas < c.vagas) erros.push(`${v.nome}: subsolo com ${sb ? sb.vagas : 0} de ${c.vagas} vagas`); }
       // regra de 05/10/2026: com subsolo, ele comporta o máximo de vagas e o campo de vagas não conta
-      if(c.subsolo && c.garagemLocal!=='terreo' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'), v1 = M.gerar(Object.assign({}, c, {vagas:1})).variantes[0], sb1 = v1 && v1.pav.find(p => p.nome==='Subsolo');
+      if(c.subsolo && c.garagemLocal!=='terreo' && v===r.variantes[0]){ const sb = v.pav.find(p => p.nome==='Subsolo'), v1 = M.gerar(Object.assign({}, c, {vagas:1})).variantes.find(x => x.tipologia === v.tipologia && Math.abs(x.W - v.W) < 0.01), sb1 = v1 && v1.pav.find(p => p.nome==='Subsolo');
         if(sb && !sb.vagas) erros.push(`${v.nome}: subsolo sem vagas`);
         if(sb && sb1 && sb1.vagas !== sb.vagas) erros.push(`${v.nome}: o campo de vagas mudou o subsolo (${sb1.vagas} × ${sb.vagas})`); }
       if((c.torreCalor || (c.torreTipo && c.torreTipo !== 'nenhuma')) && !v.torre) erros.push(`${v.nome}: sem torre de ar`);

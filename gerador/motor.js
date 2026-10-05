@@ -868,9 +868,10 @@ function subsolo(q, W0, D0, cel0, av){
     }
     const fim = Math.max(y, ny1);
     if(fim - y > 0.3) f.push({y0:y, y1:fim, t:'livre'});
-    return {f, fim, corredor, blocos};
+    const acesso = q.subGaragem && Lin > 0 && yl > Lin + 0.3 ? {x0:rx0, x1:rx1, y0:Lin, y1:yl} : null;
+    return {f, fim, corredor, blocos, acesso};
   }
-  const obstaculos = pl => [obsN].concat(obsRf() ? [obsRf()] : [], pl.corredor ? [pl.corredor] : []);
+  const obstaculos = pl => [obsN].concat(obsRf() ? [obsRf()] : [], pl.corredor ? [pl.corredor] : [], pl.acesso ? [pl.acesso] : []);
   const contaVagas = pl => pl.f.filter(b => b.t==='vagas').reduce((t,b) => t + corta(obstaculos(pl).filter(o => o.y0 < b.y1-0.001 && o.y1 > b.y0+0.001).map(o => [o.x0, o.x1])).reduce((u,[m,n]) => u + Math.floor((n-m+0.001)/VW), 0), 0);
   // vagas perpendiculares ao comprimento do lote: corredor de manobra de 5 m ao longo do lote, no prumo da rampa,
   // com uma fileira de vagas (carro no sentido da frente) junto ao núcleo e, se couber, outra do lado da rampa
@@ -907,7 +908,7 @@ function subsolo(q, W0, D0, cel0, av){
     const cands = [];
     if(ny0 - MANOBRA >= Lin - 0.001) cands.push(r2(ny0 - MANOBRA));      // núcleo no começo da fileira de vagas
     cands.push(r2(Math.max(Lin, ny1)));                                     // manobra logo depois do núcleo
-    const larguras = []; for(let w = Math.max(nx1 + RAMPA_L, 6); w < Wfull - 0.01; w += 0.5) larguras.push(r2(w)); larguras.push(Wfull);
+    const larguras = [], passoL = Wfull - Math.max(nx1 + RAMPA_L, 6) > 10 ? 1 : 0.5; for(let w = Math.max(nx1 + RAMPA_L, 6); w < Wfull - 0.01; w += passoL) larguras.push(r2(w)); larguras.push(Wfull);
     // regra de 05/10/2026: com subsolo vale o máximo de vagas que cabe (o campo de vagas não conta);
     // empate: vagas perpendiculares ao comprimento do lote e, depois, o menor subsolo
     const melhorQue = (a, b) => a.cabe !== b.cabe ? a.cabe : a.n !== b.n ? a.n > b.n : !!a.longo !== !!b.longo ? !!a.longo : a.custo < b.custo - 0.01;
@@ -934,6 +935,7 @@ function subsolo(q, W0, D0, cel0, av){
   } else { fixaLargura(Math.min(Wfull, Math.max(nx1, 3))); obsR = null; pl = {f:[], fim:ny1, corredor:null}; }
   if(obsR) salas.push(sala('rampa', rx0, 0, rx1, Lin, {inclinacao:q.inclinacao}));
   if(pl.corredor) salas.push(sala('manobra', pl.corredor.x0, pl.corredor.y0, pl.corredor.x1, pl.corredor.y1, {nome:'Corredor de manobra'}));
+  if(pl.acesso) salas.push(sala('manobra', pl.acesso.x0, pl.acesso.y0, pl.acesso.x1, pl.acesso.y1, {nome:'Acesso à manobra'}));
   const livres = [];
   let vagasOk = 0;
   let Dsub = pl.fim;
@@ -990,7 +992,8 @@ function subsolo(q, W0, D0, cel0, av){
   for(const y of ao(0, Dsub, vao)){ addPil(0, y); addPil(W, y); }
   const linhasY = [];
   const manobras = pl.f.filter(b => b.t==='manobra').concat(pl.corredor ? [Object.assign({t:'corredor'}, pl.corredor)] : [], longo ? [{t:'corredor', x0:longo.ax0, x1:longo.ax1, y0:longo.y0, y1:Dsub}] : []);
-  const noCorredor = (x, y) => pl.corredor && x > pl.corredor.x0 - 0.2 && x < pl.corredor.x1 + 0.2 && y > pl.corredor.y0 && y < pl.corredor.y1;
+  const dentroDe = (c, x, y) => c && x > c.x0 - 0.2 && x < c.x1 + 0.2 && y > c.y0 && y < c.y1;
+  const noCorredor = (x, y) => dentroDe(pl.corredor, x, y) || dentroDe(pl.acesso, x, y);
   const naRampa = (x, y) => obsR && x > rx0 + 0.2 && x < rx1 - 0.2 && y < Lin;
   if(longo){
     // vagas perpendiculares: pilares na face de cada fileira voltada para o corredor, a cada duas vagas (6 m); o corredor e a rampa ficam livres
@@ -1781,7 +1784,10 @@ function gerar(entrada, opts){
   if(!q.orientacao) avisos.push('Informe para onde a frente do terreno está voltada (rosa dos ventos no bloco Terreno). Sem isso, a rosa das plantas não mostra a orientação real.');
   if(B < 5) avisos.push(`A área edificável tem só ${f2(B)} m de largura.`);
   const Ws = [];
-  for(let w = Math.floor(B*2)/2; w >= Math.max(6, B-6); w -= 0.5) Ws.push(r2(w));
+  // larguras testadas: de 0,5 em 0,5 m nos 6 m mais largos e, em lote grande, de 1 em 1 m até 8 m (antes só os 6 m mais largos:
+  // num lote de 40 m toda casa saía com 31 m ou mais)
+  for(let w = Math.floor(B*2)/2; w >= Math.max(6, B-6); w -= (B > 20 ? 1 : 0.5)) Ws.push(r2(w));
+  for(let w = Math.floor(B-6) - 1; w >= 8; w -= (w > 16 ? 2 : 1)) Ws.push(r2(w));
   if(!Ws.length) Ws.push(B);
   const NOMES = {bloco:'bloco único', L:'em L', U:'em U', H:'em H'};
   if(q.formato==='H' && q.tipo==='sobrado') avisos.push('O formato em H está disponível só para casa térrea (com ou sem subsolo).');
@@ -1792,7 +1798,9 @@ function gerar(entrada, opts){
   // até 3 variantes, preferindo tipologias diferentes
   const escolhidas = [];
   // quarto voltado para o poente nunca: essas variantes só aparecem se nenhuma outra escapar
-  const semPoente = todas.filter(v => !v.quartosPoente), elegiveis = semPoente.length ? semPoente : todas;
+  const semPoente = todas.filter(v => !v.quartosPoente), elegiveis0 = semPoente.length ? semPoente : todas;
+  // variantes com nota 0 só aparecem se nenhuma outra montar
+  const comNota = elegiveis0.filter(v => v.score > 0), elegiveis = comNota.length ? comNota : elegiveis0;
   if(!semPoente.length && todas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
