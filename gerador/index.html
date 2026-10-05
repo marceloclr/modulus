@@ -224,7 +224,8 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
-          <p class="sub-nota" id="subVagasNota">Vagas no subsolo: o máximo que cabe (3,00 × 5,00 m cada), de preferência perpendiculares ao comprimento do lote, dos dois lados de um corredor de manobra. A quantidade de vagas só é pedida quando não há subsolo.</p>
+          <p class="sub-nota" id="subVagasNota">Vagas no subsolo: o máximo que cabe (3,00 × 5,00 m cada), de preferência perpendiculares ao comprimento do lote, dos dois lados de um corredor de manobra. A quantidade de vagas só é pedida quando não há subsolo; para limitar o tamanho do subsolo, use o teto abaixo.</p>
+          <label class="fld">Teto de vagas no subsolo<input type="number" name="subVagasMax" min="0" max="40" step="1"><small>0 = sem limite: cabem quantas vagas o lote comportar. Com um teto, o subsolo fica do menor tamanho que acomoda essas vagas, e o custo cai.</small></label>
           <label class="fld">Nível do subsolo<select name="subNivel"><option value="meio">Semienterrado (1,40 m)</option><option value="inteiro">Enterrado</option></select></label>
           <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><small>Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</small></label>
           <label class="fld">Inclinação da rampa (%)<input type="number" name="inclinacao" min="8" max="25" step="1"></label>

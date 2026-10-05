@@ -249,6 +249,15 @@ t('circulação: a ponta do corredor vai para o quarto do fim e o hall de apoio 
   ok(!v.avisos.some(a => /não se liga|sem acesso/.test(a)), v.avisos.join(' | '));
 });
 
+t('subsolo: sem teto cabe o máximo; com teto, o subsolo encolhe para essas vagas', () => {
+  const ent = {frente:22, fundo:34, formato:'U', quartos:3, suites:3, subsolo:true};
+  const sub = e => M.gerar(e).variantes[0].pav.find(p => p.nome === 'Subsolo');
+  const livre = sub(ent), t3 = sub(Object.assign({}, ent, {subVagasMax:3}));
+  ok(livre.vagas > 3, 'sem teto: ' + livre.vagas);
+  igual(t3.vagas, 3, 'com teto 3:');
+  ok(t3.dim.W * t3.dim.D < livre.dim.W * livre.dim.D, 'subsolo menor com teto');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
