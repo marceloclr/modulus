@@ -1,0 +1,16 @@
+{
+  "versao": 1,
+  "fonte": "Sinduscon-CE (CUB/m², NBR 12721:2006), SIDRA/IBGE (SINAPI, tabela 2296) e FGV IBRE (INCC-M)",
+  "serie": [
+    {"mesRef": "2026-07",
+      "onerado": {"R1-B": 2366.68, "R1-N": 2872.19, "R1-A": 3444.39, "R8-N": 2426.12},
+      "desonerado": {"R1-B": 2239.03, "R1-N": 2695.05, "R1-A": 3252.18, "R8-N": 2285.32},
+      "sinapi": 1883.24, "incc": null,
+      "sha256Zip": "571c40322902aadfcfca153a4794c1dc89980b1d7af3a8311ee3d015284b3070"},
+    {"mesRef": "2026-08",
+      "onerado": {"R1-B": 2400.49, "R1-N": 2905.13, "R1-A": 3472.63, "R8-N": 2458.13},
+      "desonerado": {"R1-B": 2269.16, "R1-N": 2723.15, "R1-A": 3275.17, "R8-N": 2313.49},
+      "sinapi": 1883.20, "incc": 0.85,
+      "sha256Zip": "8f6225860897bfea385d5057d4fa698572986331b74ea3c7353354c7a1a27061"}
+  ]
+}

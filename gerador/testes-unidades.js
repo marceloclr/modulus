@@ -101,6 +101,28 @@ t('acessos: portões no lote, portão social longe dos veículos e caminho saind
   ok(!erros.length, erros.slice(0, 4).join('; '));
 });
 
+// ---------- dados de custo ----------
+const VS = require('../tools/valida-schema.js'), DADOS = require('../dados/custos.json'), HIST = require('../dados/custos-historico.json');
+t('dados: custos.json e custos-historico.json seguem os esquemas', () => {
+  const e1 = VS.validar(DADOS, require('../dados/custos.schema.json')), e2 = VS.validar(HIST, require('../dados/custos-historico.schema.json'));
+  ok(!e1.length && !e2.length, e1.concat(e2).slice(0, 4).join('; '));
+  const ruim = JSON.parse(JSON.stringify(DADOS)); ruim.cub.onerado['R1-N'] = 'caro'; delete ruim.fatores.marinho.ate500; ruim.cub.mesRef = '2026-13';
+  igual(VS.validar(ruim, require('../dados/custos.schema.json')).length, 3, 'o validador acusa os três erros plantados:');
+});
+t('dados: faixas coerentes (mín ≤ méd ≤ máx), padrões existentes e série histórica fechando com o CUB vigente', () => {
+  const erros = [];
+  (function varre(o, cam){ if(!o || typeof o !== 'object') return;
+    if(typeof o.min === 'number' && typeof o.med === 'number' && typeof o.max === 'number' && !(o.min <= o.med && o.med <= o.max)) erros.push(cam);
+    for(const [k, v] of Object.entries(o)) varre(v, cam + '.' + k); })(DADOS, '$');
+  for(const p of Object.values(DADOS.padroes)) if(!(p.cub in DADOS.cub.onerado) || !(p.cub in DADOS.cub.desonerado)) erros.push('padrão ' + p.cub);
+  const ult = HIST.serie[HIST.serie.length - 1];
+  if(ult.mesRef !== DADOS.cub.mesRef) erros.push('série termina em ' + ult.mesRef);
+  for(const k of ['R1-B','R1-N','R1-A']) if(ult.onerado[k] !== DADOS.cub.onerado[k] || ult.desonerado[k] !== DADOS.cub.desonerado[k]) erros.push('série ≠ CUB em ' + k);
+  for(let i = 1; i < HIST.serie.length; i++) for(const k of ['R1-B','R1-N','R1-A']){ const v = 100*(HIST.serie[i].onerado[k]/HIST.serie[i-1].onerado[k] - 1); if(Math.abs(v) > 5) erros.push(`variação de ${v.toFixed(2)} % em ${k} (${HIST.serie[i].mesRef})`); }
+  for(const k of ['R1-B','R1-N','R1-A']){ const c = DADOS.cub.composicao[k], s = c.materiais + c.maoDeObra + c.administracao + c.equipamentos; if(Math.abs(s - DADOS.cub.onerado[k]) > 0.02) erros.push('composição ≠ total em ' + k); }
+  ok(!erros.length, erros.join('; '));
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

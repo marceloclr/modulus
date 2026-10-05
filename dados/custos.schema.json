@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "custos.schema.json",
+  "title": "Valores de custo do Modulus",
+  "type": "object",
+  "required": ["versao", "atualizadoEm", "cub", "referencias", "padroes", "municipios", "coeficientes", "fatores", "adicionais"],
+  "properties": {
+    "versao": {"type": "integer", "minimum": 1},
+    "atualizadoEm": {"$ref": "#/$defs/data"},
+    "aviso": {"type": "string"},
+    "cub": {
+      "type": "object",
+      "required": ["uf", "fonte", "url", "mesRef", "publicadoEm", "coletadoEm", "onerado", "desonerado"],
+      "properties": {
+        "uf": {"type": "string", "enum": ["CE"]},
+        "fonte": {"type": "string"},
+        "url": {"type": "string", "pattern": "^https://"},
+        "mesRef": {"$ref": "#/$defs/mes"},
+        "publicadoEm": {"$ref": "#/$defs/data"},
+        "coletadoEm": {"$ref": "#/$defs/data"},
+        "arquivo": {"type": "string", "pattern": "^https://"},
+        "sha256Zip": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "onerado": {"$ref": "#/$defs/tabelaCub"},
+        "desonerado": {"$ref": "#/$defs/tabelaCub"},
+        "variacaoMes": {"type": "object"},
+        "composicao": {"type": "object"}
+      }
+    },
+    "referencias": {
+      "type": "object",
+      "required": ["sinapi", "incc"],
+      "properties": {
+        "sinapi": {"type": "object", "required": ["tabela", "variavel", "mesRef", "valor"], "properties": {"tabela": {"type": "integer"}, "variavel": {"type": "integer"}, "mesRef": {"$ref": "#/$defs/mes"}, "valor": {"type": "number", "minimum": 500, "maximum": 10000}}},
+        "incc": {"type": "object", "required": ["mesRef", "mes"], "properties": {"mesRef": {"$ref": "#/$defs/mes"}, "mes": {"type": "number", "minimum": -5, "maximum": 5}}}
+      }
+    },
+    "padroes": {
+      "type": "object",
+      "required": ["simples", "intermediario", "alto"],
+      "properties": {
+        "simples": {"$ref": "#/$defs/padrao"}, "intermediario": {"$ref": "#/$defs/padrao"}, "alto": {"$ref": "#/$defs/padrao"}
+      }
+    },
+    "municipios": {"type": "object", "required": ["fortaleza", "eusebio", "aquiraz", "portoDasDunas"]},
+    "coeficientes": {"type": "object", "required": ["garagem", "varanda", "terraco", "areaTecnica", "piscina", "jardim"], "additionalProperties": {"$ref": "#/$defs/faixaCoef"}},
+    "fatores": {
+      "type": "object",
+      "required": ["logistica", "condominio", "marinho", "estrutural", "vaosMaiores", "estilo"],
+      "properties": {
+        "logistica": {"$ref": "#/$defs/porMunicipio"},
+        "condominio": {"$ref": "#/$defs/porMunicipio"},
+        "marinho": {"type": "object", "required": ["ate500", "de500a2000", "acima2000"], "additionalProperties": {"$ref": "#/$defs/faixaFator"}},
+        "estrutural": {"type": "object", "required": ["alvenariaEstrutural", "concretoArmado", "lajeNervurada", "protendido", "metalica", "steelFrame", "madeira"], "additionalProperties": {"$ref": "#/$defs/sistema"}},
+        "vaosMaiores": {"$ref": "#/$defs/faixaFator"},
+        "estilo": {"type": "object", "additionalProperties": {"$ref": "#/$defs/faixaFator"}}
+      }
+    },
+    "adicionais": {"type": "object", "additionalProperties": {"$ref": "#/$defs/adicional"}},
+    "solar": {"type": "object"},
+    "muro": {"type": "object"}
+  },
+  "$defs": {
+    "mes": {"type": "string", "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])$"},
+    "data": {"type": "string", "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"},
+    "reais": {"type": "number", "minimum": 500, "maximum": 20000},
+    "tabelaCub": {"type": "object", "required": ["R1-B", "R1-N", "R1-A"], "additionalProperties": {"$ref": "#/$defs/reais"}},
+    "padrao": {"type": "object", "required": ["nome", "cub"], "properties": {"nome": {"type": "string"}, "cub": {"type": "string", "enum": ["R1-B", "R1-N", "R1-A"]}}},
+    "faixaFator": {"type": "object", "required": ["min", "med", "max"], "properties": {"min": {"type": "number", "minimum": 0.5, "maximum": 2}, "med": {"type": "number", "minimum": 0.5, "maximum": 2}, "max": {"type": "number", "minimum": 0.5, "maximum": 2}, "origem": {"type": "string"}}},
+    "faixaCoef": {"type": "object", "required": ["nome", "min", "med", "max", "origem"], "properties": {"min": {"type": "number", "minimum": 0, "maximum": 1}, "med": {"type": "number", "minimum": 0, "maximum": 1}, "max": {"type": "number", "minimum": 0, "maximum": 1}}},
+    "porMunicipio": {"type": "object", "required": ["fortaleza", "eusebio", "aquiraz", "portoDasDunas"], "additionalProperties": {"$ref": "#/$defs/faixaFator"}},
+    "sistema": {"allOf": [{"$ref": "#/$defs/faixaFator"}, {"type": "object", "required": ["nome", "norma", "vaoEcon", "vaoMax", "balanco", "prazo", "oferta", "restricoes"], "properties": {"vaoEcon": {"type": "array", "items": {"type": "number", "minimum": 1, "maximum": 30}}, "vaoMax": {"type": "number", "minimum": 1, "maximum": 30}, "balanco": {"type": "number", "minimum": 0, "maximum": 10}}}]},
+    "adicional": {"type": "object", "required": ["nome", "unidade", "min", "med", "max", "origem"], "properties": {"unidade": {"type": "string", "enum": ["m2Projecao", "m2Subsolo", "un", "m2Lamina", "vb", "m2Fachada", "pct"]}, "min": {"type": "number", "minimum": 0}, "med": {"type": "number", "minimum": 0}, "max": {"type": "number", "minimum": 0}}}
+  }
+}
