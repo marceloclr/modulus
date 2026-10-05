@@ -3,12 +3,8 @@
 'use strict';
 var root=document.documentElement;
 try{var sv=localStorage.getItem('plantas-tema'); if(sv==='dark'||sv==='light') root.setAttribute('data-theme',sv);}catch(e){}
-// sinalizador de recursos em teste: ?beta=1 liga e ?beta=0 desliga (fica guardado neste navegador)
-var beta=false;
-try{var bq=(location.search.match(/[?&]beta=([01])/)||[])[1]; if(bq==='1') localStorage.setItem('plantas-beta','1'); else if(bq==='0') localStorage.removeItem('plantas-beta'); beta=localStorage.getItem('plantas-beta')==='1';}
-catch(e){beta=/[?&]beta=1/.test(location.search);}
-if(beta) root.classList.add('beta');
-window.plantasBeta=beta;
+// o beta foi encerrado em 05/10/2026: todos os recursos valem para todos (apaga o sinalizador antigo deste navegador)
+try{localStorage.removeItem('plantas-beta');}catch(e){}
 function currentTheme(){var t=root.getAttribute('data-theme'); if(t) return t; return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
 window.plantasTema=currentTheme;
 document.addEventListener('DOMContentLoaded',function(){
@@ -32,8 +28,6 @@ document.addEventListener('DOMContentLoaded',function(){
     document.addEventListener('click',function(e){if(!e.target.closest('#topnav')&&!e.target.closest('.navbtn')){document.body.classList.remove('nav-open'); bt.setAttribute('aria-expanded','false');}});
     var tb=document.getElementById('themeBtn'); barIn.insertBefore(el,tb); barIn.insertBefore(bt,tb);
   }
-  if(beta){ var cr=document.querySelector('.crumb'); if(cr){ var bc=document.createElement('span'); bc.className='chip beta-chip'; bc.style.setProperty('--c','var(--rust)'); bc.textContent='beta';
-    bc.setAttribute('tabindex','0'); bc.setAttribute('data-tip','Recursos em teste ativos neste navegador. Para desativar, abra a página com ?beta=0 no endereço'); cr.insertBefore(bc,cr.children[1]||null); } }
   var themeBtn=document.getElementById('themeBtn');
   function labelTheme(){if(themeBtn) themeBtn.textContent=currentTheme()==='dark'?'Tema claro':'Tema escuro';}
   labelTheme();
