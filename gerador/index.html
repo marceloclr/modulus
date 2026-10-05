@@ -24,6 +24,43 @@
 .cartas figure{margin:0;text-align:center}
 .cartas figcaption{font-size:12px;color:var(--ink-3)}
 .carta{max-width:100%;height:auto}
+/* card Sol e vento ao longo do ano (gerador/animacao.js) */
+#cardSolVento{margin-top:16px}
+.sv-abas{display:flex;gap:6px;margin:0 0 8px}
+.sv-abas [aria-selected=true]{background:var(--c);border-color:var(--c);color:var(--bg)}
+.sv-regua{display:flex;align-items:flex-start;gap:10px;margin:6px 0}
+.sv-regua .sv-play{min-width:40px;padding:6px 10px}
+.sv-trilho{flex:1;min-width:0}
+.sv-trilho input,.sv-horas input{width:100%;accent-color:var(--c)}
+.sv-horas{align-items:center}
+.sv-horas output{min-width:3.2em;font-variant-numeric:tabular-nums;font-weight:600}
+.sv-marcas{display:flex;justify-content:space-between;margin:0 -8px}
+.sv-marca{background:none;border:0;color:var(--ink-3);font:inherit;font-size:11px;cursor:pointer;padding:2px 0;line-height:1.15;width:2.4em;text-align:center;border-radius:6px}
+.sv-marca b{display:block;color:var(--ink-2);font-size:12px}
+.sv-marca[aria-current=true]{color:var(--ink);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.sv-marca:focus-visible{outline:2px solid var(--steel)}
+.sv-corpo{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(250px,1fr);gap:16px;margin-top:8px;align-items:start}
+@media (max-width:899px){.sv-corpo{grid-template-columns:minmax(0,1fr)}}
+.sv-planta{background:#FBFAF7;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.sv-planta svg{display:block;width:100%;height:auto;max-height:640px}
+.sv h4{margin:12px 0 6px;font-size:13.5px}
+.sv-sol{margin:0 0 4px}
+.sv-barra{display:grid;grid-template-columns:5.5em 1fr auto;align-items:center;gap:6px;font-size:12.5px;margin:3px 0}
+.sv-barra i{height:8px;background:#F59E0B;border-radius:4px;min-width:2px}
+.sv-barra em{font-style:normal;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.sv-lista{list-style:none;padding:0;margin:0;font-size:13px}
+.sv-lista li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 8px;border-bottom:1px solid var(--line);padding:4px 0}
+.sv-lista li small{width:100%;color:var(--ink-3)}
+.sv-alerta{color:var(--rust);font-size:13px}
+.sv-rosa-box{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.sv-rosa-box p{margin:2px 0;font-size:13px}
+.sv-dia{display:flex;align-items:flex-end;gap:2px;height:60px}
+.sv-dia i{flex:1;background:#2F6FB0;border-radius:2px 2px 0 0}
+.sv-eixo{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin:2px 0 8px}
+.sv-leg{display:inline-block;width:14px;height:4px;background:var(--c);vertical-align:middle;margin-right:4px;border-radius:2px}
+@keyframes svFluxo{to{stroke-dashoffset:-48}}
+.sv-fluxo{animation:svFluxo linear infinite}
+@media (prefers-reduced-motion:reduce){.sv-fluxo{animation:none}}
 .sub-nota{color:var(--ink-3);font-size:12px;margin:2px 0 8px;line-height:1.45}
 .lote-wrap{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:18px;align-items:start}
 .lote-wrap svg{width:100%;height:auto;border:1px solid var(--line);border-radius:12px;background:#FBFAF7}
@@ -430,6 +467,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
     <section class="panel so-beta" id="conforto" style="--c:var(--card-torre)" aria-labelledby="tConforto">
       <div class="panel-head"><p class="eyebrow">Conforto passivo da variante escolhida</p><h2 id="tConforto">Torre de ar e brises</h2></div>
       <div id="cardsConforto" class="grid-analise"></div>
+      <div id="cardSolVento"></div>
     </section>
   </main>
 </div>
@@ -443,6 +481,9 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
 <script src="solar.js"></script>
 <script src="torre.js"></script>
 <script src="brises.js"></script>
+<script src="insolacao.js"></script>
+<script src="vento.js"></script>
+<script src="animacao.js"></script>
 <script src="../tools/valida-schema.js"></script>
 <script src="valores.js"></script>
 <script src="graficos.js"></script>
@@ -583,6 +624,7 @@ function render(){
   const estBrises = window.plantasBeta && q.brises ? Brises.estudar(v, q) : null;
   document.getElementById('plan').innerHTML = Desenho.planta(v, pi, estBrises && estBrises.janelas ? {brises: estBrises.janelas} : undefined);
   brisesVisiveis();
+  if(window.plantasBeta){ const cv = document.getElementById('cardSolVento'); if(!cv.dataset.ok){ cv.dataset.ok = '1'; Animacao.iniciar(cv, {raiz:'../'}); } Animacao.atualizar(v, q, pi, estBrises); }
   const av = v.avisos.filter((a,i,arr) => arr.indexOf(a)===i);
   document.getElementById('avisos').innerHTML = av.length
     ? `<div class="warn"><strong>Pontos de atenção desta variante</strong><ul>${av.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`
