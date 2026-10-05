@@ -276,6 +276,12 @@ function planta(v, idx, op){
     if(e.vidro){ seg(e, JAN, 4, 'stroke-opacity=".28"'); seg(e, JAN, 1.2); }
     else seg(e, JAN, 1.4, e.alta ? 'stroke-dasharray="3 2"' : '');
   }
+  // brises (op.brises, de Brises.estudar): linha tracejada 0,30 m para fora de cada janela protegida
+  for(const b of (op.brises || []).filter(b => b.pav === p.nome)){
+    const fora = b.lado === 'x0' || b.lado === 'y0' ? -0.3 : 0.3;
+    const c = b.c + fora, a = b.t0 - 0.15, z = b.t1 + 0.15, [x0, y0, x1, y1] = b.o === 'h' ? [a, c, z, c] : [c, a, c, z];
+    o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="#4C6E8F" stroke-width="1.8" stroke-dasharray="4 2"><title>Brise ${esc(b.nomeTipo || '')}</title></line>`);
+  }
   for(const d of (ehSub ? [] : (p.portas||[]))){
     seg(d, d.entrada ? '#FFFFFF' : PISO, 4.6);
     const w = d.t1 - d.t0, s = d.dentro || 1;

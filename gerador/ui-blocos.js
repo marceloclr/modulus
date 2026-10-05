@@ -91,7 +91,7 @@ function montar(form, est, opts){
   }
   // bloco 1: as seções atuais, com o subsolo e o conforto passivo como subseções próprias
   const subsolo = subsecao('Subsolo', [rotuloDe('subsolo'), document.getElementById('subOps')]);
-  const conforto = subsecao('Conforto passivo', [rotuloDe('torreTipo')]);
+  const conforto = subsecao('Conforto passivo', [rotuloDe('torreTipo'), document.getElementById('brisesOps')]);
   [sec('terreno'), sec('tipo'), subsolo, sec('quartos'), sec('salas'), recolhida(sec('dimensoes')), sec('garagem'), recolhida(sec('anexos')), conforto]
     .forEach(n => corpos.b1.appendChild(n));
   // bloco 2: sistema estrutural e padrão e local da obra

@@ -71,6 +71,8 @@ function calcular(v, q, dados){
   ad.push({id:'fundacao', nome:fund.nome, valor:tri(n => proj * fund[n]), formula:`${f2(proj)} m² de projeção × ${brl(fund.med)}/m² (${brl(fund.min)} a ${brl(fund.max)})`, origem:fund.origem});
   if(A.subsolo > 0) ad.push({id:'subsolo', nome:AD.subsolo.nome, valor:tri(n => A.subsolo * AD.subsolo[n]), formula:`${f2(A.subsolo)} m² de subsolo × ${brl(AD.subsolo.med)}/m²`, origem:AD.subsolo.origem});
   if(q.elevador) ad.push({id:'elevador', nome:AD.elevador.nome, valor:tri(n => AD.elevador[n]), formula:`1 elevador: ${brl(AD.elevador.min)} a ${brl(AD.elevador.max)}`, origem:AD.elevador.origem});
+  if(q.brises && v.brises && v.brises.area > 0 && AD.brises){ const ab = 1.5 * v.brises.area;
+    ad.push({id:'brises', nome:AD.brises.nome, valor:tri(n => ab * AD.brises[n]), formula:`1,5 × ${f2(v.brises.area)} m² de janelas = ${f2(ab)} m² × ${brl(AD.brises.med)}/m² (${brl(AD.brises.min)} a ${brl(AD.brises.max)})`, origem:AD.brises.origem}); }
   const pis = (v.anexos || []).find(x => x.tipo === 'piscina');
   if(pis){ ad.push({id:'piscina', nome:'Piscina', valor:tri(n => pis.lamina * AD.piscinaLamina[n] + AD.piscinaEquipamentos[n]),
     formula:`${f2(pis.lamina)} m² de lâmina × ${brl(AD.piscinaLamina.med)}/m² + equipamentos ${brl(AD.piscinaEquipamentos.med)}`, origem:AD.piscinaLamina.origem}); }
