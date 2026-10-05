@@ -45,6 +45,7 @@
 .dimrow input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .vtab{flex-direction:column;align-items:flex-start;gap:2px;line-height:1.25}
 .vtab small{font-size:11.5px;color:inherit;opacity:.8;font-weight:400}
+.vtab .vdim{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;font-variant-numeric:tabular-nums}
 /* blocos guiados (beta, gerador/ui-blocos.js) */
 .blocos{display:flex;flex-direction:column;gap:10px;margin:4px 0 12px}
 .bloco{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;background:var(--surface-2)}
@@ -261,7 +262,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
       <div class="panel-head">
         <p class="eyebrow">Gerador de plantas · estudo preliminar automático</p>
         <h1 style="font-size:clamp(26px,4vw,34px)">Plantas a partir do programa</h1>
-        <p>Preencha o terreno e o programa ao lado. O gerador monta variantes por regras (zoneamento social, serviço e íntimo, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores.</p>
+        <p>Preencha o terreno e o programa no formulário. O gerador monta variantes por regras (zoneamento social, serviço e íntimo, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores.</p>
       </div>
 
       <div class="stats" id="stats"></div>
@@ -431,7 +432,7 @@ function render(){
   ].map(([k,val,c]) => `<div class="stat" style="--c:${c}"><div class="k">${k}</div><div class="v">${val}</div></div>`).join('');
   document.getElementById('avisosGerais').innerHTML = res.avisos.length ? `<div class="warn">${res.avisos.map(esc).join('<br>')}</div>` : '';
   document.getElementById('vtabs').innerHTML = res.variantes.map((x,i) =>
-    `<button class="btn vtab" type="button" role="tab" aria-selected="${i===vi}" aria-pressed="${i===vi}" data-v="${i}">${x.nome}<span class="score">${x.score}</span><small>${x.tipologia} · ${f2(x.W)} × ${f2(x.D)} m</small></button>`).join('');
+    `<button class="btn vtab" type="button" role="tab" aria-selected="${i===vi}" aria-pressed="${i===vi}" data-v="${i}">${x.nome}<span class="score">${x.score}</span><small>${x.tipologia}</small><small class="vdim"><span data-tip="Terreno: frente × fundo = área do lote">Terreno ${f2(q.frente)} × ${f2(q.fundo)} m · ${f2(q.frente*q.fundo)} m²</span><span data-tip="Construção: largura × profundidade da casa; área = soma das áreas fechadas de todos os pavimentos">Casa ${f2(x.W)} × ${f2(x.D)} m · ${f2(x.quadro.fechada)} m² construídos</span></small></button>`).join('');
   document.getElementById('ptabs').innerHTML = v.pav.map((p,i) =>
     `<button class="btn" type="button" role="tab" aria-selected="${i===pi}" aria-pressed="${i===pi}" data-p="${i}">${p.nome}</button>`).join('');
   document.getElementById('plan').innerHTML = Desenho.planta(v, pi);
