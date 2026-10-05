@@ -191,6 +191,20 @@ t('cards: selo de atualidade (alerta acima de 45 dias do fim do mês) e card com
   ok(CA.cartaoEstrutura(ve, DADOS).includes('Concreto protendido'), 'card da estrutura');
 });
 
+// ---------- valores (camadas) ----------
+const VA = require('./valores.js');
+t('valores: ajustes sobre os oficiais (mín e máx acompanham), diferenças e editáveis válidos', () => {
+  const ef = VA.aplicarAjustes(DADOS, {'cub.onerado.R1-N': 3000, 'fatores.logistica.eusebio.med': 1.04, 'fatores.logistica.fortaleza.med': 1.01, 'x.y': 3});
+  igual(ef.cub.onerado['R1-N'], 3000); igual(DADOS.cub.onerado['R1-N'], 2905.13, 'o oficial não muda:');
+  perto(ef.fatores.logistica.eusebio.min, 1.01 * 1.04 / 1.02, 'mín acompanha:'); perto(ef.fatores.logistica.eusebio.max, 1.03 * 1.04 / 1.02, 'máx acompanha:');
+  igual([ef.fatores.logistica.fortaleza.min, ef.fatores.logistica.fortaleza.max], [1.01, 1.01], 'faixa de ponto único acompanha o valor:');
+  const dif = VA.diferencas(DADOS, ef).map(d => d.caminho);
+  ok(dif.includes('cub.onerado.R1-N') && dif.includes('fatores.logistica.eusebio.med'), dif.join(','));
+  igual(VA.diferencas(DADOS, JSON.parse(JSON.stringify(DADOS))).length, 0);
+  const ed = VA.editaveis(DADOS); ok(ed.length >= 30 && ed.every(([cam]) => typeof cam.split('.').reduce((o, k) => o[k], DADOS) === 'number'), 'editável sem número');
+  igual(VS.validar(ef, require('../dados/custos.schema.json')).length, 0, 'valores ajustados continuam válidos:');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

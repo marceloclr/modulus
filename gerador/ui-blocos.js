@@ -92,7 +92,7 @@ function montar(form, est, opts){
   [sec('terreno'), sec('tipo'), subsolo, sec('quartos'), sec('salas'), recolhida(sec('dimensoes')), sec('garagem'), recolhida(sec('anexos')), conforto]
     .forEach(n => corpos.b1.appendChild(n));
   // bloco 2: sistema estrutural e padrão e local da obra
-  [sec('estrutura'), sec('custo')].filter(Boolean).forEach(n => corpos.b2.appendChild(n));
+  [sec('estrutura'), sec('custo'), sec('valores')].filter(Boolean).forEach(n => corpos.b2.appendChild(n));
   caixa.after(rodape);
   // conclusão: só pelo botão (a conclusão automática fecharia o bloco no meio da digitação)
   for(const b of BLOCOS){
