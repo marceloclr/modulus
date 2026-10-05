@@ -299,6 +299,53 @@ t('brises: sol de Fortaleza, geometria das lâminas e estudo da variante', () =>
   ok(B.estudar(M.gerar(q2).variantes[0], q2).faces.every(fc => fc.rumo === 'S'), 'escolha manual');
 });
 
+t('vento: dados/vento.json válido, 12 meses e alísios de leste/sudeste', () => {
+  const VT = require('../dados/vento.json');
+  igual(VS.validar(VT, require('../dados/vento.schema.json')), [], 'esquema:');
+  igual(VT.meses.map(m => m.mes), [1,2,3,4,5,6,7,8,9,10,11,12]);
+  for(const m of VT.meses){ ok(m.rosa.length === VT.setores && m.velHora.length === 24, 'mês ' + m.mes);
+    ok(Math.abs(m.rosa.reduce((t, x) => t + x.freq, 0) + m.calmaria - 100) < 1.5, 'frequências somam 100 % no mês ' + m.mes);
+    ok(m.dirPredominante >= 45 && m.dirPredominante <= 157.5, 'predomínio de NE a SSE no mês ' + m.mes); }
+  const set = VT.meses[8], mar = VT.meses[2]; ok(set.velMedia > mar.velMedia, 'setembro venta mais que março');
+});
+
+t('insolação: sombra de um cubo, mancha de sol pela janela e incidência por fachada (contas à mão)', () => {
+  const I = require('./insolacao.js');
+  const q = {orientacao:'N', peDireito:3}, sala = {id:1, tipo:'estar', nome:'Estar', x0:0, y0:0, x1:3, y1:3};
+  // frente para o norte (face y0); sol a 45° vindo do norte: a sombra do cubo de 3 m anda 3 m para o fundo (+y)
+  const sb = I.sombras({pav:[{nome:'Térreo', salas:[sala]}]}, q, {h:45, az:0});
+  igual(sb.length, 1); ok(Math.abs(Math.max(...sb[0].pts.map(p => p[1])) - 6) < 1e-9, 'sombra até y = 6: ' + JSON.stringify(sb[0].pts));
+  // janela de 1,00 m na face norte, peitoril 1,00 m e verga 2,20 m; 21/jun ao meio-dia (h = 62,8°):
+  // a mancha vai de 1,00/tan h = 0,51 m a 2,20/tan h = 1,13 m para dentro
+  const p = {nome:'Térreo', salas:[sala], janelas:[{o:'h', c:0, t0:1, t1:2, h:1.2}]};
+  const L = I.luzPavimento({pav:[p]}, q, p, I.solEm(6, 12));
+  igual(L.manchas.length, 1); const ys = L.manchas[0].pts.map(p => p[1]);
+  ok(Math.abs(Math.min(...ys) - 1/Math.tan(62.82*Math.PI/180)) < 0.01 && Math.abs(Math.max(...ys) - 2.2/Math.tan(62.82*Math.PI/180)) < 0.01, 'mancha ' + ys);
+  ok(L.fachadas.some(fc => fc.lado === 'y0'), 'fachada norte iluminada em junho');
+  // às 12h de dezembro o sol está ao sul: a janela norte não recebe sol
+  igual(I.luzPavimento({pav:[p]}, q, p, I.solEm(12, 12)).manchas.length, 0, 'sem sol na face norte em dezembro:');
+  // incidência: em dezembro a face sul recebe mais que a norte; em junho, o contrário
+  const v = M.gerar({orientacao:'N'}).variantes[0], qq = M.normaliza({orientacao:'N'});
+  const fx = (m, r) => (I.incidenciaFaces(v, qq, m).find(x => x.rumo === r) || {kwh:0}).kwh;
+  ok(fx(12, 'S') > fx(12, 'N') && fx(6, 'N') > fx(6, 'S'), 'sazonalidade norte/sul');
+  ok(I.horasSolComodos(v, qq, 3).length > 0, 'horas de sol por cômodo');
+});
+
+t('vento na variante: janelas de entrada e saída, linhas de corrente e camada da planta', () => {
+  const VE = require('./vento.js'), D = require('./desenho.js'), VT = require('../dados/vento.json');
+  // casa com frente para o norte e vento de leste (90°): a face x1 (leste) é entrada e a x0 (oeste) é saída
+  const q = {orientacao:'N'}, sala = {id:1, tipo:'estar', x0:0, y0:0, x1:4, y1:4};
+  const p = {salas:[sala], janelas:[{o:'v', c:4, t0:1, t1:2, h:1.2}, {o:'v', c:0, t0:1, t1:2, h:1.2}, {o:'h', c:0, t0:1, t1:2, h:1.2}]};
+  igual(VE.janelas({}, q, p, 90).map(j => j.papel), ['entrada', 'saida', 'lateral']);
+  // linhas paralelas ao vento: vento de leste corre para oeste (−x), y constante
+  const ls = VE.linhas({x0:0, y0:0, x1:10, y1:20}, 90, 0, 5);
+  igual(ls.length, 5); ok(ls.every(l => Math.abs(l.a[1] - l.b[1]) < 1e-9 && l.b[0] < l.a[0]), 'sentido do escoamento');
+  const rs = VE.resumo(VT, 9); ok(rs.velMedia > 5 && rs.principais.length === 3 && rs.velHora.length === 24, 'resumo de setembro');
+  const v = M.gerar({orientacao:'N'}).variantes[0];
+  ok(/<g id="svCamada" data-ox="[0-9.-]+" data-oy="[0-9.-]+" data-k="30"/.test(D.planta(v, 0, {camadaId:'svCamada'})), 'grupo da camada animada');
+  ok(!D.planta(v, 0).includes('svCamada'), 'sem a opção, a planta não muda');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

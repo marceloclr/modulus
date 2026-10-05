@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vento.schema.json",
+  "title": "Vento por mês do Modulus (rosa dos ventos)",
+  "type": "object",
+  "required": ["versao", "fonte", "licenca", "local", "periodo", "coletadoEm", "setores", "calmaLimite", "meses"],
+  "properties": {
+    "versao": {"type": "integer", "minimum": 1},
+    "fonte": {"type": "string"},
+    "url": {"type": "string"},
+    "licenca": {"type": "string"},
+    "local": {"type": "object", "required": ["nome", "lat", "lon"], "properties": {"nome": {"type": "string"}, "lat": {"type": "number", "minimum": -90, "maximum": 90}, "lon": {"type": "number", "minimum": -180, "maximum": 180}}},
+    "periodo": {"type": "object", "required": ["inicio", "fim"], "properties": {"inicio": {"$ref": "#/$defs/data"}, "fim": {"$ref": "#/$defs/data"}}},
+    "coletadoEm": {"$ref": "#/$defs/data"},
+    "setores": {"type": "integer", "enum": [8, 16]},
+    "calmaLimite": {"type": "number", "minimum": 0},
+    "nota": {"type": "string"},
+    "conferencia": {"type": ["object", "null"]},
+    "meses": {"type": "array", "items": {"$ref": "#/$defs/mes"}}
+  },
+  "$defs": {
+    "data": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "mes": {
+      "type": "object",
+      "required": ["mes", "horas", "velMedia", "calmaria", "dirMedia", "dirPredominante", "rosa", "velHora"],
+      "properties": {
+        "mes": {"type": "integer", "minimum": 1, "maximum": 12},
+        "horas": {"type": "integer", "minimum": 1},
+        "velMedia": {"type": "number", "minimum": 0, "maximum": 40},
+        "calmaria": {"type": "number", "minimum": 0, "maximum": 100},
+        "dirMedia": {"type": "number", "minimum": 0, "maximum": 360},
+        "dirPredominante": {"type": "number", "minimum": 0, "maximum": 360},
+        "rosa": {"type": "array", "items": {"type": "object", "required": ["dir", "freq", "vel"], "properties": {"dir": {"type": "number", "minimum": 0, "maximum": 360}, "freq": {"type": "number", "minimum": 0, "maximum": 100}, "vel": {"type": "number", "minimum": 0}}}},
+        "velHora": {"type": "array", "items": {"type": "number", "minimum": 0}}
+      }
+    }
+  }
+}

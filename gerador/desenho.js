@@ -303,6 +303,8 @@ function planta(v, idx, op){
   // pilares (subsolo)
   if(!ehSub) for(const pl of (p.pilares||[])) o.push(`<rect x="${(X(pl.x)-5.5).toFixed(1)}" y="${(Y(pl.y)-5.5).toFixed(1)}" width="11" height="11" fill="#111318" stroke="#FFFFFF" stroke-width="1.2"><title>Pilar</title></rect>`);
   if(p.manobra && !ehSub) o.push(`<text x="${X(W)-6}" y="${Y(p.manobra.y0)+10}" class="rd" style="font-size:6px;text-anchor:end;fill:#57534E">faixa de manobra livre, sem pilares</text>`);
+  // camada animada (sol e vento): grupo vazio no sistema da casa, preenchido por gerador/animacao.js com X = ox + m·k, Y = oy + m·k
+  if(op.camadaId) o.push(`<g id="${esc(op.camadaId)}" data-ox="${OX}" data-oy="${OY}" data-k="${K}" pointer-events="none"></g>`);
   // rótulos
   for(const s of S){
     const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h;
