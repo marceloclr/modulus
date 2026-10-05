@@ -171,6 +171,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
+          <label class="fld" id="subVagasOps">Vagas no subsolo<input type="number" id="subVagas" min="1" max="20" step="1" data-obrig aria-describedby="subVagasNota"><small id="subVagasNota">Quantos carros o subsolo deve comportar: ele é dimensionado para essas vagas (3,00 × 5,00 m cada).</small></label>
           <label class="fld">Nível do subsolo<select name="subNivel"><option value="meio">Semienterrado (1,40 m)</option><option value="inteiro">Enterrado</option></select></label>
           <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><small>Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</small></label>
           <label class="fld">Inclinação da rampa (%)<input type="number" name="inclinacao" min="8" max="25" step="1"></label>
@@ -375,6 +376,8 @@ function sincroniza(){
   document.getElementById('garNota').hidden = sub;
   document.getElementById('vagasRot').textContent = gl.value==='terreo' ? 'Vagas' : 'Vagas no subsolo (o subsolo é dimensionado para elas)';
   document.getElementById('vagasTOps').hidden = gl.value!=='ambos';
+  document.getElementById('subVagasOps').hidden = gl.value==='terreo';
+  document.getElementById('subVagas').value = form.elements.vagas.value;
   document.getElementById('rtOps').hidden = !form.elements.rooftop.checked;
   document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';
   form.querySelectorAll('#secOps .chk').forEach(el => { el.hidden = fmt!=='auto' && !el.classList.contains('sec-' + chave); });
@@ -484,6 +487,12 @@ form.addEventListener('input', e => {
   if(v.badInput || v.rangeUnderflow || v.rangeOverflow || (el.value === '' && !el.name.startsWith('d_'))) return;
   const meu = ++pedido;
   espera = setTimeout(() => { if(meu !== pedido || !faixasOk()) return; sincroniza(); gerar(); }, 200);
+});
+// subsolo: ao marcar, as vagas vão para o subsolo (antes ficavam no térreo e o subsolo saía sem rampa nem vagas)
+form.elements.subsolo.addEventListener('change', e => { if(e.target.checked && form.elements.garagemLocal.value==='terreo') form.elements.garagemLocal.value = 'subsolo'; });
+// "Vagas no subsolo" é um atalho do campo de vagas: repassa o valor e o evento para ele
+for(const tipo of ['input', 'change']) document.getElementById('subVagas').addEventListener(tipo, e => {
+  e.stopPropagation(); const vg = form.elements.vagas; vg.value = e.target.value; vg.dispatchEvent(new Event(tipo, {bubbles:true}));
 });
 document.getElementById('padrao').addEventListener('click', () => { preencher(Motor.PADRAO); gerar(); });
 document.getElementById('link').addEventListener('click', async function(){

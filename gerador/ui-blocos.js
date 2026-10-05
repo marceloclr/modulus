@@ -131,7 +131,7 @@ function montar(form, est, opts){
     for(const i of corpo.querySelectorAll('input[type=number]')){
       if(!visivel(i)) continue;
       const v = i.validity;
-      if((OBRIG[id] || []).includes(i.name) && i.value === '') probs.push({el:i, msg:`${rotulo(i)}: informe um valor.`});
+      if(((OBRIG[id] || []).includes(i.name) || i.hasAttribute('data-obrig')) && i.value === '') probs.push({el:i, msg:`${rotulo(i)}: informe um valor.`});
       else if(v.badInput) probs.push({el:i, msg:`${rotulo(i)}: número inválido.`});
       else if(v.rangeUnderflow || v.rangeOverflow) probs.push({el:i, msg:`${rotulo(i)}: use um valor entre ${num(i.min)} e ${num(i.max)}.`});
     }
