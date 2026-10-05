@@ -590,138 +590,61 @@
     },
     "cargas": [
       {
-        "id": "geladeira",
-        "nome": "Geladeira",
-        "nivel": "N1",
-        "kwhMes": 40,
-        "potenciaW": 150,
-        "motor": true
-      },
-      {
-        "id": "iluminacao",
-        "nome": "Iluminação LED básica",
-        "nivel": "N1",
-        "kwhMes": 20,
-        "potenciaW": 200
-      },
-      {
         "id": "portao",
         "nome": "Portão automático",
-        "nivel": "N1",
         "kwhMes": 4,
         "potenciaW": 400,
-        "motor": true
+        "motor": true,
+        "origem": "Motor de 1/3 cv, cerca de 10 ciclos por dia."
       },
       {
-        "id": "rede",
-        "nome": "Roteador e carregadores",
-        "nivel": "N1",
-        "kwhMes": 10,
-        "potenciaW": 60
+        "id": "luzInterna",
+        "nome": "Iluminação interna (LED)",
+        "kwhMes": 15,
+        "potenciaW": 150,
+        "origem": "Cerca de 10 pontos de 9 W, 5 h por dia."
+      },
+      {
+        "id": "luzExterna",
+        "nome": "Iluminação externa (LED)",
+        "kwhMes": 29,
+        "potenciaW": 80,
+        "origem": "Cerca de 8 pontos de 10 W, 12 h por noite."
+      },
+      {
+        "id": "cameras",
+        "nome": "Câmeras de segurança e gravador",
+        "kwhMes": 25,
+        "potenciaW": 35,
+        "origem": "4 câmeras de 5 W e gravador de 15 W, 24 h por dia."
+      },
+      {
+        "id": "geladeira",
+        "nome": "Geladeira",
+        "kwhMes": 40,
+        "potenciaW": 150,
+        "motor": true,
+        "origem": "Geladeira frost free com selo A."
+      },
+      {
+        "id": "ar",
+        "nome": "Ar-condicionado inverter (1 aparelho, 12.000 BTU)",
+        "kwhMes": 120,
+        "potenciaW": 1100,
+        "origem": "Uso noturno de cerca de 8 h."
       },
       {
         "id": "ventiladores",
         "nome": "Ventiladores",
-        "nivel": "N2",
         "kwhMes": 15,
         "potenciaW": 70,
         "motor": true,
         "porQuarto": true,
-        "mais": 1
-      },
-      {
-        "id": "tv",
-        "nome": "TV",
-        "nivel": "N2",
-        "kwhMes": 15,
-        "potenciaW": 120
-      },
-      {
-        "id": "bomba",
-        "nome": "Bomba ou pressurizador",
-        "nivel": "N2",
-        "kwhMes": 25,
-        "potenciaW": 750,
-        "motor": true
-      },
-      {
-        "id": "computador",
-        "nome": "Computador",
-        "nivel": "N2",
-        "kwhMes": 25,
-        "potenciaW": 200
-      },
-      {
-        "id": "arQuartos",
-        "nome": "Ar-condicionado inverter nos quartos (noite)",
-        "nivel": "N3",
-        "kwhMes": 120,
-        "potenciaW": 1100,
-        "porQuarto": true
-      },
-      {
-        "id": "lavar",
-        "nome": "Máquina de lavar",
-        "nivel": "N3",
-        "kwhMes": 12,
-        "potenciaW": 500,
-        "motor": true
-      },
-      {
-        "id": "arSala",
-        "nome": "Ar-condicionado das salas",
-        "nivel": "N4",
-        "kwhMes": 150,
-        "potenciaW": 1800
-      },
-      {
-        "id": "cooktop",
-        "nome": "Cooktop de indução e forno",
-        "nivel": "N4",
-        "kwhMes": 90,
-        "potenciaW": 5000
-      },
-      {
-        "id": "demais",
-        "nome": "Demais cargas da casa",
-        "nivel": "N4",
-        "kwhMesPorM2": 0.6,
-        "potenciaW": 1500
-      },
-      {
-        "id": "piscina",
-        "nome": "Bomba da piscina",
-        "nivel": "N4",
-        "kwhMes": 85,
-        "potenciaW": 750,
-        "motor": true,
-        "se": "piscina"
-      },
-      {
-        "id": "elevador",
-        "nome": "Elevador",
-        "nivel": "N4",
-        "kwhMes": 20,
-        "potenciaW": 3700,
-        "motor": true,
-        "se": "elevador"
-      },
-      {
-        "id": "ve",
-        "nome": "Carregador de veículo elétrico",
-        "nivel": "N4",
-        "kwhMes": 165,
-        "potenciaW": 7000,
-        "se": "solVE"
+        "mais": 1,
+        "origem": "Um por quarto e um na sala, cerca de 8 h por dia."
       }
     ],
-    "cargasOrigem": "Consumos típicos estimados (kWh/mês); ajuste pelo consumo da sua conta no campo de consumo informado.",
-    "niveis": {
-      "N1": "Geladeira, iluminação LED básica, portão, roteador e carregadores",
-      "N2": "N1 + ventiladores, TV, bomba e computador",
-      "N3": "N2 + ar-condicionado nos quartos à noite e máquina de lavar",
-      "N4": "Casa inteira: ar das salas, cooktop, piscina, elevador e, se marcado, carregador de veículo"
-    },
+    "cargasOrigem": "Consumos típicos estimados do pacote básico (kWh/mês).",
     "normas": [
       "ABNT NBR 16690 (instalações elétricas de arranjos fotovoltaicos)",
       "ABNT NBR 16149 e NBR 16150 (interface com a rede)",
@@ -729,7 +652,8 @@
       "NR-10 (segurança em instalações elétricas)",
       "Lei 14.300/2022 e regras de acesso da Enel Ceará"
     ],
-    "litoral": "Na orla: estrutura de alumínio com fixação em aço inox, caixas e conectores IP65 ou superior e inspeção semestral de corrosão."
+    "litoral": "Na orla: estrutura de alumínio com fixação em aço inox, caixas e conectores IP65 ou superior e inspeção semestral de corrosão.",
+    "pacote": "Pacote básico: portão automático, iluminação interna e externa, câmeras de segurança, geladeira, um ar-condicionado e ventiladores. Tudo no quadro crítico, ligado pela bateria quando a rede cai."
   },
   "muro": {
     "alvenaria2m": {
