@@ -80,6 +80,27 @@ t('sol: nenhum quarto com janela voltada para o poente, nos 8 rumos e nos format
   ok(!erros.length, erros.slice(0, 3).join('; '));
 });
 
+// ---------- acessos (motor) ----------
+t('acessos: portões no lote, portão social longe dos veículos e caminho saindo dele', () => {
+  const {TODOS} = require('./golden.js'), E = 0.011, erros = [];
+  const extras = {'descoberta 3': {garagem:'descoberta', vagas:3}, 'ambos': {subsolo:true, garagemLocal:'ambos', vagas:2, vagasTerreo:1}, 'L 3 vagas': {frente:16, fundo:34, formato:'L', vagas:3}};
+  for(const [nome, c] of Object.entries(Object.assign({}, TODOS, extras))){
+    for(const v of M.gerar(c).variantes){
+      const a = v.acessos; if(!a){ erros.push(`${nome}: sem acessos`); continue; }
+      const ped = a.portoes.filter(p => p.tipo==='pedestres'), vei = a.portoes.filter(p => p.tipo==='veiculos');
+      if(ped.length !== 1) erros.push(`${nome}/${v.nome}: ${ped.length} portões sociais`);
+      for(const p of a.portoes) if(p.x0 < a.xL - E || p.x1 > a.xR + E || Math.abs(p.y - a.yF) > E) erros.push(`${nome}/${v.nome}: portão fora da divisa frontal`);
+      for(const p of ped.filter(p => !p.junto)) for(const w of vei) if(p.x0 < w.x1 + 0.6 - E && p.x1 > w.x0 - 0.6 + E) erros.push(`${nome}/${v.nome}: portão social a menos de 0,60 m do de veículos`);
+      for(const g of a.vagasFora) if(g.x0 < a.xL - E || g.x1 > a.xR + E) erros.push(`${nome}/${v.nome}: vaga descoberta fora do lote`);
+      if(a.caminho && ped[0]){ const [x, y] = a.caminho.pontos[0]; if(Math.abs(x - (ped[0].x0 + ped[0].x1)/2) > E || Math.abs(y - a.yF) > E) erros.push(`${nome}/${v.nome}: caminho não sai do portão social`); }
+      const ter = v.pav.find(p => p.nome==='Térreo');
+      if(ter.salas.some(s => s.tipo==='garagem') && !a.vias.some(r => r.tipo==='garagem')) erros.push(`${nome}/${v.nome}: garagem sem faixa até a rua`);
+      if(v.pav.some(p => p.nome==='Subsolo' && p.salas.some(s => s.tipo==='rampa')) && !a.vias.some(r => r.tipo==='rampa')) erros.push(`${nome}/${v.nome}: rampa sem faixa até a rua`);
+    }
+  }
+  ok(!erros.length, erros.slice(0, 4).join('; '));
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

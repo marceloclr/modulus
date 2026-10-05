@@ -14,6 +14,22 @@ const SUB_COR = {rampa:['#F4C47C','#9A5B12','Rampa'], manobra:['#E3E7EC','#33415
   escada:['#E2D8F5','#6A4FB3','Escada'], elevador:['#F9D3E3','#B03A6E','Elevador'], jardim:['#D5E6C0','#5E7D3A','Jardim de inverno']};
 const subCor = t => SUB_COR[t] || SUB_COR.manobra;
 const PISO = '#F4F2EC', PAREDE = '#2B2F36', JAN = '#4C86C6', PORTA = '#8C6A2F';
+const AC = {via:['#E2DED6','#8F877A'], vaga:['#ECE9E3','#8A8F98'], caminho:['#EAD7BC','#A9875C'], veiculos:'#3F3A35', pedestres:'#2F6FB0'};
+/* Acessos (motor.acessos): faixas de veículos, vagas descobertas, caminho de pedestres e portões, em coordenadas da casa.
+   tx/ty convertem para o desenho; serve à planta do térreo e à implantação. */
+function desenhaAcessos(a, tx, ty, k, o, semRotulos){
+  if(!a) return;
+  const rect = (r, c, ex) => { const h = r.y1 - r.y0; if(h < 0.05) return; o.push(`<rect x="${tx(r.x0)}" y="${ty(r.y0)}" width="${((r.x1-r.x0)*k).toFixed(1)}" height="${(h*k).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width=".8"${ex||''}/>`); };
+  for(const r of a.vias) rect(r, AC.via, ' stroke-dasharray="4 3"');
+  a.vagasFora.forEach((r, i) => { rect(r, AC.vaga, ' stroke-dasharray="2 2"');
+    o.push(`<text x="${((tx(r.x0)+tx(r.x1))/2).toFixed(1)}" y="${((ty(r.y0)+ty(r.y1))/2 + 2).toFixed(1)}" class="rd" style="font-size:5.8px;font-weight:600;fill:#5B5F66">VAGA</text>`); });
+  if(a.caminho){ const pts = a.caminho.pontos.map(([x,y]) => `${tx(x)},${ty(y)}`).join(' '), w = a.caminho.largura*k;
+    o.push(`<polyline points="${pts}" fill="none" stroke="${AC.caminho[1]}" stroke-width="${(w + 1.4).toFixed(1)}" stroke-linejoin="miter"/>`);
+    o.push(`<polyline points="${pts}" fill="none" stroke="${AC.caminho[0]}" stroke-width="${w.toFixed(1)}" stroke-linejoin="miter"><title>Caminho de pedestres ${f2(a.caminho.largura)} m</title></polyline>`); }
+  for(const p of a.portoes){ const c = p.tipo==='veiculos' ? AC.veiculos : AC.pedestres, y = ty(p.y);
+    o.push(`<line x1="${tx(p.x0)}" y1="${y}" x2="${tx(p.x1)}" y2="${y}" stroke="${c}" stroke-width="4" stroke-linecap="butt"><title>${p.tipo==='veiculos' ? 'Portão de veículos' : 'Portão social'} ${f2(p.largura)} m</title></line>`);
+    if(!semRotulos) o.push(`<text x="${((tx(p.x0)+tx(p.x1))/2).toFixed(1)}" y="${(y - 5).toFixed(1)}" class="rd" style="font-size:5.8px;font-weight:600;fill:${c}">${p.tipo==='veiculos' ? 'PORTÃO VEÍC.' : 'PORTÃO SOCIAL'} ${f2(p.largura)}</text>`); }
+}
 const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
 /* Espelha a variante na horizontal (x → W − x). */
@@ -35,6 +51,10 @@ function espelha(v){
     }
   }
   if(c.patios) for(const s of c.patios){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
+  if(c.acessos){ const ac = c.acessos;
+    for(const r of ac.vias.concat(ac.vagasFora, ac.portoes)){ const a = fx(r.x1), b = fx(r.x0); r.x0 = a; r.x1 = b; }
+    if(ac.caminho) ac.caminho.pontos = ac.caminho.pontos.map(([x,y]) => [fx(x), y]);
+    const xl = fx(ac.xR), xr = fx(ac.xL); ac.xL = xl; ac.xR = xr; }
   if(c.anexos && c.loteFrente){ const F = c.loteFrente; for(const a of c.anexos){ const x0 = +(F - a.x1).toFixed(2), x1 = +(F - a.x0).toFixed(2); a.x0 = x0; a.x1 = x1; a.espelhado = !a.espelhado; } }
   c.espelhada = true;
   return c;
@@ -118,7 +138,7 @@ function planta(v, idx, op){
   if(lo){
     o.push(`<rect x="${X(lo.x0)}" y="${Y(lo.y0)}" width="${((lo.x1-lo.x0)*K).toFixed(1)}" height="${((lo.y1-lo.y0)*K).toFixed(1)}" fill="#EEF2E8" stroke="#5F7350" stroke-width="1.2"><title>Lote ${f2(L.frente)} × ${f2(L.fundo)} m</title></rect>`);
     o.push(`<rect x="${X(lo.x0+lo.rl)}" y="${Y(lo.y0+lo.rf)}" width="${((lo.x1-lo.x0-2*lo.rl)*K).toFixed(1)}" height="${((lo.y1-lo.y0-lo.rf-lo.rb)*K).toFixed(1)}" fill="none" stroke="#5F7350" stroke-width=".7" stroke-dasharray="5 4"><title>Área edificável</title></rect>`);
-    o.push(`<text x="${((X(lo.x0)+X(lo.x1))/2).toFixed(1)}" y="${(Y(lo.y0)-6).toFixed(1)}" class="cota" style="font-size:7.4px;font-weight:600;fill:#5F7350">RUA</text>`);
+    o.push(`<text x="${((X(lo.x0)+X(lo.x1))/2).toFixed(1)}" y="${(Y(lo.y0)-16).toFixed(1)}" class="cota" style="font-size:7.4px;font-weight:600;fill:#5F7350">RUA</text>`);
   }
   // rooftop: pavimento de baixo esmaecido, para dar proporção
   if(p.base){ for(const b of p.base){ const c = COR[b.zona] || COR.apoio;
@@ -127,6 +147,8 @@ function planta(v, idx, op){
   // pátios (H)
   if(idx===v.pav.findIndex(q => q.nome==='Térreo') && v.patios) for(const pt of v.patios) if(pt.y1-pt.y0>0.5)
     o.push(`<rect x="${X(pt.x0)}" y="${Y(pt.y0)}" width="${((pt.x1-pt.x0)*K).toFixed(1)}" height="${((pt.y1-pt.y0)*K).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}"><title>Pátio</title></rect>`);
+  // acessos por cima dos pátios (no H o caminho atravessa o pátio até a entrada)
+  if(lo && p.nome==='Térreo') desenhaAcessos(v.acessos, X, Y, K, o);
   // pátios ingleses do subsolo
   for(const pc of pocos){
     o.push(`<rect x="${X(pc.x0)}" y="${Y(pc.y0)}" width="${((pc.x1-pc.x0)*K).toFixed(1)}" height="${((pc.y1-pc.y0)*K).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}" stroke-dasharray="4 3"><title>Pátio inglês ${f2(Math.min(pc.x1-pc.x0, pc.y1-pc.y0))} m</title></rect>`);
@@ -243,6 +265,10 @@ function planta(v, idx, op){
       else seg(e, PAREDE, 6, 'stroke-linecap="square"');
     }
   }
+  if(p.nome==='Térreo' && v.acessos) for(const r of v.acessos.vias.filter(r => r.tipo==='garagem')){
+    seg({o:'h', c:r.y1, t0:r.x0 + 0.15, t1:r.x1 - 0.15}, PISO, 6.6);
+    seg({o:'h', c:r.y1, t0:r.x0 + 0.15, t1:r.x1 - 0.15}, AC.veiculos, 1.2, 'stroke-dasharray="5 3"');
+  }
   // vãos parciais (closet), portas e janelas
   if(!ehSub) for(const e of (p.vaos||[]).filter(e => !e.livre)) seg(e, PISO, 4.4);
   for(const e of (p.janelas||[])){
@@ -340,12 +366,8 @@ function lote(v, q, res){
   const ter = v.pav.find(p => p.nome==='Térreo');
   for(const s of ter.salas){ const c = COR[s.zona]||COR.apoio;
     o.push(`<rect x="${X(v.x0+s.x0)}" y="${Y(v.y0+s.y0)}" width="${((s.x1-s.x0)*k).toFixed(1)}" height="${((s.y1-s.y0)*k).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width=".5"/>`); }
-  // vagas descobertas no recuo frontal
-  const fora = q.garagem==='nenhuma' ? 0 : Math.max(0, (q.vagasT||0) - (v.garagemDentro||0));
-  if(fora>0){
-    const n = Math.min(fora, Math.floor((q.frente-0.5)/2.5)), dy = Math.min(5, q.recFrente-0.2);
-    for(let i=0;i<n;i++) o.push(`<rect x="${X(0.3+i*2.5)}" y="${Y(q.recFrente-dy)}" width="${2.4*k}" height="${dy*k}" fill="#E9E6E1" stroke="#A39C90" stroke-dasharray="2 2"><title>Vaga descoberta</title></rect>`);
-  }
+  // acessos: faixas de veículos, vagas descobertas, caminho e portões (coordenadas da casa → lote)
+  desenhaAcessos(v.acessos, m => X(v.x0 + m), m => Y(v.y0 + m), k, o, true);
   const rt = v.pav.find(p => p.nome==='Rooftop');
   if(rt){ const xs = rt.salas.map(s => [s.x0, s.x1]).flat(), ys = rt.salas.map(s => [s.y0, s.y1]).flat();
     const a0 = Math.min(...xs), a1 = Math.max(...xs), b0 = Math.min(...ys), b1 = Math.max(...ys);
@@ -385,9 +407,12 @@ function lote(v, q, res){
   if(!(v.anexos||[]).length) o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.fundo - q.recFundo/2)+3}" class="cota">fundo ${f2(q.fundo - v.y0 - v.D)} m livres</text>`);
   const F = rumoGraus(q.orientacao);
   const gg = girado(o.join(''), F, X(0) - 30, Y(0) - 22, X(q.frente) + 8, Y(q.fundo) + 8, 14, 14);
-  const W2 = Math.ceil(gg.Wr + 100), H2 = Math.ceil(Math.max(gg.Hr + 28, 150));
+  const W2 = Math.ceil(gg.Wr + 100), H2 = Math.ceil(Math.max(gg.Hr + 28, 150)) + (v.acessos ? 18 : 0);
   o.length = 0; o.push(gg.g, rosa(W2 - 44, 60, 24, q.orientacao));
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" role="img" aria-label="Implantação no lote"><style>text{font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif}.cota{font-size:8px;text-anchor:middle;fill:#55595F}.halo text{paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px}</style><rect width="100%" height="100%" fill="#FBFAF7"/>${o.join('')}</svg>`;
+  // legenda dos acessos (na implantação a escala é pequena para rótulos junto dos portões)
+  if(v.acessos){ const pv = v.acessos.portoes.filter(p => p.tipo==='veiculos').map(p => f2(p.largura)).join(' + '), ps = v.acessos.portoes.filter(p => p.tipo==='pedestres').map(p => f2(p.largura)).join(' + ');
+    o.push(`<g transform="translate(14,${H2 - 10})" style="font-size:7px;fill:#43474D"><line x1="0" y1="-2.5" x2="14" y2="-2.5" stroke="${AC.veiculos}" stroke-width="4"/><text x="18" y="0">portão de veículos${pv ? ' ' + pv + ' m' : ''}</text><line x1="124" y1="-2.5" x2="138" y2="-2.5" stroke="${AC.pedestres}" stroke-width="4"/><text x="142" y="0">portão social ${ps} m</text><rect x="214" y="-6" width="14" height="7" fill="${AC.caminho[0]}" stroke="${AC.caminho[1]}" stroke-width=".8"/><text x="232" y="0">caminho de pedestres</text></g>`); }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" role="img" aria-label="Implantação no lote"><style>text{font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif}.cota{font-size:8px;text-anchor:middle;fill:#55595F}.rd{text-anchor:middle;fill:#4a4e55}.halo text{paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px}</style><rect width="100%" height="100%" fill="#FBFAF7"/>${o.join('')}</svg>`;
 }
 
 return {planta, lote, espelha, COR};
