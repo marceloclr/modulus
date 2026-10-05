@@ -219,6 +219,7 @@ a.btn{text-decoration:none}
 .back{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--ink-2);text-decoration:none;padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);flex:none}
 .back:hover{border-color:var(--ink-3);color:var(--ink)}
 @media (max-width:560px){.back{padding:6px 8px;font-size:12px}.crumb .sec{display:none}}
+.figure.hum svg{max-width:min(100%,980px);border-radius:10px}
 .figure.hum img{display:block;width:100%;height:auto;max-width:600px;margin:0 auto;background:#fff;border-radius:10px;cursor:zoom-in}
 svg .fx{fill:var(--surface-2);stroke:var(--ink-2);stroke-width:.8}
 svg .fxb{fill:var(--glass-f);stroke:var(--win);stroke-width:.8}
@@ -299,8 +300,8 @@ svg .txs{font:400 9.5px 'IBM Plex Sans',system-ui,sans-serif;fill:var(--ink-2)}
       <ul class="clean" style="--c:var(--brass)">
         <li>Rede na varanda frontal; churrasqueira, varal e mesa externa na varanda de fundo.</li>
         <li>Sapateira no vestíbulo e armários de closet com 0,55 m de profundidade.</li>
-        <li>Box de canto com porta de correr em todos os banhos.</li>
-        <li>Bancada dupla e escrivaninha sob a janela lateral nas opções C e D.</li>
+        <li>Boxe acessível de 0,90 × 0,95 m, sem desnível e com banco articulado, em todos os banhos (NBR 9050).</li>
+        <li>Escrivaninha sob a janela lateral nas opções C e D.</li>
         <li>Na opção B, lavanderia junto à cozinha e despensa no lugar da área de serviço.</li>
       </ul>
     </div>
@@ -980,31 +981,31 @@ var HUM={
      dims:calc('7,00 × 22,00 m','Largura Wb = 2 × 2,90 + 1,20 = 7,00 m; comprimento L = 1,80 + 4,20 + 3,00 + 6,00 + 5,00 + 2,00 = 22,00 m'),
      fech:calc('127,40 m²','Área fechada = 7,00 × (20,00 − 1,80) = 127,40 m²'),
      tot:calc('154,00 m²','127,40 + 12,60 (varanda frontal) + 14,00 (varanda de fundo) = 154,00 m²'),
-     dest:['Rede na varanda frontal; churrasqueira, varal e mesa ao fundo','Sapateira no vestíbulo e armários de closet com 0,55 m','Box de canto com porta de correr'],
-     mel:['Churrasqueira, varal e mesa externa na varanda de fundo','Rede de descanso na varanda frontal','Sapateira no vestíbulo','Box de canto com porta de correr','Armários de closet com 0,55 m'],
-     mob:[['Suítes','Cama de casal de 1,40 m com a cabeceira na parede frontal; janela-banco frontal e lateral'],['Closets','Armários com 0,55 m de profundidade'],['Banhos','Box de canto com porta de correr'],['Vestíbulo','Sapateira'],['Sala','Estar e jantar integrados, dois ventiladores de teto'],['Varanda frontal','Rede de descanso'],['Varanda de fundo','Churrasqueira, varal e mesa externa']]},
+     dest:['Rede na varanda frontal; churrasqueira, varal e mesa ao fundo','Sapateira no vestíbulo e armários de closet com 0,55 m','Boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado'],
+     mel:['Churrasqueira, varal e mesa externa na varanda de fundo','Rede de descanso na varanda frontal','Sapateira no vestíbulo','Boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado','Armários de closet com 0,55 m'],
+     mob:[['Suítes','Cama de casal de 1,40 m com a cabeceira na parede frontal; janela-banco frontal e lateral'],['Closets','Armários com 0,55 m de profundidade'],['Banhos','Boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado'],['Vestíbulo','Sapateira'],['Sala','Estar e jantar integrados, dois ventiladores de teto'],['Varanda frontal','Rede de descanso'],['Varanda de fundo','Churrasqueira, varal e mesa externa']]},
   B:{f:'planta_B_v2',frente:'sul, com o leste à esquerda',
      dims:calc('7,00 × 22,00 m','Casa 7,00 × 22,00 m com eixo de simetria em y = 11,00; suítes nas extremidades sul e norte'),
      fech:calc('128,80 m²','Área fechada = 7,00 × (20,20 − 1,80) = 128,80 m²'),
      tot:calc('154,00 m²','128,80 + 12,60 (varanda sul) + 12,60 (varanda norte) = 154,00 m²'),
      dest:['Lavanderia com máquina e tanque junto à cozinha','Ex-área de serviço convertida em despensa com prateleiras','Churrasqueira, varal e mesa na varanda norte'],
-     mel:['Lavanderia (máquina e tanque) junto à cozinha','Ex-área de serviço como despensa e depósito','Churrasqueira, varal e mesa na varanda norte','Rede de descanso na varanda sul','Sapateira no vestíbulo; box de canto de correr','Armários de closet com 0,55 m'],
-     mob:[['Suítes','Cama queen com a cabeceira na parede leste; janela-banco leste e janela-banco na fachada'],['Closets','Armários com 0,55 m de profundidade'],['Banhos','Box de canto com porta de correr'],['Vestíbulo','Sapateira'],['Cozinha','Bancada sob a janela leste, torre T1 no centro'],['Lavanderia','Máquina de lavar e tanque'],['Despensa e depósito','Prateleiras'],['Varanda sul','Rede de descanso'],['Varanda norte','Churrasqueira, varal e mesa externa']],
+     mel:['Lavanderia (máquina e tanque) junto à cozinha','Ex-área de serviço como despensa e depósito','Churrasqueira, varal e mesa na varanda norte','Rede de descanso na varanda sul','Sapateira no vestíbulo; boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado','Armários de closet com 0,55 m'],
+     mob:[['Suítes','Cama queen com a cabeceira na parede leste; janela-banco leste e janela-banco na fachada'],['Closets','Armários com 0,55 m de profundidade'],['Banhos','Boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado'],['Vestíbulo','Sapateira'],['Cozinha','Bancada sob a janela leste, torre T1 no centro'],['Lavanderia','Máquina de lavar e tanque'],['Despensa e depósito','Prateleiras'],['Varanda sul','Rede de descanso'],['Varanda norte','Churrasqueira, varal e mesa externa']],
      par:['Casa 7,00 × 22,65 m, frente ao sul','Eixo de simetria transversal em y = 11,33','Faixa oeste de apoio: 1,20 m junto às suítes e 1,65 m no centro','Banho acessível de 2,40 × 2,50 m e closet de 2,40 × 2,20 m','Norte para cima: rua embaixo, leste à direita']},
   C:{f:'planta_C_v2',frente:'leste',
      dims:calc('9,20 × 21,80 m','Largura Wb = 2 × 4,00 + 1,20 = 9,20 m; comprimento L = 1,80 + 5,00 + 3,00 + 5,50 + 4,50 + 2,00 = 21,80 m'),
      fech:calc('165,60 m²','Área fechada = 9,20 × (19,80 − 1,80) = 165,60 m²'),
      tot:calc('200,56 m²','165,60 + 16,56 (varanda frontal) + 18,40 (varanda de fundo) = 200,56 m²'),
-     dest:['Bancada dupla com duas cubas no banho','Escrivaninha sob a janela lateral dos quartos','Rede, churrasqueira, varal, mesa externa e sapateira'],
-     mel:['Churrasqueira, varal e mesa externa na varanda de fundo','Rede de descanso na varanda frontal','Sapateira no vestíbulo; escrivaninha sob a janela lateral','Box de canto com porta de correr','Bancada dupla com duas cubas no banho','Armários de closet com 0,55 m'],
-     mob:[['Suítes','Cama queen com a cabeceira na parede frontal; escrivaninha sob a janela lateral'],['Closets','Armários com 0,55 m de profundidade'],['Banhos','Bancada dupla com duas cubas; box de canto com porta de correr'],['Vestíbulo','Sapateira'],['Sala','Estar e jantar integrados, dois ventiladores de teto'],['Varanda frontal','Rede de descanso'],['Varanda de fundo','Churrasqueira, varal e mesa externa']]},
+     dest:['Banho acessível com lavatório suspenso, bacia com barras e boxe com banco','Escrivaninha sob a janela lateral dos quartos','Rede, churrasqueira, varal, mesa externa e sapateira'],
+     mel:['Churrasqueira, varal e mesa externa na varanda de fundo','Rede de descanso na varanda frontal','Sapateira no vestíbulo; escrivaninha sob a janela lateral','Boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado','Bancada dupla com duas cubas no banho','Armários de closet com 0,55 m'],
+     mob:[['Suítes','Cama queen com a cabeceira na parede frontal; escrivaninha sob a janela lateral'],['Closets','Armários com 0,55 m de profundidade'],['Banhos','Lavatório suspenso, bacia com barras de apoio e boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado'],['Vestíbulo','Sapateira'],['Sala','Estar e jantar integrados, dois ventiladores de teto'],['Varanda frontal','Rede de descanso'],['Varanda de fundo','Churrasqueira, varal e mesa externa']]},
   D:{f:'planta_D_v2',frente:'leste',
      dims:calc('11,20 × 21,80 m','Largura Wb = 2 × 5,00 + 1,20 = 11,20 m; comprimento L = 1,80 + 5,00 + 3,00 + 5,50 + 4,50 + 2,00 = 21,80 m'),
      fech:calc('201,60 m²','Área fechada = 11,20 × (19,80 − 1,80) = 201,60 m²'),
      tot:calc('244,16 m²','201,60 + 20,16 (varanda frontal) + 22,40 (varanda de fundo) = 244,16 m²'),
-     dest:['Closet com armários nos dois lados e corredor de 1,30 m','Bancada dupla de 1,80 m no banho','Escrivaninha sob a janela lateral dos quartos'],
-     mel:['Churrasqueira, varal e mesa externa na varanda de fundo','Rede de descanso na varanda frontal','Sapateira no vestíbulo; escrivaninha sob a janela lateral','Box de canto com porta de correr','Closet com armários nos dois lados (corredor de 1,30 m)','Bancada dupla de 1,80 m no banho'],
-     mob:[['Suítes','Cama queen com a cabeceira na parede frontal; escrivaninha sob a janela lateral'],['Closets','Armários nos dois lados, corredor de 1,30 m'],['Banhos','Bancada dupla de 1,80 m; box de canto com porta de correr'],['Vestíbulo','Sapateira'],['Sala','Estar e jantar integrados, dois ventiladores de teto'],['Varanda frontal','Rede de descanso'],['Varanda de fundo','Churrasqueira, varal e mesa externa']]}
+     dest:['Closet com armários nos dois lados e corredor de 1,30 m','Banho acessível com lavatório suspenso, bacia com barras e boxe com banco','Escrivaninha sob a janela lateral dos quartos'],
+     mel:['Churrasqueira, varal e mesa externa na varanda de fundo','Rede de descanso na varanda frontal','Sapateira no vestíbulo; escrivaninha sob a janela lateral','Boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado','Closet com armários nos dois lados (corredor de 1,30 m)','Bancada dupla de 1,80 m no banho'],
+     mob:[['Suítes','Cama queen com a cabeceira na parede frontal; escrivaninha sob a janela lateral'],['Closets','Armários nos dois lados, corredor de 1,30 m'],['Banhos','Lavatório suspenso, bacia com barras de apoio e boxe acessível de 0,90 × 0,95 m, sem desnível, com banco articulado'],['Vestíbulo','Sapateira'],['Sala','Estar e jantar integrados, dois ventiladores de teto'],['Varanda frontal','Rede de descanso'],['Varanda de fundo','Churrasqueira, varal e mesa externa']]}
 };
 function params(v){
   var sm=v.dS+v.sala/2;
@@ -1024,19 +1025,19 @@ function pHum(g){
   var h=HUM[g],v=vFor(g),f=h.f+'_norte';
   return head(v,'Planta humanizada','Versão 2 do estudo, com mobiliário, equipamentos e quadro de áreas, girada para o norte ficar para cima. A frente da casa fica voltada a '+h.frente+'.','--rust')+
   '<div class="stats s3">'+stat('Casa adaptada',f2(v.Wb)+' × '+f2(v.L)+' m','--patina')+stat('Área fechada',f2(v.nucleo)+' m²','--slate')+stat('Com varandas',f2(v.cob)+' m²','--brass')+'</div>'+
-  '<p class="note">A planta humanizada v2 é anterior à adaptação dos banheiros à NBR 9050. As medidas acima já são as da casa adaptada; o arranjo atual dos banhos e do WC está na planta técnica e na planta de circulação.</p>'+
+  '<p class="note">Gerada do mesmo modelo da planta técnica e da planta de circulação: janelas, portas, banhos acessíveis e móveis coincidem nas três. As janelas de cada quarto ficam em pontos distantes (frente junto ao vestíbulo e lateral no fundo), para a ventilação cruzada.</p>'+
   '<figure class="figure hum"><div class="fig-tools">'+
   '<a class="btn" href="'+f+'.svg" target="_blank" rel="noopener" data-tip="Abre a planta vetorial em nova aba, com zoom sem perda">Ampliar</a>'+
   '<a class="btn" href="'+f+'.png" download data-tip="Salva a versão PNG, boa para o celular">Baixar PNG</a></div>'+
-  '<a href="'+f+'.svg" target="_blank" rel="noopener" aria-label="Abrir a planta humanizada em nova aba"><img src="'+f+'.svg" onerror="this.onerror=null;this.src=\''+f+'.png\'" alt="Planta humanizada da '+v.nome+', com o norte para cima"></a>'+
-  '<figcaption>Norte para cima. Clique na planta para abri-la em tamanho real; se o navegador não exibir o SVG, a imagem PNG é carregada no lugar.</figcaption></figure>'+
+  humDoc(g,true)+
+  '<figcaption>Norte para cima. Passe o cursor sobre as portas e as janelas para ver o vão e o tipo; “Ampliar” abre o arquivo vetorial e “Baixar PNG”, a imagem.</figcaption></figure>'+
   '<div class="card tint" style="--c:var(--rust)"><h3>Destaques</h3><ul class="clean" style="--c:var(--rust)">'+h.dest.map(li).join('')+'</ul></div>'+
   (ORIS[g]==='SE'?'<p class="note">A planta humanizada foi desenhada com a frente para leste. Com a frente a sudeste, a distribuição interna é a mesma; mudam a leitura do sol e do vento, os brises das laterais e o nome das fachadas, como mostram as demais seções.</p>':'');
 }
 
 function pMob(g){
   var h=HUM[g],v=vFor(g),par=h.par||params(v);
-  return head(v,'Mobiliário e parâmetros','O que a versão 2 das plantas humanizadas acrescentou, ambiente por ambiente, e as medidas que geram o desenho.','--slate')+
+  return head(v,'Mobiliário e parâmetros','O mobiliário da planta humanizada, ambiente por ambiente, e as medidas que geram o desenho.','--slate')+
   '<div class="tbl-wrap"><table><thead><tr><th>Ambiente</th><th>Mobiliário e equipamentos</th></tr></thead><tbody>'+
   h.mob.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join('')+'</tbody></table></div>'+
   '<div class="grid2"><div class="card tint" style="--c:var(--patina)"><h3>Melhorias da versão 2</h3><ul class="clean" style="--c:var(--patina)">'+h.mel.map(li).join('')+'</ul></div>'+
@@ -1592,6 +1593,118 @@ function pComparativo(){
   '</tbody></table></div>'+
   '<div class="grid2"><div class="card tint" style="--c:var(--steel)"><h3>Quando o lote é de 10 × 30</h3><p style="margin-bottom:0">A casa ocupa toda a largura edificável de 7 m, e os banheiros acessíveis só cabem alongando a casa. Com a frente a leste ou sudeste, a opção A chega a '+f2(A.L)+' m de comprimento, com quartos de '+f2(A.a.quarto)+' m² e sala de 42 m². Com a frente sul, a opção B chega a '+f2(B.L)+' m, com quartos de 15,98 m² e lavanderia, mas divide a sala em estar e jantar e depende mais das torres.</p></div>'+
   '<div class="card tint" style="--c:var(--brass)"><h3>Quando há lote mais largo</h3><p style="margin-bottom:0">As opções C e D já tinham banhos de 2,20 e 2,60 m de largura: recebem o arranjo acessível sem mudar de tamanho. Com 12,5 m ou mais de frente, a opção C oferece quartos de 20 m² e sala de '+f1(C.a.sala)+' m²; a partir de 14,5 m, a opção D chega a quartos de 25 m² e sala acima de 60 m².</p></div></div>';
+}
+
+/* ---------- Planta humanizada gerada (outubro de 2026) ----------
+   Desenhada a partir do mesmo modelo da planta técnica e da circulação (roomsACD/roomsB, BLY, planSVG/planB):
+   janelas, portas, banhos e móveis nunca mais divergem entre as plantas. SVG autossuficiente (estilos hz-*),
+   usado na página e exportado para os arquivos planta_X_v2(_norte).svg/png por tools/humanizadas.mjs. */
+var HZ={s:30,pad:46,top:92,cor:{suite:['#E3EEEC','#93B3AC'],apoio:['#ECECE8','#ABAB9F'],social:['#E7E7F0','#9C9CBD'],varanda:['#F3EBDD','#C8B08A']}};
+var HZ_CSS='<style>.hz-t{font-family:"IBM Plex Sans","Inter","Segoe UI",Helvetica,Arial,sans-serif;fill:#2F333A}.hz-tt{font-size:15px;font-weight:600}.hz-st{font-size:8.6px;fill:#5d6168}.hz-rn{font-weight:600;text-anchor:middle;letter-spacing:.2px}.hz-rd{text-anchor:middle;fill:#4a4e55}</style>';
+function hzZona(s){return /Quarto|Banho|Closet/.test(s)?'suite':/Roup|Desp|WC|AS|Lav/.test(s)?'apoio':'social';}
+// aberturas, torres e setas de vento lidas da planta técnica (mesmo desenho, sem duplicar números)
+function hzTecnica(g){
+  var B=g==='B',svg=B?planB():planSVG(vFor(g)),s=26,o=44,out={win:[],hi:[],dr:[],torre:[],flow:[]};
+  var ax=function(X){return B?7-(X-o)/s:(X-o)/s;},dy=function(Y){return (Y-o)/s;};
+  svg.replace(/<line class="(win|hi|dr)" x1="([\d.\-]+)" y1="([\d.\-]+)" x2="([\d.\-]+)" y2="([\d.\-]+)">(?:<title>([^<]*)<\/title>)?/g,function(m,c,x1,y1,x2,y2,t){
+    out[c].push({a1:ax(+x1),d1:dy(+y1),a2:ax(+x2),d2:dy(+y2),t:t||''});return m;});
+  svg.replace(/<rect class="z-torre" x="([\d.\-]+)" y="([\d.\-]+)" width="([\d.\-]+)" height="([\d.\-]+)"><title>([^<]*)<\/title>/g,function(m,x,y,w,h,t){
+    var a1=ax(+x),a2=ax(+x+(+w));out.torre.push({a1:Math.min(a1,a2),a2:Math.max(a1,a2),d1:dy(+y),d2:dy(+y+(+h)),t:t});return m;});
+  svg.replace(/<path class="flow" d="M([^"]+)"/g,function(m,d){out.flow.push(d.split(' L').map(function(p){var q=p.trim().split(' ');return [ax(+q[0]),dy(+q[1])];}));return m;});
+  return out;
+}
+function humSVG(g){
+  var M=circModel(g),T=hzTecnica(g),s=HZ.s,W=M.W,L=M.L,flip=M.flip,o=[],v=g==='B'?B2:vFor(g);
+  function X(a){return +(((flip?W-a:a))*s).toFixed(1);} function Y(d){return +(d*s).toFixed(1);}
+  function rect(a1,d1,a2,d2,at){var x1=Math.min(X(a1),X(a2)),x2=Math.max(X(a1),X(a2)),y1=Math.min(Y(d1),Y(d2)),y2=Math.max(Y(d1),Y(d2));return '<rect x="'+x1+'" y="'+y1+'" width="'+(x2-x1).toFixed(1)+'" height="'+(y2-y1).toFixed(1)+'" '+at+'/>';}
+  function line(a1,d1,a2,d2,at,tt){return '<line x1="'+X(a1)+'" y1="'+Y(d1)+'" x2="'+X(a2)+'" y2="'+Y(d2)+'" '+at+(tt?'><title>'+tt+'</title></line>':'/>');}
+  function txt(a,d,t,cl,fs){return '<text class="hz-t '+cl+'" x="'+X(a)+'" y="'+Y(d)+'" font-size="'+fs+'">'+t+'</text>';}
+  var salas=M.R;
+  // pisos: varandas e cômodos
+  M.ext.forEach(function(e){o.push(rect(e[0],e[1],e[2],e[3],'fill="'+HZ.cor.varanda[0]+'" stroke="'+HZ.cor.varanda[1]+'"'));});
+  salas.forEach(function(r){var c=HZ.cor[hzZona(r.s)];o.push(rect(r.r[0],r.r[1],r.r[2],r.r[3],'fill="'+c[0]+'" stroke="'+c[1]+'"'));});
+  // móveis
+  var F='fill="#FFFFFF" stroke="#6F6A60" stroke-width="0.8"',MAD='fill="#EDE5D6" stroke="#8C8270" stroke-width="0.9"';
+  salas.forEach(function(r){
+    if(r.bath){var E={R:function(a1,d1,a2,d2,c){if(c==='fxb')o.push(rect(a1,d1,a2,d2,'fill="#E1EBF2" stroke="#7F9BB1" stroke-width="0.9"'));else if(c==='fxs')o.push(rect(a1,d1,a2,d2,'fill="#E8E4DC" stroke="#7C776D" stroke-width="0.8"'));else if(c==='fx')o.push(rect(a1,d1,a2,d2,'rx="2" '+F));},
+        L:function(a1,d1,a2,d2,c){if(c==='bar')o.push(line(a1,d1,a2,d2,'stroke="#5E7F98" stroke-width="1.6" stroke-linecap="round"'));},C:function(){}};
+      emitFix(r.bath.Ly,r.bath.M,r.bath.sh,E);return;}
+    (r.f||[]).forEach(function(f){var a1=f[0],d1=f[1],a2=f[2],d2=f[3],n=f[4],w=a2-a1,h=d2-d1;
+      if(/Cama/.test(n)){
+        var porY=h>w,cab=porY?(Math.abs(d1-r.r[1])<0.25?'d1':'d2'):(Math.abs(a1-r.r[0])<0.25?'a1':'a2');
+        o.push(rect(a1,d1,a2,d2,'rx="2" fill="#FFFFFF" stroke="#6F6A60" stroke-width="0.8"'));
+        o.push(rect(porY?a1+0.05:(cab==='a1'?a1+0.45:a1+0.05),porY?(cab==='d1'?d1+0.45:d1+0.05):d1+0.05,porY?a2-0.05:(cab==='a1'?a2-0.05:a2-0.45),porY?(cab==='d1'?d2-0.05:d2-0.45):d2-0.05,'rx="2" fill="#D7E5E1" stroke="#9DB3AD" stroke-width="0.6"'));
+        for(var k=0;k<2;k++){if(porY){var pa=a1+0.12+k*(w-0.24)/2,yy=cab==='d1'?d1+0.08:d2-0.38;o.push(rect(pa,yy,pa+(w-0.36)/2,yy+0.3,'rx="3" fill="#F6F3EC" stroke="#6F6A60" stroke-width="0.7"'));}
+          else{var pd=d1+0.12+k*(h-0.24)/2,xx=cab==='a1'?a1+0.08:a2-0.38;o.push(rect(xx,pd,xx+0.3,pd+(h-0.36)/2,'rx="3" fill="#F6F3EC" stroke="#6F6A60" stroke-width="0.7"'));}}
+      } else if(/Sofá/.test(n)){o.push(rect(a1,d1,a2,d2,'rx="4" fill="#C9D6CF" stroke="#6F6A60" stroke-width="0.8"'));o.push(rect(a1,d1,a1+0.22,d2,'rx="3" fill="#B3C5BB" stroke="#6F6A60" stroke-width="0.6"'));}
+      else if(/Mesa de jantar/.test(n)){o.push(rect(a1+0.45,d1+0.45,a2-0.45,d2-0.45,'rx="2" fill="#E2D5BE" stroke="#8C7B5C" stroke-width="0.9"'));
+        var nl=Math.max(2,Math.round((h-0.9)/0.6));for(var i=0;i<nl;i++){var cy=d1+0.45+(i+0.5)*(h-0.9)/nl;o.push(rect(a1+0.05,cy-0.2,a1+0.4,cy+0.2,'rx="1.5" '+F));o.push(rect(a2-0.4,cy-0.2,a2-0.05,cy+0.2,'rx="1.5" '+F));}}
+      else if(/Mesa de centro/.test(n)) o.push(rect(a1,d1,a2,d2,'rx="2" fill="#E2D5BE" stroke="#8C7B5C" stroke-width="0.8"'));
+      else if(/Geladeira/.test(n)) o.push(rect(a1,d1,a2,d2,'rx="1.5" fill="#F4F4F2" stroke="#6F6A60" stroke-width="0.9"'));
+      else if(/Bancada/.test(n)){o.push(rect(a1,d1,a2,d2,'fill="#E8E4DC" stroke="#7C776D" stroke-width="0.8"'));var cx=(a1+a2)/2,cyy=(d1+d2)/2;o.push('<circle cx="'+X(cx)+'" cy="'+Y(cyy)+'" r="'+(Math.min(w,h)*0.28*s).toFixed(1)+'" fill="#FFFFFF" stroke="#6F6A60" stroke-width="0.7"/>');}
+      else if(/Armário|Prateleiras/.test(n)){o.push(rect(a1,d1,a2,d2,MAD));var lg=Math.max(w,h),nn=Math.max(2,Math.round(lg/0.6));for(var j=1;j<nn;j++){if(h>w)o.push(line(a1,d1+j*h/nn,a2,d1+j*h/nn,'stroke="#8C8270" stroke-width="0.6"'));else o.push(line(a1+j*w/nn,d1,a1+j*w/nn,d2,'stroke="#8C8270" stroke-width="0.6"'));}}
+      else if(/Escrivaninha/.test(n)){o.push(rect(a1,d1,a2,d2,'rx="1" fill="#E2D5BE" stroke="#8C7B5C" stroke-width="0.9"'));var ca=a1<r.r[0]+0.1?a2+0.05:a1-0.5,cd=(d1+d2)/2;o.push(rect(ca,cd-0.22,ca+0.45,cd+0.22,'rx="1.5" fill="#F1ECE2" stroke="#6F6A60" stroke-width="0.8"'));}
+      else if(/Banco/.test(n)){o.push(rect(a1,d1,a2,d2,'rx="2" fill="#DCCFB6" stroke="#9C8A68" stroke-width="0.9"'));}
+      else if(/Tanque/.test(n)){o.push(rect(a1,d1,a2,d1+h/2-0.03,'rx="1.5" '+F));o.push('<circle cx="'+X((a1+a2)/2)+'" cy="'+Y(d1+h*0.75)+'" r="'+(Math.min(w,h/2)*0.38*s).toFixed(1)+'" '+F+'/>');}
+      else o.push(rect(a1,d1,a2,d2,'rx="1.5" '+F));
+    });
+  });
+  // varandas: rede na frontal; mesa externa, churrasqueira e varal na de fundo; sapateira no vestíbulo
+  var vf=M.ext[0],vb=M.ext[1];
+  if(vf){var ra=vf[0]+0.5,rd=(vf[1]+vf[3])/2;o.push('<path d="M'+X(ra)+','+Y(rd)+' Q'+X(ra+1.0)+','+Y(rd+0.45)+' '+X(ra+2.0)+','+Y(rd)+'" fill="none" stroke="#B98C7A" stroke-width="5" stroke-linecap="round" opacity=".8"><title>Rede de descanso</title></path>');}
+  if(vb){var mc=(vb[0]+vb[2])/2,md=(vb[1]+vb[3])/2;o.push(rect(mc-0.8,md-0.4,mc+0.8,md+0.4,'rx="2" fill="#E2D5BE" stroke="#8C7B5C" stroke-width="0.9"'));
+    o.push(rect(vb[2]-1.1,vb[1]+0.15,vb[2]-0.15,vb[1]+0.75,'fill="#C9BCA4" stroke="#6F6A60" stroke-width="0.8"'));
+    o.push(line(vb[0]+0.4,vb[3]-0.35,vb[0]+1.9,vb[3]-0.35,'stroke="#9C8A68" stroke-width="0.8" stroke-dasharray="2 2"'));}
+  var ve=salas.filter(function(r){return r.s==='Vest.';})[0];
+  if(ve) o.push(rect(ve.r[0]+0.05,ve.r[1]+0.15,ve.r[0]+0.4,ve.r[1]+1.1,MAD));
+  // torres (tracejadas, com X)
+  T.torre.forEach(function(t){o.push(rect(t.a1,t.d1,t.a2,t.d2,'fill="#F2E3DC" fill-opacity=".6" stroke="#C48F7A" stroke-width="1.2" stroke-dasharray="5 3"'));
+    o.push(line(t.a1,t.d1,t.a2,t.d2,'stroke="#C48F7A" stroke-width="0.6"'));o.push(line(t.a2,t.d1,t.a1,t.d2,'stroke="#C48F7A" stroke-width="0.6"'));});
+  // paredes
+  salas.forEach(function(r){o.push(rect(r.r[0],r.r[1],r.r[2],r.r[3],'fill="none" stroke="#2F333A" stroke-width="5"'));});
+  // vãos: janelas (três linhas) e portas (de correr: duas folhas; de abrir: folha e arco para dentro do cômodo)
+  function vao(p,cor){var hz=Math.abs(p.d1-p.d2)<1e-6;o.push(hz?rect(p.a1,p.d1-0.1,p.a2,p.d1+0.1,'fill="'+cor+'"'):rect(p.a1-0.1,p.d1,p.a1+0.1,p.d2,'fill="'+cor+'"'));}
+  T.win.forEach(function(p){vao(p,'#FFFFFF');var hz=Math.abs(p.d1-p.d2)<1e-6;
+    [-0.08,0.08].forEach(function(k){o.push(hz?line(p.a1,p.d1+k,p.a2,p.d2+k,'stroke="#3E6A92" stroke-width="1"'):line(p.a1+k,p.d1,p.a2+k,p.d2,'stroke="#3E6A92" stroke-width="1"'));});
+    o.push(line(p.a1,p.d1,p.a2,p.d2,'stroke="#3E6A92" stroke-width="1.4"'+(/maxim-ar/.test(p.t)?' stroke-dasharray="4 2"':''),p.t||'Janela'));});
+  T.hi.forEach(function(p){o.push(line(p.a1,p.d1,p.a2,p.d2,'stroke="#3E6A92" stroke-width="1" stroke-dasharray="3 3"'));});
+  function salaEm(a,d){return salas.filter(function(r){return a>r.r[0]+1e-6&&a<r.r[2]-1e-6&&d>r.r[1]+1e-6&&d<r.r[3]-1e-6;})[0];}
+  T.dr.forEach(function(p){
+    var hz=Math.abs(p.d1-p.d2)<1e-6,a1=Math.min(p.a1,p.a2),a2=Math.max(p.a1,p.a2),d1=Math.min(p.d1,p.d2),d2=Math.max(p.d1,p.d2),ma=(a1+a2)/2,md=(d1+d2)/2;
+    var lados=hz?[salaEm(ma,d1-0.3),salaEm(ma,d1+0.3)]:[salaEm(a1-0.3,md),salaEm(a1+0.3,md)];
+    var correr=/correr/.test(p.t)||lados.some(function(r){return r&&r.s==='Closet';});
+    var alvo=lados[1]&&!/Banho|WC/.test(lados[1].s)?1:lados[0]&&!/Banho|WC/.test(lados[0].s)?0:1,sg=alvo?1:-1;
+    var cz=lados[alvo]?HZ.cor[hzZona(lados[alvo].s)][0]:HZ.cor.varanda[0];vao({a1:a1,d1:d1,a2:a2,d2:d2},cz);
+    var tt=(correr?'Porta de correr':'Porta')+', vão livre de '+(hz?a2-a1:d2-d1).toFixed(2).replace('.',',')+' m'+(/correr/.test(p.t)?' (folha de 0,90 m)':'');
+    if(correr){if(hz){o.push(line(a1,d1-0.05,ma+0.08,d1-0.05,'stroke="#8a6f3c" stroke-width="2"'));o.push(line(ma-0.08,d1+0.05,a2,d1+0.05,'stroke="#8a6f3c" stroke-width="2"',tt));}
+      else{o.push(line(a1-0.05,d1,a1-0.05,md+0.08,'stroke="#8a6f3c" stroke-width="2"'));o.push(line(a1+0.05,md-0.08,a1+0.05,d2,'stroke="#8a6f3c" stroke-width="2"',tt));}}
+    else{var Lw=hz?a2-a1:d2-d1,pts=[];
+      for(var k=0;k<=10;k++){var th=k/10*Math.PI/2;pts.push(hz?[X(a1+Lw*Math.cos(th)),Y(d1+sg*Lw*Math.sin(th))]:[X(a1+sg*Lw*Math.sin(th)),Y(d1+Lw*Math.cos(th))]);}
+      o.push(hz?line(a1,d1,a1,d1+sg*Lw,'stroke="#8a6f3c" stroke-width="1.8"',tt):line(a1,d1,a1+sg*Lw,d1,'stroke="#8a6f3c" stroke-width="1.8"',tt));
+      o.push('<polyline points="'+pts.map(function(q){return q.join(',');}).join(' ')+'" fill="none" stroke="#8a6f3c" stroke-width="0.8" stroke-dasharray="3 2"/>');}
+  });
+  // ventilação cruzada (setas da planta técnica)
+  T.flow.forEach(function(p){o.push('<polyline points="'+p.map(function(q){return X(q[0])+','+Y(q[1]);}).join(' ')+'" fill="none" stroke="#4C86C6" stroke-width="1.3" stroke-dasharray="5 3" opacity=".85" marker-end="url(#hzSeta)"/>');});
+  // rótulos
+  salas.forEach(function(r){var w=r.r[2]-r.r[0],h=r.r[3]-r.r[1],a=(r.r[0]+r.r[2])/2,d=(r.r[1]+r.r[3])/2,pq=w*h<6;
+    var nome=(/suíte (\d)/.test(r.n)?r.s+' '+r.n.match(/suíte (\d)/)[1]:/suíte (sul|norte)/.test(r.n)?r.s+' '+r.n.match(/suíte (sul|norte)/)[1]:r.s).toUpperCase();
+    if(r.s==='Quarto') d=r.r[1]+h*0.62;
+    T.torre.forEach(function(t){if(a>t.a1-0.3&&a<t.a2+0.3&&d>t.d1-0.5&&d<t.d2+0.6) d=Math.min(r.r[3]-0.55,t.d2+0.5);});   // rótulo fora da torre
+    // um só <text> com <tspan>: no desenho girado (norte para cima) o rótulo gira inteiro em torno do mesmo ponto
+    o.push('<text class="hz-t hz-rn" x="'+X(a)+'" y="'+Y(d-(pq?0.05:0.2))+'" font-size="'+(pq?5.6:7)+'">'+nome+(pq?'':'<tspan class="hz-rd" x="'+X(a)+'" dy="1.25em" font-size="6">'+f2(w)+' × '+f2(h)+'</tspan><tspan class="hz-rd" x="'+X(a)+'" dy="1.2em" font-size="6">'+f2(w*h)+' m²</tspan>')+'</text>');});
+  return {inner:'<defs><marker id="hzSeta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 Z" fill="#4C86C6"/></marker></defs>'+o.join(''),w:W*s,h:L*s,v:v,up:M.up};
+}
+/* SVG completo da planta humanizada: rot = 0 (frente para cima) ou o giro do norte para cima (textos continuam de pé). */
+function humDoc(g,norte){
+  var H=humSVG(g),v=H.v,rot=norte?H.up:0,pad=HZ.pad,top=HZ.top,r=rot*Math.PI/180,c=Math.abs(Math.cos(r)),sn=Math.abs(Math.sin(r));
+  var W2=H.w*c+H.h*sn,H2=H.w*sn+H.h*c,CW=Math.max(470,Math.round(W2+2*pad+(norte?90:0))),CH=Math.round(H2+top+pad);
+  var inner=rot?H.inner.replace(/<text class="([^"]*)" x="([\d.\-]+)" y="([\d.\-]+)"/g,function(m,cl,x,y){return '<text class="'+cl+'" x="'+x+'" y="'+y+'" transform="rotate('+(-rot)+' '+x+' '+y+')"';}):H.inner;
+  var tit='Planta humanizada · '+v.nome,sub='Casa '+f2(v.Wb)+' × '+f2(v.L)+' m · 30 px/m · mesmo modelo da planta técnica'+(norte?' · norte para cima':' · frente para cima');
+  var rosa='';
+  if(norte){var cx=CW-50,cy=top+10;rosa='<circle cx="'+cx+'" cy="'+cy+'" r="22" fill="none" stroke="#9AA0A6"/><path d="M'+cx+','+(cy-20)+' L'+(cx+6)+','+cy+' L'+(cx-6)+','+cy+' Z" fill="#C0392B"/><path d="M'+cx+','+(cy+20)+' L'+(cx+6)+','+cy+' L'+(cx-6)+','+cy+' Z" fill="#9AA0A6"/><text class="hz-t hz-rn" x="'+cx+'" y="'+(cy-26)+'" font-size="9">N</text>';}
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+CW+' '+CH+'" width="'+CW+'" height="'+CH+'" role="img" aria-label="'+tit+'">'+HZ_CSS+'<title>'+tit+'</title><rect width="'+CW+'" height="'+CH+'" fill="#FBFAF7"/>'+
+    '<text class="hz-t hz-tt" x="'+pad+'" y="30">'+tit+'</text><text class="hz-t hz-st" x="'+pad+'" y="46">'+sub+'</text>'+
+    '<g transform="translate('+(Math.max(pad,(CW-(norte?90:0)-W2)/2)+W2/2).toFixed(1)+','+(top+H2/2).toFixed(1)+') rotate('+rot+') translate('+(-H.w/2).toFixed(1)+','+(-H.h/2).toFixed(1)+')">'+inner+'</g>'+rosa+'</svg>';
 }
 
 /* ---------- Navegação ---------- */

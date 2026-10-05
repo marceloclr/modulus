@@ -363,6 +363,19 @@ t('janelas: quartos de canto com duas janelas distantes (ventilação cruzada)',
   ok(quartosDeCanto >= 5, 'há quartos de canto com duas janelas: ' + quartosDeCanto);
 });
 
+t('casa simétrica: a humanizada sai do mesmo modelo da técnica (janelas e portas iguais)', () => {
+  const vm = require('vm'), html = require('fs').readFileSync(require('path').join(__dirname, '../casa-simetrica/index.html'), 'utf8');
+  const js = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).find(x => x.includes('function humDoc'));
+  const ctx = {Math, document:{documentElement:{}}, window:{matchMedia:() => ({matches:false})}};
+  vm.createContext(ctx); vm.runInContext(js.slice(0, js.indexOf('/* ---------- Navegação')).replace(/^\s*\(function\(\)\{/, '') + ';this.API={humDoc,hzTecnica};', ctx);
+  for(const g of ['A', 'B', 'C', 'D']){
+    const T = ctx.API.hzTecnica(g), h = ctx.API.humDoc(g, true);
+    ok(T.win.length >= 6 && T.dr.length >= 8, g + ': aberturas lidas da técnica');
+    igual((h.match(/<title>Porta/g) || []).length, T.dr.length, g + ': portas');
+    igual((h.match(/stroke-width="1.4"( stroke-dasharray="4 2")?><title>/g) || []).length, T.win.length, g + ': janelas');
+  }
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
