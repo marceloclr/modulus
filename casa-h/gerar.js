@@ -74,7 +74,9 @@ const VAOS = [
 ];
 // Janelas [x0,y0,x1,y1, alta?] e portas de vidro [.., 'vidro']
 const JAN = [
-  [1.2, 0, 3.8, 0], [0, 1, 0, 3], [0, 9, 0, 11], [0, 13, 0, 15],
+  // quartos: janelas em pontos distantes (premissa de 05/10/2026): na suíte 1, a frontal junto à circulação e a lateral no fundo;
+  // nas suítes 2 e master (uma só face externa), a janela longe da porta
+  [2.4, 0, 4.4, 0], [0, 1.6, 0, 3.6], [0, 8.4, 0, 10.4], [0, 13.8, 0, 15.6],
   [0, 4.6, 0, 5.4, 1], [0, 6.6, 0, 7.4, 1], [0.8, 19, 2.0, 19, 1], [3.6, 19, 5.4, 19, 1],
   [5.2, 0, 6.0, 0, 1], [6.2, 1.0, 6.2, 3.6], [6.2, 5.0, 6.2, 10.4],
   [6.6, 11, 12.4, 11, 'vidro'], [7.4, 15.8, 8.4, 15.8, 1], [9.4, 15.8, 12.2, 15.8],

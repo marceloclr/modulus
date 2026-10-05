@@ -199,5 +199,14 @@ function cartaoBrises(r, B, dados){
   return h + '</div>';
 }
 
-return {selo, cartaoCusto, cartaoEstrutura, cartaoSolar, cartaoTorre, cartaoBrises, cartaSolar, VISTAS, VISTAS_SOLAR, mesTxt};
+/* Card de acessibilidade (v.acessibilidade, com a opção marcada). */
+function cartaoAcessibilidade(v){
+  const it = v.acessibilidade, n = it.filter(i => i.ok).length;
+  let h = `<div class="card res" style="--c:var(--steel)"><div class="res-head"><h3>Acessibilidade</h3><p class="selo">NBR 9050:2020 · ${n} de ${it.length} itens atendidos</p></div>`;
+  h += '<div class="tbl-wrap"><table><tbody>' + it.map(i => `<tr><td>${esc(i.item)}</td><td>${i.ok ? '<span class="tag-ok">Atende</span>' : '<span class="tag-nao">Não atende</span>'}</td><td>${esc(i.detalhe)}</td></tr>`).join('') + '</tbody></table></div>';
+  h += '<p class="note">Verificação do estudo preliminar pela geometria: o círculo tracejado marca o giro de 1,50 m no banho acessível. Barras, alturas de peças e maçanetas ficam para o projeto executivo.</p>';
+  return h + '</div>';
+}
+
+return {selo, cartaoCusto, cartaoEstrutura, cartaoSolar, cartaoTorre, cartaoBrises, cartaSolar, cartaoAcessibilidade, VISTAS, VISTAS_SOLAR, mesTxt};
 });

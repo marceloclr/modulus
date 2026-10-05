@@ -57,14 +57,14 @@
 <line x1="348" y1="484" x2="444" y2="484" stroke="#F4F2EC" stroke-width="4.2" />
 <line x1="456" y1="505" x2="456" y2="565" stroke="#F4F2EC" stroke-width="4.2" />
 <line x1="459" y1="298" x2="519" y2="298" stroke="#F4F2EC" stroke-width="4.2" />
-<line x1="108" y1="118" x2="186" y2="118" stroke="#FFFFFF" stroke-width="6.4" />
-<line x1="108" y1="118" x2="186" y2="118" stroke="#4C86C6" stroke-width="1.4" />
-<line x1="72" y1="148" x2="72" y2="208" stroke="#FFFFFF" stroke-width="6.4" />
-<line x1="72" y1="148" x2="72" y2="208" stroke="#4C86C6" stroke-width="1.4" />
-<line x1="72" y1="388" x2="72" y2="448" stroke="#FFFFFF" stroke-width="6.4" />
-<line x1="72" y1="388" x2="72" y2="448" stroke="#4C86C6" stroke-width="1.4" />
-<line x1="72" y1="508" x2="72" y2="568" stroke="#FFFFFF" stroke-width="6.4" />
-<line x1="72" y1="508" x2="72" y2="568" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="144" y1="118" x2="204" y2="118" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="144" y1="118" x2="204" y2="118" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="72" y1="166" x2="72" y2="226" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="166" x2="72" y2="226" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="72" y1="370" x2="72" y2="430" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="370" x2="72" y2="430" stroke="#4C86C6" stroke-width="1.4" />
+<line x1="72" y1="532" x2="72" y2="586" stroke="#FFFFFF" stroke-width="6.4" />
+<line x1="72" y1="532" x2="72" y2="586" stroke="#4C86C6" stroke-width="1.4" />
 <line x1="72" y1="256" x2="72" y2="280" stroke="#FFFFFF" stroke-width="6.4" />
 <line x1="72" y1="256" x2="72" y2="280" stroke="#4C86C6" stroke-width="1.4" stroke-dasharray="3 2"/>
 <line x1="72" y1="316" x2="72" y2="340" stroke="#FFFFFF" stroke-width="6.4" />

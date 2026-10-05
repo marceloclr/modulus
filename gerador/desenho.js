@@ -168,6 +168,8 @@ function planta(v, idx, op){
     const c = COR[s.zona] || COR.apoio, a = Motor.area(s);
     o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width="1"><title>${esc(s.nome)}: ${f2(s.x1-s.x0)} × ${f2(s.y1-s.y0)} = ${f2(a)} m²</title></rect>`);
   }
+  // banho acessível (opção de acessibilidade): giro de 1,50 m no centro
+  for(const s of S.filter(x => x.acessivel)) o.push(`<circle cx="${X((s.x0+s.x1)/2)}" cy="${Y((s.y0+s.y1)/2)}" r="${(0.75*K).toFixed(1)}" fill="#9A5B45" fill-opacity=".06" stroke="#9A5B45" stroke-width="1" stroke-dasharray="4 3"><title>Banho acessível: giro de 1,50 m, transferência lateral à bacia e boxe de 0,90 × 0,95 m (NBR 9050)</title></circle>`);
   // mobiliário mínimo: carros, escadas, rampas, camas
   for(const s of S){
     const w = s.x1-s.x0, h = s.y1-s.y0;
@@ -415,11 +417,11 @@ function lote(v, q, res){
   if(!(v.anexos||[]).length) o.push(`<text x="${(X(0)+X(q.frente))/2}" y="${Y(q.fundo - q.recFundo/2)+3}" class="cota">fundo ${f2(q.fundo - v.y0 - v.D)} m livres</text>`);
   const F = rumoGraus(q.orientacao);
   const gg = girado(o.join(''), F, X(0) - 30, Y(0) - 22, X(q.frente) + 8, Y(q.fundo) + 8, 14, 14);
-  const W2 = Math.ceil(gg.Wr + 100), H2 = Math.ceil(Math.max(gg.Hr + 28, 150)) + (v.acessos ? 18 : 0);
+  const W2 = Math.ceil(gg.Wr + 100), duas = W2 < 330, H2 = Math.ceil(Math.max(gg.Hr + 28, 150)) + (v.acessos ? (duas ? 30 : 18) : 0);   // legenda em duas linhas no lote estreito
   o.length = 0; o.push(gg.g, rosa(W2 - 44, 60, 24, q.orientacao));
   // legenda dos acessos (na implantação a escala é pequena para rótulos junto dos portões)
   if(v.acessos){ const pv = v.acessos.portoes.filter(p => p.tipo==='veiculos').map(p => f2(p.largura)).join(' + '), ps = v.acessos.portoes.filter(p => p.tipo==='pedestres').map(p => f2(p.largura)).join(' + ');
-    o.push(`<g transform="translate(14,${H2 - 10})" style="font-size:7px;fill:#43474D"><line x1="0" y1="-2.5" x2="14" y2="-2.5" stroke="${AC.veiculos}" stroke-width="4"/><text x="18" y="0">portão de veículos${pv ? ' ' + pv + ' m' : ''}</text><line x1="124" y1="-2.5" x2="138" y2="-2.5" stroke="${AC.pedestres}" stroke-width="4"/><text x="142" y="0">portão social ${ps} m</text><rect x="214" y="-6" width="14" height="7" fill="${AC.caminho[0]}" stroke="${AC.caminho[1]}" stroke-width=".8"/><text x="232" y="0">caminho de pedestres</text></g>`); }
+    o.push(`<g transform="translate(14,${H2 - (duas ? 22 : 10)})" style="font-size:7px;fill:#43474D"><line x1="0" y1="-2.5" x2="14" y2="-2.5" stroke="${AC.veiculos}" stroke-width="4"/><text x="18" y="0">portão de veículos${pv ? ' ' + pv + ' m' : ''}</text><line x1="124" y1="-2.5" x2="138" y2="-2.5" stroke="${AC.pedestres}" stroke-width="4"/><text x="142" y="0">portão social ${ps} m</text><rect x="${duas ? 0 : 214}" y="${duas ? 6 : -6}" width="14" height="7" fill="${AC.caminho[0]}" stroke="${AC.caminho[1]}" stroke-width=".8"/><text x="${duas ? 18 : 232}" y="${duas ? 12 : 0}">caminho de pedestres</text></g>`); }
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W2} ${H2}" width="${W2}" height="${H2}" role="img" aria-label="Implantação no lote"><style>text{font-family:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif}.cota{font-size:8px;text-anchor:middle;fill:#55595F}.rd{text-anchor:middle;fill:#4a4e55}.halo text{paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px}</style><rect width="100%" height="100%" fill="#FBFAF7"/>${o.join('')}</svg>`;
 }
 

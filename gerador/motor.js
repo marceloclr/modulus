@@ -74,6 +74,7 @@ const PADRAO = {
   torreTipo:'nenhuma',
   rooftop:false, rtPos:'centro', rtTecnicaA:4, rtGourmetA:12, rtVarandaA:10, rtTerracoA:20, rtBanho:true, rtSpa:false,
   subRecuos:'nenhum', permeab:20, subVagasMax:0,
+  acessivel:false,
   brises:false, brisesTipo:'auto', brisesFaces:'auto', brisesFace_N:false, brisesFace_NE:false, brisesFace_L:false, brisesFace_SE:false, brisesFace_S:false, brisesFace_SO:false, brisesFace_O:false, brisesFace_NO:false,
   subsolo:false, subNivel:'meio', garagemLocal:'subsolo', vagasTerreo:1, subLazer:false, inclinacao:20,
 };
@@ -127,6 +128,9 @@ function normaliza(p){
   // brises (Fase 4): estudo em gerador/brises.js; o motor só normaliza os campos
   const sim = x => x===true||x==='true'||x===1||x==='1'||x==='on';
   q.brises = sim(q.brises);
+  // acessibilidade (NBR 9050) é opcional; com ela, ao menos um banho social, que será o banho acessível
+  q.acessivel = sim(q.acessivel);
+  if(q.acessivel && q.banhosSociais < 1) q.banhosSociais = 1;
   if(!['auto','horizontal','vertical','misto','movel'].includes(q.brisesTipo)) q.brisesTipo = 'auto';
   if(q.brisesFaces !== 'escolha') q.brisesFaces = 'auto';
   for(const k of Object.keys(RUMOS)) q['brisesFace_' + k] = sim(q['brisesFace_' + k]);
@@ -142,7 +146,9 @@ function normaliza(p){
 }
 
 /* ---------- Programa → listas de ambientes ---------- */
-function alvo(tipo, q){ const d = q.dims && q.dims[tipo]; if(d) return d.a; const t = TIPOS[tipo]; return t.alvo * (t.hab ? FATOR[q.tamanho] : 1); }
+const BANHO_ACESSIVEL = {lado:2.40, comp:2.50};
+function alvo(tipo, q){ const d = q.dims && q.dims[tipo]; if(d) return d.a; const t = TIPOS[tipo]; const a = t.alvo * (t.hab ? FATOR[q.tamanho] : 1);
+  return q.acessivel && tipo === 'banhoSocial' ? Math.max(a, BANHO_ACESSIVEL.lado * BANHO_ACESSIVEL.comp) : a; }
 /* Largura pedida para a faixa dos quartos (lado menor da suíte, da master ou do quarto), se houver. */
 function larguraQuartoPedida(q){ const d = q.dims || {}; for(const t of ['suite','master','quarto']) if(d[t] && d[t].w) return d[t].w; return null; }
 
@@ -155,9 +161,9 @@ function programa(q){
     mods.push({tipo: m?'master':'suite', id: ++id, fixo: !!(q.dims && q.dims[m?'master':'suite'] && q.dims[m?'master':'suite'].w),
       aq: alvo(m?'master':'suite', q), ab: alvo(m?'banhoMaster':'banhoSuite', q), ac: alvo(m?'closetMaster':'closet', q)});
   }
-  for(let i=0;i<nQ;i++) mods.push({tipo:'quarto', id: ++id, aq: alvo('quarto', q), fixo: !!(q.dims && q.dims.quarto && q.dims.quarto.w)});
+  for(let i=0;i<nQ;i++) mods.push({tipo:'quarto', id: ++id, aq: alvo('quarto', q), fixo: !!(q.dims && q.dims.quarto && q.dims.quarto.w), acess: q.acessivel});
   let bs = q.banhosSociais;
-  if(nQ>0 && bs>0){ mods.push({tipo:'banhoSocial', id: ++id, ab: alvo('banhoSocial', q)}); bs--; }
+  if(nQ>0 && bs>0){ mods.push({tipo:'banhoSocial', id: ++id, ab: alvo('banhoSocial', q), acess: q.acessivel}); bs--; }
   // ordem: master no fim (mais ao fundo), banho social no começo (perto do social)
   mods.sort((a,b) => ord(a)-ord(b));
   function ord(m){ return m.tipo==='banhoSocial'?0 : m.tipo==='quarto'?1 : m.tipo==='suite'?2 : 3; }
@@ -183,7 +189,7 @@ function programa(q){
     const simplesSobe = sobem.some(m => m.tipo==='quarto'), simplesFica = ficam.some(m => m.tipo==='quarto');
     const bS = [], bT = [];
     for(const b of banhoM){ if(simplesSobe && !bS.length) bS.push(b); else bT.push(b); }
-    if(simplesFica && !bT.length && bs > 0){ bT.push({tipo:'banhoSocial', id:++id, ab:alvo('banhoSocial', q)}); apoioEsq.splice(apoioEsq.indexOf('banhoSocial'), 1); }
+    if(simplesFica && !bT.length && bs > 0){ bT.push({tipo:'banhoSocial', id:++id, ab:alvo('banhoSocial', q), acess: q.acessivel}); apoioEsq.splice(apoioEsq.indexOf('banhoSocial'), 1); }
     if(q.supEscritorio && social.includes('escritorio')){ social.splice(social.indexOf('escritorio'), 1); sup.push({tipo:'escritorio', id:++id, a:alvo('escritorio', q)}); }
     if(q.supTv && social.includes('tv')){ social.splice(social.indexOf('tv'), 1); sup.push({tipo:'tv', id:++id, a:alvo('tv', q), nome:'Sala íntima / TV'}); }
     if(q.supServico && apoioDir.includes('servico')){ apoioDir.splice(apoioDir.indexOf('servico'), 1); sup.push({tipo:'servico', id:++id, a:alvo('servico', q), nome:'Lavanderia'}); }
@@ -240,8 +246,8 @@ function faixa(x0, y0, x1, y1, itens, eixo){
 /* ---------- Faixa íntima: módulos (quarto + banho + closet) dos dois lados de um corredor ---------- */
 function compModulo(m, ws){
   if(m.a) return Math.max(TIPOS[m.tipo].lado || 2.4, m.a/ws);
-  if(m.tipo==='banhoSocial') return Math.max(1.6, m.ab/ws);
-  if(m.tipo==='quarto') return Math.max(TIPOS.quarto.lado, m.aq/ws);
+  if(m.tipo==='banhoSocial') return Math.max(m.acess ? BANHO_ACESSIVEL.comp : 1.6, m.ab/ws);
+  if(m.tipo==='quarto') return Math.max(m.acess ? 2.8 : TIPOS.quarto.lado, m.aq/ws);
   const tq = m.tipo==='master'?'master':'suite';
   const db = clamp((m.ab+m.ac)/ws, TIPOS[m.tipo==='master'?'banhoMaster':'banhoSuite'].lado+0.3, 3.2);
   return Math.max(TIPOS[tq].lado, m.aq/ws) + db;
@@ -1219,7 +1225,7 @@ function aberturas(pav, q, ehTerreo, espelho){
     }
     if(s.tipo==='banhoSuite'||s.tipo==='banhoMaster'){
       const c2 = S.find(o => o.mod===s.mod && (o.tipo==='closet'||o.tipo==='closetMaster')); const sh = c2 && compartilhado(s,c2);
-      if(sh){ portas.push(porta(s, c2, sh, 0.7)); continue; }
+      if(sh){ portas.push(porta(s, c2, sh, q.acessivel ? 0.9 : 0.7)); continue; }
     }
     if(S.some(o => o!==s && aberto(s,o) && compartilhado(s,o))) continue;
     const pref = PREF[s.tipo] || [];
@@ -1227,7 +1233,7 @@ function aberturas(pav, q, ehTerreo, espelho){
     for(const t of pref){
       const viz = S.filter(o => o!==s && o.tipo===t).map(o => ({o, sh:compartilhado(s,o)})).filter(v => v.sh && v.sh.t1-v.sh.t0 >= 0.85)
         .sort((a,b) => (b.sh.t1-b.sh.t0)-(a.sh.t1-a.sh.t0));
-      if(viz.length){ portas.push(porta(s, viz[0].o, viz[0].sh, larguraPorta(s))); feito = true; break; }
+      if(viz.length){ portas.push(porta(s, viz[0].o, viz[0].sh, q.acessivel ? Math.max(0.9, larguraPorta(s)) : larguraPorta(s))); feito = true; break; }
     }
     if(!feito && s.tipo!=='estar' && pref.length && !['garagem','gourmet'].includes(s.tipo) && s.nome!=='Área técnica' && !(s.tipo==='rouparia' && area(s) < 1.5)) av.push(`${pav.nome}: ${rotulo(s)} sem acesso por ${pref.slice(0,3).map(t=>TIPOS[t].nome.toLowerCase()).join(', ')}.`);
   }
@@ -1299,21 +1305,60 @@ function aberturas(pav, q, ehTerreo, espelho){
     const vidro = s.tipo==='galeria';
     const h = vidro ? 2.1 : alta ? 0.6 : 1.2;
     let falta = exig, obt = 0;
-    ext.forEach((e, i) => {
-      if(i > 0 && falta <= 0.01 && !(s.tipo==='circ' && i===1 && e.t1-e.t0 >= 2.0)) return;
+    // premissa (05/10/2026): sempre que possível, janelas em pontos distantes entre si, para a ventilação cruzada.
+    // 1) escolhe as faces e as larguras; um cômodo de permanência com duas faces externas sempre ganha janela na segunda face
+    const cruzada = !!t.hab && !alta && !vidro, sel = [];
+    // trecho livre de cada face: o maior pedaço fora da porta de entrada (com 0,20 m de folga)
+    const livre = e => { let seg = [[e.t0, e.t1]];
+      for(const p of portas.filter(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001)) seg = seg.flatMap(([a,b]) => [[a, Math.min(b, p.t0-0.2)], [Math.max(a, p.t1+0.2), b]]).filter(([a,b]) => b-a > 0.05);
+      const m = seg.sort((x,y) => (y[1]-y[0]) - (x[1]-x[0]))[0]; return m ? Object.assign({}, e, {t0:m[0], t1:m[1]}) : null; };
+    ext.forEach((e0, i) => {
+      const e = livre(e0); if(!e) return;
+      // a janela extra de ventilação não vai para face de sol da tarde (SO, O, NO) num quarto
+      const tarde = QUARTOS.includes(s.tipo) && RUMOS[q.orientacao] !== undefined && classeSol(rumoFace(e.lado, RUMOS[q.orientacao], espelho)) >= 2;
+      const outraFace = cruzada && sel.length === 1 && !sel.some(x => x.e.lado === e.lado) && !tarde;
+      if(i > 0 && falta <= 0.01 && !outraFace && !(s.tipo==='circ' && i===1 && e.t1-e.t0 >= 2.0)) return;
+      if(cruzada && sel.some(x => x.e.lado === e.lado) && falta <= 0.01) return;
       const L = e.t1-e.t0;
       const wmin = alta ? 0.6 : vidro ? L-0.6 : 1.0;
-      let w = vidro ? L-0.6 : clamp(Math.max(wmin, falta/h), wmin, Math.min(alta ? 1.6 : 3.0, L-0.3));
+      const w = vidro ? L-0.6 : clamp(Math.max(wmin, falta/h), wmin, Math.min(alta ? 1.6 : 3.0, L-0.3));
       if(w < 0.5) return;
-      const m = (e.t0+e.t1)/2;
+      sel.push({e, e0, w}); obt += w*h; falta = exig - obt;
+    });
+    // 2) posição: em faces vizinhas, cada janela na ponta longe do canto comum; em faces opostas, em pontas contrárias;
+    //    com uma janela só, na ponta longe da porta do cômodo; sempre 0,30 m de boneca
+    const pontas = (e, w) => [e.t0 + Math.min(0.3, (e.t1-e.t0-w)/2) + w/2, e.t1 - Math.min(0.3, (e.t1-e.t0-w)/2) - w/2];
+    const ponto = (e, t) => e.o === 'h' ? [t, e.c] : [e.c, t];
+    const dist = (p, q) => Math.hypot(p[0]-q[0], p[1]-q[1]);
+    const centros = sel.map(({e, w}) => (e.t0+e.t1)/2);
+    if(cruzada && sel.length >= 2){
+      const [A, B] = sel, pa = pontas(A.e, A.w), pb = pontas(B.e, B.w);
+      let melhor = null;
+      for(const ta of pa) for(const tb of pb){ const d = dist(ponto(A.e, ta), ponto(B.e, tb)); if(!melhor || d > melhor.d + 0.001) melhor = {d, ta, tb}; }
+      centros[0] = melhor.ta; centros[1] = melhor.tb;
+    } else if(cruzada && sel.length === 1){
+      const dp = portas.find(p => (p.sala === s.id || p.viz === s.id) && !p.entrada);
+      if(dp){ const pd = ponto(dp, (dp.t0+dp.t1)/2), pa = pontas(sel[0].e, sel[0].w);
+        centros[0] = dist(ponto(sel[0].e, pa[0]), pd) >= dist(ponto(sel[0].e, pa[1]), pd) ? pa[0] : pa[1]; }
+    }
+    obt = 0;
+    sel.forEach(({e, w}, i) => {
+      let mm = centros[i];
       // não sobrepor porta de entrada
-      const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2);
-      let mm = m;
+      const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>mm-w/2 && p.t0<mm+w/2);
       if(pe){ if(pe.t1 + 0.3 + w <= e.t1) mm = pe.t1+0.3+w/2; else if(pe.t0 - 0.3 - w >= e.t0) mm = pe.t0-0.3-w/2; else { w = Math.max(0, Math.max(e.t1-pe.t1, pe.t0-e.t0) - 0.4); mm = e.t1-pe.t1 > pe.t0-e.t0 ? pe.t1+0.2+w/2 : pe.t0-0.2-w/2; } }
       if(w < 0.5) return;
       janelas.push({o:e.o, c:e.c, t0:r2(mm-w/2), t1:r2(mm+w/2), alta, vidro, h});
-      obt += w*h; falta = exig - obt;
+      obt += w*h;
     });
+    falta = exig - obt;
+    // 3) se a porta de entrada encurtou alguma janela, completa a área nas faces que sobraram (centradas)
+    for(const e of ext){
+      if(falta <= 0.01 || sel.some(x => x.e0 === e)) continue;
+      const L = e.t1-e.t0, w = clamp(Math.max(alta ? 0.6 : 1.0, falta/h), alta ? 0.6 : 1.0, Math.min(alta ? 1.6 : 3.0, L-0.3)), m = (e.t0+e.t1)/2;
+      if(w < 0.5 || portas.some(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2)) continue;
+      janelas.push({o:e.o, c:e.c, t0:r2(m-w/2), t1:r2(m+w/2), alta, vidro, h}); obt += w*h; falta = exig - obt;
+    }
     if(exig){
       s.ilum = {exig:r2(exig), obt:r2(obt)};
       if(obt < exig - 0.01){
@@ -1385,6 +1430,52 @@ function porta(s, o, sh, w, centro){
   return {o:sh.o, c:sh.c, t0:r2(t0), t1:r2(t0+w), sala:s.id, viz:o.id, dentro:ds};
 }
 
+/* ---------- Acessibilidade (NBR 9050:2020), opcional ----------
+   Itens: portas com vão livre de 0,80 m (folha de 0,90 m); um banho acessível (≥ 2,40 × 2,50 m pelo eixo: giro de 1,50 m,
+   transferência lateral à bacia e boxe de 0,90 × 0,95 m) em cada pavimento com quarto; quartos com lado ≥ 2,80 m (giro ao lado
+   da cama); corredores com ≥ 1,20 m; rota sem degraus (semienterrado ou sobrado sem elevador pedem rampa, plataforma ou
+   quarto e banho acessíveis no térreo). Marca s.acessivel no banho escolhido (o desenho mostra o giro). */
+function verificaAcessibilidade(v, q){
+  const itens = [], av = []; let pen = 0;
+  const falha = (item, txt, p) => { itens.push({item, ok:false, detalhe:txt}); av.push(`Acessibilidade: ${txt}`); pen += p; };
+  const passa = (item, txt) => itens.push({item, ok:true, detalhe:txt});
+  const casa = v.pav.filter(p => !p.anexo && p.nome !== 'Subsolo' && p.nome !== 'Rooftop');
+  const ehBanho = s => ['banhoSocial','banhoSuite','banhoMaster'].includes(s.tipo);
+  const lados = s => [Math.min(s.x1-s.x0, s.y1-s.y0), Math.max(s.x1-s.x0, s.y1-s.y0)];
+  // portas
+  const estreitas = casa.filter(p => p.nome === 'Térreo' || q.elevador).flatMap(p => (p.portas || []).filter(d => !d.saida && d.t1 - d.t0 < 0.9 - 0.01));
+  if(estreitas.length) falha('Portas', `${estreitas.length} porta(s) com folha menor que 0,90 m (vão livre abaixo de 0,80 m).`, 2*estreitas.length);
+  else passa('Portas', 'Folhas de 0,90 m (vão livre de 0,80 m) em todo o percurso.');
+  // banho acessível por pavimento com quarto
+  const comQuarto = casa.filter(p => p.salas.some(s => QUARTOS.includes(s.tipo)));
+  const semBanho = [];
+  for(const p of comQuarto){
+    const cands = p.salas.filter(s => ehBanho(s) && lados(s)[0] >= BANHO_ACESSIVEL.lado - 0.01 && lados(s)[1] >= BANHO_ACESSIVEL.comp - 0.01)
+      .sort((a, b) => (a.tipo === 'banhoSocial' ? 0 : 1) - (b.tipo === 'banhoSocial' ? 0 : 1) || area(b) - area(a));
+    if(cands.length) cands[0].acessivel = true; else semBanho.push(p.nome.toLowerCase());
+  }
+  if(semBanho.length) falha('Banho acessível', `falta banho de 2,40 × 2,50 m (giro de 1,50 m, transferência e boxe) no ${semBanho.join(' e no ')}.`, 8*semBanho.length);
+  else passa('Banho acessível', 'Banho de 2,40 × 2,50 m ou maior em cada pavimento com quarto, com giro de 1,50 m, transferência lateral e boxe de 0,90 × 0,95 m.');
+  // quartos
+  const apertados = casa.flatMap(p => p.salas.filter(s => QUARTOS.includes(s.tipo) && lados(s)[0] < 2.8 - 0.01));
+  if(apertados.length) falha('Quartos', `${apertados.length} quarto(s) com lado menor que 2,80 m: o giro de 1,50 m não cabe ao lado da cama de casal.`, 3*apertados.length);
+  else passa('Quartos', 'Lado de 2,80 m ou mais: giro de 1,50 m ao lado da cama.');
+  // corredores
+  // corredores da rota acessível: o térreo e, com elevador, os demais pavimentos
+  const corr = casa.filter(p => p.nome === 'Térreo' || q.elevador).flatMap(p => p.salas.filter(s => s.tipo === 'circ' && lados(s)[0] < 1.2 - 0.01));
+  if(corr.length) falha('Corredores', 'corredor com menos de 1,20 m.', 3*corr.length); else passa('Corredores', 'Corredores de 1,20 m ou mais.');
+  // rota sem degraus
+  if(q.subsolo && q.subNivel === 'meio' && !q.elevador)
+    falha('Rota sem degraus', 'o térreo fica 1,40 m acima da rua (subsolo semienterrado): prever rampa de 8,33 % (cerca de 16,80 m) ou plataforma elevatória.', 8);
+  else if(q.tipo === 'sobrado' && !q.elevador){
+    const t = casa.find(p => p.nome === 'Térreo');
+    const ok = t && t.salas.some(s => QUARTOS.includes(s.tipo)) && t.salas.some(s => s.acessivel);
+    if(ok) passa('Rota sem degraus', 'Sobrado sem elevador, com quarto e banho acessíveis no térreo.');
+    else falha('Rota sem degraus', 'sobrado sem elevador: deixe um quarto e um banho acessível no térreo ou preveja elevador.', 8);
+  } else passa('Rota sem degraus', q.elevador ? 'Elevador entre os pavimentos.' : 'Casa térrea no nível da rua.');
+  return {itens, av, pen};
+}
+
 /* ---------- Avaliação ---------- */
 function avalia(v, q){
   let pen = 0; const av = [];
@@ -1446,6 +1537,8 @@ function avalia(v, q){
   if(v.anexoLarg) pen += 25*v.anexoLarg;
   const taxa = 100*proj/(q.frente*q.fundo);
   if(taxa > q.taxa + 0.01){ pen += 2*(taxa-q.taxa); av.push(`Ocupação de ${f2(taxa)} %, acima do máximo de ${f2(q.taxa)} %.`); }
+  // acessibilidade (NBR 9050), só com a opção marcada
+  if(q.acessivel){ const ac = verificaAcessibilidade(v, q); pen += ac.pen; av.push(...ac.av); v.acessibilidade = ac.itens; }
   // circulação
   const tot = v.pav.reduce((s,p)=>s+p.salas.filter(x=>!TIPOS[x.tipo].aberto).reduce((t,x)=>t+area(x),0),0);
   const circ = v.pav.reduce((s,p)=>s+p.salas.filter(x=>['circ','hall','galeria'].includes(x.tipo)).reduce((t,x)=>t+area(x),0),0);
@@ -1751,5 +1844,5 @@ function loteMinimo(q0, P){
   return {minimo:best, comFrente};
 }
 
-return {gerar, acessos, edicula, normaliza, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
+return {gerar, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
 });

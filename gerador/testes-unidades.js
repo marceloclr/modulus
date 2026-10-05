@@ -346,6 +346,52 @@ t('vento na variante: janelas de entrada e saída, linhas de corrente e camada d
   ok(!D.planta(v, 0).includes('svCamada'), 'sem a opção, a planta não muda');
 });
 
+t('janelas: quartos de canto com duas janelas distantes (ventilação cruzada)', () => {
+  const casos = [{orientacao:'N'}, {orientacao:'L', tipo:'sobrado'}, {frente:22, fundo:30, formato:'U', quartos:3, suites:3, orientacao:'S'}, {frente:22, fundo:30, formato:'H', quartos:3, suites:3, orientacao:'N'}, {frente:16, fundo:34, formato:'L', orientacao:'SE'}];
+  let quartosDeCanto = 0;
+  for(const e of casos) for(const v of M.gerar(e).variantes) for(const p of v.pav){
+    for(const sq of p.salas.filter(x => ['quarto','suite','master'].includes(x.tipo))){
+      const js = (p.janelas || []).filter(j => !j.alta).map(j => ({j, lado: M.ladoDaJanela(j, sq)})).filter(x => x.lado);
+      const lados = new Set(js.map(x => x.lado)); if(lados.size < 2) continue;
+      quartosDeCanto++;
+      const c = x => x.j.o === 'h' ? [(x.j.t0 + x.j.t1)/2, x.j.c] : [x.j.c, (x.j.t0 + x.j.t1)/2];
+      let d = 0; for(const a of js) for(const b of js) if(a.lado !== b.lado) d = Math.max(d, Math.hypot(c(a)[0]-c(b)[0], c(a)[1]-c(b)[1]));
+      const diag = Math.hypot(sq.x1 - sq.x0, sq.y1 - sq.y0);
+      ok(d >= 0.6 * diag - 1e-9, `${JSON.stringify(e)} ${v.nome} ${p.nome} ${sq.nome}: ${d.toFixed(2)} m entre janelas, diagonal ${diag.toFixed(2)} m`);
+    }
+  }
+  ok(quartosDeCanto >= 5, 'há quartos de canto com duas janelas: ' + quartosDeCanto);
+});
+
+t('casa simétrica: a humanizada sai do mesmo modelo da técnica (janelas e portas iguais)', () => {
+  const vm = require('vm'), html = require('fs').readFileSync(require('path').join(__dirname, '../casa-simetrica/index.html'), 'utf8');
+  const js = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).find(x => x.includes('function humDoc'));
+  const ctx = {Math, document:{documentElement:{}}, window:{matchMedia:() => ({matches:false})}};
+  vm.createContext(ctx); vm.runInContext(js.slice(0, js.indexOf('/* ---------- Navegação')).replace(/^\s*\(function\(\)\{/, '') + ';this.API={humDoc,hzTecnica};', ctx);
+  for(const g of ['A', 'B', 'C', 'D']){
+    const T = ctx.API.hzTecnica(g), h = ctx.API.humDoc(g, true);
+    ok(T.win.length >= 6 && T.dr.length >= 8, g + ': aberturas lidas da técnica');
+    igual((h.match(/<title>Porta/g) || []).length, T.dr.length, g + ': portas');
+    igual((h.match(/stroke-width="1.4"( stroke-dasharray="4 2")?><title>/g) || []).length, T.win.length, g + ': janelas');
+  }
+});
+
+t('acessibilidade (opção): portas, banho acessível, quartos, rota e nada muda sem ela', () => {
+  const v = M.gerar({acessivel:true}).variantes[0], T = v.pav.find(p => p.nome === 'Térreo');
+  ok(T.portas.filter(d => !d.saida).every(d => d.t1 - d.t0 >= 0.9 - 0.01), 'portas de 0,90 m no térreo');
+  const b = T.salas.find(x => x.acessivel); ok(b, 'banho acessível marcado');
+  ok(Math.min(b.x1-b.x0, b.y1-b.y0) >= 2.4 - 0.01 && Math.max(b.x1-b.x0, b.y1-b.y0) >= 2.5 - 0.01, 'banho com 2,40 × 2,50 m');
+  ok(v.acessibilidade.every(i => i.ok), v.acessibilidade.filter(i => !i.ok).map(i => i.detalhe).join(' | '));
+  const semi = M.gerar({acessivel:true, subsolo:true, subNivel:'meio'}).variantes[0];
+  ok(semi.acessibilidade.some(i => i.item === 'Rota sem degraus' && !i.ok), 'semienterrado sem elevador pede rampa');
+  ok(M.gerar({acessivel:true, subsolo:true, subNivel:'meio', elevador:true}).variantes[0].acessibilidade.find(i => i.item === 'Rota sem degraus').ok, 'com elevador, a rota atende');
+  ok(M.gerar({acessivel:true, tipo:'sobrado'}).variantes[0].acessibilidade.some(i => i.item === 'Rota sem degraus' && !i.ok), 'sobrado sem elevador e quartos em cima');
+  igual(M.normaliza({acessivel:true, banhosSociais:0}).banhosSociais, 1, 'com acessibilidade, ao menos um banho social:');
+  const sem = M.gerar({}).variantes[0];
+  ok(!sem.acessibilidade && !sem.pav.some(p => p.salas.some(x => x.acessivel)), 'sem a opção, nada é marcado');
+  ok(require('./desenho.js').planta(v, 0).includes('Banho acessível: giro de 1,50 m'), 'giro desenhado');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
