@@ -113,7 +113,9 @@ if(typeof module==='object' && module.exports){
     g.linhas.forEach(l => console.log(l));
     const tm = G.tempos();
     tm.linhas.forEach(l => console.log(l));
-    process.exitCode = (falhas || g.falhas) ? 1 : 0;
+    const u = require('./testes-unidades.js').rodar();
+    u.linhas.forEach(l => console.log(l));
+    process.exitCode = (falhas || g.falhas || u.falhas) ? 1 : 0;
   }
 } else root.TestesMotor = rodar;
 })(this);
