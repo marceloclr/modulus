@@ -144,6 +144,36 @@ t('estrutura: gancho posAvalia só penaliza a alvenaria estrutural e não muda n
   ok(!('estrutura' in base.variantes[0]), 'sem gancho, a variante não ganha o campo estrutura');
 });
 
+// ---------- custos ----------
+const CU = require('./custos.js');
+const perto = (a, b, msg) => ok(Math.abs(a - b) < 0.05, `${msg || ''} esperado ${b}, obtido ${a}`);
+t('custos: conta conferida à mão (100 m² fechados + 20 m² de varanda, térrea, Fortaleza, R1-N onerado)', () => {
+  const v = {pav:[{nome:'Térreo', salas:[{tipo:'quarto', x0:0, y0:0, x1:10, y1:10}, {tipo:'varanda', x0:0, y0:10, x1:10, y1:12}]}], projecao:120, quadro:{fechada:100}};
+  const r = CU.calcular(v, {}, DADOS);
+  perto(r.Aeq.med, 117, 'área equivalente 100 + 20 × 0,85:'); perto(r.Aeq.min, 115); perto(r.Aeq.max, 120);
+  perto(r.parcelas[0].valor.med, 117 * 2905.13, 'construção:');
+  perto(r.adicionais[0].valor.med, 120 * 220, 'fundação térrea:');
+  perto(r.total.med, (117 * 2905.13 + 26400) * 1.06, 'total com projetos de 6 %:');
+  perto(r.total.min, (115 * 2905.13 + 120 * 180) * 1.04, 'mínimo:');
+  perto(r.total.max, (120 * 2905.13 + 120 * 260) * 1.08, 'máximo:');
+  perto(r.porM2.med, r.total.med / 100);
+});
+t('custos: fatores (Porto das Dunas, condomínio, até 500 m do mar, metálica, vãos maiores), desonerado, BDI e INCC', () => {
+  const v = {pav:[{nome:'Térreo', salas:[{tipo:'quarto', x0:0, y0:0, x1:10, y1:10}]}], projecao:100, quadro:{fechada:100}};
+  const q = {municipio:'portoDasDunas', condominio:true, distMar:'ate500', estSistema:'metalica', estVaos:'maiores', cubTipo:'desonerado', padrao:'alto', empreitada:true, custoIncc:true};
+  const r = CU.calcular(v, q, DADOS), fl = 1.045 * 1.03 * 1.065, fe = (1.115 + 0.03) * 1.045;
+  perto(r.fatores.local.med, fl, 'fator local:'); perto(r.fatores.estrutura.med, fe, 'fator estrutural com acréscimo do litoral:');
+  igual(r.cub, 3275.17, 'CUB R1-A desonerado:');
+  const obra = 100 * 3275.17 * fl * fe + 100 * 220, proj = obra * 0.06, bdi = (obra + proj) * 0.2212;
+  perto(r.total.med, (obra + proj + bdi) * 1.0025, 'total com BDI e INCC de setembro (0,25 %):');
+  ok(r.parcelas.some(p => p.id === 'incc' && p.estimado), 'projeção marcada como estimada');
+});
+t('custos: variante real tem fórmula em cada parcela e faixa crescente', () => {
+  const v = M.gerar({tipo:'sobrado', subsolo:true, vagas:2, elevador:true}).variantes[0], r = CU.calcular(v, {elevador:true}, DADOS);
+  ok(r.parcelas.every(p => p.formula && p.valor.min <= p.valor.med && p.valor.med <= p.valor.max), 'parcelas sem fórmula ou faixa invertida');
+  ok(['construcao', 'fundacao', 'subsolo', 'elevador', 'projetos'].every(id => r.parcelas.some(p => p.id === id)), r.parcelas.map(p => p.id).join(','));
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
