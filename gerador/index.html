@@ -44,6 +44,15 @@
 .dimrow input{width:100%;font:500 12.5px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 5px}
 .dimrow input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .vtab{flex-direction:column;align-items:flex-start;gap:2px;line-height:1.25}
+.zoom-barra{display:inline-flex;align-items:center;gap:4px}
+.zoom-barra .btn{min-width:34px;justify-content:center}
+.zoom-barra .btn:disabled{opacity:.45;cursor:default}
+.zoom-nivel{min-width:48px;text-align:center;font:500 12.5px 'IBM Plex Sans',sans-serif;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.zoom-caixa{overflow:auto}
+.zoom-caixa>svg{margin-left:auto;margin-right:auto}
+.zoom-caixa:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+#lote{max-height:78vh;border-radius:12px}
+.lote-col .zoom-barra{margin:0 0 6px}
 .vtab small{font-size:11.5px;color:inherit;opacity:.8;font-weight:400}
 .vtab .vdim{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;font-variant-numeric:tabular-nums}
 /* blocos guiados (beta, gerador/ui-blocos.js) */
@@ -287,7 +296,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
 
       <h2>Implantação e terreno</h2>
       <div class="lote-wrap">
-        <div id="lote"></div>
+        <div class="lote-col"><div id="lote"></div></div>
         <div>
           <div class="tbl-wrap"><table id="terreno"></table></div>
           <p class="note">O terreno mínimo é calculado com os mesmos recuos e a mesma taxa de ocupação, procurando a menor área em que alguma variante cabe sem violar o terreno.</p>
@@ -328,6 +337,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
 <script src="desenho.js"></script>
 <script src="estado.js"></script>
 <script src="ui-blocos.js"></script>
+<script src="zoom.js"></script>
 <script>
 (function(){
 'use strict';
@@ -529,6 +539,9 @@ document.getElementById('baixarPng').addEventListener('click', () => {
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 });
 
+// zoom com botões + e − na planta e na implantação
+Zoom.ligar(document.getElementById('plan'), b => document.querySelector('.fig-tools').appendChild(b), 'Planta');
+Zoom.ligar(document.getElementById('lote'), b => document.getElementById('lote').before(b), 'Implantação');
 // sessão: o link (#s= ou o antigo #q=) tem prioridade; no beta, sem link, volta a última sessão deste navegador
 let salvo = null;
 if(window.plantasBeta && !location.hash) try{ salvo = Estado.deLocal(localStorage.getItem(Estado.CHAVE_LOCAL), Motor.PADRAO); }catch(e){}
