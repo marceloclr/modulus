@@ -309,6 +309,28 @@ t('vento: dados/vento.json válido, 12 meses e alísios de leste/sudeste', () =>
   const set = VT.meses[8], mar = VT.meses[2]; ok(set.velMedia > mar.velMedia, 'setembro venta mais que março');
 });
 
+t('insolação: sombra de um cubo, mancha de sol pela janela e incidência por fachada (contas à mão)', () => {
+  const I = require('./insolacao.js');
+  const q = {orientacao:'N', peDireito:3}, sala = {id:1, tipo:'estar', nome:'Estar', x0:0, y0:0, x1:3, y1:3};
+  // frente para o norte (face y0); sol a 45° vindo do norte: a sombra do cubo de 3 m anda 3 m para o fundo (+y)
+  const sb = I.sombras({pav:[{nome:'Térreo', salas:[sala]}]}, q, {h:45, az:0});
+  igual(sb.length, 1); ok(Math.abs(Math.max(...sb[0].pts.map(p => p[1])) - 6) < 1e-9, 'sombra até y = 6: ' + JSON.stringify(sb[0].pts));
+  // janela de 1,00 m na face norte, peitoril 1,00 m e verga 2,20 m; 21/jun ao meio-dia (h = 62,8°):
+  // a mancha vai de 1,00/tan h = 0,51 m a 2,20/tan h = 1,13 m para dentro
+  const p = {nome:'Térreo', salas:[sala], janelas:[{o:'h', c:0, t0:1, t1:2, h:1.2}]};
+  const L = I.luzPavimento({pav:[p]}, q, p, I.solEm(6, 12));
+  igual(L.manchas.length, 1); const ys = L.manchas[0].pts.map(p => p[1]);
+  ok(Math.abs(Math.min(...ys) - 1/Math.tan(62.82*Math.PI/180)) < 0.01 && Math.abs(Math.max(...ys) - 2.2/Math.tan(62.82*Math.PI/180)) < 0.01, 'mancha ' + ys);
+  ok(L.fachadas.some(fc => fc.lado === 'y0'), 'fachada norte iluminada em junho');
+  // às 12h de dezembro o sol está ao sul: a janela norte não recebe sol
+  igual(I.luzPavimento({pav:[p]}, q, p, I.solEm(12, 12)).manchas.length, 0, 'sem sol na face norte em dezembro:');
+  // incidência: em dezembro a face sul recebe mais que a norte; em junho, o contrário
+  const v = M.gerar({orientacao:'N'}).variantes[0], qq = M.normaliza({orientacao:'N'});
+  const fx = (m, r) => (I.incidenciaFaces(v, qq, m).find(x => x.rumo === r) || {kwh:0}).kwh;
+  ok(fx(12, 'S') > fx(12, 'N') && fx(6, 'N') > fx(6, 'S'), 'sazonalidade norte/sul');
+  ok(I.horasSolComodos(v, qq, 3).length > 0, 'horas de sol por cômodo');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
