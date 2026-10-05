@@ -1057,7 +1057,7 @@ const PREF = {
   lazer:['hall','manobra','garagem','deposito','jardim'], gourmet:['cozinha','jantar','servico','estar','galeria'],
   salaIntima:['circ','hall'], hall:[], circ:[], galeria:[], escada:[], elevador:[], jardim:[], manobra:['hall'], rampa:[], varanda:[], terraco:['circ','hall'],
 };
-const ABERTOS = [['varanda','terraco'],['varanda','hall'],['varanda','gourmet'],['terraco','terraco'],['circ','circ'],['gourmet','terraco'],['gourmet','hall'],['hall','terraco'],['hall','hall'],['hall','elevador'],['circ','elevador'],['circ','estar'],['circ','jantar'],['circ','tv'],['estar','jantar'],['estar','tv'],['hall','estar'],['hall','jantar'],['hall','tv'],['hall','circ'],['galeria','circ'],['galeria','jantar'],['galeria','estar'],['galeria','cozinha'],['manobra','garagem'],['manobra','rampa'],['hall','manobra']];
+const ABERTOS = [['varanda','terraco'],['varanda','hall'],['varanda','gourmet'],['terraco','terraco'],['circ','circ'],['gourmet','terraco'],['gourmet','hall'],['hall','terraco'],['hall','hall'],['hall','elevador'],['circ','elevador'],['circ','estar'],['circ','jantar'],['circ','tv'],['estar','jantar'],['estar','tv'],['hall','estar'],['hall','jantar'],['hall','tv'],['hall','circ'],['galeria','circ'],['circ','cozinha'],['galeria','jantar'],['galeria','estar'],['galeria','cozinha'],['manobra','garagem'],['manobra','rampa'],['hall','manobra']];
 
 function compartilhado(a, b){
   // aresta comum entre retângulos: {o:'v'|'h', c, t0, t1}
@@ -1328,7 +1328,7 @@ function avalia(v, q){
       if(a < t.min - 0.01){ pen += 6*(t.min-a); av.push(`${p.nome}: ${rotulo(s)} com ${f2(a)} m², abaixo do mínimo de ${f2(t.min)} m².`); }
       if(lmin < t.lado - 0.01){ pen += 12*(t.lado-lmin); av.push(`${p.nome}: ${rotulo(s)} com lado de ${f2(lmin)} m, abaixo de ${f2(t.lado)} m.`); }
       const ra = a / (t.alvo || a);
-      if(ra > 1.8 && p.nome!=='Subsolo' && s.tipo!=='deposito') pen += (ra-1.8)*4;
+      if(ra > 1.8 && p.nome!=='Subsolo' && s.tipo!=='deposito' && !s.integra) pen += (ra-1.8)*4;
     }
     if(!['circ','hall','galeria','rampa','manobra','escada','rouparia','varanda','terraco','garagem','deposito'].includes(s.tipo) && lmax/lmin > 2.6) pen += 2*(lmax/lmin-2.6);
   }
@@ -1515,10 +1515,59 @@ function comTorre(v, q){
   return v;
 }
 
+/* ---------- Circulação enxuta (05/10/2026) ----------
+   O trecho final de um corredor que serve só a um quarto passa a fazer parte dele, e o hall de apoio
+   encostado na cozinha (sem escada nem elevador) é integrado à cozinha. Só quando o resultado continua retangular
+   e todos os vizinhos mantêm acesso. */
+const ABSORVE = ['quarto','suite','master','salaIntima','closet','closetMaster'];
+const DO_MODULO = ['banhoSuite','banhoMaster','closet','closetMaster'];
+function enxuga(v){
+  for(const p of v.pav){
+    if(p.nome==='Subsolo') continue;
+    const S = p.salas;
+    // hall de apoio → cozinha
+    for(const h of S.filter(s => s.tipo==='hall' && !s.nucleo && s.nome===TIPOS.hall.nome)){
+      if(S.some(o => (o.tipo==='escada' || o.tipo==='elevador') && compartilhado(o, h))) continue;
+      const k = S.find(o => o.tipo==='cozinha' && compartilhado(o, h) && (compartilhado(o, h).o==='v' ? Math.abs(o.y0-h.y0)<0.001 && Math.abs(o.y1-h.y1)<0.001 : Math.abs(o.x0-h.x0)<0.001 && Math.abs(o.x1-h.x1)<0.001));
+      if(!k) continue;
+      const livre = ['circ','galeria','jantar','estar','tv','varanda','cozinha'];
+      const semAcesso = S.filter(o => o!==h && o!==k && compartilhado(o, h) && !livre.includes(o.tipo)).some(o => {
+        const pref = PREF[o.tipo] || [];
+        if(pref.includes('cozinha') && compartilhado(o, k)) return false;
+        return !S.some(x => x!==h && x!==o && pref.includes(x.tipo) && compartilhado(o, x) && compartilhado(o, x).t1 - compartilhado(o, x).t0 >= 0.85);
+      });
+      if(semAcesso) continue;
+      k.x0 = Math.min(k.x0, h.x0); k.x1 = Math.max(k.x1, h.x1); k.y0 = Math.min(k.y0, h.y0); k.y1 = Math.max(k.y1, h.y1);
+      k.integra = 1; S.splice(S.indexOf(h), 1);
+    }
+    // ponta do corredor → quarto do fim
+    for(const c of S.filter(s => s.tipo==='circ')){
+      const vert = (c.y1-c.y0) >= (c.x1-c.x0), a0 = vert ? 'y0' : 'x0', a1 = vert ? 'y1' : 'x1', b0 = vert ? 'x0' : 'y0', b1 = vert ? 'x1' : 'y1';
+      for(const fim of [a1, a0]){
+        const E = c[fim], pos = fim===a1;
+        const viz = S.filter(o => o!==c && compartilhado(o, c)).map(o => ({o, sh:compartilhado(o, c)}));
+        const naPonta = viz.filter(z => z.sh.o === (vert ? 'h' : 'v') && Math.abs(z.sh.c - E) < 0.001);
+        if(naPonta.length) continue;                                  // a ponta encosta em outro cômodo: não é um fim de corredor
+        const lado = viz.filter(z => z.sh.o === (vert ? 'v' : 'h'));
+        const fins = lado.filter(z => ABSORVE.includes(z.o.tipo) && Math.abs(z.o[fim] - E) < 0.001);
+        if(fins.length !== 1) continue;                               // a ponta serve a dois cômodos (ou a nenhum)
+        const R = fins[0].o, corte = pos ? R[a0] : R[a1];
+        if(Math.abs((pos ? corte - c[a0] : c[a1] - corte)) < 1.2) continue;
+        const ok = lado.filter(z => z.o!==R && !(DO_MODULO.includes(z.o.tipo) && z.o.mod && z.o.mod===R.mod))
+          .every(z => (pos ? Math.min(z.sh.t1, corte) - z.sh.t0 : z.sh.t1 - Math.max(z.sh.t0, corte)) >= 1.0 - 0.001);
+        if(!ok) continue;
+        if(Math.abs(R[b1] - c[b0]) < 0.001) R[b1] = c[b1]; else R[b0] = c[b0];
+        c[fim] = r2(corte); R.integra = 1;
+      }
+    }
+  }
+  return v;
+}
+
 function geraTodas(q, P, Ws){
   const out = [];
   const push0 = out.push.bind(out);
-  out.push = (...vs) => push0(...vs.map(v => comTorre(comRooftop(v, q), q)));
+  out.push = (...vs) => push0(...vs.map(v => comTorre(comRooftop(enxuga(v), q), q)));
   for(const W of Ws){
     const modos = [], f = q.formato, quer = x => f==='auto' || f===x;
     const larguraCol = (q.tipo==='sobrado'||q.subsolo) ? COL : C;

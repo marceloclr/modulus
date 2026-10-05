@@ -239,6 +239,16 @@ t('cards: card solar com as três vistas, fórmulas e normas', () => {
   ok(h.includes('NBR 16690') && h.includes('kWp = ') && h.includes('cobertura provisória') && h.includes('Projeção de custo'), 'normas, fórmula do kWp, cobertura provisória e título');
 });
 
+// ---------- circulação enxuta (05/10/2026) ----------
+t('circulação: a ponta do corredor vai para o quarto do fim e o hall de apoio para a cozinha', () => {
+  const v = M.gerar({}).variantes.find(x => x.tipologia.includes('corredor lateral')), T = v.pav[0].salas;
+  const c = T.find(s => s.tipo==='circ'), m = T.find(s => s.tipo==='master'), k = T.find(s => s.tipo==='cozinha');
+  ok(!T.some(s => s.tipo==='hall'), 'hall integrado à cozinha');
+  igual(c.y1, m.y0, 'o corredor termina na porta da suíte:'); igual([m.x0, m.x1], [0, v.W], 'a suíte ocupa a largura toda:');
+  ok(k.integra && m.integra && k.x1 === c.x1, 'cozinha encosta no corredor');
+  ok(!v.avisos.some(a => /não se liga|sem acesso/.test(a)), v.avisos.join(' | '));
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
