@@ -44,7 +44,17 @@
 .dimrow input{width:100%;font:500 12.5px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 5px}
 .dimrow input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .vtab{flex-direction:column;align-items:flex-start;gap:2px;line-height:1.25}
+.zoom-barra{display:inline-flex;align-items:center;gap:4px}
+.zoom-barra .btn{min-width:34px;justify-content:center}
+.zoom-barra .btn:disabled{opacity:.45;cursor:default}
+.zoom-nivel{min-width:48px;text-align:center;font:500 12.5px 'IBM Plex Sans',sans-serif;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.zoom-caixa{overflow:auto}
+.zoom-caixa>svg{margin-left:auto;margin-right:auto}
+.zoom-caixa:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+#lote{max-height:78vh;border-radius:12px}
+.lote-col .zoom-barra{margin:0 0 6px}
 .vtab small{font-size:11.5px;color:inherit;opacity:.8;font-weight:400}
+.vtab .vdim{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;font-variant-numeric:tabular-nums}
 /* blocos guiados (beta, gerador/ui-blocos.js) */
 .blocos{display:flex;flex-direction:column;gap:10px;margin:4px 0 12px}
 .bloco{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;background:var(--surface-2)}
@@ -171,6 +181,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
+          <label class="fld" id="subVagasOps">Vagas no subsolo<input type="number" id="subVagas" min="1" max="20" step="1" data-obrig aria-describedby="subVagasNota"><small id="subVagasNota">Quantos carros o subsolo deve comportar: ele é dimensionado para essas vagas (3,00 × 5,00 m cada).</small></label>
           <label class="fld">Nível do subsolo<select name="subNivel"><option value="meio">Semienterrado (1,40 m)</option><option value="inteiro">Enterrado</option></select></label>
           <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><small>Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</small></label>
           <label class="fld">Inclinação da rampa (%)<input type="number" name="inclinacao" min="8" max="25" step="1"></label>
@@ -260,7 +271,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
       <div class="panel-head">
         <p class="eyebrow">Gerador de plantas · estudo preliminar automático</p>
         <h1 style="font-size:clamp(26px,4vw,34px)">Plantas a partir do programa</h1>
-        <p>Preencha o terreno e o programa ao lado. O gerador monta variantes por regras (zoneamento social, serviço e íntimo, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores.</p>
+        <p>Preencha o terreno e o programa no formulário. O gerador monta variantes por regras (zoneamento social, serviço e íntimo, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores.</p>
       </div>
 
       <div class="stats" id="stats"></div>
@@ -285,7 +296,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
 
       <h2>Implantação e terreno</h2>
       <div class="lote-wrap">
-        <div id="lote"></div>
+        <div class="lote-col"><div id="lote"></div></div>
         <div>
           <div class="tbl-wrap"><table id="terreno"></table></div>
           <p class="note">O terreno mínimo é calculado com os mesmos recuos e a mesma taxa de ocupação, procurando a menor área em que alguma variante cabe sem violar o terreno.</p>
@@ -326,6 +337,7 @@ html.beta section.panel{--c:var(--card-variante)!important}
 <script src="desenho.js"></script>
 <script src="estado.js"></script>
 <script src="ui-blocos.js"></script>
+<script src="zoom.js"></script>
 <script>
 (function(){
 'use strict';
@@ -375,6 +387,8 @@ function sincroniza(){
   document.getElementById('garNota').hidden = sub;
   document.getElementById('vagasRot').textContent = gl.value==='terreo' ? 'Vagas' : 'Vagas no subsolo (o subsolo é dimensionado para elas)';
   document.getElementById('vagasTOps').hidden = gl.value!=='ambos';
+  document.getElementById('subVagasOps').hidden = gl.value==='terreo';
+  document.getElementById('subVagas').value = form.elements.vagas.value;
   document.getElementById('rtOps').hidden = !form.elements.rooftop.checked;
   document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';
   form.querySelectorAll('#secOps .chk').forEach(el => { el.hidden = fmt!=='auto' && !el.classList.contains('sec-' + chave); });
@@ -428,7 +442,7 @@ function render(){
   ].map(([k,val,c]) => `<div class="stat" style="--c:${c}"><div class="k">${k}</div><div class="v">${val}</div></div>`).join('');
   document.getElementById('avisosGerais').innerHTML = res.avisos.length ? `<div class="warn">${res.avisos.map(esc).join('<br>')}</div>` : '';
   document.getElementById('vtabs').innerHTML = res.variantes.map((x,i) =>
-    `<button class="btn vtab" type="button" role="tab" aria-selected="${i===vi}" aria-pressed="${i===vi}" data-v="${i}">${x.nome}<span class="score">${x.score}</span><small>${x.tipologia} · ${f2(x.W)} × ${f2(x.D)} m</small></button>`).join('');
+    `<button class="btn vtab" type="button" role="tab" aria-selected="${i===vi}" aria-pressed="${i===vi}" data-v="${i}">${x.nome}<span class="score">${x.score}</span><small>${x.tipologia}</small><small class="vdim"><span data-tip="Terreno: frente × fundo = área do lote">Terreno ${f2(q.frente)} × ${f2(q.fundo)} m · ${f2(q.frente*q.fundo)} m²</span><span data-tip="Construção: largura × profundidade da casa; área = soma das áreas fechadas de todos os pavimentos">Casa ${f2(x.W)} × ${f2(x.D)} m · ${f2(x.quadro.fechada)} m² construídos</span></small></button>`).join('');
   document.getElementById('ptabs').innerHTML = v.pav.map((p,i) =>
     `<button class="btn" type="button" role="tab" aria-selected="${i===pi}" aria-pressed="${i===pi}" data-p="${i}">${p.nome}</button>`).join('');
   document.getElementById('plan').innerHTML = Desenho.planta(v, pi);
@@ -485,6 +499,12 @@ form.addEventListener('input', e => {
   const meu = ++pedido;
   espera = setTimeout(() => { if(meu !== pedido || !faixasOk()) return; sincroniza(); gerar(); }, 200);
 });
+// subsolo: ao marcar, as vagas vão para o subsolo (antes ficavam no térreo e o subsolo saía sem rampa nem vagas)
+form.elements.subsolo.addEventListener('change', e => { if(e.target.checked && form.elements.garagemLocal.value==='terreo') form.elements.garagemLocal.value = 'subsolo'; });
+// "Vagas no subsolo" é um atalho do campo de vagas: repassa o valor e o evento para ele
+for(const tipo of ['input', 'change']) document.getElementById('subVagas').addEventListener(tipo, e => {
+  e.stopPropagation(); const vg = form.elements.vagas; vg.value = e.target.value; vg.dispatchEvent(new Event(tipo, {bubbles:true}));
+});
 document.getElementById('padrao').addEventListener('click', () => { preencher(Motor.PADRAO); gerar(); });
 document.getElementById('link').addEventListener('click', async function(){
   const url = location.href; try{ await navigator.clipboard.writeText(url); this.textContent = 'Link copiado'; }catch(e){ this.textContent = 'Copie da barra'; }
@@ -519,6 +539,9 @@ document.getElementById('baixarPng').addEventListener('click', () => {
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 });
 
+// zoom com botões + e − na planta e na implantação
+Zoom.ligar(document.getElementById('plan'), b => document.querySelector('.fig-tools').appendChild(b), 'Planta');
+Zoom.ligar(document.getElementById('lote'), b => document.getElementById('lote').before(b), 'Implantação');
 // sessão: o link (#s= ou o antigo #q=) tem prioridade; no beta, sem link, volta a última sessão deste navegador
 let salvo = null;
 if(window.plantasBeta && !location.hash) try{ salvo = Estado.deLocal(localStorage.getItem(Estado.CHAVE_LOCAL), Motor.PADRAO); }catch(e){}
