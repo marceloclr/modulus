@@ -266,6 +266,16 @@ t('torre de ar: recomendação por tipologia e links antigos (torreCalor)', () =
   ok(!M.gerar({}).variantes[0].torre, 'sem torre por padrão');
 });
 
+t('torre de ar: vazões pelas fórmulas do dossiê (conta à mão) e card', () => {
+  const TO = require('./torre.js'), CA = require('./cartoes.js');
+  const e = {tipo:'sobrado', torreTipo:'chamine'}, v = M.gerar(e).variantes[0], r = TO.calcular(v, M.normaliza(e));
+  igual(Math.round(r.H*100)/100, 6.5, 'H = 2 × 3,0 + 1,5 − 1,0:');
+  ok(Math.abs(r.qCham - 1988) < 2, 'chaminé 0,6·1·√(2·9,81·6,5·2/301)·3600 ≈ 1988: ' + r.qCham);
+  ok(Math.abs(r.qVento - 0.6*4*Math.sqrt(0.3)*3600) < 1, 'vento');
+  const h = CA.cartaoTorre(r); ok(h.includes('Torre de ar') && h.includes('Trocas de ar por hora') && h.includes('torre/'), 'card');
+  igual(TO.calcular(M.gerar({}).variantes[0], M.normaliza({})), null, 'sem torre:');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

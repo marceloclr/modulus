@@ -92,8 +92,8 @@ details.sub>.fs>legend{display:none}
 .bloco-res:empty{display:none}
 .bloco-res{margin:-2px 0 4px}
 .bloco-res .panel{max-width:none;margin:0}
-html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!important}
-#analises,#energia{margin-top:28px}
+html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variante)!important}
+#analises,#energia,#conforto{margin-top:28px}
 .grid-energia .card{margin:0;max-width:940px}
 .grid-analise{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px;align-items:start}
 .grid-analise .card{margin:0}
@@ -414,6 +414,10 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
       <div class="panel-head"><p class="eyebrow">Energia da variante escolhida</p><h2 id="tEnergia">Energia solar</h2></div>
       <div id="cardsEnergia" class="grid-energia"><p class="note">Carregando os valores…</p></div>
     </section>
+    <section class="panel so-beta" id="conforto" style="--c:var(--card-torre)" aria-labelledby="tConforto">
+      <div class="panel-head"><p class="eyebrow">Conforto passivo da variante escolhida</p><h2 id="tConforto">Torre de ar e brises</h2></div>
+      <div id="cardsConforto" class="grid-analise"></div>
+    </section>
   </main>
 </div>
 <footer><div>Gerador experimental de estudos preliminares. Medidas pelo eixo das paredes, sem valor de projeto executivo.</div></footer>
@@ -424,6 +428,7 @@ html.beta section.panel:not(#analises):not(#energia){--c:var(--card-variante)!im
 <script src="estrutura.js"></script>
 <script src="custos.js"></script>
 <script src="solar.js"></script>
+<script src="torre.js"></script>
 <script src="../tools/valida-schema.js"></script>
 <script src="valores.js"></script>
 <script src="graficos.js"></script>
@@ -597,12 +602,19 @@ function render(){
   document.getElementById('crumbSec').textContent = `${v.nome} · ${v.pav[pi].nome}`;
   if(window.plantasBeta) renderAnalises();
 }
+// conforto passivo (beta): torre de ar e brises da variante escolhida
+function renderConforto(v, q){
+  const t = Torre.calcular(v, q), cards = [];
+  if(t) cards.push(Cartoes.cartaoTorre(t));
+  document.getElementById('cardsConforto').innerHTML = cards.length ? cards.join('') : '<p class="note">Escolha uma torre de ar ou brises em “Conforto passivo”, no bloco 1, para ver o estudo desta variante.</p>';
+}
 // cards de custo e estrutura (beta): custo da variante escolhida e de todas, para comparar
 function renderAnalises(){
   const box = document.getElementById('cardsAnalise');
   if(!dadosCusto || !res || !res.variantes[vi]){ box.innerHTML = '<p class="note">Carregando os valores de custo…</p>'; return; }
   const v = res.variantes[vi], q = res.entrada;
   const porVariante = res.variantes.map(x => ({nome:x.nome, r:Custos.calcular(x, q, dadosCusto)}));
+  renderConforto(v, q);
   const be = document.getElementById('cardsEnergia');
   be.innerHTML = dadosCusto.solar ? Cartoes.cartaoSolar(Solar.calcular(v, q, dadosCusto), {vista:vistaSolar}) : '<p class="note">Valores de energia solar indisponíveis.</p>';
   box.innerHTML = Cartoes.cartaoCusto(porVariante[vi].r, {dados:dadosCusto, historico:historicoCusto, porVariante, atual:vi, vista:vistaCusto, sinapiVivo}) + Cartoes.cartaoEstrutura(v, dadosCusto);

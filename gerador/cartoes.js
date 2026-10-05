@@ -129,5 +129,23 @@ function cartaoSolar(r, extra){
   return h;
 }
 
-return {selo, cartaoCusto, cartaoEstrutura, cartaoSolar, VISTAS, VISTAS_SOLAR, mesTxt};
+/* Card da torre de ar (r de Torre.calcular; null quando a variante não tem torre). */
+function cartaoTorre(r, raiz){
+  const m3h = n => Math.round(n).toLocaleString('pt-BR') + ' m³/h', f1 = n => (Math.round(n*10)/10).toFixed(1).replace('.', ',');
+  let h = `<div class="card res" style="--c:var(--card-torre)"><div class="res-head"><h3>Torre de ar</h3><p class="selo">${esc(r.nome)} sobre ${r.sobre === 'escada' ? 'a escada' : 'o estar'}${r.auto ? ' · recomendada para esta casa' : ''}</p></div>`;
+  h += `<div class="tbl-wrap"><table><tbody>`;
+  if(!r.auto && r.recomendada !== r.tipo) h += `<tr><td>Recomendada para esta tipologia</td><td class="n">${esc(r.nomeRecomendada)}</td></tr>`;
+  h += `<tr><td>Altura de tiragem</td><td class="n"><span class="calc" data-tip="Da entrada de ar (1 m acima do piso) até a saída da torre, 1,5 m acima da cobertura">${f2(r.H)} m</span></td></tr>`;
+  h += `<tr><td>Área efetiva de saída</td><td class="n">${f2(r.A)} m²</td></tr>`;
+  if(r.dT) h += `<tr><td>Efeito chaminé (ΔT ${r.dT} K)</td><td class="n"><span class="calc" data-tip="${esc(r.formulas.cham)}">${m3h(r.qCham)}</span></td></tr>`;
+  if(r.dCp) h += `<tr><td>Vento de 4 m/s (ΔCp ${f2(r.dCp)})</td><td class="n"><span class="calc" data-tip="${esc(r.formulas.vento)}">${m3h(r.qVento)}</span> · com 2 m/s, ${m3h(r.qVentoFraco)}</td></tr>`;
+  if(r.ec) h += `<tr><td>Exaustor EC (horas sem vento)</td><td class="n">${m3h(r.ec)}</td></tr>`;
+  h += `<tr><td>Volume ventilado</td><td class="n">${f2(r.volume)} m³</td></tr>`;
+  h += `<tr class="total"><td>Trocas de ar por hora</td><td class="n"><span class="calc" data-tip="${esc(r.formulas.trocas)}">${f1(r.trocas)}</span> · mínimo ${f1(r.trocasMin)}</td></tr>`;
+  h += `</tbody></table></div>`;
+  h += `<p class="note">Na zona bioclimática 8 (Fortaleza) a diferença de temperatura entre dentro e fora é de 1 a 3 K: o vento de leste/sudeste rende várias vezes mais que o efeito chaminé. Estimativa para estudo preliminar; confirme com simulação. <a href="${raiz || '../'}torre/" target="_blank" rel="noopener">Dossiê das torres</a>.</p>`;
+  return h + '</div>';
+}
+
+return {selo, cartaoCusto, cartaoEstrutura, cartaoSolar, cartaoTorre, VISTAS, VISTAS_SOLAR, mesTxt};
 });
