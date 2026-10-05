@@ -151,7 +151,9 @@ function planta(v, idx, op){
     const w = s.x1-s.x0, h = s.y1-s.y0;
     if(s.tipo==='garagem'){
       const n = s.vaga ? 1 : (s.vagas || Math.max(1, Math.floor(w/2.5)));
-      const vert = h >= w || s.vaga;
+      // o carro fica perpendicular à face por onde entra: garagem aberta para a rua (fachada frontal) tem os carros de frente para ela
+      const ext = Motor._interno.trechosExternos(s, S), abreFrente = ext.some(e => e.lado==='y0' && e.t1-e.t0 >= 2.4), abreLado = ext.some(e => (e.lado==='x0'||e.lado==='x1') && e.t1-e.t0 >= 4.5);
+      const vert = s.vaga || abreFrente || (!abreLado && h >= w);
       for(let i=0;i<n;i++){
         const cx = vert ? s.x0 + w*(i+0.5)/n : s.x0 + w/2, cy = vert ? s.y0 + h/2 : s.y0 + h*(i+0.5)/n;
         const cw = vert ? 1.8 : 4.4, chh = vert ? 4.4 : 1.8;
