@@ -218,7 +218,6 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
   <div class="bar-in">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true"><span></span></div>
-      <div class="crumb"><span class="chip" style="--c:var(--brass)">Gerador</span><span class="sec" id="crumbSec">Plantas por programa de necessidades</span></div>
     </div>
     <button class="btn" id="themeBtn" type="button" data-tip="Alterna entre o tema claro e o escuro. A escolha fica guardada neste navegador">Tema escuro</button>
   </div>
@@ -752,7 +751,6 @@ function render(){
   const sub = v.pav.find(p => p.nome==='Subsolo');
   if(sub && sub.rampa && q.subGaragem) t += `<tr><td>Rampa</td><td class="n">${f2(sub.rampa.L)} m a ${q.inclinacao} % (${f2(sub.rampa.Lout)} m no recuo)</td></tr>`;
   document.getElementById('terreno').innerHTML = t + '</tbody>';
-  document.getElementById('crumbSec').textContent = `${v.nome} · ${v.pav[pi].nome}`;
   renderAnalises();
 }
 // conforto passivo: torre de ar e brises da variante escolhida
