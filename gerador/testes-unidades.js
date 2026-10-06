@@ -18,7 +18,13 @@ t('estado: ida e volta pela URL com acentos, blocos e ui', () => {
   ok(h.startsWith('#s=') && !/[+/=]/.test(h.slice(3)), 'hash em base64url');
   const r = Estado.deHash(h, P);
   igual(r.entrada.frente, 15); igual(r.entrada.tipo, 'sobrado'); igual(r.entrada.notaLivre, 'Varanda à direita'); igual(r.entrada.fundo, P.fundo);
-  igual(r.ui, {blocos:{b1:'concluido', b2:'a-definir', b3:'a-definir', b4:'a-definir'}, abertos:['b1'], variante:2, pavimento:1, espelho:true});
+  igual(r.ui, {blocos:{b1:'concluido', b2:'a-definir', b3:'a-definir', b4:'a-definir'}, abertos:['b1'], variante:2, pavimento:1, espelho:true, processado:true});
+});
+t('estado: resultado só depois da primeira conclusão das dimensões', () => {
+  const e = Estado.novo(P); igual(e.ui.processado, false, 'estado novo:');
+  igual(Estado.deHash(Estado.paraHash(e, P), P).ui.processado, false, 'sem a marca no link:');
+  e.ui.processado = true; e.ui.blocos.b1 = 'em-edicao';
+  igual(Estado.deHash(Estado.paraHash(e, P), P).ui.processado, true, 'marca mantida com o bloco reaberto:');
 });
 t('estado: só as diferenças do padrão vão para o link', () => {
   igual(Estado.diferencas(Object.assign({}, P, {quartos:4}), P), {quartos:4});

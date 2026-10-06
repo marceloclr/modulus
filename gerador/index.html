@@ -155,6 +155,11 @@ details.sub>.fs{border:0;margin:0;padding-top:0;background:transparent}
 details.sub>.fs>legend{display:none}
 [aria-invalid="true"]{outline:2px solid var(--rust)!important;outline-offset:1px}
 .bloco-res:empty{display:none}
+/* resultado oculto até a primeira conclusão do bloco Dimensões (06/10/2026) */
+.vazio-res{display:none;border:1px dashed var(--line);border-radius:var(--radius);background:var(--surface);padding:18px 20px;margin:0 0 22px}
+.vazio-res strong{font-family:'IBM Plex Serif',Georgia,serif;font-weight:500;font-size:19px}.vazio-res p{margin:.4rem 0 0;color:var(--ink-2)}
+body.aguardando .vazio-res{display:block}
+body.aguardando :is(#resultado,#analises,#energia,#conforto){display:none!important}
 .bloco-res{margin:-2px 0 4px}
 .bloco-res .panel{max-width:none;margin:0}
 section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variante)!important}
@@ -436,6 +441,11 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <p>Preencha o terreno e o programa no formulário. O gerador monta variantes por regras (zoneamento social, serviço e íntimo, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores.</p>
       </div>
 
+      <div class="vazio-res" id="resultadoVazio">
+        <strong>O resultado aparece depois das suas escolhas</strong>
+        <p>Preencha o bloco 1, Dimensões (terreno, tipo da casa e programa), e toque em "Concluir bloco". Aí o gerador calcula as variantes e mostra os indicadores, a planta, o quadro de áreas e a implantação.</p>
+      </div>
+      <div id="resultado">
       <div class="stats" id="stats"></div>
       <div id="avisosGerais"></div>
 
@@ -466,6 +476,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         </div>
       </div>
 
+      </div><!-- #resultado -->
       <h2>Como o gerador decide</h2>
       <p class="note">Ordem das decisões: primeiro o que torna a planta inválida, depois as regras que você escolheu, por fim a nota. Uma regra de cima sempre vence a de baixo.</p>
       <div class="grid2">
@@ -677,7 +688,10 @@ function dicaNota(v){
 Esta variante: ${v.score} (perdeu ${100 - v.score}), nota ${faixa}. Os motivos estão em “Pontos de atenção”.`;
 }
 
+function marcaProcessado(){ document.body.classList.toggle('aguardando', !est.ler().ui.processado); }
+est.assinar && est.assinar((e, caminho) => { if(caminho === 'ui.processado' || caminho === '') marcaProcessado(); });
 function render(){
+  marcaProcessado();
   const q = res.entrada, v = variante();
   const st = document.getElementById('stats');
   if(!v){ st.innerHTML=''; const lm = res.loteMinimo && res.loteMinimo.minimo;
@@ -797,7 +811,7 @@ function brisesVisiveis(){
 form.addEventListener('change', e => { if(/^brises/.test(e.target.name || '')) brisesVisiveis(); });
 // subsolo: ao marcar, as vagas vão para o subsolo (antes ficavam no térreo e o subsolo saía sem rampa nem vagas)
 form.elements.subsolo.addEventListener('change', e => { if(e.target.checked && form.elements.garagemLocal.value==='terreo') form.elements.garagemLocal.value = 'subsolo'; });
-document.getElementById('restaurar').addEventListener('click', () => { preencher(PADRAO); gerar(); });
+document.getElementById('restaurar').addEventListener('click', () => { est.escrever('ui.processado', false); est.escrever('ui.blocos', Estado.blocosIniciais()); preencher(PADRAO); gerar(); if(blocos && blocos.pintar) blocos.pintar(); });
 document.getElementById('link').addEventListener('click', async function(){
   const url = location.href; try{ await navigator.clipboard.writeText(url); this.textContent = 'Link copiado'; }catch(e){ this.textContent = 'Copie da barra'; }
   setTimeout(() => this.textContent = 'Copiar link', 1800);

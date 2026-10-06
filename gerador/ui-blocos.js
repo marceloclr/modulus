@@ -172,6 +172,7 @@ function montar(form, est, opts){
     mostrarErros(id, probs);
     if(probs.length){ gravaBlocos(aposAlterar(est.ler().ui.blocos, id, '', false)); focar(probs[0].el); return false; }
     const novos = aposConcluir(est.ler().ui.blocos, id);
+    if(id === 'b1') est.escrever('ui.processado', true);   // primeira conclusão das dimensões: o resultado passa a aparecer
     document.getElementById('bl-'+id).open = false;
     gravaBlocos(novos);
     const nx = proximo(novos, id);

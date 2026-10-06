@@ -11,7 +11,7 @@ const ESTADOS_BLOCO = ['a-definir', 'em-edicao', 'pronto', 'concluido', 'revisar
 
 function blocosIniciais(){ return {b1:'a-definir', b2:'a-definir', b3:'a-definir', b4:'bloqueado'}; }
 function novo(padrao){
-  return {versao:VERSAO, entrada:Object.assign({}, padrao), ui:{blocos:blocosIniciais(), abertos:[], variante:0, pavimento:null, espelho:null}};
+  return {versao:VERSAO, entrada:Object.assign({}, padrao), ui:{blocos:blocosIniciais(), abertos:[], variante:0, pavimento:null, espelho:null, processado:false}};
 }
 
 // base64url com UTF-8 (também lê o base64 comum dos links antigos)
@@ -34,6 +34,7 @@ function compacto(est, padrao){
   if(u.espelho !== null && u.espelho !== undefined) o.u.m = u.espelho ? 1 : 0;
   if(u.blocos && BLOCOS.some(b => u.blocos[b] !== blocosIniciais()[b])) o.u.b = u.blocos;
   if(u.abertos && u.abertos.length) o.u.a = u.abertos;
+  if(u.processado) o.u.d = 1;   // dimensões já processadas uma vez: o resultado aparece
   return o;
 }
 function expandir(o, padrao){
@@ -45,6 +46,8 @@ function expandir(o, padrao){
   if(u.m === 0 || u.m === 1) est.ui.espelho = !!u.m;
   if(u.b && typeof u.b === 'object') for(const b of BLOCOS) if(ESTADOS_BLOCO.includes(u.b[b])) est.ui.blocos[b] = u.b[b];
   if(Array.isArray(u.a)) est.ui.abertos = u.a.filter(b => BLOCOS.includes(b));
+  // links e sessões de antes de 06/10/2026 não têm a marca: bloco 1 concluído (ou a revisar) conta como processado
+  est.ui.processado = u.d === 1 || ['concluido', 'revisar'].includes(est.ui.blocos.b1);
   return est;
 }
 
