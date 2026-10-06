@@ -516,6 +516,24 @@ t('recuos: menos de 1,50 m da divisa não recebe janela (art. 1.301), e o link a
   igual([M.normaliza(ex.entrada).recX0, M.normaliza(ex.entrada).recX1], [3, 3], 'link antigo expandido pelo estado:');
 });
 
+// ---------- inversões (etapa E2.3) ----------
+t('inversões: estar ↔ jantar e cozinha ↔ serviço trocam de lugar; cozinha aberta fica encostada no jantar', () => {
+  const base = {frente:12, fundo:30, quartos:3, suites:1, orientacao:'N'};
+  const ter = v => v.pav.find(p => p.nome === 'Térreo').salas, de = (v, t) => ter(v).find(s => s.tipo === t);
+  const encosta = v => { const sh = M._interno.compartilhado(de(v, 'cozinha'), de(v, 'jantar')); return !!sh && sh.t1 - sh.t0 >= 1.0; };
+  const n = M.gerar(base).variantes[0];
+  ok(de(n, 'estar').x0 < de(n, 'jantar').x0 && !n.invertido, 'normal: estar à esquerda do jantar');
+  const ej = M.gerar(Object.assign({invEstarJantar:true}, base));
+  ok(ej.variantes.length && ej.variantes.every(v => v.invertido && de(v, 'jantar').x0 < de(v, 'estar').x0 && encosta(v)), 'estar ↔ jantar: jantar à esquerda e cozinha encostada nele');
+  const dois = M.gerar(Object.assign({invEstarJantar:true, invCozinhaServico:true}, base)).variantes;
+  ok(dois.length && dois.every(v => v.invertido.length === 2 && de(v, 'cozinha').x0 < de(v, 'servico').x0 && encosta(v)), 'as duas inversões juntas');
+  const cs = M.gerar(Object.assign({invCozinhaServico:true}, base));
+  ok(cs.variantes.every(v => !v.invertido || encosta(v)) && (cs.variantes.some(v => v.invertido) || cs.avisos.some(a => /não coube/.test(a))), 'cozinha ↔ serviço com cozinha aberta: aplica ou avisa');
+  const fe = M.gerar(Object.assign({invCozinhaServico:true, cozinha:'fechada'}, base)).variantes[0];
+  ok(fe.invertido && de(fe, 'cozinha').x0 < de(fe, 'servico').x0, 'cozinha fechada: a troca vale');
+  ok(M.gerar(Object.assign({invEstarJantar:true, jantar:false}, base)).avisos.some(a => /sem efeito/.test(a)), 'sem jantar: aviso de inversão sem efeito');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

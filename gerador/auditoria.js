@@ -271,6 +271,8 @@ function casos(){
     'Cozinha fechada e lavabo, 12 × 30': {frente:12, fundo:30, quartos:3, suites:1, cozinha:'fechada', lavabo:true, orientacao:'L'},
     'Garagem descoberta, 3 vagas, 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, garagem:'descoberta', vagas:3, orientacao:'NE'},
     'Subsolo em lote largo, 30 × 50': {frente:30, fundo:50, quartos:4, suites:4, subsolo:true, orientacao:'S'},
+    'Inversões estar/jantar e cozinha/serviço, 12 × 30': {frente:12, fundo:30, quartos:3, suites:1, invEstarJantar:true, invCozinhaServico:true, orientacao:'L'},
+    'Cozinha fechada invertida com o serviço, 14 × 30': {frente:14, fundo:30, quartos:3, suites:2, cozinha:'fechada', invCozinhaServico:true, orientacao:'SE'},
     'Sobrado com pé-direito de 2,70 m, 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, peDireito:2.7, orientacao:'NO'},
     'Sobrado com pé-direito de 4,50 m, 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, peDireito:4.5, orientacao:'N'},
   });
