@@ -202,7 +202,7 @@ function planta(v, idx, op){
       const rp = p.rampa, y0t = p.rampaFora ? p.rampaFora.y0 : s.y0;
       o.push(`<text transform="translate(${(X(s.x0)+X(s.x1))/2+3},${(Y(y0t)+Y(s.y1))/2}) rotate(-90)" class="rd" style="font-size:7px;font-weight:600">RAMPA ${s.inclinacao||20}% · ${rp ? f2(rp.L) + ' m' : ''}${rp && rp.Lout > 0.05 ? ' (' + f2(rp.Lout) + ' no recuo)' : ''}</text>`);
     }
-    if(['suite','master','quarto'].includes(s.tipo) && w >= 2.6 && h >= 2.6){
+    if(['suite','master','quarto'].includes(s.tipo) && w >= 2.6 - 0.005 && h >= 2.6 - 0.005){   // folga: 2,60 m chega como 2,5999…
       const dupla = s.tipo!=='quarto', bw = dupla ? (s.tipo==='master'?1.9:1.6) : 1.0, bl = 2.0;
       // cabeceira na parede mais longa que não seja do corredor: centraliza
       const horiz = w >= h;

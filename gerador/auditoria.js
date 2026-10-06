@@ -27,10 +27,10 @@ const REGRAS = {
   G10: {nome:'Corredor abaixo de 1,20 m', limite:98},
   G11: {nome:'Circulação interrompida (cômodo sem ligação)', limite:20},
   G12: {nome:'Escada que não cabe no espaço', limite:0},
-  G13: {nome:'Escada fora da faixa de Blondel (0,63–0,65 m)', limite:6},
+  G13: {nome:'Escada fora da faixa de Blondel (0,63–0,65 m)', limite:0},
   G14: {nome:'Garagem sem largura ou profundidade para os carros', limite:0},
   G15: {nome:'Vaga do subsolo sem acesso à manobra', limite:0},
-  G16: {nome:'Mobiliário sobreposto ou fora do cômodo', limite:32},
+  G16: {nome:'Mobiliário sobreposto ou fora do cômodo', limite:9},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
   M03: {nome:'Projeção ignora o superior em balanço', limite:44},
@@ -151,7 +151,7 @@ function auditar(v, q){
     }
     for(const s of S.filter(x => ['suite','master','quarto'].includes(x.tipo))){
       const w = s.x1 - s.x0, h = s.y1 - s.y0;
-      if(w < 2.6 || h < 2.6) add('G16', nome, `${s.nome} de ${f2(w)} × ${f2(h)} m sem cama desenhada`);
+      if(w < 2.6 - 0.005 || h < 2.6 - 0.005) add('G16', nome, `${s.nome} de ${f2(w)} × ${f2(h)} m sem cama desenhada`);
     }
     // G15: vagas do subsolo encostadas numa manobra (ou numa vaga, em fila)
     if(nome === 'Subsolo'){

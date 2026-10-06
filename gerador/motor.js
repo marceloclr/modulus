@@ -314,8 +314,10 @@ function faixaIntima(mods, tiras, y0, compMin, fixo){
 
 /* ---------- Escada reta ---------- */
 function escada(q){
-  const n = Math.ceil(q.peDireito/0.18);
-  const espelho = q.peDireito/n, piso = 0.28;
+  const n = Math.ceil(q.peDireito/0.18 - 1e-9);         // 2,70 / 0,18 = 15,000…02 em ponto flutuante: sem a folga, viravam 16 degraus
+  const espelho = q.peDireito/n;
+  // piso de 0,28 m; se 2e + p sair da faixa de Blondel (0,63–0,65 m), o piso é ajustado para entrar nela
+  const piso = 2*espelho + 0.28 < 0.63 ? Math.ceil((0.63 - 2*espelho)*100)/100 : 2*espelho + 0.28 > 0.65 ? Math.floor((0.65 - 2*espelho)*100)/100 : 0.28;
   return {n, espelho: r2(espelho*1000)/1000, piso, L: r2((n-1)*piso), blondel: r2(2*espelho+piso)};
 }
 
