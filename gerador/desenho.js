@@ -131,7 +131,7 @@ function hzMoveis(pecas, X, Y){
     const pt = (u, v) => l === 'y0' ? [q.x0 + u, q.y0 + v] : l === 'y1' ? [q.x0 + u, q.y1 - v] : l === 'x0' ? [q.x0 + v, q.y0 + u] : [q.x1 - v, q.y0 + u];
     const R = (u0, v0, u1, v1, at) => { const [x0, y0] = pt(u0, v0), [x1, y1] = pt(u1, v1); r(x0, y0, x1, y1, at); };
     const C = (u, v, rr, at) => { const [x, y] = pt(u, v); c(x, y, rr, at); };
-    const tt = `<title>${({cama:'Cama', criado:'Criado-mudo', armario:'Armário', escrivaninha:'Escrivaninha', boxe:'Boxe', bacia:'Bacia sanitária', lavatorio:'Lavatório', bancada:'Bancada', 'bancada-cozinha':'Bancada com cuba e cooktop', geladeira:'Geladeira', tanque:'Tanque', maquina:'Máquina de lavar', rack:'Rack da TV', sofa:'Sofá', 'mesa-centro':'Mesa de centro', 'mesa-jantar':'Mesa de jantar', 'mesa-externa':'Mesa externa', vaso:'Vaso com planta', churrasqueira:'Churrasqueira', prateleiras:'Prateleiras', estante:'Estante', arvore:'Árvore'})[q.tipo] || q.tipo} ${f2(W)} × ${f2(P)} m</title>`;
+    const tt = `<title>${({cama:'Cama', criado:'Criado-mudo', armario:'Armário', escrivaninha:'Escrivaninha', boxe:'Boxe', bacia:'Bacia sanitária', lavatorio:'Lavatório', bancada:'Bancada', 'bancada-cozinha':'Bancada com cuba e cooktop', geladeira:'Geladeira', tanque:'Tanque', maquina:'Máquina de lavar', rack:'Rack da TV', sofa:'Sofá', 'mesa-centro':'Mesa de centro', 'mesa-jantar':'Mesa de jantar', 'mesa-externa':'Mesa externa', 'mesa-atendimento':'Mesa de atendimento', vaso:'Vaso com planta', churrasqueira:'Churrasqueira', prateleiras:'Prateleiras', estante:'Estante', arvore:'Árvore'})[q.tipo] || q.tipo} ${f2(W)} × ${f2(P)} m</title>`;
     o.push('<g>' + tt);
     switch(q.tipo){
       case 'cama': {
@@ -180,6 +180,13 @@ function hzMoveis(pecas, X, Y){
           for(const s of [-1, 1]){ const [x, y] = ex ? [cx + u, cy + s * (mh / 2 + 0.22)] : [cx + s * (mh / 2 + 0.22), cy + u]; r(x - (ex ? 0.2 : 0.18), y - (ex ? 0.18 : 0.2), x + (ex ? 0.2 : 0.18), y + (ex ? 0.18 : 0.2), 'rx="1.5" ' + BR); } }
         if(pontas) for(const s of [-1, 1]){ const [x, y] = ex ? [cx + s * (mw / 2 + 0.22), cy] : [cx, cy + s * (mw / 2 + 0.22)]; r(x - (ex ? 0.18 : 0.2), y - (ex ? 0.2 : 0.18), x + (ex ? 0.18 : 0.2), y + (ex ? 0.2 : 0.18), 'rx="1.5" ' + BR); }
         r(cx - tw / 2, cy - th / 2, cx + tw / 2, cy + th / 2, 'rx="2" fill="#E2D5BE" stroke="#8C7B5C" stroke-width=".9"');
+        break; }
+      case 'mesa-atendimento': {   // mesa no meio, cadeira de trabalho de um lado e duas de visita do outro (ao longo do lado curto)
+        const ex = q.eixo === 'x', [cx, cy] = [(q.x0 + q.x1) / 2, (q.y0 + q.y1) / 2];
+        const mw = ex ? q.w : 0.7, mh = ex ? 0.7 : q.h;
+        r(cx - (ex ? mw : 0.7) / 2, cy - (ex ? 0.7 : mh) / 2, cx + (ex ? mw : 0.7) / 2, cy + (ex ? 0.7 : mh) / 2, 'rx="1.5" fill="#E2D5BE" stroke="#8C7B5C" stroke-width=".9"');
+        const ch = (x, y) => r(x - 0.22, y - 0.22, x + 0.22, y + 0.22, 'rx="2" ' + BR);
+        if(ex){ ch(cx, cy - 0.6); ch(cx - 0.35, cy + 0.6); ch(cx + 0.35, cy + 0.6); } else { ch(cx - 0.6, cy); ch(cx + 0.6, cy - 0.35); ch(cx + 0.6, cy + 0.35); }
         break; }
       case 'vaso': C(W / 2, P / 2, Math.min(W, P) * 0.42, 'fill="#C9B79C" stroke="#8C7B5C" stroke-width=".7"'); C(W / 2, P / 2, Math.min(W, P) * 0.32, 'fill="#7FA05A" fill-opacity=".9"'); break;
       case 'churrasqueira': R(0, 0, W, P, 'fill="#6B6660" stroke="#3F3A35" stroke-width=".8"'); for(let i = 1; i < 5; i++) R(0.1, i * P / 5, W - 0.1, i * P / 5, 'stroke="#B7B0A6" stroke-width=".5"'); break;

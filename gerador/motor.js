@@ -228,7 +228,7 @@ const area = s => (s.x1-s.x0)*(s.y1-s.y0);
 function faixa(x0, y0, x1, y1, itens, eixo){
   const L = eixo==='x' ? x1-x0 : y1-y0, P = eixo==='x' ? y1-y0 : x1-x0;
   if(!itens.length || L<=0.01 || P<=0.01) return [];
-  const lado = it => TIPOS[it.tipo].lado || 1;
+  const lado = it => it.lado || TIPOS[it.tipo].lado || 1;
   // grupos: {itens, peso}; um item fino demais vai para uma coluna empilhada só se cada um mantiver o lado mínimo
   const grupos = []; let col = null;
   const colOk = c => { const sa = c.reduce((t,i)=>t+i.a,0); return c.every(i => P*i.a/sa >= lado(i)-0.01); };
@@ -395,7 +395,7 @@ function linear(q, P, W, modo, opts){
   }
   // faixa social
   // escritório ampliado (E2.4): ele e o estar nunca empilham, para os dois terem a frente (porta externa e entrada principal)
-  const socialItens = P.social.map(t => ({tipo:t, a:alvo(t,q), frente: !!q.escritorioAmpliado && (t==='escritorio' || t==='estar')}));
+  const socialItens = P.social.map(t => ({tipo:t, a:alvo(t,q), frente: !!q.escritorioAmpliado && (t==='escritorio' || t==='estar'), lado: t==='escritorio' && q.escritorioAmpliado ? ESC_AMPLIADO.lado : undefined}));
   if(temNucleo && !Wg){ const k = socialItens.findIndex(i => i.tipo==='estar'); if(k > 0) socialItens.unshift(socialItens.splice(k,1)[0]); }
   const aS = socialItens.reduce((s,i)=>s+i.a,0);
   const Wsoc = W - Wg;
