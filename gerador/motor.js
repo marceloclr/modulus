@@ -59,7 +59,7 @@ const NOMES_RUMO = {N:'Norte', NE:'Nordeste', L:'Leste', SE:'Sudeste', S:'Sul', 
 const DIMENSIONAVEIS = ['quarto','suite','master','banhoSuite','closet','banhoSocial','lavabo','estar','jantar','tv','escritorio','cozinha','servico','despensa','gourmet'];
 
 const PADRAO = {
-  frente:12, fundo:30, recFrente:5, recLat:1.5, recFundo:3, taxa:60, orientacao:'',
+  frente:12, fundo:30, recFrente:5, recLatE:1.5, recLatD:1.5, recFundo:3, taxa:60, orientacao:'',
   tipo:'terrea', formato:'auto', peDireito:3.0,
   quartos:3, suites:1, master:true, tamanho:'medio',
   banhosSociais:1, lavabo:false,
@@ -81,7 +81,13 @@ const PADRAO = {
 
 function normaliza(p){
   const q = Object.assign({}, PADRAO, p||{});
-  for(const k of ['frente','fundo','recFrente','recLat','recFundo','taxa','peDireito','quartos','suites','banhosSociais','vagas','inclinacao','pisC','pisL','pisP','afastAnexo','vaoMax']) q[k] = +q[k] || 0;
+  for(const k of ['frente','fundo','recFrente','recLatE','recLatD','recFundo','taxa','peDireito','quartos','suites','banhosSociais','vagas','inclinacao','pisC','pisL','pisP','afastAnexo','vaoMax']) q[k] = +q[k] || 0;
+  // recuos laterais (E2.2): esquerdo e direito de quem olha da rua para o lote. Pela convenção do motor, a esquerda de quem
+  // olha da rua é o lado x1 e a direita é o x0. Links e arquivos antigos com um só recuo lateral (recLat) valem para os dois.
+  // (o estado expande links antigos com o padrão: o recLat antigo vale quando os dois campos novos estão no padrão)
+  if(p && p.recLat !== undefined && p.recLat !== null && (p.recLatE === undefined || p.recLatE === PADRAO.recLatE) && (p.recLatD === undefined || p.recLatD === PADRAO.recLatD)) q.recLatE = q.recLatD = +p.recLat || 0;
+  q.recLatE = clamp(q.recLatE, 0, 20); q.recLatD = clamp(q.recLatD, 0, 20);
+  q.recX0 = q.recLatD; q.recX1 = q.recLatE; delete q.recLat;
   q.elevador = q.elevador===true||q.elevador==='true'||q.elevador===1||q.elevador==='1'||q.elevador==='on';
   q.vaoMax = clamp(q.vaoMax || 10, 5, 20);
   if(!['frente','centro','fundo'].includes(q.rtPos)) q.rtPos = 'centro';
@@ -748,15 +754,17 @@ function edicula(q){
 }
 
 function comAnexos(v, q){
-  const B = q.frente - 2*q.recLat;
-  v.x0 = r2(q.recLat + (B - v.W)/2); v.y0 = q.recFrente;
+  const B = q.frente - q.recX0 - q.recX1;
+  v.x0 = r2(q.recX0 + (B - v.W)/2); v.y0 = q.recFrente;
   v.pav = v.pav.filter(p => !p.anexo);
   v.avisos = (v.avisosBase = v.avisosBase || (v.avisos||[]).slice()).slice();
+  // o espelho vira os anexos dentro desta faixa
+  v.faixaAnexos = {x0:q.recX0, x1:r2(q.frente - q.recX1)};
   const itens = []; v.anexos = itens; v.anexoFalta = 0; v.anexoProf = 0; v.anexoLarg = 0;
   const quer = q.piscina || q.gourmetDest || q.edicula!=='nenhuma';
   if(!quer) return v;
   const sub = v.pav.find(p => p.nome==='Subsolo');
-  const xq0 = q.recLat, xq1 = q.frente - q.recLat, yq0 = Math.max(v.y0 + v.D + q.afastAnexo, sub ? v.y0 + sub.dim.y0 + sub.dim.D + 2.5 : 0);
+  const xq0 = q.recX0, xq1 = q.frente - q.recX1, yq0 = Math.max(v.y0 + v.D + q.afastAnexo, sub ? v.y0 + sub.dim.y0 + sub.dim.D + 2.5 : 0);
   const yq1 = q.fundo - (q.anexoFundo ? 0 : q.recFundo);
   const ed = q.edicula!=='nenhuma' ? edicula(q) : null;
   if(ed) v.pav.push(...ed.pav);
@@ -816,8 +824,8 @@ function copiaNucleo(cel, flags){
 /* ---------- Subsolo: manobra contínua, núcleo na lateral, rampa do lado oposto, jardim de inverno no fundo ---------- */
 function subsolo(q, W0, D0, cel0, av){
   // quanto o subsolo avança sobre os recuos, conforme a opção escolhida
-  const B = q.frente - 2*q.recLat, lat = q.subRecuos!=='nenhum', fundoLivre = q.subRecuos!=='nenhum';
-  const xL = lat ? r2(q.recLat + (B - W0)/2) : 0, xR = lat ? r2(q.frente - (q.recLat + (B - W0)/2) - W0) : 0;
+  const B = q.frente - q.recX0 - q.recX1, lat = q.subRecuos!=='nenhum', fundoLivre = q.subRecuos!=='nenhum';
+  const xL = lat ? r2(q.recX0 + (B - W0)/2) : 0, xR = lat ? r2(q.frente - (q.recX0 + (B - W0)/2) - W0) : 0;
   const yF = q.subRecuos==='todos' ? q.recFrente : 0;
   let W = r2(W0 + xL + xR); const D = r2(D0 + yF);
   let cel = cel0.map(c => Object.assign({}, c, {x0:c.x0+xL, x1:c.x1+xL, y0:c.y0+yF, y1:c.y1+yF}));
@@ -825,7 +833,7 @@ function subsolo(q, W0, D0, cel0, av){
   const X0 = r2(Math.min(...cel.map(c => c.x0)));
   cel = cel.map(c => Object.assign({}, c, {x0:r2(c.x0-X0), x1:r2(c.x1-X0)}));
   const Wfull = r2(W - X0); W = Wfull;
-  const recuoEsq = r2(q.recLat + (B - W0)/2);                    // faixa livre entre a parede da casa e a divisa
+  const recuoEsq = r2(q.recX0 + (B - W0)/2);                    // faixa livre entre a parede da casa e a divisa
   if(lat) av.push(q.subRecuos==='todos' ? 'Subsolo ocupa todos os recuos: vai da frente ao fundo do lote e de divisa a divisa.' : 'Subsolo ocupa os recuos laterais e de fundo (de divisa a divisa).');
   const salas = [];
   const h = q.subNivel==='meio' ? 1.40 : q.peDireito + 0.20;
@@ -1152,9 +1160,9 @@ function comRooftop(v, q){
   }
   // fechamento a oeste: bordas abertas voltadas para o poente, na planta normal e na espelhada
   pav.fechamentos = {normal:[], espelhada:[]};
-  if(F !== undefined) for(const s of salas.filter(s => TIPOS[s.tipo].aberto))
+  for(const s of salas.filter(s => TIPOS[s.tipo].aberto))
     for(const e of trechosExternos(s, salas)) for(const [k, esp] of [['normal', false], ['espelhada', true]])
-      if(classeSol(rumoFace(e.lado, F, esp)) === 3) pav.fechamentos[k].push({o:e.o, c:r2(e.c), t0:r2(e.t0), t1:r2(e.t1)});
+      if(classeSol(rumoFace(e.lado, F, esp)) === 3 || distDivisa(q, v.W, e.lado, e.c, esp) < DIVISA_JANELA - 0.001) pav.fechamentos[k].push({o:e.o, c:r2(e.c), t0:r2(e.t0), t1:r2(e.t1), motivo: classeSol(rumoFace(e.lado, F, esp)) === 3 ? 'poente' : 'divisa'});
   v.pav.push(pav);
   return v;
 }
@@ -1201,7 +1209,7 @@ function trechosExternos(s, salas, filtro){
 }
 
 /* Subsolo: aberturas altas (semienterrado) ou voltadas para pátios ingleses (enterrado), com ventilação cruzada obrigatória. */
-function janelasSubsolo(pav, q, S, av){
+function janelasSubsolo(pav, q, S, av, Wc, espelho){
   const janelas = [];
   const X0 = pav.dim.x0 || 0, Y0 = pav.dim.y0 || 0, W = pav.dim.W, D = pav.dim.D, semi = q.subNivel==='meio', pocos = pav.pocos || [];
   const E = 0.01;
@@ -1226,7 +1234,7 @@ function janelasSubsolo(pav, q, S, av){
     const exig = hab ? A/8 : A/20;
     let obt = 0;
     const ext = trechosExternos(s, S.filter(o => !TIPOS[o.tipo].aberto)).map(e => { const l = ladoDe(e); const t = l && trecho(e, l); return t ? {o:e.o, c:e.c, t0:t[0], t1:t[1], lado:l} : null; })
-      .filter(Boolean).sort((a,b) => (lados.has(a.lado)?1:0)-(lados.has(b.lado)?1:0) || (b.t1-b.t0)-(a.t1-a.t0));
+      .filter(Boolean).filter(e => Wc === undefined || distDivisa(q, Wc, e.lado, e.c, espelho) >= DIVISA_JANELA - 0.001).sort((a,b) => (lados.has(a.lado)?1:0)-(lados.has(b.lado)?1:0) || (b.t1-b.t0)-(a.t1-a.t0));
     for(const e of ext){
       if(obt >= exig && lados.has(e.lado)) continue;
       const L = e.t1-e.t0;
@@ -1244,7 +1252,19 @@ function janelasSubsolo(pav, q, S, av){
   return {janelas};
 }
 
-function aberturas(pav, q, ehTerreo, espelho){
+/* Código Civil (Lei 10.406/2002), art. 1.301: "É defeso abrir janelas, ou fazer eirado, terraço ou varanda, a menos de metro e
+   meio do terreno vizinho" (texto conferido em fonte secundária em 06/10/2026; o Planalto não respondeu: confirmar na fonte oficial).
+   Distância de uma face da casa (lado e coordenada no sistema da casa, sem espelho) até a divisa vizinha; a frente dá para a rua.
+   A casa fica centrada na faixa edificável e o espelho a vira no lugar: a face x0 passa para o lado direito do lote. */
+const DIVISA_JANELA = 1.5;
+function distDivisa(q, W, lado, c, espelho){
+  if(q.recX0 === undefined || lado === 'y0') return Infinity;
+  const g = (q.frente - q.recX0 - q.recX1 - W)/2;
+  if(lado === 'y1') return q.fundo - q.recFrente - c;
+  const recuo = (lado === 'x0') !== !!espelho ? q.recX0 : q.recX1;
+  return recuo + g + (lado === 'x0' ? c : W - c);
+}
+function aberturas(pav, q, ehTerreo, espelho, W){
   const S = pav.salas, portas = [], vaos = [], janelas = [], av = [];
   const aberto = (a,b) => ABERTOS.some(([p,r]) => (a.tipo===p&&b.tipo===r)||(a.tipo===r&&b.tipo===p))
     || (q.cozinha==='aberta' && ((a.tipo==='cozinha'&&b.tipo==='jantar')||(a.tipo==='jantar'&&b.tipo==='cozinha')));
@@ -1328,12 +1348,15 @@ function aberturas(pav, q, ehTerreo, espelho){
   }
   // janelas: área mínima de iluminação = 1/8 da área do piso (ventilação 1/16 = metade de uma janela de correr)
   const fechados = S.filter(o => !TIPOS[o.tipo].aberto);
-  if(pav.nome==='Subsolo') return Object.assign({portas, vaos, avisos:av}, janelasSubsolo(pav, q, S, av));
+  if(pav.nome==='Subsolo') return Object.assign({portas, vaos, avisos:av}, janelasSubsolo(pav, q, S, av, W, espelho));
   for(const s of S){
     if(TIPOS[s.tipo].aberto) continue;
     const t = TIPOS[s.tipo];
     if(!(t.hab || t.mol || s.tipo==='circ' || s.tipo==='galeria' || s.tipo==='hall' || s.tipo==='closetMaster')) continue;
     let ext = trechosExternos(s, fechados).filter(e => e.t1-e.t0 >= 0.8).sort((a,b) => (b.t1-b.t0)-(a.t1-a.t0));
+    // art. 1.301: nada de janela a menos de 1,50 m da divisa
+    if(W !== undefined){ const n0 = ext.length; ext = ext.filter(e => distDivisa(q, W, e.lado, e.c, espelho) >= DIVISA_JANELA - 0.001);
+      if(n0 && !ext.length && t.hab) av.push(`${pav.nome}: ${rotulo(s)} só tem paredes a menos de 1,50 m da divisa (Código Civil, art. 1.301).`); }
     if(QUARTOS.includes(s.tipo) && RUMOS[q.orientacao] !== undefined){
       // quarto: nada de janela a oeste se houver outra face; as faces a nascente vêm primeiro
       const nota = e => classeSol(rumoFace(e.lado, RUMOS[q.orientacao], espelho));
@@ -1549,12 +1572,18 @@ function avalia(v, q){
     else { const rel = Math.abs(a - d.a)/d.a; dif = rel; txt = `${f2(a)} m² (pedido ${f2(d.a)} m²)`; if(rel > 0.2) pen += 10*rel; }
     if((d.w ? dif > 0.5 : dif > 0.2) && !avisados.has(s.tipo)){ avisados.add(s.tipo); av.push(`${p.nome}: ${rotulo(s)} ficou com ${txt}.`); }
   }
-  const abrir = esp => { const avs = []; for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo', esp); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas; avs.push(...ab.avisos); } return avs; };
+  // as aberturas dependem da orientação (sol nos quartos, divisa a menos de 1,50 m com recuos diferentes): guarda as duas,
+  // em coordenadas sem espelho, para a vista normal e a espelhada usarem cada uma o seu conjunto (espelharCasa, semEspelho)
+  const abrir = esp => { const avs = []; for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo', esp, v.W); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas;
+    p.aberturasPor = Object.assign(p.aberturasPor || {}, {[esp ? 'espelhada' : 'normal']: {portas:ab.portas, vaos:ab.vaos, janelas:ab.janelas}}); avs.push(...ab.avisos); } return avs; };
+  for(const p of v.pav) delete p.aberturasPor;
   let ori = null;
   if(RUMOS[q.orientacao] === undefined){
-    // sem orientação, as janelas não dependem do espelho: abre uma vez e compara só o vento
+    // sem orientação, o sol não conta; com recuos iguais as janelas não dependem do espelho: abre uma vez e compara só o vento
     const avAb = abrir(false), vn = avaliaVento(v, q, false), ve = avaliaVento(v, q, true), sl = {pen:0, av:[]};
     ori = ve.pen < vn.pen ? {esp:true, avAb, vt:ve, sl} : {esp:false, avAb, vt:vn, sl};
+    if(q.recX0 !== q.recX1){ const avE = abrir(true); if(ori.esp) ori.avAb = avE; else abrir(false); }
+    else for(const p of v.pav) if(p.aberturasPor) p.aberturasPor.espelhada = p.aberturasPor.normal;
   } else {
     for(const esp of [false, true]){
       const avAb = abrir(esp), vt = avaliaVento(v, q, esp), sl = avaliaSol(v, q, esp), pn = 6*avAb.length + vt.pen + sl.pen;
@@ -1564,7 +1593,7 @@ function avalia(v, q){
   }   // a última rodada foi a espelhada: refaz as aberturas da escolhida
   av.push(...ori.avAb); pen += 6*ori.avAb.length;
   // terreno
-  const B = q.frente - 2*q.recLat, Dmax = q.fundo - q.recFrente - q.recFundo;
+  const B = q.frente - q.recX0 - q.recX1, Dmax = q.fundo - q.recFrente - q.recFundo;
   if(v.W > B + 0.01){ pen += 40*(v.W-B); av.push(`A casa (${f2(v.W)} m) é mais larga que a área edificável (${f2(B)} m).`); }
   if(v.D > Dmax + 0.01){ pen += 25*(v.D-Dmax); av.push(`A casa precisa de ${f2(v.D)} m de profundidade; o terreno permite ${f2(Dmax)} m.`); }
   // anexos estão em coordenadas do lote; aqui passam para as da casa
@@ -1581,6 +1610,9 @@ function avalia(v, q){
     v.permeavel = r2(pct);
     if(pct < q.permeab - 0.01){ pen += 2*(q.permeab - pct); av.push(`Área permeável de ${f2(pct)} % do lote, abaixo do mínimo de ${f2(q.permeab)} % (descontados a casa, os anexos, o subsolo e os pisos de acesso).`); }
   }
+  for(const p of v.pav){ if(p.anexo || p.nome==='Subsolo' || p.nome==='Rooftop') continue;   // o rooftop já fecha essas bordas
+    const perto = p.salas.filter(s => TIPOS[s.tipo].aberto && trechosExternos(s, p.salas).some(e => distDivisa(q, v.W, e.lado, e.c, ori.esp) < DIVISA_JANELA - 0.001));
+    if(perto.length) av.push(`${p.nome}: ${[...new Set(perto.map(rotulo))].join(', ')} a menos de 1,50 m da divisa; feche essa face com parede (Código Civil, art. 1.301).`); }
   if(subA){ const fimSub = q.recFrente + subA.dim.y0 + subA.dim.D + 2.0; if(fimSub > q.fundo + 0.01){ pen += 25*(fimSub - q.fundo); av.push(`O subsolo com o jardim de inverno vai até ${f2(fimSub)} m; o lote tem ${f2(q.fundo)} m.`); } }
   if(v.anexoLarg) pen += 25*v.anexoLarg;
   const taxa = 100*proj/(q.frente*q.fundo);
@@ -1633,7 +1665,7 @@ function projecao(v){ return uniao(cobertura(v)); }
 function invalidez(v, q, av){
   const E = 0.011, m = [];
   const lote = {x0:-v.x0, y0:-v.y0, x1:q.frente - v.x0, y1:q.fundo - v.y0};
-  const edif = {x0:q.recLat - v.x0, y0:q.recFrente - v.y0, x1:q.frente - q.recLat - v.x0, y1:q.fundo - q.recFundo - v.y0};
+  const edif = {x0:q.recX0 - v.x0, y0:q.recFrente - v.y0, x1:q.frente - q.recX1 - v.x0, y1:q.fundo - q.recFundo - v.y0};
   const dentro = (s, r) => s.x0 >= r.x0 - E && s.x1 <= r.x1 + E && s.y0 >= r.y0 - E && s.y1 <= r.y1 + E;
   for(const p of v.pav){
     if(p.anexo) continue;
@@ -1877,7 +1909,7 @@ function geraTodas(q, P, Ws){
 function gerar(entrada, opts){
   const q = normaliza(entrada);
   const P = programa(q);
-  const B = r2(q.frente - 2*q.recLat), Dmax = r2(q.fundo - q.recFrente - q.recFundo);
+  const B = r2(q.frente - q.recX0 - q.recX1), Dmax = r2(q.fundo - q.recFrente - q.recFundo);
   const avisos = [];
   if(!q.orientacao) avisos.push('Informe para onde a frente do terreno está voltada (rosa dos ventos no bloco Terreno). Sem isso, a rosa das plantas não mostra a orientação real.');
   if(B < 5) avisos.push(`A área edificável tem só ${f2(B)} m de largura.`);
@@ -1905,12 +1937,54 @@ function gerar(entrada, opts){
   if(!semPoente.length && validas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
-  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recLat:q.recLat, recFundo:q.recFundo}; v.acessos = acessos(v, q);
+  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recX0:q.recX0, recX1:q.recX1, recFundo:q.recFundo}; v.acessos = acessos(v, q);
+    // acessos da versão espelhada: a casa vira no lugar e o lote não (com recuos diferentes, espelhar os acessos em torno do lote erraria)
+    const ve = espelharCasa(v); v.acessosEsp = acessos(ve, q);
     if(v.acessos && v.acessos.portoes.some(p => p.junto)) v.avisos.push('A frente do lote não comporta portão social separado do portão de veículos; os dois ficam juntos.');
     if(v.acessos && v.acessos.faltam) v.avisos.push(`Só ${v.acessos.vagasFora.length} vaga(s) descoberta(s) cabem no recuo frontal; faltam ${v.acessos.faltam}.`); });
   const lm = loteMinimo(q, P);
   if(escolhidas.length && escolhidas[0].score < 60) avisos.push('O programa não cabe bem neste terreno. Veja o terreno mínimo sugerido.');
   return {entrada:q, B, Dmax, variantes:escolhidas, loteMinimo:lm, avisos, escada: (q.tipo==='sobrado'||q.subsolo) ? escada(q) : null};
+}
+
+/* Espelha a casa no lugar (x → W − x): pavimentos, aberturas, poços, pilares, núcleo, spa, fechamentos do rooftop e o subsolo.
+   A casa não muda de posição no lote (fica centrada na faixa edificável); acessos e anexos são tratados por quem chama.
+   Usado pelo desenho (Desenho.espelha) e por gerar(), que calcula os acessos da versão espelhada (v.acessosEsp). */
+function espelharCasa(v){
+  const W = v.W, c = JSON.parse(JSON.stringify(v));
+  // aberturas calculadas para a vista espelhada (ainda em coordenadas sem espelho); depois tudo vira
+  for(const p of c.pav) if(p.aberturasPor && p.aberturasPor.espelhada){ Object.assign(p, p.aberturasPor.espelhada); delete p.aberturasPor; }
+  const fx = x => +(W - x).toFixed(2), vira = r => { const a = fx(r.x1), b = fx(r.x0); r.x0 = a; r.x1 = b; };
+  for(const p of c.pav){
+    if(p.anexo) continue;
+    if(p.pocos) p.pocos.forEach(vira);
+    if(p.pilares) for(const pl of p.pilares) pl.x = fx(pl.x);
+    if(p.nucleo) vira(p.nucleo);
+    if(p.spa) p.spa.x = fx(p.spa.x);
+    if(p.fechamentos) for(const k of ['normal', 'espelhada']) for(const e of p.fechamentos[k]){ if(e.o==='v') e.c = fx(e.c); else { const a = fx(e.t1), b = fx(e.t0); e.t0 = a; e.t1 = b; } }
+    if(p.dim && p.dim.x0 !== undefined) p.dim.x0 = +(W - p.dim.x0 - p.dim.W).toFixed(2);
+    if(p.rampa && p.rampa.x0 !== undefined) p.rampa.x0 = +(W - p.rampa.x0 - p.rampa.largura).toFixed(2);
+    if(p.rampaFora) vira(p.rampaFora);
+    if(p.manobra && p.manobra.x0 !== undefined) vira(p.manobra);
+    for(const m of (p.manobras || [])) if(m.x0 !== undefined) vira(m);
+    p.salas.forEach(vira);
+    for(const k of ['portas','vaos','janelas']) for(const e of (p[k]||[])){
+      if(e.o==='v'){ e.c = fx(e.c); if(e.dentro) e.dentro *= -1; }
+      else { const a = fx(e.t1), b = fx(e.t0); e.t0 = a; e.t1 = b; e.dobra = !e.dobra; }
+    }
+  }
+  if(c.patios) c.patios.forEach(vira);
+  if(c.torre) vira(c.torre);
+  c.espelhada = true;
+  return c;
+}
+
+/* A variante na vista normal (sem espelho), com as aberturas calculadas para ela. */
+function semEspelho(v){
+  if(!v.pav.some(p => p.aberturasPor)) return v;
+  const c = JSON.parse(JSON.stringify(v));
+  for(const p of c.pav) if(p.aberturasPor && p.aberturasPor.normal){ Object.assign(p, p.aberturasPor.normal); delete p.aberturasPor; }
+  return c;
 }
 
 /* Profundidade necessária atrás da casa: recuo, anexos e o subsolo (com o jardim de inverno). */
@@ -1928,7 +2002,7 @@ function loteMinimo(q0, P){
   for(let W = 6; W <= 24; W += 0.5){
     const vs = geraTodas(q, P, [W]);
     for(const v of vs){
-      const fr = r2(W + 2*q.recLat);
+      const fr = r2(W + q.recX0 + q.recX1);
       comAnexos(v, Object.assign({}, q, {frente:fr, fundo:999}));
       const atras = atrasDe(v, q);
       let fu = Math.ceil((v.D + q.recFrente + atras)*2)/2;
@@ -1944,7 +2018,7 @@ function loteMinimo(q0, P){
   // fundo mínimo mantendo a frente informada
   let comFrente = null;
   const q9 = Object.assign({}, q, {fundo: 999});
-  const vs = geraTodas(q, P, [r2(q.frente - 2*q.recLat)]).map(v => avalia(comAnexos(v, q9), q9));
+  const vs = geraTodas(q, P, [r2(q.frente - q.recX0 - q.recX1)]).map(v => avalia(comAnexos(v, q9), q9));
   const fundoDe = v => v.D + atrasDe(v, q);
   const bons = vs.filter(v => v.score >= 70 && !v.invalida.length);
   (bons.length ? bons : vs).sort((a,b) => bons.length ? fundoDe(a)-fundoDe(b) : b.score-a.score);
@@ -1956,5 +2030,5 @@ function loteMinimo(q0, P){
 // versão do motor (gravada nos arquivos de projeto): ano.mês.dia da última mudança de regra
 const VERSAO = '2026.10.06';
 
-return {VERSAO, gerar, rooftopOpcoes, RT, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
+return {VERSAO, gerar, espelharCasa, semEspelho, rooftopOpcoes, RT, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
 });

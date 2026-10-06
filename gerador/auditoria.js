@@ -32,6 +32,7 @@ const REGRAS = {
   G15: {nome:'Vaga do subsolo sem acesso à manobra', limite:0},
   G16: {nome:'Mobiliário sobreposto ou fora do cômodo', limite:1},
   G17: {nome:'Rooftop aberto para o poente sem fechamento', limite:0},
+  G18: {nome:'Janela a menos de 1,50 m da divisa (Código Civil, art. 1.301)', limite:0},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
   M03: {nome:'Projeção diferente da recalculada (térreo ∪ pavimentos de cima)', limite:0},
@@ -68,10 +69,11 @@ const mesmaLinha = (a, b) => a.o === b.o && Math.abs(a.c - b.c) < E && a.t0 < b.
 /* Confere uma variante. Devolve [{regra, pav, msg}]. */
 function auditar(v, q){
   const out = [], add = (regra, pav, msg) => out.push({regra, pav, msg});
-  const L = v.lote || {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recLat:q.recLat, recFundo:q.recFundo};
+  const L = v.lote || {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recX0:q.recX0, recX1:q.recX1, recFundo:q.recFundo};
   // lote e área edificável no sistema da casa (origem no canto frontal esquerdo da casa)
   const lote = {x0:-v.x0, y0:-v.y0, x1:L.frente - v.x0, y1:L.fundo - v.y0};
-  const edif = {x0:L.recLat - v.x0, y0:L.recFrente - v.y0, x1:L.frente - L.recLat - v.x0, y1:L.fundo - L.recFundo - v.y0};
+  const rx0 = L.recX0 !== undefined ? L.recX0 : L.recLat, rx1 = L.recX1 !== undefined ? L.recX1 : L.recLat;
+  const edif = {x0:rx0 - v.x0, y0:L.recFrente - v.y0, x1:L.frente - rx1 - v.x0, y1:L.fundo - L.recFundo - v.y0};
   const dentroDe = (s, r) => s.x0 >= r.x0 - E && s.x1 <= r.x1 + E && s.y0 >= r.y0 - E && s.y1 <= r.y1 + E;
   for(const p of v.pav){
     const S = p.salas, nome = p.nome;
@@ -206,6 +208,20 @@ function auditar(v, q){
       fT += l.fechada; aT += l.aberta;
     });
     if(Math.abs(fT - Q.fechada) > 0.011 || Math.abs(aT - Q.aberta) > 0.011 || Math.abs(Q.fechada + Q.aberta - Q.total) > 0.011) add('M02', 'Total', `fechada ${f2(Q.fechada)}, aberta ${f2(Q.aberta)}, total ${f2(Q.total)}`);
+  }
+  // G18: janelas a menos de 1,50 m da divisa lateral ou de fundo, na planta normal e na espelhada (a casa vira no lugar).
+  // A janela olha para o lado oposto ao do cômodo; a distância é medida no lote até a divisa para a qual ela olha.
+  if(L.recX0 !== undefined) for(const w of [M.semEspelho(v), M.espelharCasa(v)]) for(const p of w.pav){
+    if(p.anexo) continue;
+    const fechadosP = p.salas.filter(s => p.nome === 'Subsolo' ? s.tipo !== 'jardim' : !ABERTO(s));
+    const ocupa = (x, y) => fechadosP.some(s => x > s.x0 + 1e-6 && x < s.x1 - 1e-6 && y > s.y0 + 1e-6 && y < s.y1 - 1e-6);
+    for(const j of (p.janelas || [])){
+      const m = (j.t0 + j.t1)/2;
+      let d = Infinity;
+      if(j.o === 'v'){ const xl = v.x0 + j.c; d = ocupa(j.c - 0.05, m) && !ocupa(j.c + 0.05, m) ? L.frente - xl : ocupa(j.c + 0.05, m) && !ocupa(j.c - 0.05, m) ? xl : Infinity; }
+      else if(ocupa(m, j.c - 0.05) && !ocupa(m, j.c + 0.05)) d = L.fundo - (v.y0 + j.c);
+      if(d < 1.5 - 0.011) add('G18', p.nome, `janela ${j.o === 'h' ? 'y' : 'x'} = ${f2(j.c)} a ${f2(d)} m da divisa${w.espelhada ? ' (planta espelhada)' : ''}`);
+    }
   }
   // M03, M04: projeção e ocupação recalculadas (térreo ∪ superior ∪ rooftop coberto, sem o subsolo e sem a edícula)
   const ter = v.pav.find(p => p.nome === 'Térreo'), loteA = L.frente * L.fundo;

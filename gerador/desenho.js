@@ -32,31 +32,17 @@ function desenhaAcessos(a, tx, ty, k, o, semRotulos){
 }
 const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 
-/* Espelha a variante na horizontal (x → W − x). */
+/* Espelha a variante na horizontal. A casa vira no lugar (Motor.espelharCasa); os acessos da versão espelhada vêm do motor
+   (v.acessosEsp) e os anexos viram dentro da faixa entre os recuos laterais (v.faixaAnexos), para respeitar recuos diferentes. */
 function espelha(v){
-  const W = v.W, c = JSON.parse(JSON.stringify(v));
-  const fx = x => +(W - x).toFixed(2);
-  for(const p of c.pav){
-    if(p.anexo) continue;
-    if(p.pocos) for(const s of p.pocos){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
-    if(p.pilares) for(const pl of p.pilares) pl.x = fx(pl.x);
-    if(p.nucleo){ const a = fx(p.nucleo.x1), b = fx(p.nucleo.x0); p.nucleo.x0 = a; p.nucleo.x1 = b; }
-    if(p.spa) p.spa.x = fx(p.spa.x);
-    if(p.fechamentos) for(const k of ['normal', 'espelhada']) for(const e of p.fechamentos[k]){ if(e.o==='v') e.c = fx(e.c); else { const a = fx(e.t1), b = fx(e.t0); e.t0 = a; e.t1 = b; } }
-    if(p.dim && p.dim.x0 !== undefined) p.dim.x0 = +(W - p.dim.x0 - p.dim.W).toFixed(2);
-    if(p.rampa && p.rampa.x0 !== undefined) p.rampa.x0 = +(W - p.rampa.x0 - p.rampa.largura).toFixed(2);
-    for(const s of p.salas){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
-    for(const k of ['portas','vaos','janelas']) for(const e of (p[k]||[])){
-      if(e.o==='v'){ e.c = fx(e.c); if(e.dentro) e.dentro *= -1; }
-      else { const a = fx(e.t1), b = fx(e.t0); e.t0 = a; e.t1 = b; e.dobra = !e.dobra; }
-    }
-  }
-  if(c.patios) for(const s of c.patios){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
-  if(c.acessos){ const ac = c.acessos;
+  const c = Motor.espelharCasa(v);
+  if(v.acessosEsp) c.acessos = JSON.parse(JSON.stringify(v.acessosEsp));
+  else if(c.acessos){ const fx = x => +(v.W - x).toFixed(2), ac = c.acessos;
     for(const r of ac.vias.concat(ac.vagasFora, ac.portoes)){ const a = fx(r.x1), b = fx(r.x0); r.x0 = a; r.x1 = b; }
     if(ac.caminho) ac.caminho.pontos = ac.caminho.pontos.map(([x,y]) => [fx(x), y]);
     const xl = fx(ac.xR), xr = fx(ac.xL); ac.xL = xl; ac.xR = xr; }
-  if(c.anexos && c.loteFrente){ const F = c.loteFrente; for(const a of c.anexos){ const x0 = +(F - a.x1).toFixed(2), x1 = +(F - a.x0).toFixed(2); a.x0 = x0; a.x1 = x1; a.espelhado = !a.espelhado; } }
+  if(c.anexos && c.loteFrente){ const fa = c.faixaAnexos || {x0:0, x1:c.loteFrente};
+    for(const a of c.anexos){ const x0 = +(fa.x0 + fa.x1 - a.x1).toFixed(2), x1 = +(fa.x0 + fa.x1 - a.x0).toFixed(2); a.x0 = x0; a.x1 = x1; a.espelhado = !a.espelhado; } }
   c.espelhada = true;
   return c;
 }
@@ -120,7 +106,7 @@ function planta(v, idx, op){
   const L = v.lote; let lo = null;
   if(L){ const ed = p.anexo ? (v.anexos||[]).find(a => a.tipo==='edicula') : null;
     const ox = ed ? ed.x0 : v.x0, oy = ed ? ed.y0 : v.y0;
-    if(ox !== undefined){ lo = {x0:-ox, y0:-oy, x1:L.frente-ox, y1:L.fundo-oy, rf:L.recFrente, rl:L.recLat, rb:L.recFundo}; extras.push(lo); } }
+    if(ox !== undefined){ lo = {x0:-ox, y0:-oy, x1:L.frente-ox, y1:L.fundo-oy, rf:L.recFrente, rl:L.recX0 !== undefined ? L.recX0 : L.recLat, rr:L.recX1 !== undefined ? L.recX1 : L.recLat, rb:L.recFundo}; extras.push(lo); } }
   const mx0 = Math.min(0, ...pocos.map(q => q.x0), ...S.map(q => q.x0), ...extras.map(q => q.x0 - 1.6)), my0 = Math.min(0, ...pocos.map(q => q.y0), ...S.map(q => q.y0), ...extras.map(q => q.y0 - 1.2));
   const OX = 70 - mx0*K + (mx0<0 ? 12 : 0), OY = 96 - my0*K;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
@@ -138,7 +124,7 @@ function planta(v, idx, op){
   // terreno: lote, área edificável e rua
   if(lo){
     o.push(`<rect x="${X(lo.x0)}" y="${Y(lo.y0)}" width="${((lo.x1-lo.x0)*K).toFixed(1)}" height="${((lo.y1-lo.y0)*K).toFixed(1)}" fill="#EEF2E8" stroke="#5F7350" stroke-width="1.2"><title>Lote ${f2(L.frente)} × ${f2(L.fundo)} m</title></rect>`);
-    o.push(`<rect x="${X(lo.x0+lo.rl)}" y="${Y(lo.y0+lo.rf)}" width="${((lo.x1-lo.x0-2*lo.rl)*K).toFixed(1)}" height="${((lo.y1-lo.y0-lo.rf-lo.rb)*K).toFixed(1)}" fill="none" stroke="#5F7350" stroke-width=".7" stroke-dasharray="5 4"><title>Área edificável</title></rect>`);
+    o.push(`<rect x="${X(lo.x0+lo.rl)}" y="${Y(lo.y0+lo.rf)}" width="${((lo.x1-lo.x0-lo.rl-lo.rr)*K).toFixed(1)}" height="${((lo.y1-lo.y0-lo.rf-lo.rb)*K).toFixed(1)}" fill="none" stroke="#5F7350" stroke-width=".7" stroke-dasharray="5 4"><title>Área edificável</title></rect>`);
     o.push(`<text x="${((X(lo.x0)+X(lo.x1))/2).toFixed(1)}" y="${(Y(lo.y0)-16).toFixed(1)}" class="cota" style="font-size:7.4px;font-weight:600;fill:#5F7350">RUA</text>`);
   }
   // rooftop: pavimento de baixo esmaecido, para dar proporção
@@ -312,7 +298,7 @@ function planta(v, idx, op){
   // rooftop: fechamento (parede ou brise) nas bordas abertas voltadas para o poente
   const fechOeste = p.fechamentos && (v.espelhada ? p.fechamentos.espelhada : p.fechamentos.normal);
   for(const e of (fechOeste || [])){ const [ax, ay, bx, by] = e.o==='h' ? [e.t0, e.c, e.t1, e.c] : [e.c, e.t0, e.c, e.t1];
-    o.push(`<line x1="${X(ax)}" y1="${Y(ay)}" x2="${X(bx)}" y2="${Y(by)}" stroke="#9A5B45" stroke-width="5" stroke-linecap="square"><title>Fechamento a oeste (parede ou brise): o rooftop não se abre para o poente</title></line>`); }
+    o.push(`<line x1="${X(ax)}" y1="${Y(ay)}" x2="${X(bx)}" y2="${Y(by)}" stroke="#9A5B45" stroke-width="5" stroke-linecap="square"><title>${e.motivo === 'divisa' ? 'Fechamento na divisa: borda aberta a menos de 1,50 m do vizinho (Código Civil, art. 1.301)' : 'Fechamento a oeste (parede ou brise): o rooftop não se abre para o poente'}</title></line>`); }
   // spa do rooftop
   if(p.spa) o.push(`<circle cx="${X(p.spa.x)}" cy="${Y(p.spa.y)}" r="${p.spa.r*K}" fill="#CFE6F2" stroke="#4C86C6" stroke-width="1.2"><title>Spa</title></circle><text x="${X(p.spa.x)}" y="${Y(p.spa.y)+2.5}" class="rd" style="font-size:6.4px;font-weight:600">SPA</text>`);
   // pilares (subsolo)
@@ -385,7 +371,7 @@ function lote(v, q, res){
   const o = [];
   o.push(`<rect x="${X(0)}" y="${Y(0)}" width="${w}" height="${h}" fill="#E6ECDF" stroke="#5F7350" stroke-width="1.2"/>`);
   const B = res.B, Dmax = res.Dmax;
-  o.push(`<rect x="${X(q.recLat)}" y="${Y(q.recFrente)}" width="${(B*k).toFixed(1)}" height="${(Dmax*k).toFixed(1)}" fill="none" stroke="#5F7350" stroke-dasharray="4 3"><title>Área edificável ${f2(B)} × ${f2(Dmax)} m</title></rect>`);
+  o.push(`<rect x="${X(q.recX0 !== undefined ? q.recX0 : q.recLat)}" y="${Y(q.recFrente)}" width="${(B*k).toFixed(1)}" height="${(Dmax*k).toFixed(1)}" fill="none" stroke="#5F7350" stroke-dasharray="4 3"><title>Área edificável ${f2(B)} × ${f2(Dmax)} m</title></rect>`);
   const ter = v.pav.find(p => p.nome==='Térreo');
   for(const s of ter.salas){ const c = COR[s.zona]||COR.apoio;
     o.push(`<rect x="${X(v.x0+s.x0)}" y="${Y(v.y0+s.y0)}" width="${((s.x1-s.x0)*k).toFixed(1)}" height="${((s.y1-s.y0)*k).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width=".5"/>`); }
