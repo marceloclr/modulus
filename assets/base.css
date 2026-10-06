@@ -266,21 +266,24 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .plan-box{background:#FBFAF7;border:1px solid var(--line);border-radius:var(--radius);padding:10px;box-shadow:var(--shadow);margin-bottom:14px;overflow:auto}
 .plan-box svg{display:block;width:100%;height:auto;max-height:78vh}
 
-/* Menu geral (Início · Gerador · Banco de projetos) */
-.topnav{display:flex;align-items:center;gap:4px;flex:none}
-.topnav a{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;color:var(--ink-2);text-decoration:none;padding:8px 12px;border-radius:9px;border:1px solid transparent}
-.topnav a:hover{color:var(--ink);background:var(--surface-2)}
-.topnav a[aria-current="page"]{color:var(--ink);background:var(--surface-2);border-color:var(--line);box-shadow:inset 0 -2px 0 var(--brass)}
-.topnav a:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
-.topnav svg{width:15px;height:15px;flex:none}
-.navbtn{display:none}
+/* Menu geral (Início · Gerador · Banco de projetos · tema): ícone sobre o rótulo, cada ícone na cor da sua seção.
+   A barra é escura nos dois temas; as cores dos ícones (--nav-*) passam de 3:1 sobre ela. */
+.topnav{display:flex;align-items:center;gap:2px;flex:none}
+.nav-b{--c:var(--nav-inicio);display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:58px;height:48px;padding:4px 10px;font:500 11.5px/1.1 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink-2);text-decoration:none;background:transparent;border:1px solid transparent;border-radius:10px;cursor:pointer;flex:none;white-space:nowrap;transition:background .15s,color .15s}
+.nav-b svg{width:20px;height:20px;flex:none;color:var(--c)}
+.nav-b:hover{color:var(--ink);background:color-mix(in srgb,var(--c) 10%,transparent)}
+.nav-b[aria-current="page"]{color:var(--ink);background:color-mix(in srgb,var(--c) 18%,transparent);border-color:color-mix(in srgb,var(--c) 45%,transparent)}
+.nav-b:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.nav-b .ls{display:none}
+@media (prefers-reduced-motion:reduce){.nav-b{transition:none}}
 @media (max-width:760px){
-  .navbtn{display:inline-flex}
-  .topnav{display:none;position:absolute;top:calc(var(--hdr) - 4px);right:12px;left:12px;flex-direction:column;align-items:stretch;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:var(--shadow);z-index:50}
-  body.nav-open .topnav{display:flex}
-  .topnav a{padding:11px 12px;font-size:15px}
+  .bar-in{gap:6px;padding:0 10px}
+  .nav-b{min-width:52px;padding:4px 6px}
+  .nav-b .ll{display:none}.nav-b .ls{display:inline}
   .bar-in .crumb .sec{display:none}
 }
+@media (max-width:560px){header.bar .crumb{display:none}}
+@media (max-width:520px){.wordmark{display:none}}
 .atalhos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin:0 0 30px}
 @media (max-width:760px){.atalhos{grid-template-columns:minmax(0,1fr)}}
 .atalho{display:flex;flex-direction:column;gap:6px;padding:22px 24px;background:var(--surface-2);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:var(--radius);box-shadow:var(--shadow);color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}
@@ -346,10 +349,9 @@ header.bar .crumb{color:var(--hdr-ink-2)}
 header.bar .crumb .chip{background:var(--hdr-btn);border-color:var(--hdr-line);color:var(--hdr-ink)}
 header.bar .btn,header.bar .back{background:var(--hdr-btn);border-color:var(--hdr-line);color:var(--hdr-ink)}
 header.bar .btn:hover,header.bar .back:hover{border-color:var(--hdr-ink-2)}
-header.bar .topnav a{color:var(--hdr-ink-2)}
-header.bar .topnav a:hover{color:var(--hdr-ink);background:var(--hdr-btn)}
-header.bar .topnav a[aria-current="page"]{color:var(--hdr-ink);background:var(--hdr-btn);border-color:var(--hdr-line)}
-@media (max-width:760px){header.bar .topnav{background:var(--hdr-bg);border-color:var(--hdr-line)}}
+:root{--nav-inicio:#A9D98A;--nav-gerador:#6BC7B6;--nav-banco:#C7A8F0;--nav-tema:#F2BE5C}
+header.bar .nav-b{color:var(--hdr-ink-2)}
+header.bar .nav-b:hover,header.bar .nav-b[aria-current="page"]{color:var(--hdr-ink)}
 /* V3: no tema escuro, cards e indicadores levemente tingidos pela cor da seção (--c) */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) :is(.stat,.atalho,.card.tint){background:color-mix(in srgb,var(--c,var(--brass)) 7%,var(--surface-2))}}
 :root[data-theme="dark"] :is(.stat,.atalho,.card.tint){background:color-mix(in srgb,var(--c,var(--brass)) 7%,var(--surface-2))}

@@ -16,20 +16,24 @@ document.addEventListener('DOMContentLoaded',function(){
   var nav=document.body.getAttribute('data-nav'), barIn=document.querySelector('.bar-in');
   if(nav!==null && barIn){
     var raiz=document.body.getAttribute('data-root')||'';
-    var ic={inicio:'<path d="M2 7.5L8 2.5l6 5V14H10v-4H6v4H2z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>',
-      gerador:'<rect x="2" y="2" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M2 7h7M9 2v12M9 10h5" stroke="currentColor" stroke-width="1.3"/>',
-      banco:'<rect x="2" y="2" width="5" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/>'};
-    var itens=[['inicio','Início',raiz||'./'],['gerador','Gerador',raiz+'gerador/'],['banco','Banco de projetos',raiz+'banco/']];
+    var ic={inicio:'<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+      gerador:'<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 12h9M13 4v16M13 15h7" stroke="currentColor" stroke-width="1.8"/>',
+      banco:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'};
+    // [chave, rótulo, rótulo curto (celular), endereço]
+    var itens=[['inicio','Início','Início',raiz||'./'],['gerador','Gerador','Gerador',raiz+'gerador/'],['banco','Banco de projetos','Banco',raiz+'banco/']];
     var el=document.createElement('nav'); el.className='topnav'; el.id='topnav'; el.setAttribute('aria-label','Seções');
-    el.innerHTML=itens.map(function(i){return '<a href="'+i[2]+'"'+(i[0]===nav?' aria-current="page"':'')+'><svg viewBox="0 0 16 16" aria-hidden="true">'+ic[i[0]]+'</svg>'+i[1]+'</a>';}).join('');
-    var bt=document.createElement('button'); bt.className='btn navbtn'; bt.type='button'; bt.setAttribute('aria-controls','topnav'); bt.setAttribute('aria-expanded','false');
-    bt.innerHTML='<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Menu';
-    bt.addEventListener('click',function(){var o=!document.body.classList.contains('nav-open'); document.body.classList.toggle('nav-open',o); bt.setAttribute('aria-expanded',o?'true':'false');});
-    document.addEventListener('click',function(e){if(!e.target.closest('#topnav')&&!e.target.closest('.navbtn')){document.body.classList.remove('nav-open'); bt.setAttribute('aria-expanded','false');}});
-    var tb=document.getElementById('themeBtn'); barIn.insertBefore(el,tb); barIn.insertBefore(bt,tb);
+    el.innerHTML=itens.map(function(i){return '<a class="nav-b" style="--c:var(--nav-'+i[0]+')" href="'+i[3]+'"'+(i[0]===nav?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+ic[i[0]]+'</svg><span class="ll">'+i[1]+'</span><span class="ls" aria-hidden="true">'+i[2]+'</span></a>';}).join('');
+    var tb=document.getElementById('themeBtn'); barIn.insertBefore(el,tb);
+    // o botão de tema entra no menu, no mesmo formato
+    if(tb){ tb.className='nav-b'; tb.style.setProperty('--c','var(--nav-tema)'); el.appendChild(tb); }
   }
   var themeBtn=document.getElementById('themeBtn');
-  function labelTheme(){if(themeBtn) themeBtn.textContent=currentTheme()==='dark'?'Tema claro':'Tema escuro';}
+  var icTema={sol:'<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+    lua:'<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'};
+  function labelTheme(){if(!themeBtn) return; var esc=currentTheme()==='dark', t=esc?'Tema claro':'Tema escuro';
+    if(themeBtn.classList.contains('nav-b')) themeBtn.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true">'+(esc?icTema.sol:icTema.lua)+'</svg><span class="ll">'+t+'</span><span class="ls" aria-hidden="true">'+(esc?'Claro':'Escuro')+'</span>';
+    else themeBtn.textContent=t;
+    themeBtn.setAttribute('aria-label',t);}
   labelTheme();
   if(themeBtn) themeBtn.addEventListener('click',function(){var n=currentTheme()==='dark'?'light':'dark'; root.setAttribute('data-theme',n); try{localStorage.setItem('plantas-tema',n);}catch(e){} labelTheme(); document.dispatchEvent(new CustomEvent('plantas:tema'));});
   if(window.matchMedia){var mq=window.matchMedia('(prefers-color-scheme: dark)'); if(mq.addEventListener) mq.addEventListener('change',labelTheme);}
