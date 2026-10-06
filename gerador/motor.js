@@ -1528,19 +1528,19 @@ function avalia(v, q){
   const B = q.frente - 2*q.recLat, Dmax = q.fundo - q.recFrente - q.recFundo;
   if(v.W > B + 0.01){ pen += 40*(v.W-B); av.push(`A casa (${f2(v.W)} m) é mais larga que a área edificável (${f2(B)} m).`); }
   if(v.D > Dmax + 0.01){ pen += 25*(v.D-Dmax); av.push(`A casa precisa de ${f2(v.D)} m de profundidade; o terreno permite ${f2(Dmax)} m.`); }
-  const proj = projecao(v) + (v.anexos||[]).filter(a => a.tipo!=='piscina').reduce((t,a)=>t+(a.x1-a.x0)*(a.y1-a.y0),0);
+  // anexos estão em coordenadas do lote; aqui passam para as da casa
+  const anexosCasa = (v.anexos||[]).map(a => ({tipo:a.tipo, x0:a.x0 - v.x0, y0:a.y0 - v.y0, x1:a.x1 - v.x0, y1:a.y1 - v.y0}));
+  const proj = uniao(cobertura(v).concat(anexosCasa.filter(a => a.tipo!=='piscina')));
   if(v.anexoFalta) pen += 25*v.anexoFalta;
   const subA = v.pav.find(p => p.nome==='Subsolo');
   if(subA && q.subGaragem && subA.vagas < q.vagas) pen += 10*(q.vagas - subA.vagas);
   if(q.permeab > 0){
-    // impermeável: projeção do térreo, anexos (inclusive piscina), subsolo fora da projeção e rampa no recuo
-    let imp = projecao(v) + (v.anexos||[]).reduce((t,a)=>t+(a.x1-a.x0)*(a.y1-a.y0),0);
-    if(subA){ const d = subA.dim, sx0 = d.x0, sx1 = d.x0 + d.W, sy0 = d.y0, sy1 = d.y0 + d.D;
-      const ov = Math.max(0, Math.min(sx1, v.W) - Math.max(sx0, 0)) * Math.max(0, Math.min(sy1, v.D) - Math.max(sy0, 0));
-      imp += d.W*d.D - ov; if(subA.rampa && q.subGaragem) imp += subA.rampa.Lout * subA.rampa.largura; }
-    const lote = q.frente*q.fundo, perm = Math.max(0, lote - imp), pct = 100*perm/lote;
+    // impermeável (união, sem contar duas vezes o que se sobrepõe): térreo, anexos (inclusive piscina), laje do subsolo,
+    // rampa no recuo e os pisos de acesso (faixa de veículos, vagas descobertas e caminho de pedestres; auditoria M05)
+    const imp = impermeaveis(v, q, anexosCasa, subA);
+    const lote = q.frente*q.fundo, perm = Math.max(0, lote - uniao(imp)), pct = 100*perm/lote;
     v.permeavel = r2(pct);
-    if(pct < q.permeab - 0.01){ pen += 2*(q.permeab - pct); av.push(`Área permeável de ${f2(pct)} % do lote, abaixo do mínimo de ${f2(q.permeab)} % (sem contar pisos externos).`); }
+    if(pct < q.permeab - 0.01){ pen += 2*(q.permeab - pct); av.push(`Área permeável de ${f2(pct)} % do lote, abaixo do mínimo de ${f2(q.permeab)} % (descontados a casa, os anexos, o subsolo e os pisos de acesso).`); }
   }
   if(subA){ const fimSub = q.recFrente + subA.dim.y0 + subA.dim.D + 2.0; if(fimSub > q.fundo + 0.01){ pen += 25*(fimSub - q.fundo); av.push(`O subsolo com o jardim de inverno vai até ${f2(fimSub)} m; o lote tem ${f2(q.fundo)} m.`); } }
   if(v.anexoLarg) pen += 25*v.anexoLarg;
@@ -1562,10 +1562,42 @@ function avalia(v, q){
   return v;
 }
 
-function projecao(v){
-  // área da projeção: térreo (inclui varandas cobertas) unido com superior
-  const ter = v.pav.find(p => p.nome==='Térreo');
-  return ter.salas.filter(s => s.tipo!=='terraco').reduce((t,s)=>t+area(s),0);
+/* Área exata da união de retângulos {x0,y0,x1,y1} (varredura pelas coordenadas x). */
+function uniao(rs){
+  rs = rs.filter(r => r.x1 - r.x0 > 1e-6 && r.y1 - r.y0 > 1e-6);
+  const xs = [...new Set(rs.flatMap(r => [r.x0, r.x1]))].sort((a, b) => a - b);
+  let A = 0;
+  for(let i = 0; i < xs.length - 1; i++){
+    const xm = (xs[i] + xs[i+1]) / 2, iv = rs.filter(r => r.x0 < xm && r.x1 > xm).map(r => [r.y0, r.y1]).sort((a, b) => a[0] - b[0]);
+    let tot = 0, a = null, b = null;
+    for(const [p, q] of iv){ if(a === null || p > b){ if(a !== null) tot += b - a; a = p; b = q; } else b = Math.max(b, q); }
+    if(a !== null) tot += b - a;
+    A += tot * (xs[i+1] - xs[i]);
+  }
+  return A;
+}
+/* Cobertura da casa: térreo (com varandas cobertas, sem terraço descoberto) unido aos pavimentos de cima
+   (o superior inteiro, inclusive balanços e terraços sobre o térreo; o rooftop sem o terraço descoberto). */
+function cobertura(v){
+  const out = [];
+  for(const p of v.pav){
+    if(p.anexo || p.nome==='Subsolo') continue;
+    out.push(...p.salas.filter(s => p.nome==='Superior' || (s.tipo!=='terraco' && s.tipo!=='jardim')));
+  }
+  return out;
+}
+function projecao(v){ return uniao(cobertura(v)); }
+/* Retângulos impermeáveis no sistema da casa. */
+function impermeaveis(v, q, anexosCasa, subA){
+  const ter = v.pav.find(p => p.nome==='Térreo'), out = ter.salas.filter(s => s.tipo!=='terraco' && s.tipo!=='jardim').concat(anexosCasa);
+  if(subA){ const d = subA.dim; out.push({x0:d.x0, y0:d.y0, x1:d.x0 + d.W, y1:d.y0 + d.D}); if(subA.rampaFora && q.subGaragem) out.push(subA.rampaFora); }
+  const ac = acessos(v, q);
+  if(ac){
+    out.push(...ac.vias, ...ac.vagasFora);
+    if(ac.caminho) for(let i = 0; i < ac.caminho.pontos.length - 1; i++){ const [a, b] = [ac.caminho.pontos[i], ac.caminho.pontos[i+1]], m = ac.caminho.largura/2;
+      out.push(a[0]===b[0] ? {x0:a[0]-m, x1:a[0]+m, y0:Math.min(a[1], b[1]), y1:Math.max(a[1], b[1])} : {x0:Math.min(a[0], b[0]), x1:Math.max(a[0], b[0]), y0:a[1]-m, y1:a[1]+m}); }
+  }
+  return out;
 }
 
 function quadro(v){
@@ -1861,5 +1893,5 @@ function loteMinimo(q0, P){
 // versão do motor (gravada nos arquivos de projeto): ano.mês.dia da última mudança de regra
 const VERSAO = '2026.10.06';
 
-return {VERSAO, gerar, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
+return {VERSAO, gerar, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
 });
