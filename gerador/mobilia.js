@@ -230,6 +230,8 @@ function jantar(ctx){
   }
 }
 function escritorio(ctx){
+  // escritório grande (ampliado, 11 m² ou mais): mesa de atendimento solta, cadeira de um lado e duas de visita do outro
+  const R = ctx.R; if((R.x1 - R.x0) * (R.y1 - R.y0) >= 11 && solta(ctx, 'mesa-atendimento', [[1.5, 1.8], [1.3, 1.8]], 0.5, {lugares:3})){ naParede(ctx, 'estante', [2.0, 1.6, 1.2, 0.9], 0.35, 0.6, {alto:true}); return; }
   naParede(ctx, 'escrivaninha', [1.4, 1.2, 1.0], 0.6, 0.8, {nota:(l, t0, t1) => janelaEm(ctx, l, t0, t1) ? 1 : 0});
   naParede(ctx, 'estante', [1.6, 1.2, 0.9], 0.35, 0.6, {alto:true});
 }

@@ -334,6 +334,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="chk"><input type="checkbox" name="jantar">Sala de jantar</label>
         <label class="chk"><input type="checkbox" name="tv">Sala de TV</label>
         <label class="chk"><input type="checkbox" name="escritorio">Escritório</label>
+        <label class="chk" id="escAmpOps" data-tip="Escritório de 14 m² na frente da casa, com porta própria para a rua (ou para a varanda) e porta para dentro; o caminho do portão chega até ele"><input type="checkbox" name="escritorioAmpliado">Escritório ampliado, com porta para a rua</label>
         <label class="fld">Cozinha<select name="cozinha"><option value="aberta">Aberta para o jantar</option><option value="fechada">Fechada</option></select></label>
         <label class="chk" data-tip="Troca a posição das duas salas na faixa social"><input type="checkbox" name="invEstarJantar">Inverter estar e jantar</label>
         <label class="chk" data-tip="Troca a posição dos dois cômodos na faixa de apoio"><input type="checkbox" name="invCozinhaServico">Inverter cozinha e serviço</label>
@@ -511,6 +512,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
             <li>Escada reta com 2 × espelho + piso entre 0,63 e 0,65 m (Blondel); espelho até 0,18 m.</li>
             <li>Subsolo com o máximo de vagas (3,00 × 5,00 m), manobra contínua de 5 m, rampa em escala e jardim de inverno oposto à rampa; ventilação cruzada obrigatória.</li>
             <li>Varanda de fundos (opcional): faixa aberta no trecho mais longo da fachada de fundos, com a profundidade e a largura escolhidas; a porta sai das salas (quando ficam no fundo), da suíte master, de uma suíte ou da circulação. Quando a casa mais a varanda passam do recuo de fundo, o gerador primeiro tenta uma casa mais curta (salas e apoio um pouco menores); se ainda faltar, reduz a varanda até 1,50 m, com aviso; abaixo disso, a variante fica sem varanda, com aviso, e vai para o fim da lista.</li>
+            <li>Escritório ampliado (opcional): 14 m² e lado de 3,00 m (preferência de projeto), na frente, com porta para dentro e porta própria para a varanda frontal ou para a rua; o caminho do portão social ganha um ramal até ele, sem cruzar a faixa dos carros. Com o fundo a oeste (quartos na frente), ele vai para a frente junto da entrada; no sobrado, fica no térreo.</li>
             <li>Planta humanizada: móvel só onde cabe com folga. Nada na faixa de 0,60 m em frente às portas nem no arco da folha; cama com a cabeceira longe da porta; mesa de jantar com 0,75 m livres atrás das cadeiras (0,45 m no aperto); sofá de 1,60 a 3,20 m da TV; armário e geladeira nunca na frente de janela. Paredes desenhadas com 10 cm (internas) e 15 cm (externas).</li>
           </ul>
         </div>
@@ -627,6 +629,7 @@ function sincroniza(){
   form.querySelectorAll('.dimrow').forEach(el => { el.hidden = !vis[el.dataset.t]; });
   document.getElementById('varOps').hidden = !form.elements.varanda.checked;
   document.getElementById('varFundOps').hidden = !form.elements.varandaFundos.checked;
+  document.getElementById('escAmpOps').hidden = !form.elements.escritorio.checked;
   const sub = form.elements.subsolo.checked, gl = form.elements.garagemLocal;
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
   if(!sub) gl.value = 'terreo';

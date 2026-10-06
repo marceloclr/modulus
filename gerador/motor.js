@@ -63,7 +63,7 @@ const PADRAO = {
   tipo:'terrea', formato:'auto', peDireito:3.0,
   quartos:3, suites:1, master:true, tamanho:'medio',
   banhosSociais:1, lavabo:false,
-  estar:true, jantar:true, tv:false, escritorio:false,
+  estar:true, jantar:true, tv:false, escritorio:false, escritorioAmpliado:false,
   cozinha:'aberta', servico:true, despensa:false,
   vagas:2, garagem:'coberta', varanda:true, varandaForma:'corrida', gourmet:false,
   varandaFundos:false, varandaFundosP:2, varandaFundosL:0,
@@ -109,7 +109,7 @@ function normaliza(p){
   if(q.edicula==='2'){ q.edQuarto = true; q.edGourmet = true; }
   if(!['retangular','raia','L','oval'].includes(q.pisForma)) q.pisForma = 'retangular';
   q.pisC = clamp(q.pisC || 8, 2, 25); q.pisL = clamp(q.pisL || 4, 1.5, 12); q.pisP = clamp(q.pisP || 1.4, 0.4, 3); q.afastAnexo = clamp(q.afastAnexo, 1.5, 10);
-  for(const k of ['master','lavabo','estar','jantar','tv','escritorio','servico','despensa','varanda','varandaFundos','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
+  for(const k of ['master','lavabo','estar','jantar','tv','escritorio','escritorioAmpliado','servico','despensa','varanda','varandaFundos','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   q.quartos = clamp(Math.round(q.quartos), 1, 8);
   q.suites = clamp(Math.round(q.suites), 0, q.quartos);
   q.banhosSociais = clamp(Math.round(q.banhosSociais), 0, 4);
@@ -123,6 +123,7 @@ function normaliza(p){
   if(q.vagas===0 && !q.subsolo) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
   if(q.varandaForma!=='L') q.varandaForma = 'corrida';
+  if(!q.escritorio) q.escritorioAmpliado = false;   // o ampliado é uma variação do escritório
   // varanda de fundos (06/10/2026): profundidade 1,50 / 2,00 / 2,50 / 3,00 m; largura 0 = toda a fachada de fundos, ou 3 a 6 m
   q.varandaFundosP = [1.5, 2, 2.5, 3].includes(+q.varandaFundosP) ? +q.varandaFundosP : 2;
   q.varandaFundosL = [0, 3, 4, 5, 6].includes(+q.varandaFundosL) ? +q.varandaFundosL : 0;
@@ -159,7 +160,10 @@ function normaliza(p){
 
 /* ---------- Programa → listas de ambientes ---------- */
 const BANHO_ACESSIVEL = {lado:2.40, comp:2.50};
-function alvo(tipo, q){ const d = q.dims && q.dims[tipo]; if(d) return d.a; const t = TIPOS[tipo]; const a = t.alvo * (t.hab ? FATOR[q.tamanho] : 1);
+/* Escritório ampliado (E2.4): alvo de 14 m² e lado de 3,00 m, PREFERÊNCIA de projeto (mesa de atendimento com cadeiras). */
+const ESC_AMPLIADO = {alvo:14, lado:3.0};
+function ladoMin(tipo, q){ return tipo === 'escritorio' && q.escritorioAmpliado ? ESC_AMPLIADO.lado : TIPOS[tipo].lado; }
+function alvo(tipo, q){ const d = q.dims && q.dims[tipo]; if(d) return d.a; if(tipo === 'escritorio' && q.escritorioAmpliado) return ESC_AMPLIADO.alvo; const t = TIPOS[tipo]; const a = t.alvo * (t.hab ? FATOR[q.tamanho] : 1);
   return q.acessivel && tipo === 'banhoSocial' ? Math.max(a, BANHO_ACESSIVEL.lado * BANHO_ACESSIVEL.comp) : a; }
 /* Largura pedida para a faixa dos quartos (lado menor da suíte, da master ou do quarto), se houver. */
 function larguraQuartoPedida(q){ const d = q.dims || {}; for(const t of ['suite','master','quarto']) if(d[t] && d[t].w) return d[t].w; return null; }
@@ -202,7 +206,7 @@ function programa(q){
     const bS = [], bT = [];
     for(const b of banhoM){ if(simplesSobe && !bS.length) bS.push(b); else bT.push(b); }
     if(simplesFica && !bT.length && bs > 0){ bT.push({tipo:'banhoSocial', id:++id, ab:alvo('banhoSocial', q), acess: q.acessivel}); apoioEsq.splice(apoioEsq.indexOf('banhoSocial'), 1); }
-    if(q.supEscritorio && social.includes('escritorio')){ social.splice(social.indexOf('escritorio'), 1); sup.push({tipo:'escritorio', id:++id, a:alvo('escritorio', q)}); }
+    if(q.supEscritorio && !q.escritorioAmpliado && social.includes('escritorio')){ social.splice(social.indexOf('escritorio'), 1); sup.push({tipo:'escritorio', id:++id, a:alvo('escritorio', q)}); }
     if(q.supTv && social.includes('tv')){ social.splice(social.indexOf('tv'), 1); sup.push({tipo:'tv', id:++id, a:alvo('tv', q), nome:'Sala íntima / TV'}); }
     if(q.supServico && apoioDir.includes('servico')){ apoioDir.splice(apoioDir.indexOf('servico'), 1); sup.push({tipo:'servico', id:++id, a:alvo('servico', q), nome:'Lavanderia'}); }
     sup.unshift(...bS); sup.push(...sobem);
@@ -224,13 +228,14 @@ const area = s => (s.x1-s.x0)*(s.y1-s.y0);
 function faixa(x0, y0, x1, y1, itens, eixo){
   const L = eixo==='x' ? x1-x0 : y1-y0, P = eixo==='x' ? y1-y0 : x1-x0;
   if(!itens.length || L<=0.01 || P<=0.01) return [];
-  const lado = it => TIPOS[it.tipo].lado || 1;
+  const lado = it => it.lado || TIPOS[it.tipo].lado || 1;
   // grupos: {itens, peso}; um item fino demais vai para uma coluna empilhada só se cada um mantiver o lado mínimo
   const grupos = []; let col = null;
   const colOk = c => { const sa = c.reduce((t,i)=>t+i.a,0); return c.every(i => P*i.a/sa >= lado(i)-0.01); };
   const fecha = () => { if(col){ const sa = col.reduce((t,i)=>t+i.a,0); grupos.push({itens:col, peso:Math.max(sa, P*Math.max(...col.map(lado)))}); col = null; } };
   for(const it of itens){
     const w = it.a / P;
+    if(it.frente){ fecha(); if(it.a / P >= lado(it)) grupos.push({itens:[it], peso:it.a}); else col = [it]; continue; }   // precisa da fachada: começa uma coluna (na frente); outros podem ficar atrás
     if(w >= lado(it) && P/w <= 3.2){ fecha(); grupos.push({itens:[it], peso:it.a}); continue; }
     if(w >= lado(it)){ fecha(); grupos.push({itens:[it], peso:it.a}); continue; }
     const cand = (col||[]).concat(it);
@@ -257,7 +262,7 @@ function faixa(x0, y0, x1, y1, itens, eixo){
 
 /* ---------- Faixa íntima: módulos (quarto + banho + closet) dos dois lados de um corredor ---------- */
 function compModulo(m, ws){
-  if(m.a) return Math.max(TIPOS[m.tipo].lado || 2.4, m.a/ws);
+  if(m.a) return Math.max(m.lado || TIPOS[m.tipo].lado || 2.4, m.a/ws);
   if(m.tipo==='banhoSocial') return Math.max(m.acess ? BANHO_ACESSIVEL.comp : 1.6, m.ab/ws);
   if(m.tipo==='quarto') return Math.max(m.acess ? 2.8 : TIPOS.quarto.lado, m.aq/ws);
   const tq = m.tipo==='master'?'master':'suite';
@@ -389,7 +394,8 @@ function linear(q, P, W, modo, opts){
     if(vagasDentro < q.vagasT) av.push(`Só ${vagasDentro} de ${q.vagasT} vagas do térreo cabem cobertas na largura de ${f2(W)} m; as demais ficam descobertas no recuo frontal.`);
   }
   // faixa social
-  const socialItens = P.social.map(t => ({tipo:t, a:alvo(t,q)}));
+  // escritório ampliado (E2.4): ele e o estar nunca empilham, para os dois terem a frente (porta externa e entrada principal)
+  const socialItens = P.social.map(t => ({tipo:t, a:alvo(t,q), frente: !!q.escritorioAmpliado && (t==='escritorio' || t==='estar'), lado: t==='escritorio' && q.escritorioAmpliado ? ESC_AMPLIADO.lado : undefined}));
   if(temNucleo && !Wg){ const k = socialItens.findIndex(i => i.tipo==='estar'); if(k > 0) socialItens.unshift(socialItens.splice(k,1)[0]); }
   const aS = socialItens.reduce((s,i)=>s+i.a,0);
   const Wsoc = W - Wg;
@@ -1326,6 +1332,17 @@ function aberturas(pav, q, ehTerreo, espelho, W){
       }
     }
   }
+  // escritório ampliado (E2.4): porta externa própria na frente (para a varanda frontal, se ela encosta; senão, direto para fora)
+  if(ehTerreo && q.escritorioAmpliado) for(const s of S.filter(x => x.tipo==='escritorio')){
+    const vf = S.find(o => o.tipo==='varanda' && !o.fundos && o.y1 <= s.y0 + 0.001 && compartilhado(s, o));
+    const sh = vf ? compartilhado(s, vf) : null;
+    if(sh && sh.t1 - sh.t0 >= 1.0){ portas.push(Object.assign(porta(s, vf, sh, 0.9, true), {escritorio:true, externa:true})); continue; }
+    const exts = trechosExternos(s, S).filter(e => e.t1 - e.t0 >= 1.0);
+    const ext = exts.filter(e => e.o==='h' && Math.abs(e.c - s.y0) < 0.001).sort((a,b) => (b.t1-b.t0)-(a.t1-a.t0))[0]
+      || exts.filter(e => e.o==='v').sort((a,b) => a.t0 - b.t0)[0];   // em H a garagem ocupa a frente da ala: porta na fachada lateral, o mais perto da rua
+    if(ext){ const m = ext.o==='h' ? (ext.t0 + ext.t1)/2 : ext.t0 + 0.6; portas.push({o:ext.o, c:ext.c, t0:r2(m - 0.45), t1:r2(m + 0.45), sala:s.id, dentro:dentro(s, ext), escritorio:true, externa:true}); }
+    else av.push(`${pav.nome}: escritório ampliado sem parede na frente para a porta externa.`);
+  }
   // varanda de fundos pedida: porta a partir do cômodo de acesso (larga e centrada nas salas)
   if(ehTerreo) for(const vf of S.filter(s => s.fundos && s.acesso)){
     const a = S.find(s => s.id === vf.acesso), sh = a && compartilhado(a, vf);
@@ -1373,6 +1390,7 @@ function aberturas(pav, q, ehTerreo, espelho, W){
     }
     for(const s of S) if(!vis.has(s.id) && !['rouparia','deposito','terraco','jardim'].includes(s.tipo) && !s.vaga) av.push(`${pav.nome}: ${rotulo(s)} não se liga ao resto da casa.`);
   }
+  else if(ehTerreo) av.push('Térreo: a casa não tem porta de entrada.');   // sem entrada não há por onde conferir as ligações
   // janelas: área mínima de iluminação = 1/8 da área do piso (ventilação 1/16 = metade de uma janela de correr)
   const fechados = S.filter(o => !TIPOS[o.tipo].aberto);
   if(pav.nome==='Subsolo') return Object.assign({portas, vaos, avisos:av}, janelasSubsolo(pav, q, S, av, W, espelho));
@@ -1595,7 +1613,8 @@ function avalia(v, q){
     if(p.anexo && (s.tipo==='rouparia'||s.tipo==='hall')) continue; const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h, lmin = Math.min(w,h), lmax = Math.max(w,h);
     if(t.min && !s.vaga && s.nome!=='Área técnica'){
       if(a < t.min - 0.01){ pen += 6*(t.min-a); av.push(`${p.nome}: ${rotulo(s)} com ${f2(a)} m², abaixo do mínimo de ${f2(t.min)} m².`); }
-      if(lmin < t.lado - 0.01){ pen += 12*(t.lado-lmin); av.push(`${p.nome}: ${rotulo(s)} com lado de ${f2(lmin)} m, abaixo de ${f2(t.lado)} m.`); }
+      const lm = ladoMin(s.tipo, q);
+      if(lmin < lm - 0.01){ pen += 12*(lm-lmin); av.push(`${p.nome}: ${rotulo(s)} com lado de ${f2(lmin)} m, abaixo de ${f2(lm)} m.`); }
       const ra = a / (t.alvo || a);
       if(ra > 1.8 && p.nome!=='Subsolo' && s.tipo!=='deposito' && !s.integra) pen += (ra-1.8)*4;
     }
@@ -1719,7 +1738,7 @@ function invalidez(v, q, av){
     if(fora.length) m.push(`${p.nome}: ${lista(fora)} fora do lote`);
     if(recuo.length) m.push(`${p.nome}: ${lista(recuo)} nos recuos`);
   }
-  for(const a of av) if(/não se liga ao resto da casa/.test(a)) m.push(a.replace(/.$/, ''));
+  for(const a of av) if(/não se liga ao resto da casa|não tem porta de entrada/.test(a)) m.push(a.replace(/.$/, ''));
   return m;
 }
 /* Retângulos impermeáveis no sistema da casa. */
@@ -1834,7 +1853,35 @@ function acessos(v, q){
     caminho = {largura:CAMINHO, pontos: pts.map(([x,y]) => [r2(x), r2(y)])};
   }
   const faltam = Math.max(0, nFora - vagasFora.length);
-  return {yF, xL, xR, vias, vagasFora, portoes, caminho, faltam};
+  // escritório ampliado (E2.4): ramal do caminho até a porta externa própria, sem cruzar a faixa dos carros nem as vagas.
+  // Porta para a varanda frontal: o caminho principal já chega à varanda, e a ligação é por ela (sem ramal).
+  let ramal = null, ramalMotivo = null;
+  const dEsc = (ter.portas || []).find(d => d.escritorio && d.externa);
+  if(dEsc && caminho){
+    const viz = dEsc.viz !== undefined ? ter.salas.find(s => s.id === dEsc.viz) : null;
+    if(viz && viz.tipo === 'varanda') ramalMotivo = 'varanda';
+    else {
+      const m = (dEsc.t0 + dEsc.t1)/2, s = dEsc.dentro || 1;
+      // ponto em frente à porta, do lado de fora: 0,75 m da parede (a meia largura do caminho mais folga)
+      const fora = dEsc.o === 'h' ? [m, r2(dEsc.c - s*0.75)] : [r2(dEsc.c - s*0.75), m];
+      const porta = dEsc.o === 'h' ? [m, dEsc.c] : [dEsc.c, m];
+      const [gx, gy] = caminho.pontos[0], obst = vias.concat(vagasFora).map(r => ({x0:r.x0 - CAMINHO/2, x1:r.x1 + CAMINHO/2, y0:r.y0 - CAMINHO/2, y1:r.y1 + CAMINHO/2}));
+      const corta = (a, b) => obst.some(r => Math.min(a[0], b[0]) < r.x1 - 0.001 && Math.max(a[0], b[0]) > r.x0 + 0.001 && Math.min(a[1], b[1]) < r.y1 - 0.001 && Math.max(a[1], b[1]) > r.y0 + 0.001);
+      const casa = ter.salas.filter(x => !TIPOS[x.tipo].aberto), naCasa = (a, b) => casa.some(r => Math.min(a[0], b[0]) < r.x1 - 0.001 && Math.max(a[0], b[0]) > r.x0 + 0.001 && Math.min(a[1], b[1]) < r.y1 - 0.001 && Math.max(a[1], b[1]) > r.y0 + 0.001);
+      // sai do portão social, sobe até uma linha y, atravessa até o alinhamento da porta e chega a ela
+      const ys = [];
+      for(let y = gy + 0.7; y <= Math.min(fora[1], 0) - 0.3 + 0.001; y += 0.3) ys.push(r2(y));
+      if(dEsc.o === 'v') ys.push(fora[1]);
+      for(const y of ys){
+        const pts = dEsc.o === 'h' ? [[gx, gy], [gx, y], [fora[0], y], porta] : [[gx, gy], [gx, y], [fora[0], y], [fora[0], fora[1]], porta];
+        const segs = pts.slice(1).map((p, i) => [pts[i], p]).filter(([a, b]) => Math.hypot(a[0]-b[0], a[1]-b[1]) > 0.01);
+        if(segs.some(([a, b]) => corta(a, b)) || segs.slice(0, -1).some(([a, b]) => naCasa(a, b))) continue;
+        ramal = {largura:CAMINHO, pontos:pts.map(([x, y]) => [r2(x), r2(y)])}; break;
+      }
+      if(!ramal) ramalMotivo = 'cruza';
+    }
+  }
+  return Object.assign({yF, xL, xR, vias, vagasFora, portoes, caminho, faltam}, ramal ? {ramal} : {}, ramalMotivo ? {ramalMotivo} : {});   // só com o escritório ampliado
 }
 
 /* ---------- Geração ---------- */
@@ -2016,7 +2063,10 @@ function geraTodas(q, P, Ws){
       // (a busca do terreno mínimo, q.subMin, não monta as invertidas: o retângulo é o mesmo e o custo dobraria)
       if(fundoNoPoente(q) && q.tipo==='terrea' && !q.subsolo && !q.subMin) try{
         const qi = q.garagem==='coberta' ? Object.assign({}, q, {garagem:'descoberta'}) : q;
-        const vi = inverteFrenteFundo(linear(qi, P, W, m), q); if(vi) out.push(vi);
+        let Pv = P;
+        if(q.escritorioAmpliado && P.social.includes('escritorio'))   // E2.4: o escritório ampliado vai para a frente, junto da entrada
+          Pv = Object.assign({}, P, {social:P.social.filter(s => s !== 'escritorio'), mods:P.mods.concat([{tipo:'escritorio', id:900, a:alvo('escritorio', q), lado:ESC_AMPLIADO.lado, nome:'Escritório'}])});
+        const vi = inverteFrenteFundo(linear(qi, Pv, W, m), q); if(vi) out.push(vi);
       }catch(e){ /* inviável */ }
       if(q.tipo==='sobrado' && (q.subsolo || q.elevador)) try{ let ve = linear(q, P, W, m, {empilha:true});
         if(ve.Lsup && ve.Lsup > ve.Dter + 1.0){ const k = Math.min(1.3, 1 + (ve.Lsup - ve.Dter)/Math.max(1, ve.Dter - (q.varanda?2:0))); ve = linear(q, P, W, m, {empilha:true, cresce:k}); }
@@ -2090,6 +2140,7 @@ function gerar(entrada, opts){
     // acessos da versão espelhada: a casa vira no lugar e o lote não (com recuos diferentes, espelhar os acessos em torno do lote erraria)
     const ve = espelharCasa(v); v.acessosEsp = acessos(ve, q);
     if(v.acessos && v.acessos.portoes.some(p => p.junto)) v.avisos.push('A frente do lote não comporta portão social separado do portão de veículos; os dois ficam juntos.');
+    if(v.acessos && v.acessos.ramalMotivo === 'cruza') v.avisos.push('Escritório ampliado: não há traçado do portão social até a porta do escritório sem cruzar a faixa dos carros; o cliente entra pela porta principal.');
     if(v.acessos && v.acessos.faltam) v.avisos.push(`Só ${v.acessos.vagasFora.length} vaga(s) descoberta(s) cabem no recuo frontal; faltam ${v.acessos.faltam}.`); });
   const lm = loteMinimo(q, P);
   if(escolhidas.length && escolhidas[0].score < 60) avisos.push('O programa não cabe bem neste terreno. Veja o terreno mínimo sugerido.');
