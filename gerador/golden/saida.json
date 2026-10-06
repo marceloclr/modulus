@@ -8,12 +8,15 @@
   ],
   "svg": {
    "Variante A/Térreo": "df0f85a88bd7cb66",
+   "Variante A/humanizada/Térreo": "389c266fad456d2a",
    "Variante A/espelhada/Térreo": "fbef051eb8ff0dfc",
    "Variante A/lote": "21787e92860cab00",
    "Variante B/Térreo": "ecbfac91c13cc755",
+   "Variante B/humanizada/Térreo": "8039604f2064e50a",
    "Variante B/espelhada/Térreo": "766602a3193ee6b0",
    "Variante B/lote": "3598ad375331ae9e",
    "Variante C/Térreo": "d37f6183f52e0e0c",
+   "Variante C/humanizada/Térreo": "d670a5313d5ddee1",
    "Variante C/espelhada/Térreo": "1c761ae40fbfbc41",
    "Variante C/lote": "5d39a2e5a0002205"
   }
@@ -25,6 +28,7 @@
   ],
   "svg": {
    "Variante A/Térreo": "cfe83829f9d2cde7",
+   "Variante A/humanizada/Térreo": "c8de9a495cb512ff",
    "Variante A/espelhada/Térreo": "9ac7d703447330f7",
    "Variante A/lote": "7a6fb7907126a353"
   }
@@ -38,12 +42,15 @@
   ],
   "svg": {
    "Variante A/Térreo": "ebb858d5429fee19",
+   "Variante A/humanizada/Térreo": "ff7df7db008cc853",
    "Variante A/espelhada/Térreo": "f95e72647e80ba92",
    "Variante A/lote": "0b28a9bdee2e2ce9",
    "Variante B/Térreo": "7edba400ac72215a",
+   "Variante B/humanizada/Térreo": "59ba5b59066bfe08",
    "Variante B/espelhada/Térreo": "d2d90e65e679b4f1",
    "Variante B/lote": "41ac5800c0a2c16c",
    "Variante C/Térreo": "d4658abf71199982",
+   "Variante C/humanizada/Térreo": "08ca8f2c810e8b6f",
    "Variante C/espelhada/Térreo": "a5883394b651b064",
    "Variante C/lote": "24d877adb89a8dad"
   }
@@ -57,6 +64,9 @@
    "Variante A/Subsolo": "283baa360401075b",
    "Variante A/Térreo": "2a3ba9c6e0a19840",
    "Variante A/Superior": "5873f0cd3d6f8a4f",
+   "Variante A/humanizada/Subsolo": "586b9c7114058807",
+   "Variante A/humanizada/Térreo": "29a09291c4390f72",
+   "Variante A/humanizada/Superior": "581576b2a1badb6a",
    "Variante A/espelhada/Térreo": "19e708c59c60dc55",
    "Variante A/lote": "c1111dc4a2ba5b69"
   }
@@ -71,14 +81,20 @@
   "svg": {
    "Variante A/Subsolo": "e7e51688c6f97f12",
    "Variante A/Térreo": "db3b17f14b6a7a99",
+   "Variante A/humanizada/Subsolo": "38b1842c3196cf03",
+   "Variante A/humanizada/Térreo": "ab1f967452a086f9",
    "Variante A/espelhada/Térreo": "47b761f31b79a2f0",
    "Variante A/lote": "70599f1c4e8d5830",
    "Variante B/Subsolo": "8dc555124c15db0b",
    "Variante B/Térreo": "5ced1bdaee0dad2d",
+   "Variante B/humanizada/Subsolo": "8128b80b7ff54d3d",
+   "Variante B/humanizada/Térreo": "84c46ddb2ac98fb9",
    "Variante B/espelhada/Térreo": "042d2deb570b4503",
    "Variante B/lote": "a7083333a61877dc",
    "Variante C/Subsolo": "b944629af952f6a9",
    "Variante C/Térreo": "bddddda57685514b",
+   "Variante C/humanizada/Subsolo": "828f91e4fdaf5a73",
+   "Variante C/humanizada/Térreo": "76f82591a0f84a7b",
    "Variante C/espelhada/Térreo": "b7b55d7e3e13086d",
    "Variante C/lote": "9d0dbd677dc8cf86"
   }
@@ -90,6 +106,7 @@
   ],
   "svg": {
    "Variante A/Térreo": "6d2d651fc3e869bc",
+   "Variante A/humanizada/Térreo": "e3bcf1d450ce1939",
    "Variante A/espelhada/Térreo": "df7930392c1bf7e2",
    "Variante A/lote": "cff31bb4cffae7d7"
   }
@@ -105,16 +122,25 @@
    "Variante A/Térreo": "9d322f9514906c43",
    "Variante A/Edícula térreo": "59b16eff1a8aa1e8",
    "Variante A/Edícula superior": "4d02d8e08d067c11",
+   "Variante A/humanizada/Térreo": "c043a90d97809a94",
+   "Variante A/humanizada/Edícula térreo": "23aaa68381bfcdca",
+   "Variante A/humanizada/Edícula superior": "630f333024c0825b",
    "Variante A/espelhada/Térreo": "04e27db6de0bcbba",
    "Variante A/lote": "b733a6d088f9249e",
    "Variante B/Térreo": "e2d59f81ea49910c",
    "Variante B/Edícula térreo": "36db9f3a2a779404",
    "Variante B/Edícula superior": "278ca8e19389bd89",
+   "Variante B/humanizada/Térreo": "1d4cf32f0eb681b6",
+   "Variante B/humanizada/Edícula térreo": "bf24b5c42b6bfe57",
+   "Variante B/humanizada/Edícula superior": "fb8189966b82a178",
    "Variante B/espelhada/Térreo": "77902e44327f5e86",
    "Variante B/lote": "d7684aa1e92398cd",
    "Variante C/Térreo": "e4702dce78139d48",
    "Variante C/Edícula térreo": "a3bd30312bbd76c7",
    "Variante C/Edícula superior": "bc968ffb5cee2476",
+   "Variante C/humanizada/Térreo": "2c610a4160504c42",
+   "Variante C/humanizada/Edícula térreo": "a81b8be99dd919b3",
+   "Variante C/humanizada/Edícula superior": "03fc5d6b3825b594",
    "Variante C/espelhada/Térreo": "c39f44b35a302ef1",
    "Variante C/lote": "896cf6230061d89f"
   }
@@ -129,14 +155,20 @@
   "svg": {
    "Variante A/Subsolo": "cc3af731adde40a7",
    "Variante A/Térreo": "73be2263e86dbc9e",
+   "Variante A/humanizada/Subsolo": "e3fce104248f340a",
+   "Variante A/humanizada/Térreo": "e88b26b09e734c43",
    "Variante A/espelhada/Térreo": "ba111786002da52a",
    "Variante A/lote": "d1fd63d044e8d6e4",
    "Variante B/Subsolo": "016d672e13277e70",
    "Variante B/Térreo": "cab9df8e8a3a94ae",
+   "Variante B/humanizada/Subsolo": "384c65b93151ff0a",
+   "Variante B/humanizada/Térreo": "093c7269f8573d2d",
    "Variante B/espelhada/Térreo": "c729c3f53e7c3b0a",
    "Variante B/lote": "64182ed9b401c2cf",
    "Variante C/Subsolo": "04b4b849594d03ac",
    "Variante C/Térreo": "e15a845a7399e9a5",
+   "Variante C/humanizada/Subsolo": "344a05306468b596",
+   "Variante C/humanizada/Térreo": "2b7905181aa193d9",
    "Variante C/espelhada/Térreo": "e952c7bc85401f5e",
    "Variante C/lote": "e81fc4f241f33fd2"
   }
@@ -151,14 +183,20 @@
   "svg": {
    "Variante A/Térreo": "db0d3b8065cd568a",
    "Variante A/Superior": "bcd6ada5804d37a3",
+   "Variante A/humanizada/Térreo": "d13e9149ce91d7ea",
+   "Variante A/humanizada/Superior": "1b0b06a0eafc8dd8",
    "Variante A/espelhada/Térreo": "b34e4f9978660110",
    "Variante A/lote": "0ae221d07f02de21",
    "Variante B/Térreo": "47a17842be04c21f",
    "Variante B/Superior": "b792f5bab1073236",
+   "Variante B/humanizada/Térreo": "bc39e340e2ad6ee0",
+   "Variante B/humanizada/Superior": "554fad344741e4f0",
    "Variante B/espelhada/Térreo": "e922ca602477e91e",
    "Variante B/lote": "468edabd9cd4dc10",
    "Variante C/Térreo": "676b30e4004b4b36",
    "Variante C/Superior": "b708bc45c49cdaf1",
+   "Variante C/humanizada/Térreo": "23549f40d990efa3",
+   "Variante C/humanizada/Superior": "aaa3bb73abd31a1e",
    "Variante C/espelhada/Térreo": "a974eec4f005238a",
    "Variante C/lote": "64ba3b5696b2a8dd"
   }
@@ -171,6 +209,8 @@
   "svg": {
    "Variante A/Térreo": "1f7412b5f718c50a",
    "Variante A/Superior": "81cf69745329b879",
+   "Variante A/humanizada/Térreo": "ef173eb798147e94",
+   "Variante A/humanizada/Superior": "e1fa2178e8fe9e44",
    "Variante A/espelhada/Térreo": "a67e61d5be64bccb",
    "Variante A/lote": "de1a77d96fea5d27"
   }
@@ -185,14 +225,20 @@
   "svg": {
    "Variante A/Térreo": "f8717c7bf8ed8e0f",
    "Variante A/Superior": "9eba6b4b4b360a67",
+   "Variante A/humanizada/Térreo": "9c651fd47fe5e4a1",
+   "Variante A/humanizada/Superior": "d009d4e62212262e",
    "Variante A/espelhada/Térreo": "73aacc62ea684a36",
    "Variante A/lote": "ac0d73b0abe7bf54",
    "Variante B/Térreo": "41b2f93b1ed86903",
    "Variante B/Superior": "a8e4c02cff4e3c4e",
+   "Variante B/humanizada/Térreo": "e6621104fea757cc",
+   "Variante B/humanizada/Superior": "b9c5b91030ed9776",
    "Variante B/espelhada/Térreo": "41e1428e0eaddb54",
    "Variante B/lote": "a47c3dedc18bbca8",
    "Variante C/Térreo": "06cfeba050c412e1",
    "Variante C/Superior": "393341eb922d3fdb",
+   "Variante C/humanizada/Térreo": "77c9f6ae3e7604e6",
+   "Variante C/humanizada/Superior": "e6cfb198cc60c587",
    "Variante C/espelhada/Térreo": "44dba462a64b7abd",
    "Variante C/lote": "f288de96e8d35795"
   }
@@ -207,14 +253,20 @@
   "svg": {
    "Variante A/Térreo": "d2ae19de8184fd53",
    "Variante A/Rooftop": "5279093b4f088280",
+   "Variante A/humanizada/Térreo": "abff7d3e3b0f760f",
+   "Variante A/humanizada/Rooftop": "e3351bf4d2e68693",
    "Variante A/espelhada/Térreo": "a07c3366db889c16",
    "Variante A/lote": "7d08c358d4757b5f",
    "Variante B/Térreo": "dbc5f7933f9f6274",
    "Variante B/Rooftop": "b733231e2880da12",
+   "Variante B/humanizada/Térreo": "845259971cd9d19c",
+   "Variante B/humanizada/Rooftop": "41df5d1f2a09f9a1",
    "Variante B/espelhada/Térreo": "3b21a80ee0f73d44",
    "Variante B/lote": "8e7cbecc02936802",
    "Variante C/Térreo": "7e584c543e8f4a2c",
    "Variante C/Rooftop": "bc539f3e7688e089",
+   "Variante C/humanizada/Térreo": "d1b9059e498b7f5f",
+   "Variante C/humanizada/Rooftop": "32b1164ba69f7141",
    "Variante C/espelhada/Térreo": "dd3baa2056c8677f",
    "Variante C/lote": "27b1b81f805eb14e"
   }
@@ -230,16 +282,25 @@
    "Variante A/Térreo": "b452233fd9987d56",
    "Variante A/Superior": "dd50b7c28c3ec5cf",
    "Variante A/Rooftop": "dc2328f37f823467",
+   "Variante A/humanizada/Térreo": "b185ae3d7273ad71",
+   "Variante A/humanizada/Superior": "baf3770c3d9d4985",
+   "Variante A/humanizada/Rooftop": "dd254b7183cfe661",
    "Variante A/espelhada/Térreo": "c00670c8a10d2415",
    "Variante A/lote": "7742a15127a0624f",
    "Variante B/Térreo": "127dfccaec19c647",
    "Variante B/Superior": "b0dd7b2c08c051ae",
    "Variante B/Rooftop": "71df4039d8bd99d4",
+   "Variante B/humanizada/Térreo": "203d1cd1fc1d8da1",
+   "Variante B/humanizada/Superior": "447081487260ec94",
+   "Variante B/humanizada/Rooftop": "7073b6eb75a2148d",
    "Variante B/espelhada/Térreo": "f73c9005bab78cb3",
    "Variante B/lote": "1c06a44a48dbd8b9",
    "Variante C/Térreo": "75d5b94d5d2beacf",
    "Variante C/Superior": "281bbb6030deaecb",
    "Variante C/Rooftop": "f5ef4b6da173fbc1",
+   "Variante C/humanizada/Térreo": "872e75b1cb302c54",
+   "Variante C/humanizada/Superior": "b77fd5bacf220adf",
+   "Variante C/humanizada/Rooftop": "a4badfd4c943ba6b",
    "Variante C/espelhada/Térreo": "46722e40595434e9",
    "Variante C/lote": "100619ada5108d87"
   }
@@ -255,16 +316,25 @@
    "Variante A/Subsolo": "d4509d1656b0d098",
    "Variante A/Térreo": "5fb7dc6032d11f39",
    "Variante A/Superior": "28b1213455c8d478",
+   "Variante A/humanizada/Subsolo": "76ec80f996230912",
+   "Variante A/humanizada/Térreo": "aa97f8bf341583dd",
+   "Variante A/humanizada/Superior": "f77c394ee8bdf01b",
    "Variante A/espelhada/Térreo": "3ee423b014743cad",
    "Variante A/lote": "2a230dd317a7a938",
    "Variante B/Subsolo": "a48d97d1008d94a8",
    "Variante B/Térreo": "ae170f1303ae81f8",
    "Variante B/Superior": "7cec23bd2124a3d8",
+   "Variante B/humanizada/Subsolo": "25b095a58ffc6280",
+   "Variante B/humanizada/Térreo": "f0d137fdbb150c0d",
+   "Variante B/humanizada/Superior": "41eadd3df3d4109e",
    "Variante B/espelhada/Térreo": "3394cd141cd741d2",
    "Variante B/lote": "151a1949ce30e8cd",
    "Variante C/Subsolo": "e6e626b01b52d568",
    "Variante C/Térreo": "5eeefbf0dc79e9d1",
    "Variante C/Superior": "2f3d75cdada55531",
+   "Variante C/humanizada/Subsolo": "184decd1a8164f85",
+   "Variante C/humanizada/Térreo": "a8eff56190025d25",
+   "Variante C/humanizada/Superior": "994cc57bfc72de75",
    "Variante C/espelhada/Térreo": "ef3fb1070156a694",
    "Variante C/lote": "1b0a41b8d8fc80fa"
   }
@@ -279,14 +349,20 @@
   "svg": {
    "Variante A/Subsolo": "f3cb6cc34010c2d9",
    "Variante A/Térreo": "0df55d357c89d93d",
+   "Variante A/humanizada/Subsolo": "3949b2709a047848",
+   "Variante A/humanizada/Térreo": "d9efc3aacb1b984f",
    "Variante A/espelhada/Térreo": "168cab335350a19e",
    "Variante A/lote": "8994cefc3be9886a",
    "Variante B/Subsolo": "29440e6021589f69",
    "Variante B/Térreo": "d880252e58264d13",
+   "Variante B/humanizada/Subsolo": "67f21d2cb01d1b4f",
+   "Variante B/humanizada/Térreo": "2a21e6c07ee0e29a",
    "Variante B/espelhada/Térreo": "fe2e1f496aad2a28",
    "Variante B/lote": "33476919f0bf56ea",
    "Variante C/Subsolo": "516c0214d0cc80b1",
    "Variante C/Térreo": "c0d13b606a8c75be",
+   "Variante C/humanizada/Subsolo": "a424eda291850a4f",
+   "Variante C/humanizada/Térreo": "7b19a61b803dad2f",
    "Variante C/espelhada/Térreo": "1ffeda4e38e33661",
    "Variante C/lote": "fc789548ab7b647f"
   }
@@ -301,14 +377,20 @@
   "svg": {
    "Variante A/Subsolo": "15f7246ff7f9d0e5",
    "Variante A/Térreo": "59d78123cceed209",
+   "Variante A/humanizada/Subsolo": "dd938a65c6fcf777",
+   "Variante A/humanizada/Térreo": "cdfe5122ecf3024e",
    "Variante A/espelhada/Térreo": "7d88da13c79e1bf0",
    "Variante A/lote": "b288483bd8c47a98",
    "Variante B/Subsolo": "d88814e5787cfd84",
    "Variante B/Térreo": "d87585e44f8f7e1d",
+   "Variante B/humanizada/Subsolo": "cc3af6e9e9995325",
+   "Variante B/humanizada/Térreo": "a0ea7a398e7e32cc",
    "Variante B/espelhada/Térreo": "2c3ddad39c0bdca5",
    "Variante B/lote": "19c39f94773de65f",
    "Variante C/Subsolo": "65129baa88cccb50",
    "Variante C/Térreo": "56e100d486a35420",
+   "Variante C/humanizada/Subsolo": "217b26501ea24f39",
+   "Variante C/humanizada/Térreo": "f4e4f015b905ba99",
    "Variante C/espelhada/Térreo": "db08e9757e8edd59",
    "Variante C/lote": "ffbedd0cb41d1a80"
   }
@@ -323,14 +405,20 @@
   "svg": {
    "Variante A/Subsolo": "6919f5923227db5a",
    "Variante A/Térreo": "444cff49dd1f3624",
+   "Variante A/humanizada/Subsolo": "5e2f618595a8ab00",
+   "Variante A/humanizada/Térreo": "89db53337a04561d",
    "Variante A/espelhada/Térreo": "7521a4521fb98d55",
    "Variante A/lote": "4d2636b85d077314",
    "Variante B/Subsolo": "5ea7065f67b89d66",
    "Variante B/Térreo": "43ca37fcc5e37c43",
+   "Variante B/humanizada/Subsolo": "9ef7cd0a620023b3",
+   "Variante B/humanizada/Térreo": "264f47ffc4e6e3b1",
    "Variante B/espelhada/Térreo": "8f0be26b5fed008d",
    "Variante B/lote": "6ee212955ad418b4",
    "Variante C/Subsolo": "2d5848d80c318821",
    "Variante C/Térreo": "b6f965ed09a99701",
+   "Variante C/humanizada/Subsolo": "9506712891b66479",
+   "Variante C/humanizada/Térreo": "1bfe111a0ec6ed26",
    "Variante C/espelhada/Térreo": "fb475974dba02e76",
    "Variante C/lote": "24f8fbaf5cb7a34d"
   }
@@ -344,6 +432,9 @@
    "Variante A/Subsolo": "4d485cd086a147d7",
    "Variante A/Térreo": "547f03b39258598b",
    "Variante A/Superior": "5873f0cd3d6f8a4f",
+   "Variante A/humanizada/Subsolo": "a1f3013b477adb47",
+   "Variante A/humanizada/Térreo": "9f33cc3625b2f860",
+   "Variante A/humanizada/Superior": "581576b2a1badb6a",
    "Variante A/espelhada/Térreo": "f9dfbbf8f1570040",
    "Variante A/lote": "4a14e473cc4f10cf"
   }
@@ -357,10 +448,14 @@
   "svg": {
    "Variante A/Subsolo": "524ba4cf8ba57cc2",
    "Variante A/Térreo": "65b483b5d827cb72",
+   "Variante A/humanizada/Subsolo": "88fc43a2c0e09187",
+   "Variante A/humanizada/Térreo": "a5f77a1be0c12884",
    "Variante A/espelhada/Térreo": "f98fbc79b0d4a2c6",
    "Variante A/lote": "db1e916ad9be7251",
    "Variante B/Subsolo": "560528fad0806748",
    "Variante B/Térreo": "5d20da306c667ae4",
+   "Variante B/humanizada/Subsolo": "c7c6ae8338a04cec",
+   "Variante B/humanizada/Térreo": "dbd766d52b76c42a",
    "Variante B/espelhada/Térreo": "6c6bc8bc9749d3e5",
    "Variante B/lote": "4f9177f3b78fd7ba"
   }
@@ -375,11 +470,17 @@
    "Variante A/Térreo": "4bc2e819bb75492d",
    "Variante A/Superior": "909c0c540310d27d",
    "Variante A/Rooftop": "f4fc327302fe0805",
+   "Variante A/humanizada/Térreo": "cba2d0192974a977",
+   "Variante A/humanizada/Superior": "2444790335fc08e0",
+   "Variante A/humanizada/Rooftop": "56b6caadd751699c",
    "Variante A/espelhada/Térreo": "e1a9233dbf81a9d9",
    "Variante A/lote": "774929328f16d19c",
    "Variante B/Térreo": "1e48304645f37765",
    "Variante B/Superior": "5a7d44868615aa66",
    "Variante B/Rooftop": "ca2cbda7c8f21bd1",
+   "Variante B/humanizada/Térreo": "6201eedece1ef878",
+   "Variante B/humanizada/Superior": "cccb0a3fee943362",
+   "Variante B/humanizada/Rooftop": "438d22c42ce1a635",
    "Variante B/espelhada/Térreo": "78e229ba15da7e01",
    "Variante B/lote": "97554b9c235e085d"
   }
@@ -398,12 +499,15 @@
   ],
   "svg": {
    "Variante A/Térreo": "83c650edf5768031",
+   "Variante A/humanizada/Térreo": "a5225a58a2663e82",
    "Variante A/espelhada/Térreo": "9d56b0f417ee1789",
    "Variante A/lote": "82d0bbdd7d945322",
    "Variante B/Térreo": "4ff0bf21943b0c90",
+   "Variante B/humanizada/Térreo": "a4371db2351934bf",
    "Variante B/espelhada/Térreo": "3342184a6a750e11",
    "Variante B/lote": "9e39d101a3a077ab",
    "Variante C/Térreo": "611fa0d0a6b11cbe",
+   "Variante C/humanizada/Térreo": "7b3313bb248dd128",
    "Variante C/espelhada/Térreo": "39500738f219e658",
    "Variante C/lote": "e030716c78afb8ba"
   }
@@ -417,10 +521,14 @@
   "svg": {
    "Variante A/Subsolo": "0ea156f8b814cee6",
    "Variante A/Térreo": "a1e3e3bba8d0e09a",
+   "Variante A/humanizada/Subsolo": "12ac61e679bd1143",
+   "Variante A/humanizada/Térreo": "deabbd65b7c26c74",
    "Variante A/espelhada/Térreo": "00bc0a384bd6ad5d",
    "Variante A/lote": "417cb5e26b352dc4",
    "Variante B/Subsolo": "c32f1d9ed7f67ed7",
    "Variante B/Térreo": "8be5f24f8235aa3c",
+   "Variante B/humanizada/Subsolo": "469663bf3f722828",
+   "Variante B/humanizada/Térreo": "f0e3fb42fd26ec22",
    "Variante B/espelhada/Térreo": "ce7616b67d96adff",
    "Variante B/lote": "326389c1ecd1fedb"
   }
@@ -441,16 +549,25 @@
    "Variante A/Subsolo": "f1fba4e4cc7fff4d",
    "Variante A/Térreo": "f1dcf0031affd1b9",
    "Variante A/Superior": "8cfebed5c7ee30d3",
+   "Variante A/humanizada/Subsolo": "7eef0b1c78177e04",
+   "Variante A/humanizada/Térreo": "c46cba5ee842e8f2",
+   "Variante A/humanizada/Superior": "02c3c34391186ca9",
    "Variante A/espelhada/Térreo": "59cdb93c62bbb718",
    "Variante A/lote": "576e0da0bb9b1c49",
    "Variante B/Subsolo": "0c3e997f131f66b7",
    "Variante B/Térreo": "06c86d3e3c2f8ed2",
    "Variante B/Superior": "135299e3d20b9501",
+   "Variante B/humanizada/Subsolo": "cc64abb51d8b9d9a",
+   "Variante B/humanizada/Térreo": "a521f5e0ec5bebeb",
+   "Variante B/humanizada/Superior": "f1983684a9d8d8e1",
    "Variante B/espelhada/Térreo": "a8dc5b9d57134401",
    "Variante B/lote": "ec194a3096bed6af",
    "Variante C/Subsolo": "9e479cd0cf93e16b",
    "Variante C/Térreo": "3c9003d5e0be8b6d",
    "Variante C/Superior": "83827ada7b4e95df",
+   "Variante C/humanizada/Subsolo": "e84032b9df423eb9",
+   "Variante C/humanizada/Térreo": "391d01af50a1c951",
+   "Variante C/humanizada/Superior": "32fbca036c0fd0e6",
    "Variante C/espelhada/Térreo": "522a50794b262cbb",
    "Variante C/lote": "2f2bda7828011a66"
   }
@@ -466,16 +583,25 @@
    "Variante A/Subsolo": "2a94d674872dcb0e",
    "Variante A/Térreo": "8a2c83d05cffc69d",
    "Variante A/Superior": "cef272aaef5c8ccb",
+   "Variante A/humanizada/Subsolo": "68577fad2d49ce86",
+   "Variante A/humanizada/Térreo": "ab057d53c5881aaa",
+   "Variante A/humanizada/Superior": "b7c303f9716c838d",
    "Variante A/espelhada/Térreo": "2be02a14fe59564f",
    "Variante A/lote": "7a7a4ff88cf6204b",
    "Variante B/Subsolo": "f8bd323802d6b745",
    "Variante B/Térreo": "5f18d3e6bb6da6b3",
    "Variante B/Superior": "088fe3a49213b4bd",
+   "Variante B/humanizada/Subsolo": "991431f9136719fc",
+   "Variante B/humanizada/Térreo": "c6aaabe9d7c487cc",
+   "Variante B/humanizada/Superior": "6ab26bf0927ded28",
    "Variante B/espelhada/Térreo": "65c7007f96c4bedb",
    "Variante B/lote": "4e442cfe893ab2ca",
    "Variante C/Subsolo": "a598b9a2953f1e0e",
    "Variante C/Térreo": "69bc833b0447d2c3",
    "Variante C/Superior": "9c0cc2a6e428ddf1",
+   "Variante C/humanizada/Subsolo": "7f4eb73f96603570",
+   "Variante C/humanizada/Térreo": "6426efdb2f8259fe",
+   "Variante C/humanizada/Superior": "69bbc178d7eab23c",
    "Variante C/espelhada/Térreo": "0e4de11ef08dd532",
    "Variante C/lote": "ff77b92e05ac3f47"
   }
@@ -491,16 +617,25 @@
    "Variante A/Subsolo": "d2b00df6a5dd8e46",
    "Variante A/Térreo": "b5b8f2e4934e7e5d",
    "Variante A/Superior": "648800c78170cb3a",
+   "Variante A/humanizada/Subsolo": "0e8d9471d61fa740",
+   "Variante A/humanizada/Térreo": "e38c456d6703c573",
+   "Variante A/humanizada/Superior": "3eaa83ce60e3b103",
    "Variante A/espelhada/Térreo": "9b29e91210a3ec29",
    "Variante A/lote": "a2d2d7899d1e1631",
    "Variante B/Subsolo": "4dec6ca94e4aebb1",
    "Variante B/Térreo": "844bb654b55a750d",
    "Variante B/Superior": "fbd6541aaf7630a5",
+   "Variante B/humanizada/Subsolo": "33d922f84006d010",
+   "Variante B/humanizada/Térreo": "3d3453bb597f0699",
+   "Variante B/humanizada/Superior": "fc360cb4356d3edf",
    "Variante B/espelhada/Térreo": "45bb31d85898a6fc",
    "Variante B/lote": "28c46ea8a84c4b19",
    "Variante C/Subsolo": "f4f2e30f8b53bb80",
    "Variante C/Térreo": "0106b704d791b7f5",
    "Variante C/Superior": "9c50400bb8760d37",
+   "Variante C/humanizada/Subsolo": "3a7c04a2e2568d23",
+   "Variante C/humanizada/Térreo": "7c9759a686c9ada9",
+   "Variante C/humanizada/Superior": "e46c6a900180dada",
    "Variante C/espelhada/Térreo": "e6bfb385851e5592",
    "Variante C/lote": "85c3cc116c557095"
   }
@@ -512,6 +647,7 @@
   ],
   "svg": {
    "Variante A/Térreo": "112a5d097644b55f",
+   "Variante A/humanizada/Térreo": "dfcffe5f155f85e9",
    "Variante A/espelhada/Térreo": "501e8ca72fb27532",
    "Variante A/lote": "59c593067c34607b"
   }
@@ -525,12 +661,15 @@
   ],
   "svg": {
    "Variante A/Térreo": "28571b9fd098804b",
+   "Variante A/humanizada/Térreo": "9fe4989a00d67d2d",
    "Variante A/espelhada/Térreo": "fec6fe844b0cafa4",
    "Variante A/lote": "fef714f735f36afb",
    "Variante B/Térreo": "2ac24d9a8b237853",
+   "Variante B/humanizada/Térreo": "edad0a8f0c65a665",
    "Variante B/espelhada/Térreo": "6c560c3440e07942",
    "Variante B/lote": "3ffb64c65c59b506",
    "Variante C/Térreo": "a2c99aeef4e4f955",
+   "Variante C/humanizada/Térreo": "763d1c85fb3f95c9",
    "Variante C/espelhada/Térreo": "7cd26939b07b9b3b",
    "Variante C/lote": "52e7534aea9a9ae6"
   }
@@ -545,14 +684,20 @@
   "svg": {
    "Variante A/Térreo": "97f9253700ffdec3",
    "Variante A/Edícula térreo": "11a07b5003fdd0ba",
+   "Variante A/humanizada/Térreo": "cbf1232af6b2b4ae",
+   "Variante A/humanizada/Edícula térreo": "47e7210aa736a72b",
    "Variante A/espelhada/Térreo": "7d402f67cf4a7876",
    "Variante A/lote": "d5f9f2257e671308",
    "Variante B/Térreo": "d6eaef8905012ebf",
    "Variante B/Edícula térreo": "898bd1b1337617fd",
+   "Variante B/humanizada/Térreo": "40bb5dfcbb90514f",
+   "Variante B/humanizada/Edícula térreo": "f116d7c696105838",
    "Variante B/espelhada/Térreo": "488150a3f91ff41d",
    "Variante B/lote": "a7b2d24365f6557f",
    "Variante C/Térreo": "cd5fd00060e04110",
    "Variante C/Edícula térreo": "80725e675754f278",
+   "Variante C/humanizada/Térreo": "f373cafa83f57e53",
+   "Variante C/humanizada/Edícula térreo": "78843a11daa7be8b",
    "Variante C/espelhada/Térreo": "0011d553fb72d797",
    "Variante C/lote": "19ceb08f62df9d74"
   }

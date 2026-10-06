@@ -1,7 +1,7 @@
 /* Desenho das variantes geradas pelo motor: planta humanizada em SVG (estilo de casa-h/gerar.js) e implantação no lote. */
 (function(root, factory){
-  if(typeof module==='object'&&module.exports) module.exports=factory(require('./motor.js')); else root.Desenho=factory(root.Motor);
-})(this, function(Motor){
+  if(typeof module==='object'&&module.exports) module.exports=factory(require('./motor.js'), require('./mobilia.js')); else root.Desenho=factory(root.Motor, root.Mobilia);
+})(this, function(Motor, Mobilia){
 'use strict';
 const K = 30;
 const f2 = Motor.f2;
@@ -96,6 +96,99 @@ function rosa(cx, cy, R, rumo){
   return g;
 }
 
+/* ---------- Planta humanizada (etapa F1): pisos, paredes em escala, móveis de mobilia.js, vegetação e sombra ----------
+   Sai do mesmo modelo da planta técnica; muda só piso, paredes, móveis e rótulos. Ids dos padrões com sufixo por desenho
+   (hzN), para várias plantas na mesma página não disputarem o mesmo id. */
+let HZN = 0;
+const HZ_PISO = {madeira:['quarto','suite','master','closet','closetMaster','escritorio','salaIntima','tv'],
+  porcelanato:['estar','jantar','circ','hall','galeria','lazer','escada'], ceramica:['banhoSuite','banhoMaster','banhoSocial','lavabo','cozinha','servico','despensa','deposito','rouparia'],
+  deck:['varanda','terraco','gourmet'], grama:['jardim'], cimento:['garagem','manobra','rampa','elevador']};
+const pisoDe = tipo => Object.keys(HZ_PISO).find(k => HZ_PISO[k].includes(tipo)) || 'porcelanato';
+const PAREDE_INT = 0.10 * K, PAREDE_EXT = 0.15 * K;   // 10 e 15 cm em escala (3 e 4,5 px)
+function hzDefs(id){
+  const p = (n, w, h, corpo, tr) => `<pattern id="${id}${n}" width="${w}" height="${h}" patternUnits="userSpaceOnUse"${tr ? ` patternTransform="${tr}"` : ''}>${corpo}</pattern>`;
+  return '<defs>' +
+    p('madeira', 30, 4.5, '<rect width="30" height="4.5" fill="#E9D7BC"/><path d="M0 4.3H30" stroke="#CDB592" stroke-width=".6"/><path d="M11 0V4.5" stroke="#D5BF9E" stroke-width=".5"/>') +
+    p('porcelanato', 27, 27, '<rect width="27" height="27" fill="#ECEAE4"/><path d="M0 26.7H27M26.7 0V27" stroke="#D6D2C8" stroke-width=".6"/>') +
+    p('ceramica', 9, 9, '<rect width="9" height="9" fill="#E6EDF0"/><path d="M0 8.8H9M8.8 0V9" stroke="#C9D4D9" stroke-width=".5"/>') +
+    p('deck', 4.5, 30, '<rect width="4.5" height="30" fill="#D9BE98"/><path d="M4.3 0V30" stroke="#B89A70" stroke-width=".6"/>') +
+    p('grama', 8, 8, '<rect width="8" height="8" fill="#CFE0B4"/><circle cx="2" cy="2" r=".7" fill="#A9C784"/><circle cx="6" cy="5.5" r=".6" fill="#B7D093"/>') +
+    p('cimento', 12, 12, '<rect width="12" height="12" fill="#E3E1DC"/><circle cx="3" cy="4" r=".4" fill="#CBC7BF"/><circle cx="9" cy="9" r=".35" fill="#D2CEC6"/>') +
+    `<filter id="${id}sombra" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3.2"/></filter></defs>`;
+}
+/* Desenha as peças de mobilia.js. X e Y convertem metros em px. */
+function hzMoveis(pecas, X, Y){
+  const o = [], r = (x0, y0, x1, y1, at) => Math.abs(x1 - x0) < 1e-9 || Math.abs(y1 - y0) < 1e-9 ? o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" ${at}/>`) : o.push(`<rect x="${X(Math.min(x0, x1))}" y="${Y(Math.min(y0, y1))}" width="${(Math.abs(x1 - x0) * K).toFixed(1)}" height="${(Math.abs(y1 - y0) * K).toFixed(1)}" ${at}/>`);
+  const c = (x, y, rr, at) => o.push(`<circle cx="${X(x)}" cy="${Y(y)}" r="${(rr * K).toFixed(1)}" ${at}/>`);
+  const el = (x, y, rx, ry, at) => o.push(`<ellipse cx="${X(x)}" cy="${Y(y)}" rx="${(rx * K).toFixed(1)}" ry="${(ry * K).toFixed(1)}" ${at}/>`);
+  const MAD = 'fill="#E2D5BE" stroke="#8C7B5C" stroke-width=".8"', BR = 'fill="#FFFFFF" stroke="#6F6A60" stroke-width=".8"', LOU = 'fill="#FFFFFF" stroke="#7F9BB1" stroke-width=".8"', PEDRA = 'fill="#E8E4DC" stroke="#7C776D" stroke-width=".8"';
+  for(const q of pecas){
+    // sistema local da peça: u ao longo da parede de apoio (0..W), v da parede para dentro (0..P)
+    const l = q.lado || 'y0', hz = l === 'y0' || l === 'y1', W = hz ? q.x1 - q.x0 : q.y1 - q.y0, P = hz ? q.y1 - q.y0 : q.x1 - q.x0;
+    const pt = (u, v) => l === 'y0' ? [q.x0 + u, q.y0 + v] : l === 'y1' ? [q.x0 + u, q.y1 - v] : l === 'x0' ? [q.x0 + v, q.y0 + u] : [q.x1 - v, q.y0 + u];
+    const R = (u0, v0, u1, v1, at) => { const [x0, y0] = pt(u0, v0), [x1, y1] = pt(u1, v1); r(x0, y0, x1, y1, at); };
+    const C = (u, v, rr, at) => { const [x, y] = pt(u, v); c(x, y, rr, at); };
+    const tt = `<title>${({cama:'Cama', criado:'Criado-mudo', armario:'Armário', escrivaninha:'Escrivaninha', boxe:'Boxe', bacia:'Bacia sanitária', lavatorio:'Lavatório', bancada:'Bancada', 'bancada-cozinha':'Bancada com cuba e cooktop', geladeira:'Geladeira', tanque:'Tanque', maquina:'Máquina de lavar', rack:'Rack da TV', sofa:'Sofá', 'mesa-centro':'Mesa de centro', 'mesa-jantar':'Mesa de jantar', 'mesa-externa':'Mesa externa', vaso:'Vaso com planta', churrasqueira:'Churrasqueira', prateleiras:'Prateleiras', estante:'Estante', arvore:'Árvore'})[q.tipo] || q.tipo} ${f2(W)} × ${f2(P)} m</title>`;
+    o.push('<g>' + tt);
+    switch(q.tipo){
+      case 'cama': {
+        R(0, 0, W, P, 'rx="2" ' + BR);
+        R(0.04, 0.5, W - 0.04, P - 0.04, 'rx="2" fill="#D7E5E1" stroke="#9DB3AD" stroke-width=".6"');   // manta
+        R(0.04, 0.5, W - 0.04, 0.8, 'fill="#F6F3EC" stroke="#9DB3AD" stroke-width=".5"');                // dobra do lençol
+        const n = q.casal ? 2 : 1, pw = (W - 0.2) / n;
+        for(let i = 0; i < n; i++) R(0.1 + i * pw + 0.03, 0.08, 0.1 + (i + 1) * pw - 0.03, 0.42, 'rx="3" fill="#F6F3EC" stroke="#6F6A60" stroke-width=".7"');
+        break; }
+      case 'criado': R(0, 0, W, P, 'rx="1" ' + MAD); C(W / 2, P / 2, 0.1, 'fill="#FFF6DD" stroke="#B59B6A" stroke-width=".6"'); break;
+      case 'armario': case 'prateleiras': case 'estante': {
+        R(0, 0, W, P, (q.tipo === 'armario' ? 'fill="#EDE5D6" stroke="#8C8270"' : MAD) + ' stroke-width=".9"');
+        const n = Math.max(2, Math.round(W / 0.6));
+        for(let i = 1; i < n; i++) R(i * W / n, 0, i * W / n, P, 'stroke="#8C8270" stroke-width=".6"');
+        if(q.tipo === 'armario') R(0, P - 0.04, W, P - 0.04, 'stroke="#8C8270" stroke-width=".5"');
+        break; }
+      case 'escrivaninha': R(0, 0, W, P, 'rx="1" ' + MAD); R(W / 2 - 0.22, P + 0.08, W / 2 + 0.22, P + 0.5, 'rx="2" fill="#F1ECE2" stroke="#6F6A60" stroke-width=".8"'); break;
+      case 'boxe': R(0, 0, W, P, 'fill="#E1EBF2" stroke="#7F9BB1" stroke-width=".9"'); C(W / 2, P / 2, 0.05, 'fill="#FFFFFF" stroke="#7F9BB1" stroke-width=".6"'); R(0, P, W, P, 'stroke="#7F9BB1" stroke-width="1.6"'); break;
+      case 'bacia': { R(0.02, 0, W - 0.02, 0.18, 'rx="1" ' + LOU); const [x, y] = pt(W / 2, 0.4); el(x, y, hz ? 0.17 : 0.22, hz ? 0.22 : 0.17, LOU); break; }
+      case 'lavatorio': case 'bancada': { R(0, 0, W, P, PEDRA); const n = q.tipo === 'bancada' && W >= 1.15 ? 2 : 1;
+        for(let i = 0; i < n; i++){ const [x, y] = pt(W * (i + 0.5) / n, P * 0.55); el(x, y, hz ? 0.17 : 0.13, hz ? 0.13 : 0.17, LOU); } break; }
+      case 'bancada-cozinha': {
+        R(0, 0, W, P, PEDRA);
+        const uc = Math.min(0.55, W * 0.25);   // cuba perto de uma ponta, cooktop no outro terço
+        R(uc - 0.25, 0.12, uc + 0.25, 0.48, 'rx="2" ' + LOU);
+        const uf = Math.max(uc + 0.7, W - 0.5);
+        if(uf + 0.3 <= W) for(const [du, dv] of [[-0.15, 0.2], [0.15, 0.2], [-0.15, 0.42], [0.15, 0.42]]) C(uf + du, dv, 0.08, 'fill="none" stroke="#3F3A35" stroke-width=".7"');
+        break; }
+      case 'geladeira': R(0, 0, W, P, 'rx="1.5" fill="#F4F4F2" stroke="#6F6A60" stroke-width=".9"'); R(0, P - 0.1, W, P - 0.1, 'stroke="#6F6A60" stroke-width=".5"'); break;
+      case 'tanque': R(0, 0, W, P, 'rx="1.5" ' + BR); R(0.08, 0.08, W - 0.08, P - 0.12, 'rx="2" ' + LOU); break;
+      case 'maquina': R(0, 0, W, P, 'rx="2" ' + BR); C(W / 2, P / 2, 0.22, 'fill="#E1EBF2" stroke="#6F6A60" stroke-width=".7"'); break;
+      case 'rack': R(0, 0, W, P, 'rx="1" ' + MAD); R(W * 0.15, 0.05, W * 0.85, 0.12, 'fill="#2F333A"'); break;
+      case 'sofa':
+        R(0, 0, W, P, 'rx="4" fill="#C9D6CF" stroke="#6F6A60" stroke-width=".8"');
+        R(0, 0, W, 0.22, 'rx="3" fill="#B3C5BB" stroke="#6F6A60" stroke-width=".6"');                        // encosto (lado da parede)
+        R(0, 0, 0.2, P, 'rx="3" fill="#B3C5BB" stroke="#6F6A60" stroke-width=".6"'); R(W - 0.2, 0, W, P, 'rx="3" fill="#B3C5BB" stroke="#6F6A60" stroke-width=".6"');
+        for(let i = 1; i < 3; i++) R(0.2 + i * (W - 0.4) / 3, 0.22, 0.2 + i * (W - 0.4) / 3, P, 'stroke="#9FB2A8" stroke-width=".5"');
+        break;
+      case 'mesa-centro': R(0, 0, W, P, 'rx="2" ' + MAD); break;
+      case 'mesa-jantar': case 'mesa-externa': {
+        const [cx, cy] = [(q.x0 + q.x1) / 2, (q.y0 + q.y1) / 2];
+        if(q.tipo === 'mesa-externa'){ c(cx, cy, 0.35, MAD); for(const s of [-1, 1]) c(q.eixo === 'x' ? cx + s * 0.6 : cx, q.eixo === 'x' ? cy : cy + s * 0.6, 0.2, BR); break; }
+        const [mw, mh] = q.mesa || [1.2, 0.8], ex = q.eixo === 'x', tw = ex ? mw : mh, th = ex ? mh : mw, n = q.lugares || 4;
+        const lado = n >= 8 ? 3 : 2, pontas = n > 4 ? 1 : 0;
+        for(let i = 0; i < lado; i++){ const u = -mw / 2 + mw * (i + 0.5) / lado;
+          for(const s of [-1, 1]){ const [x, y] = ex ? [cx + u, cy + s * (mh / 2 + 0.22)] : [cx + s * (mh / 2 + 0.22), cy + u]; r(x - (ex ? 0.2 : 0.18), y - (ex ? 0.18 : 0.2), x + (ex ? 0.2 : 0.18), y + (ex ? 0.18 : 0.2), 'rx="1.5" ' + BR); } }
+        if(pontas) for(const s of [-1, 1]){ const [x, y] = ex ? [cx + s * (mw / 2 + 0.22), cy] : [cx, cy + s * (mw / 2 + 0.22)]; r(x - (ex ? 0.18 : 0.2), y - (ex ? 0.2 : 0.18), x + (ex ? 0.18 : 0.2), y + (ex ? 0.2 : 0.18), 'rx="1.5" ' + BR); }
+        r(cx - tw / 2, cy - th / 2, cx + tw / 2, cy + th / 2, 'rx="2" fill="#E2D5BE" stroke="#8C7B5C" stroke-width=".9"');
+        break; }
+      case 'vaso': C(W / 2, P / 2, Math.min(W, P) * 0.42, 'fill="#C9B79C" stroke="#8C7B5C" stroke-width=".7"'); C(W / 2, P / 2, Math.min(W, P) * 0.32, 'fill="#7FA05A" fill-opacity=".9"'); break;
+      case 'churrasqueira': R(0, 0, W, P, 'fill="#6B6660" stroke="#3F3A35" stroke-width=".8"'); for(let i = 1; i < 5; i++) R(0.1, i * P / 5, W - 0.1, i * P / 5, 'stroke="#B7B0A6" stroke-width=".5"'); break;
+      case 'arvore': { const [cx, cy] = [(q.x0 + q.x1) / 2, (q.y0 + q.y1) / 2], rr = Math.min(q.x1 - q.x0, q.y1 - q.y0) / 2;
+        c(cx + 0.12, cy + 0.15, rr, 'fill="#3F5A2A" fill-opacity=".18"'); c(cx, cy, rr, 'fill="#8DB36A" stroke="#5E7D3A" stroke-width=".8"'); c(cx - rr * 0.25, cy - rr * 0.25, rr * 0.45, 'fill="#A9C987" fill-opacity=".8"'); break; }
+      default: R(0, 0, W, P, 'rx="1.5" ' + BR);
+    }
+    o.push('</g>');
+  }
+  return o.join('');
+}
+
 function planta(v, idx, op){
   op = op || {};
   const p = v.pav[idx];
@@ -119,6 +212,10 @@ function planta(v, idx, op){
   const aberto = s => !!T[s.tipo].aberto;
   // no subsolo o desenho mostra só rampa, vagas, escada/elevador e jardim; o resto é piso neutro
   const ehSub = p.nome==='Subsolo', MOSTRA = new Set(['rampa','garagem','escada','elevador','jardim']);
+  // humanizada: pisos com textura, paredes de 10/15 cm, móveis, vegetação e sombra; o subsolo mantém as cores técnicas
+  const hum = op.estilo === 'humanizada' && !!Mobilia, hz = hum ? 'hz' + (++HZN) + '_' : '';
+  const WI = hum ? PAREDE_INT : 3.2, WE = hum ? PAREDE_EXT : 6;
+  if(hum) o.push(hzDefs(hz));
   const oculto = s => false;
 
   // terreno: lote, área edificável e rua
@@ -133,7 +230,7 @@ function planta(v, idx, op){
     o.push(`<text x="${X(Math.min(...p.base.map(b=>b.x0)))}" y="${Y(Math.max(...p.base.map(b=>b.y1))) + 12}" style="font-size:6.6px;fill:#7B828C">pavimento de baixo (esmaecido)</text>`); }
   // pátios (H)
   if(idx===v.pav.findIndex(q => q.nome==='Térreo') && v.patios) for(const pt of v.patios) if(pt.y1-pt.y0>0.5)
-    o.push(`<rect x="${X(pt.x0)}" y="${Y(pt.y0)}" width="${((pt.x1-pt.x0)*K).toFixed(1)}" height="${((pt.y1-pt.y0)*K).toFixed(1)}" fill="${COR.patio[0]}" stroke="${COR.patio[1]}"><title>Pátio</title></rect>`);
+    o.push(`<rect x="${X(pt.x0)}" y="${Y(pt.y0)}" width="${((pt.x1-pt.x0)*K).toFixed(1)}" height="${((pt.y1-pt.y0)*K).toFixed(1)}" fill="${hum ? `url(#${hz}grama)` : COR.patio[0]}" stroke="${COR.patio[1]}"><title>Pátio</title></rect>`);
   // acessos por cima dos pátios (no H o caminho atravessa o pátio até a entrada)
   if(lo && p.nome==='Térreo') desenhaAcessos(v.acessos, X, Y, K, o);
   // pátios ingleses do subsolo
@@ -143,6 +240,11 @@ function planta(v, idx, op){
     o.push(vert ? `<text transform="translate(${cx+2.5},${cy}) rotate(-90)" class="rd" style="font-size:6.4px;font-weight:600">PÁTIO INGLÊS</text>` : `<text x="${cx}" y="${cy+2.5}" class="rd" style="font-size:6.4px;font-weight:600">PÁTIO INGLÊS</text>`);
   }
   // ambientes
+  if(hum && !ehSub){ const sb = [];
+    for(const s of S.filter(x => !aberto(x))) for(const e of Motor._interno.trechosExternos(s, S)){
+      const [x0, y0, x1, y1] = e.o==='h' ? [e.t0, e.c, e.t1, e.c] : [e.c, e.t0, e.c, e.t1];
+      sb.push(`<line x1="${X(x0) + 3}" y1="${Y(y0) + 4}" x2="${X(x1) + 3}" y2="${Y(y1) + 4}" stroke="#2B2F36" stroke-width="10"/>`); }
+    o.push(`<g filter="url(#${hz}sombra)" opacity=".28">${sb.join('')}</g>`); }
   // rampa: trecho no recuo frontal, desenhado em escala e tracejado
   if(p.rampaFora){ const rf = p.rampaFora;
     o.push(`<rect x="${X(rf.x0)}" y="${Y(rf.y0)}" width="${((rf.x1-rf.x0)*K).toFixed(1)}" height="${((rf.y1-rf.y0)*K).toFixed(1)}" fill="${SUB_COR.rampa[0]}" fill-opacity=".6" stroke="${SUB_COR.rampa[1]}" stroke-dasharray="4 3"><title>Rampa no recuo frontal: ${f2(rf.y1-rf.y0)} m</title></rect>`);
@@ -153,7 +255,7 @@ function planta(v, idx, op){
       o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="${c[0]}" stroke="${s.tipo==='hall' ? c[0] : c[1]}" stroke-width="${s.tipo==='rampa' ? 1.6 : 1}"${s.tipo==='manobra' ? ' stroke-dasharray="5 3"' : ''}><title>${esc(s.nome)}: ${f2(s.x1-s.x0)} × ${f2(s.y1-s.y0)} = ${f2(Motor.area(s))} m²</title></rect>`); continue; }
     if(oculto(s)){ o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="#ECEAE5" stroke="#ECEAE5" stroke-width="1"/>`); continue; }
     const c = COR[s.zona] || COR.apoio, a = Motor.area(s);
-    o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="${c[0]}" stroke="${c[1]}" stroke-width="1"><title>${esc(s.nome)}: ${f2(s.x1-s.x0)} × ${f2(s.y1-s.y0)} = ${f2(a)} m²</title></rect>`);
+    o.push(`<rect x="${X(s.x0)}" y="${Y(s.y0)}" width="${((s.x1-s.x0)*K).toFixed(1)}" height="${((s.y1-s.y0)*K).toFixed(1)}" fill="${hum ? `url(#${hz}${pisoDe(s.tipo)})` : c[0]}" stroke="${hum ? 'none' : c[1]}" stroke-width="1"><title>${esc(s.nome)}: ${f2(s.x1-s.x0)} × ${f2(s.y1-s.y0)} = ${f2(a)} m²</title></rect>`);
   }
   // banho acessível (opção de acessibilidade): giro de 1,50 m no centro
   for(const s of S.filter(x => x.acessivel)) o.push(`<circle cx="${X((s.x0+s.x1)/2)}" cy="${Y((s.y0+s.y1)/2)}" r="${(0.75*K).toFixed(1)}" fill="#9A5B45" fill-opacity=".06" stroke="#9A5B45" stroke-width="1" stroke-dasharray="4 3"><title>Banho acessível: giro de 1,50 m, transferência lateral à bacia e boxe de 0,90 × 0,95 m (NBR 9050)</title></circle>`);
@@ -189,7 +291,7 @@ function planta(v, idx, op){
       const rp = p.rampa, y0t = p.rampaFora ? p.rampaFora.y0 : s.y0;
       o.push(`<text transform="translate(${(X(s.x0)+X(s.x1))/2+3},${(Y(y0t)+Y(s.y1))/2}) rotate(-90)" class="rd" style="font-size:7px;font-weight:600">RAMPA ${s.inclinacao||20}% · ${rp ? f2(rp.L) + ' m' : ''}${rp && rp.Lout > 0.05 ? ' (' + f2(rp.Lout) + ' no recuo)' : ''}</text>`);
     }
-    if(['suite','master','quarto'].includes(s.tipo) && w >= 2.6 - 0.005 && h >= 2.6 - 0.005){   // folga: 2,60 m chega como 2,5999…
+    if(!hum && ['suite','master','quarto'].includes(s.tipo) && w >= 2.6 - 0.005 && h >= 2.6 - 0.005){   // folga: 2,60 m chega como 2,5999…
       const dupla = s.tipo!=='quarto', bw = dupla ? (s.tipo==='master'?1.9:1.6) : 1.0, bl = 2.0;
       // cabeceira na parede mais longa que não seja do corredor: centraliza
       const horiz = w >= h;
@@ -233,6 +335,7 @@ function planta(v, idx, op){
                   : `<text x="${cx.toFixed(1)}" y="${(cy - 5).toFixed(1)}" class="rn" style="font-size:${fs}px;fill:${AZ};paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px">${txt}</text>`);
     }
   }
+  if(hum && !ehSub) o.push(hzMoveis(Mobilia.pavimento(p), X, Y));
   // paredes internas e vãos livres
   const livres = (p.vaos||[]).filter(e => e.livre);
   for(let i=0;i<S.length;i++) for(let j=i+1;j<S.length;j++){
@@ -241,8 +344,8 @@ function planta(v, idx, op){
     if(aberto(a) && aberto(b)) continue;
     const e = {o:sh.o, c:sh.c, t0:sh.t0, t1:sh.t1};
     if(livres.some(l => l.o===e.o && Math.abs(l.c-e.c)<0.001 && l.t0<=e.t0+0.001 && l.t1>=e.t1-0.001)) { seg(e, '#B7BAC2', .8, 'stroke-dasharray="3 3"'); continue; }
-    if(aberto(a) || aberto(b)) { seg(e, PAREDE, 6, 'stroke-linecap="square"'); continue; }
-    seg(e, PAREDE, 3.2, 'stroke-linecap="square"');
+    if(aberto(a) || aberto(b)) { seg(e, PAREDE, WE, 'stroke-linecap="square"'); continue; }
+    seg(e, PAREDE, WI, 'stroke-linecap="square"');
   }
   // fachada
   const fech = S.filter(s => !aberto(s));
@@ -251,15 +354,15 @@ function planta(v, idx, op){
     const d = p.dim, x0 = d.x0||0, y0 = d.y0||0, x1 = x0 + d.W, y1 = y0 + d.D;
     const rp = S.find(s => s.tipo==='rampa');
     const frente = rp ? [[x0, rp.x0], [rp.x1, x1]] : [[x0, x1]];
-    for(const [a0,a1] of frente) if(a1 - a0 > 0.05) seg({o:'h', c:y0, t0:a0, t1:a1}, PAREDE, 6, 'stroke-linecap="square"');
-    seg({o:'h', c:y1, t0:x0, t1:x1}, PAREDE, 6, 'stroke-linecap="square"');
-    seg({o:'v', c:x0, t0:y0, t1:y1}, PAREDE, 6, 'stroke-linecap="square"');
-    seg({o:'v', c:x1, t0:y0, t1:y1}, PAREDE, 6, 'stroke-linecap="square"');
+    for(const [a0,a1] of frente) if(a1 - a0 > 0.05) seg({o:'h', c:y0, t0:a0, t1:a1}, PAREDE, WE, 'stroke-linecap="square"');
+    seg({o:'h', c:y1, t0:x0, t1:x1}, PAREDE, WE, 'stroke-linecap="square"');
+    seg({o:'v', c:x0, t0:y0, t1:y1}, PAREDE, WE, 'stroke-linecap="square"');
+    seg({o:'v', c:x1, t0:y0, t1:y1}, PAREDE, WE, 'stroke-linecap="square"');
     const jd = S.find(s => s.tipo==='jardim'); if(jd) for(const e of Motor._interno.trechosExternos(jd, S)) seg(e, '#5E7D3A', 1.3, 'stroke-dasharray="4 3"');
   } else for(const s of S){
     for(const e of Motor._interno.trechosExternos(s, S)){
       if(aberto(s)) seg(e, '#C8B08A', 1.3, 'stroke-dasharray="4 3"');
-      else seg(e, PAREDE, 6, 'stroke-linecap="square"');
+      else seg(e, PAREDE, WE, 'stroke-linecap="square"');
     }
   }
   if(p.nome==='Térreo' && v.acessos) for(const r of v.acessos.vias.filter(r => r.tipo==='garagem')){
@@ -320,7 +423,7 @@ function planta(v, idx, op){
     if(pw < 34 || ph < 18){ if(pw >= 22 && ph >= 12) o.push(`<text x="${cx}" y="${cy+2.5}" class="rd" style="font-size:5.6px">${f2(a)}</text>`); continue; }
     const big = pw >= 70 && ph >= 34;
     const fs = big ? 8.2 : 6.4;
-    const sub = big ? `${f2(w)} × ${f2(h)} · ${f2(a)} m²` : `${f2(a)} m²`;
+    const sub = big && !hum ? `${f2(w)} × ${f2(h)} · ${f2(a)} m²` : `${f2(a)} m²`;
     const bw = Math.min(pw-4, Math.max(nome.length*fs*0.66, sub.length*(big?3.7:3.4)) + 8);
     o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(cy-fs-2).toFixed(1)}" width="${bw.toFixed(1)}" height="${(fs+12).toFixed(1)}" rx="2" fill="#FFFFFF" fill-opacity=".8"/>`);
     o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${fs}px">${nome}<tspan x="${cx}" dy="8.5" class="rd" style="font-size:${big?6.6:5.8}px;font-weight:400">${sub}</tspan></text>`);

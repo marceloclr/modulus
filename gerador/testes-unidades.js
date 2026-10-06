@@ -589,6 +589,17 @@ t('mobília: subsolo sem móveis e varanda com mesa externa', () => {
   ok(MOB.pavimento(pavMao([{id:1, tipo:'varanda', nome:'Varanda', zona:'varanda', x0:0, y0:0, x1:6, y1:2}])).some(x => x.tipo === 'mesa-externa'), 'varanda sem mesa');
 });
 
+t('humanizada: pisos, paredes em escala, móveis e técnica intacta', () => {
+  const D = require('./desenho.js'), v = M.gerar({frente:12, fundo:30, quartos:3, suites:2}).variantes[0];
+  const h = D.planta(v, 0, {estilo:'humanizada'}), tec = D.planta(v, 0);
+  ok(/<pattern id="hz\d+_madeira"/.test(h) && /url\(#hz\d+_madeira\)/.test(h), 'piso de madeira nos quartos');
+  ok(/stroke-width="4.5"/.test(h) && /stroke-width="3"/.test(h), 'paredes de 15 e 10 cm (4,5 e 3 px)');
+  ok(/<title>Cama /.test(h) && /<title>Bacia sanitária /.test(h), 'cama e bacia desenhadas');
+  ok(!/<pattern/.test(tec) && !/<title>Cama /.test(tec), 'sem a opção, a planta técnica não muda');
+  const ids = [...h.matchAll(/<pattern id="(hz\d+_)/g)].map(m => m[1]), h2 = D.planta(v, 0, {estilo:'humanizada'});
+  ok(ids.length && !h2.includes('id="' + ids[0] + 'madeira"'), 'cada desenho com ids próprios');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

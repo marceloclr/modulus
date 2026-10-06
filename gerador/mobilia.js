@@ -225,7 +225,7 @@ function jantar(ctx){
   const a = (ctx.R.x1 - ctx.R.x0) * (ctx.R.y1 - ctx.R.y0);
   const tams = [[2.0, 1.0, 8], [1.6, 0.9, 6], [1.2, 0.8, 4], [0.9, 0.9, 4]].filter(t => t[2] <= (a >= 12 ? 8 : a >= 8 ? 6 : 4));
   for(const f of [0.75, 0.6, 0.45]) for(const [w, h, n] of tams){   // 0,45 atrás da cadeira = 0,90 m da borda da mesa à parede (mínimo usual)
-    const q = solta(ctx, 'mesa-jantar', [[w + 0.9 + (n > 4 ? 0.9 : 0), h + 0.9]], f, {lugares:n, mesa:[w, h]});
+    const q = solta(ctx, 'mesa-jantar', [[w + (n > 4 ? 0.9 : 0), h + 0.9]], f, {lugares:n, mesa:[w, h]});   // cadeiras nos lados compridos; nas pontas só com 6 ou 8
     if(q) return q;
   }
 }
