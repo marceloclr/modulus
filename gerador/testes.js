@@ -19,11 +19,11 @@ const CASOS = {
   'Subsolo com elevador e sobrado, 12 × 32': {frente:12, fundo:32, tipo:'sobrado', quartos:3, suites:2, subsolo:true, elevador:true, vagas:2},
   'U com subsolo, 22 × 34': {frente:22, fundo:34, formato:'U', quartos:3, suites:3, subsolo:true, vagas:3},
   'H com subsolo, 22 × 34': {frente:22, fundo:34, formato:'H', quartos:3, suites:3, subsolo:true, vagas:3},
-  'L com subsolo, 16 × 34': {frente:16, fundo:34, formato:'L', quartos:3, suites:2, subsolo:true, vagas:2},
+  'L com subsolo, 16 × 36': {frente:16, fundo:36, formato:'L', quartos:3, suites:2, subsolo:true, vagas:2},
   'Subsolo nos recuos laterais e de fundo, 10 × 25': {frente:10, fundo:25, tipo:'sobrado', quartos:4, suites:2, subsolo:true, vagas:2, subRecuos:'lateraisFundo'},
   'Subsolo em todos os recuos, 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, subsolo:true, vagas:3, subRecuos:'todos', subLazer:true},
   'Frente para o sul, torre de calor e rooftop no fundo, 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, orientacao:'S', torreCalor:true, rooftop:true, rtPos:'fundo', rtTerracoA:30, rtVarandaA:12},
-  'Programa grande demais, 8 × 20': {frente:8, fundo:20, quartos:6, suites:6, tv:true, escritorio:true, vagas:3},
+  'Programa grande demais, 8 × 20': {frente:8, fundo:20, quartos:6, suites:6, tv:true, escritorio:true, vagas:3, esperaVazio:true},
 };
 const E = 0.011;
 function sobrepoe(a, b){ return a.x0 < b.x1-E && b.x0 < a.x1-E && a.y0 < b.y1-E && b.y0 < a.y1-E; }
@@ -31,7 +31,8 @@ function rodar(){
   const out = []; let falhas = 0;
   for(const [nome, c] of Object.entries(CASOS)){
     const r = M.gerar(c), erros = [];
-    if(!r.variantes.length) erros.push('nenhuma variante');
+    if(!r.variantes.length && !c.esperaVazio) erros.push('nenhuma variante');
+    if(c.esperaVazio && r.variantes.length) erros.push('o programa não cabe: não deveria haver variante válida');
     for(const v of r.variantes){
       let esc = null;
       for(const p of v.pav){
