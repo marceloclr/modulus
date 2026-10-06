@@ -63,7 +63,7 @@ const PADRAO = {
   tipo:'terrea', formato:'auto', peDireito:3.0,
   quartos:3, suites:1, master:true, tamanho:'medio',
   banhosSociais:1, lavabo:false,
-  estar:true, jantar:true, tv:false, escritorio:false, escritorioAmpliado:false,
+  estar:true, estarTipo:'tradicional', jantar:true, tv:false, escritorio:false, escritorioAmpliado:false,
   cozinha:'aberta', servico:true, despensa:false,
   vagas:2, garagem:'coberta', varanda:true, varandaForma:'corrida', gourmet:false,
   varandaFundos:false, varandaFundosP:2, varandaFundosL:0,
@@ -123,7 +123,8 @@ function normaliza(p){
   if(q.vagas===0 && !q.subsolo) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
   if(q.varandaForma!=='L') q.varandaForma = 'corrida';
-  if(!q.escritorio) q.escritorioAmpliado = false;   // o ampliado é uma variação do escritório
+  if(!q.escritorio) q.escritorioAmpliado = false;
+  if(q.estarTipo !== 'tv') q.estarTipo = 'tradicional';   // F1.5: sala tradicional (sofás e poltrona) ou com TV (rack e sofá)   // o ampliado é uma variação do escritório
   // varanda de fundos (06/10/2026): profundidade 1,50 / 2,00 / 2,50 / 3,00 m; largura 0 = toda a fachada de fundos, ou 3 a 6 m
   q.varandaFundosP = [1.5, 2, 2.5, 3].includes(+q.varandaFundosP) ? +q.varandaFundosP : 2;
   q.varandaFundosL = [0, 3, 4, 5, 6].includes(+q.varandaFundosL) ? +q.varandaFundosL : 0;
@@ -2136,7 +2137,7 @@ function gerar(entrada, opts){
   if(!semPoente.length && validas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
-  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recX0:q.recX0, recX1:q.recX1, recFundo:q.recFundo}; v.acessos = acessos(v, q);
+  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); if(q.estarTipo === 'tv') v.estarTipo = 'tv'; v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recX0:q.recX0, recX1:q.recX1, recFundo:q.recFundo}; v.acessos = acessos(v, q);
     // acessos da versão espelhada: a casa vira no lugar e o lote não (com recuos diferentes, espelhar os acessos em torno do lote erraria)
     const ve = espelharCasa(v); v.acessosEsp = acessos(ve, q);
     if(v.acessos && v.acessos.portoes.some(p => p.junto)) v.avisos.push('A frente do lote não comporta portão social separado do portão de veículos; os dois ficam juntos.');

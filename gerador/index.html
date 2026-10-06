@@ -206,7 +206,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rampa-1:#4F6342;--rampa-2:#7E9A6C;--rampa-3:#B4CDA3}}
 :root[data-theme="dark"]{--rampa-1:#4F6342;--rampa-2:#7E9A6C;--rampa-3:#B4CDA3}
 /* vista da planta (etapa F1): dois botões colados */
-.seg-vista{display:inline-flex}.seg-vista .btn{border-radius:0}.seg-vista .btn:first-child{border-radius:10px 0 0 10px}.seg-vista .btn+.btn{border-radius:0 10px 10px 0;margin-left:-1px}
+.seg-vista{display:inline-flex}.seg-vista .btn{border-radius:0}.seg-vista .btn:first-child{border-radius:10px 0 0 10px}.seg-vista .btn+.btn{margin-left:-1px}.seg-vista .btn:last-child{border-radius:0 10px 10px 0}
 @media (max-width:899px){
   .gen aside.sb{position:static;transform:none;height:auto;width:auto;box-shadow:none;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px}
   .gen main{padding:20px 16px 48px}
@@ -333,6 +333,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="chk"><input type="checkbox" name="estar">Sala de estar</label>
         <label class="chk"><input type="checkbox" name="jantar">Sala de jantar</label>
         <label class="chk"><input type="checkbox" name="tv">Sala de TV</label>
+        <label class="fld" id="estarTipoOps" data-tip="Tradicional: sofás de 3 e 2 lugares e poltrona em volta da mesa de centro. Com TV: rack com a televisão e sofá de frente">Sala de estar<select name="estarTipo"><option value="tradicional">Tradicional (sofás e poltrona)</option><option value="tv">Com TV</option></select></label>
         <label class="chk"><input type="checkbox" name="escritorio">Escritório</label>
         <label class="chk" id="escAmpOps" data-tip="Escritório de 14 m² na frente da casa, com porta própria para a rua (ou para a varanda) e porta para dentro; o caminho do portão chega até ele"><input type="checkbox" name="escritorioAmpliado">Escritório ampliado, com porta para a rua</label>
         <label class="fld">Cozinha<select name="cozinha"><option value="aberta">Aberta para o jantar</option><option value="fechada">Fechada</option></select></label>
@@ -457,7 +458,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
       <div class="tabs" id="vtabs" role="tablist" aria-label="Variantes"></div>
       <div class="tabs" id="ptabs" role="tablist" aria-label="Pavimentos"></div>
       <div class="fig-tools" style="justify-content:flex-start">
-        <span class="seg-vista" role="group" aria-label="Vista da planta"><button class="btn" type="button" id="vistaHum" data-vista="humanizada" aria-pressed="true" data-tip="Planta com pisos, móveis e paredes em escala: a casa como ela vai ficar">Humanizada</button><button class="btn" type="button" id="vistaTec" data-vista="tecnica" aria-pressed="false" data-tip="Planta técnica: cores por zona, medidas de cada cômodo e cama mínima">Técnica</button></span>
+        <span class="seg-vista" role="group" aria-label="Vista da planta"><button class="btn" type="button" id="vistaHum" data-vista="humanizada" aria-pressed="true" data-tip="Planta com pisos, móveis e paredes em escala: a casa como ela vai ficar">Humanizada</button><button class="btn" type="button" id="vistaTec" data-vista="tecnica" aria-pressed="false" data-tip="Planta técnica: cores por zona, medidas de cada cômodo e cama mínima">Técnica</button><button class="btn" type="button" id="vistaApr" data-vista="apresentacao" aria-pressed="false" data-tip="Só a casa, humanizada, sem lote, cotas, rosa dos ventos e setas de vento: para apresentar">Apresentação</button></span>
         <button class="btn" type="button" id="espelhar" aria-pressed="false" data-tip="Inverte a planta da esquerda para a direita">Espelhar</button>
         <button class="btn" type="button" id="baixarSvg" data-tip="Baixa o pavimento atual em SVG">Baixar SVG</button>
         <button class="btn" type="button" id="baixarPng" data-tip="Baixa o pavimento atual em PNG (2×)">Baixar PNG</button>
@@ -553,6 +554,8 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
 
 <script src="motor.js"></script>
 <script src="mobilia.js"></script>
+<script src="simbolos.js"></script>
+<script src="texturas.js"></script>
 <script src="desenho.js"></script>
 <script src="estado.js"></script>
 <script src="estrutura.js"></script>
@@ -581,9 +584,9 @@ const form = document.getElementById('form'), f2 = Motor.f2, est = Estado.criar(
 let dadosCusto = null, historicoCusto = null, sinapiVivo = null;
 // vista do gráfico de custo: conveniência deste navegador
 // vista da planta: humanizada (padrão, etapa F1) ou técnica; a escolha fica neste navegador
-let vistaPlanta = 'humanizada'; try{ const sv = localStorage.getItem('plantas-vista'); if(sv === 'tecnica' || sv === 'humanizada') vistaPlanta = sv; }catch(e){}
+let vistaPlanta = 'humanizada'; try{ const sv = localStorage.getItem('plantas-vista'); if(['tecnica','humanizada','apresentacao'].includes(sv)) vistaPlanta = sv; }catch(e){}
 window.plantasVistaPlanta = () => vistaPlanta;
-const opPlanta = extra => Object.assign({estilo: vistaPlanta === 'tecnica' ? undefined : 'humanizada'}, extra || {});
+const opPlanta = extra => Object.assign({estilo: vistaPlanta === 'tecnica' ? undefined : 'humanizada', apresentacao: vistaPlanta === 'apresentacao' || undefined}, extra || {});
 function marcaVista(){ for(const b of document.querySelectorAll('.seg-vista .btn')) b.setAttribute('aria-pressed', b.dataset.vista === vistaPlanta ? 'true' : 'false');
   const lz = document.getElementById('legendaZonas'); if(lz) lz.hidden = vistaPlanta !== 'tecnica'; }
 let vistaCusto = 'parcelas'; try{ vistaCusto = localStorage.getItem('plantas-vista-custo') || 'parcelas'; }catch(e){}
@@ -630,6 +633,7 @@ function sincroniza(){
   document.getElementById('varOps').hidden = !form.elements.varanda.checked;
   document.getElementById('varFundOps').hidden = !form.elements.varandaFundos.checked;
   document.getElementById('escAmpOps').hidden = !form.elements.escritorio.checked;
+  document.getElementById('estarTipoOps').hidden = !form.elements.estar.checked;
   const sub = form.elements.subsolo.checked, gl = form.elements.garagemLocal;
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
   if(!sub) gl.value = 'terreo';

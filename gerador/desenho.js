@@ -1,7 +1,8 @@
 /* Desenho das variantes geradas pelo motor: planta humanizada em SVG (estilo de casa-h/gerar.js) e implantação no lote. */
 (function(root, factory){
-  if(typeof module==='object'&&module.exports) module.exports=factory(require('./motor.js'), require('./mobilia.js')); else root.Desenho=factory(root.Motor, root.Mobilia);
-})(this, function(Motor, Mobilia){
+  if(typeof module==='object'&&module.exports) module.exports=factory(require('./motor.js'), require('./mobilia.js'), require('./simbolos.js'), require('./texturas.js'));
+  else root.Desenho=factory(root.Motor, root.Mobilia, root.Simbolos, root.Texturas);
+})(this, function(Motor, Mobilia, Simbolos, Texturas){
 'use strict';
 const K = 30;
 const f2 = Motor.f2;
@@ -209,7 +210,7 @@ function planta(v, idx, op){
   const L = v.lote; let lo = null;
   if(L){ const ed = p.anexo ? (v.anexos||[]).find(a => a.tipo==='edicula') : null;
     const ox = ed ? ed.x0 : v.x0, oy = ed ? ed.y0 : v.y0;
-    if(ox !== undefined){ lo = {x0:-ox, y0:-oy, x1:L.frente-ox, y1:L.fundo-oy, rf:L.recFrente, rl:L.recX0 !== undefined ? L.recX0 : L.recLat, rr:L.recX1 !== undefined ? L.recX1 : L.recLat, rb:L.recFundo}; extras.push(lo); } }
+    if(ox !== undefined && !op.apresentacao){ lo = {x0:-ox, y0:-oy, x1:L.frente-ox, y1:L.fundo-oy, rf:L.recFrente, rl:L.recX0 !== undefined ? L.recX0 : L.recLat, rr:L.recX1 !== undefined ? L.recX1 : L.recLat, rb:L.recFundo}; extras.push(lo); } }
   const mx0 = Math.min(0, ...pocos.map(q => q.x0), ...S.map(q => q.x0), ...extras.map(q => q.x0 - 1.6)), my0 = Math.min(0, ...pocos.map(q => q.y0), ...S.map(q => q.y0), ...extras.map(q => q.y0 - 1.2));
   const OX = 70 - mx0*K + (mx0<0 ? 12 : 0), OY = 96 - my0*K;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
@@ -225,7 +226,7 @@ function planta(v, idx, op){
   // humanizada: pisos com textura, paredes de 10/15 cm, móveis, vegetação e sombra; o subsolo mantém as cores técnicas
   const hum = op.estilo === 'humanizada' && !!Mobilia, hz = hum ? 'hz' + (++HZN) + '_' : '';
   const WI = hum ? PAREDE_INT : 3.2, WE = hum ? PAREDE_EXT : 6;
-  if(hum) o.push(hzDefs(hz));
+  if(hum) o.push(Simbolos ? Simbolos.defs(hz, Texturas) : hzDefs(hz));   // F1.5: símbolos e texturas das referências
   const oculto = s => false;
 
   // terreno: lote, área edificável e rua
@@ -345,8 +346,8 @@ function planta(v, idx, op){
                   : `<text x="${cx.toFixed(1)}" y="${(cy - 5).toFixed(1)}" class="rn" style="font-size:${fs}px;fill:${AZ};paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px">${txt}</text>`);
     }
   }
-  const pecasHum = hum && !ehSub ? Mobilia.pavimento(p) : [];
-  if(pecasHum.length) o.push(hzMoveis(pecasHum, X, Y));
+  const pecasHum = hum && !ehSub ? Mobilia.pavimento(p, {estarTipo: op.estarTipo || v.estarTipo}) : [];
+  if(pecasHum.length) o.push(Simbolos ? pecasHum.map(q => Simbolos.peca(q, X, Y, K, hz)).join('') : hzMoveis(pecasHum, X, Y));
   // paredes internas e vãos livres
   const livres = (p.vaos||[]).filter(e => e.livre);
   for(let i=0;i<S.length;i++) for(let j=i+1;j<S.length;j++){
@@ -444,11 +445,12 @@ function planta(v, idx, op){
         && !ps.some(r => x - bw/2 < r.x1 && x + bw/2 > r.x0 && y - fs - 2 < r.y1 && y + 10 > r.y0);
       const c0 = [cx, cy], alvo = [[0,0],[0,-.25],[0,.25],[-.25,0],[.25,0],[0,-.35],[0,.35],[-.32,0],[.32,0],[-.25,-.25],[.25,-.25],[-.25,.25],[.25,.25]].map(([dx, dy]) => [c0[0] + dx*pw, c0[1] + dy*ph]).find(([x, y]) => livre(x, y));
       if(alvo){ cx = +alvo[0].toFixed(1); cy = +alvo[1].toFixed(1); } }
+    if(hum && Simbolos){ const nm = esc(s.nome || ''); o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${big ? 8.6 : 7}px;fill:#3A3733;paint-order:stroke;stroke:#F8F6F2;stroke-width:2.4px;letter-spacing:0">${nm}<tspan x="${cx}" dy="${big ? 10 : 8.5}" style="font-size:${big ? 7.4 : 6.2}px;font-weight:400;fill:#6B655D">${sub}</tspan></text>`); continue; }
     o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(cy-fs-2).toFixed(1)}" width="${bw.toFixed(1)}" height="${(fs+12).toFixed(1)}" rx="2" fill="#FFFFFF" fill-opacity=".8"/>`);
     o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${fs}px">${nome}<tspan x="${cx}" dy="8.5" class="rd" style="font-size:${big?6.6:5.8}px;font-weight:400">${sub}</tspan></text>`);
   }
   // cotas
-  const cota = (a0, a1, pos, t, vert) => {
+  const cota = (a0, a1, pos, t, vert) => { if(op.apresentacao) return;   // vista Apresentação: sem cotas
     if(!vert){ line(a0, pos, a1, pos, '#55595F', .7); for(const a of [a0,a1]) line(a, pos-.12, a, pos+.12, '#55595F', .7);
       o.push(`<text x="${((X(a0)+X(a1))/2).toFixed(1)}" y="${Y(pos)-3}" class="cota">${t}</text>`); }
     else { line(pos, a0, pos, a1, '#55595F', .7); for(const a of [a0,a1]) line(pos-.12, a, pos+.12, a, '#55595F', .7);
@@ -479,8 +481,8 @@ function planta(v, idx, op){
 <text x="20" y="30" class="tt">${esc(titulo)}</text>
 <text x="20" y="46" class="st">${esc(sub)}${F ? ' · planta girada: norte para cima' : ''}</text>
 ${gg.g}
-${rosa(LW - 62, 110, 26, rumoP)}
-${ventoSetas(20 + gg.Wr, 64, gg.Hr)}
+${op.apresentacao ? '' : rosa(LW - 62, 110, 26, rumoP)}
+${op.apresentacao ? '' : ventoSetas(20 + gg.Wr, 64, gg.Hr)}
 ${fora.length ? `<g transform="translate(20,${LH - 14})">${fora.join('')}</g>` : ''}
 </svg>`;
 }

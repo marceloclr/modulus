@@ -78,7 +78,7 @@ function contexto(s, p){
   const RU = {...R};
   for(const l of LADOS){ const [a, b] = extensao(s, l); if(livre[l] > (b - a) / 2){ if(l === 'x0') RU.x0 -= 1.2; if(l === 'x1') RU.x1 += 1.2; if(l === 'y0') RU.y0 -= 1.2; if(l === 'y1') RU.y1 += 1.2; } }
   const portas = zonasPortas(s, p);
-  return {s, p, R, RU, ab, jan, livre, proib:portas, portas, pecas:[], usos:[]};
+  return {s, p, R, RU, ab, jan, livre, proib:portas, portas, pecas:[], usos:[], decor:[]};
 }
 
 /* Trechos de parede contínua (sem portas nem vãos; sem janela baixa se alto) num lado, recortados ao retângulo interno. */
@@ -141,6 +141,26 @@ function solta(ctx, tipo, tamanhos, f, extra){
   return null;
 }
 
+/* Tapete (F1.5): retângulo r ampliado por m nos lados pedidos, recortado ao cômodo; desiste se pegar a faixa de uma porta. */
+function tapete(ctx, r, m){
+  for(const k of [1, 0.6, 0.3]){
+    const c = {x0:Math.max(ctx.R.x0 + 0.1, r.x0 - m.x0*k), x1:Math.min(ctx.R.x1 - 0.1, r.x1 + m.x1*k), y0:Math.max(ctx.R.y0 + 0.1, r.y0 - m.y0*k), y1:Math.min(ctx.R.y1 - 0.1, r.y1 + m.y1*k)};
+    if(c.x1 - c.x0 < 1 || c.y1 - c.y0 < 1) return null;
+    if(!ctx.proib.some(z => sobrepoe(c, z))){ const q = {sala:ctx.s.id, tipo:'tapete', x0:r2(c.x0), y0:r2(c.y0), x1:r2(c.x1), y1:r2(c.y1), lado:'y0', decor:true}; ctx.decor.push(q); return q; }
+  }
+  return null;
+}
+/* Planta em vaso num canto livre (F1.5). */
+const planta = ctx => naParede(ctx, 'vaso', [0.5], 0.5, 0, {nota:() => 0});
+/* Converte um retângulo local de um bloco encostado no lado l (u ao longo da parede, v para dentro) em retângulo global. */
+function doBloco(b, l, u0, v0, u1, v1){
+  const p = (u, v) => l === 'y0' ? [b.x0 + u, b.y0 + v] : l === 'y1' ? [b.x1 - u, b.y1 - v] : l === 'x0' ? [b.x0 + v, b.y1 - u] : [b.x1 - v, b.y0 + u];
+  const [a, c] = [p(u0, v0), p(u1, v1)];
+  return {x0:Math.min(a[0], c[0]), x1:Math.max(a[0], c[0]), y0:Math.min(a[1], c[1]), y1:Math.max(a[1], c[1])};
+}
+/* Lado global que corresponde ao início (u0) e ao fim (u1) do bloco encostado em l. */
+const ladoU = (l, fim) => ({y0:['x0','x1'], y1:['x1','x0'], x0:['y1','y0'], x1:['y0','y1']})[l][fim ? 1 : 0];
+
 /* Normal (para dentro do cômodo) do lado l. */
 const normal = l => l === 'y0' ? [0, 1] : l === 'y1' ? [0, -1] : l === 'x0' ? [1, 0] : [-1, 0];
 const oposto = l => ({y0:'y1', y1:'y0', x0:'x1', x1:'x0'})[l];
@@ -178,7 +198,10 @@ function quarto(ctx){
   if(t === 'master') cama(ctx, [1.93, 1.6, 1.4], [2.03, 2.0, 1.9]);
   else if(t === 'suite' || (Math.min(w, h) >= 3.2 && a >= 11)) cama(ctx, [1.6, 1.4, 0.9], [2.0, 1.9, 1.9]);
   else cama(ctx, [0.9], [1.9]);
+  const cm = ctx.pecas.find(q => q.tipo === 'cama');
+  if(cm){ const l = cm.lado, m = {x0:0.5, x1:0.5, y0:0.5, y1:0.5}; m[l] = 0; tapete(ctx, cm, m); }   // tapete sob a cama, menos do lado da cabeceira
   if(!temCloset(ctx)) armario(ctx, [2.4, 2.0, 1.6, 1.2, 0.9]);
+  if(a >= 10) planta(ctx);
   if(t === 'quarto' && a >= 9) naParede(ctx, 'escrivaninha', [1.0, 0.8], 0.5, 0.7, {nota:(l, t0, t1) => janelaEm(ctx, l, t0, t1) ? 1 : 0});
 }
 function banho(ctx){
@@ -199,6 +222,30 @@ function cozinha(ctx){
 }
 function servico(ctx){ naParede(ctx, 'tanque', [0.6], 0.55, 0.6); naParede(ctx, 'maquina', [0.65], 0.65, 0.6); }
 function estar(ctx){
+  if(ctx.s.tipo === 'estar' && ctx.op.estarTipo !== 'tv' && estarTradicional(ctx)) return;
+  estarTV(ctx);
+}
+/* Sala tradicional: bloco encostado numa parede, com o sofá de 3 lugares no fundo, o de 2 lugares num lado, a poltrona no
+   outro e a mesa de centro no meio; tapete por baixo. Medidas usuais: sofá de 3 lugares 2,10 × 0,90 m, de 2 lugares
+   1,50 × 0,85 m, poltrona 0,80 × 0,80 m, mesa de centro 1,00 × 0,55 m. */
+function estarTradicional(ctx){
+  const notaB = (l, t0, t1) => { const [a, b] = extensao(ctx.R, l); return -Math.abs((t0 + t1)/2 - (a + b)/2) * 0.5 - (janelaEm(ctx, l, t0, t1) ? 1.5 : 0) - ctx.livre[l] * 0.5; };
+  for(const [W, P] of [[3.6, 3.0], [3.2, 2.9], [2.9, 2.7]]){
+    const b = naParede(ctx, 'grupo-estar', [W], P, 0.4, {canto:false, nota:notaB}); if(!b) continue;
+    const l = b.lado; ctx.pecas.splice(ctx.pecas.indexOf(b), 1);
+    ctx.usos.push({x0:b.x0, y0:b.y0, x1:b.x1, y1:b.y1});   // o miolo da sala fica livre para circular
+    const s3 = Math.min(2.1, W - 1.0), u3 = (W - s3)/2;
+    poe(ctx, 'sofa', doBloco(b, l, u3, 0, u3 + s3, 0.9), [], l, {w:s3, lugares:3});
+    poe(ctx, 'sofa', doBloco(b, l, 0, 1.0, 0.85, Math.min(P, 2.55)), [], ladoU(l, false), {lugares:2});
+    poe(ctx, 'poltrona', doBloco(b, l, W - 0.8, 1.15, W, 1.95), [], ladoU(l, true));
+    poe(ctx, 'mesa-centro', doBloco(b, l, W/2 - 0.5, 1.25, W/2 + 0.5, 1.8), [], l);
+    tapete(ctx, doBloco(b, l, 0.45, 0.6, W - 0.45, P - 0.2), {x0:0, x1:0, y0:0, y1:0});
+    planta(ctx);
+    return true;
+  }
+  return false;
+}
+function estarTV(ctx){
   const R = ctx.R;
   const notaRack = (l, t0, t1) => { const [a, b] = extensao(ctx.R, l); return -Math.abs((t0 + t1)/2 - (a + b)/2) - (janelaEm(ctx, l, t0, t1) ? 2 : 0) - ctx.livre[l] * 0.5; };
   // paredes na ordem de preferência para o rack; se o sofá não couber na frente, tenta a parede seguinte
@@ -216,6 +263,8 @@ function estar(ctx){
       poe(ctx, 'sofa', corpo, [vista], oposto(l), {w:sw});
       if(dd >= 1.4){ const m0 = 0.45 + dd/2 - 0.25, mesa = faixa(R, l, tm - 0.45, tm + 0.45, m0, m0 + 0.5);   // mesa de centro no meio da vista, se não pegar porta
         if(!ctx.proib.some(z => sobrepoe(mesa, z))){ ctx.usos.pop(); poe(ctx, 'mesa-centro', mesa, [], l); ctx.usos.push(vista); } }
+      tapete(ctx, faixa(R, l, tm - sw/2 - 0.2, tm + sw/2 + 0.2, 0.75, p0 + 0.6), {x0:0, x1:0, y0:0, y1:0});
+      if((R.x1 - R.x0) * (R.y1 - R.y0) >= 10) planta(ctx);
       return;
     }
     ctx.pecas.splice(ctx.pecas.indexOf(rack), 1);   // sem sofá, o rack sai desta parede
@@ -226,7 +275,7 @@ function jantar(ctx){
   const tams = [[2.0, 1.0, 8], [1.6, 0.9, 6], [1.2, 0.8, 4], [0.9, 0.9, 4]].filter(t => t[2] <= (a >= 12 ? 8 : a >= 8 ? 6 : 4));
   for(const f of [0.75, 0.6, 0.45]) for(const [w, h, n] of tams){   // 0,45 atrás da cadeira = 0,90 m da borda da mesa à parede (mínimo usual)
     const q = solta(ctx, 'mesa-jantar', [[w + (n > 4 ? 0.9 : 0), h + 0.9]], f, {lugares:n, mesa:[w, h]});   // cadeiras nos lados compridos; nas pontas só com 6 ou 8
-    if(q) return q;
+    if(q){ if(a >= 9) planta(ctx); return q; }
   }
 }
 function escritorio(ctx){
@@ -262,17 +311,18 @@ const PROG = {quarto, suite:quarto, master:quarto, banhoSuite:banho, banhoMaster
   despensa:prateleiras, deposito:prateleiras, rouparia:prateleiras, jardim};
 
 /* Peças de um pavimento: [{sala, tipo, x0, y0, x1, y1, lado, ...}]. O subsolo não recebe mobília (desenho técnico). */
-function pavimento(p){
+function pavimento(p, op){
   if(!p || p.nome === 'Subsolo') return [];
-  const out = [];
+  const out = [], dec = [];
   for(const s of p.salas){
     const f = PROG[s.tipo]; if(!f) continue;
-    const ctx = contexto(s, p);
+    const ctx = contexto(s, p); ctx.op = op || {};
     if(ctx.R.x1 - ctx.R.x0 < 0.5 || ctx.R.y1 - ctx.R.y0 < 0.5) continue;
     f(ctx);
     for(const q of ctx.pecas){ delete q._t; out.push(q); }
+    dec.push(...ctx.decor);
   }
-  return out;
+  return dec.concat(out);   // tapetes primeiro: ficam por baixo dos móveis
 }
 
 return {pavimento, zonasPortas, meiasParedes, PAREDE_INT, PAREDE_EXT, FOLGA_PORTA, _interno:{contexto, ladoDe}};
