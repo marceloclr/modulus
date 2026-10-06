@@ -737,6 +737,28 @@ t('pé-direito: custo da parede a mais (estimativa), sombra e volume da torre', 
     ok(hmax(alto) > hmax(baixo), 'sala alta faz sombra mais alta'); }
 });
 
+// ---------- edição direta (etapa J) ----------
+t('edição: parede interna, recusas, troca de cômodos e parede externa', () => {
+  const Ed = require('./edicao.js'), AU = require('./auditoria.js');
+  const r = M.gerar({orientacao:'SE'}), v = r.variantes[0], T = v.pav[0];
+  const est = T.salas.find(s => s.tipo === 'estar'), jan = T.salas.find(s => s.tipo === 'jantar'), x = est.x1;
+  let e = Ed.aplicar(v, [{op:'parede', pav:'Térreo', o:'v', c:x, t:(est.y0 + est.y1)/2, d:0.5}], r.entrada);
+  const e0 = e.v.pav[0];
+  igual([e0.salas.find(s => s.tipo === 'estar').x1, e0.salas.find(s => s.tipo === 'jantar').x0], [Math.round((x + 0.5)*100)/100, Math.round((x + 0.5)*100)/100], 'parede movida 0,50 m:');
+  ok(e0.portas && e0.portas.length && e.v.quadro && e.v.editada === 1, 'reavaliada (portas e quadro)');
+  ok(!AU.auditar(e.v, r.entrada).some(z => AU.REGRAS[z.regra].limite === 0), 'auditoria firme limpa depois da edição');
+  igual(T.salas.find(s => s.tipo === 'estar').x1, x, 'a variante original não muda:');
+  ok(/sumiria/.test(Ed.aplicar(v, [{op:'parede', pav:'Térreo', o:'v', c:x, t:(est.y0 + est.y1)/2, d:3}], r.entrada).puladas[0].motivo), 'recusa: cômodo sumiria');
+  const q = T.salas.find(s => s.tipo === 'quarto'), ms = T.salas.find(s => s.tipo === 'master');
+  ok(/suíte/.test(Ed.aplicar(v, [{op:'troca', pav:'Térreo', a:q.id, b:ms.id}], r.entrada).puladas[0].motivo), 'recusa: suíte não se separa');
+  e = Ed.aplicar(v, [{op:'troca', pav:'Térreo', a:est.id, b:jan.id}], r.entrada);
+  ok(!e.puladas.length && e.v.pav[0].salas.find(s => s.tipo === 'estar').x0 === jan.x0, 'troca estar e jantar');
+  e = Ed.aplicar(v, [{op:'parede', pav:'Térreo', o:'h', c:v.D, t:1, d:1}], r.entrada);
+  ok(e.v.D === Math.round((v.D + 1)*100)/100 && e.v.invalida.some(z => /recuos/.test(z)), 'parede externa: casa mais funda, fora da área edificável');
+  const esc = M.gerar({orientacao:'SE', tipo:'sobrado', quartos:3, suites:2}).variantes[0], ter = esc.pav.find(p => p.nome === 'Térreo'), es = ter.salas.find(s => s.tipo === 'escada');
+  if(es) ok(/não se move/.test(Ed.aplicar(esc, [{op:'parede', pav:'Térreo', o:'v', c:es.x1, t:(es.y0 + es.y1)/2, d:0.3}], M.normaliza({orientacao:'SE', tipo:'sobrado'})).puladas[0].motivo), 'escada travada');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

@@ -1693,6 +1693,8 @@ function avalia(v, q){
   pen += ori.vt.pen + ori.sl.pen; av.push(...ori.vt.av, ...ori.sl.av);
   if(v.espelharVento) av.push(RUMOS[q.orientacao] !== undefined ? 'A versão espelhada recebe melhor o vento de leste/sudeste e o sol; ela já aparece espelhada.' : 'A versão espelhada recebe melhor o vento de leste/sudeste; ela já aparece espelhada.');
   v.score = Math.max(0, Math.round(100 - pen));
+  // os avisos da avaliação ficam marcados (fora do JSON) para a edição direta separar os da geração (etapa J)
+  Object.defineProperty(v, '_avAval', {value:av.slice(), enumerable:false, configurable:true, writable:true});
   v.avisos = (v.avisos||[]).concat(av);
   v.invalida = invalidez(v, q, av);
   v.ocupacao = r2(taxa); v.projecao = r2(proj); v.circPct = r2(100*circ/tot);
@@ -1782,6 +1784,21 @@ function comPeDireito(v, q){
     }
   });
   for(const n of red) v.avisos.push(`${n}: pé-direito livre reduzido para ${f2(r2(q.peDireito - PD_LAJE))} m nos cômodos com pavimento em cima (piso a piso de ${f2(q.peDireito)} m menos 0,15 m de laje e forro).`);
+  return v;
+}
+
+/* Edição direta (etapa J): avisos da geração (montagem e acessos), sem os da avaliação e do pé-direito, que se refazem. */
+function avisosDeGeracao(v){ const av = new Set(v._avAval || []); return (v.avisos || []).filter(a => !av.has(a) && !/pé-direito livre reduzido|duplo no estar|forro muda de altura/.test(a)); }
+/* Reavalia uma variante editada com as mesmas regras da geração: portas, janelas, nota, validade, pé-direito, quadro e acessos.
+   Medidas da casa saem dos cômodos; se a largura mudar, a casa volta a ficar centrada na faixa edificável. */
+function reavaliar(v, q){
+  for(const p of v.pav){ delete p.portas; delete p.vaos; delete p.janelas; delete p.aberturasPor; for(const s of p.salas){ delete s.ilum; delete s.pd; delete s.duplo; } }
+  const casa = v.pav.filter(p => !p.anexo && p.nome !== 'Subsolo'), S = casa.flatMap(p => p.salas);
+  const W = r2(Math.max(...S.map(s => s.x1)) - Math.min(...S.map(s => s.x0))), D = r2(Math.max(...S.map(s => s.y1)));
+  if(Math.abs(W - v.W) > 0.001){ const B = r2(q.frente - q.recX0 - q.recX1); v.x0 = r2(q.recX0 + (B - W)/2); }
+  v.W = W; v.D = D;
+  avalia(v, q); comPeDireito(v, q); v.quadro = quadro(v);
+  v.acessos = acessos(v, q); v.acessosEsp = acessos(espelharCasa(v), q);
   return v;
 }
 
@@ -2261,5 +2278,5 @@ function loteMinimo(q0, P){
 // versão do motor (gravada nos arquivos de projeto): ano.mês.dia da última mudança de regra
 const VERSAO = '2026.10.06';
 
-return {VERSAO, gerar, espelharCasa, semEspelho, rooftopOpcoes, RT, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
+return {VERSAO, gerar, reavaliar, avisosDeGeracao, espelharCasa, semEspelho, rooftopOpcoes, RT, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
 });
