@@ -163,9 +163,10 @@ function desenhar(tudo){
   if(!v || !q){ pl.innerHTML = ''; pa.innerHTML = '<p class="note">Gere uma planta para ver a animação.</p>'; return; }
   if(Motor.RUMOS[q.orientacao] === undefined){ pl.innerHTML = ''; pa.innerHTML = '<p class="note">Informe para onde a frente do terreno está voltada (bloco 1, Terreno) para animar o sol e o vento sobre a casa.</p>'; return; }
   // a planta só é redesenhada quando muda a variante, o pavimento ou a aba
-  const chave = [v.nome, v.espelhada, E.pi, q.orientacao, E.aba, v.W, v.D, E.est ? E.est.janelas.length : 0].join('|');
+  const estilo = typeof window !== 'undefined' && window.plantasVistaPlanta && window.plantasVistaPlanta() === 'tecnica' ? undefined : 'humanizada';
+  const chave = [v.nome, v.espelhada, E.pi, q.orientacao, E.aba, v.W, v.D, E.est ? E.est.janelas.length : 0, estilo].join('|');
   if(chave !== E.chave){ E.chave = chave;
-    pl.innerHTML = Desenho.planta(v, E.pi, {camadaId:'svCamada', brises: E.aba === 'sol' && E.est ? E.est.janelas : undefined, titulo: E.aba === 'sol' ? 'Insolação' : 'Vento', sub: `${v.nome} · ${v.pav[E.pi].nome}`}); }
+    pl.innerHTML = Desenho.planta(v, E.pi, {estilo, camadaId:'svCamada', brises: E.aba === 'sol' && E.est ? E.est.janelas : undefined, titulo: E.aba === 'sol' ? 'Insolação' : 'Vento', sub: `${v.nome} · ${v.pav[E.pi].nome}`}); }
   const g = pl.querySelector('#svCamada'); if(!g) return;
   const T = {ox:+g.dataset.ox, oy:+g.dataset.oy, k:+g.dataset.k};
   if(E.aba === 'sol'){
