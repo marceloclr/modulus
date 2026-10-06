@@ -199,6 +199,8 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
 :root{--rampa-1:#9DB88A;--rampa-2:#5F7350;--rampa-3:#33422A}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rampa-1:#4F6342;--rampa-2:#7E9A6C;--rampa-3:#B4CDA3}}
 :root[data-theme="dark"]{--rampa-1:#4F6342;--rampa-2:#7E9A6C;--rampa-3:#B4CDA3}
+/* vista da planta (etapa F1): dois botões colados */
+.seg-vista{display:inline-flex}.seg-vista .btn{border-radius:0}.seg-vista .btn:first-child{border-radius:10px 0 0 10px}.seg-vista .btn+.btn{border-radius:0 10px 10px 0;margin-left:-1px}
 @media (max-width:899px){
   .gen aside.sb{position:static;transform:none;height:auto;width:auto;box-shadow:none;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px}
   .gen main{padding:20px 16px 48px}
@@ -439,13 +441,14 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
       <div class="tabs" id="vtabs" role="tablist" aria-label="Variantes"></div>
       <div class="tabs" id="ptabs" role="tablist" aria-label="Pavimentos"></div>
       <div class="fig-tools" style="justify-content:flex-start">
+        <span class="seg-vista" role="group" aria-label="Vista da planta"><button class="btn" type="button" id="vistaHum" data-vista="humanizada" aria-pressed="true" data-tip="Planta com pisos, móveis e paredes em escala: a casa como ela vai ficar">Humanizada</button><button class="btn" type="button" id="vistaTec" data-vista="tecnica" aria-pressed="false" data-tip="Planta técnica: cores por zona, medidas de cada cômodo e cama mínima">Técnica</button></span>
         <button class="btn" type="button" id="espelhar" aria-pressed="false" data-tip="Inverte a planta da esquerda para a direita">Espelhar</button>
         <button class="btn" type="button" id="baixarSvg" data-tip="Baixa o pavimento atual em SVG">Baixar SVG</button>
         <button class="btn" type="button" id="baixarPng" data-tip="Baixa o pavimento atual em PNG (2×)">Baixar PNG</button>
         <span class="salvar-banco"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto para o banco" maxlength="80"><button class="btn prim" type="button" id="salvarBanco" data-tip="Guarda esta variante no banco de projetos deste navegador">Salvar no banco</button><button class="btn" type="button" id="salvarArquivo" data-tip="Baixa o arquivo do projeto (programa, variante, resumo e custo) para guardar onde quiser">Salvar arquivo</button></span>
       </div>
       <div class="plan-box" id="plan"></div>
-      <div class="legenda-zonas" aria-label="Legenda de cores">
+      <div class="legenda-zonas" id="legendaZonas" aria-label="Legenda de cores">
         <span><i class="z-intimo"></i>Íntimo</span><span><i class="z-molhado"></i>Banhos e molhados</span><span><i class="z-social"></i>Social</span><span><i class="z-apoio"></i>Apoio e serviço</span><span><i class="z-circ"></i>Circulação</span><span><i class="z-garagem"></i>Garagem</span><span><i class="z-varanda"></i>Varandas e terraços</span><span><i class="z-patio"></i>Pátios e jardins</span>
       </div>
       <div id="avisos"></div>
@@ -491,6 +494,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
             <li>Janelas de cada cômodo em pontos distantes (ventilação cruzada), com área de 1/8 do piso para a luz.</li>
             <li>Escada reta com 2 × espelho + piso entre 0,63 e 0,65 m (Blondel); espelho até 0,18 m.</li>
             <li>Subsolo com o máximo de vagas (3,00 × 5,00 m), manobra contínua de 5 m, rampa em escala e jardim de inverno oposto à rampa; ventilação cruzada obrigatória.</li>
+            <li>Planta humanizada: móvel só onde cabe com folga. Nada na faixa de 0,60 m em frente às portas nem no arco da folha; cama com a cabeceira longe da porta; mesa de jantar com 0,75 m livres atrás das cadeiras (0,45 m no aperto); sofá de 1,60 a 3,20 m da TV; armário e geladeira nunca na frente de janela. Paredes desenhadas com 10 cm (internas) e 15 cm (externas).</li>
           </ul>
         </div>
         <div class="card tint" style="--c:var(--steel)">
@@ -529,6 +533,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
 <footer><div>Gerador experimental de estudos preliminares. Medidas pelo eixo das paredes, sem valor de projeto executivo.</div></footer>
 
 <script src="motor.js"></script>
+<script src="mobilia.js"></script>
 <script src="desenho.js"></script>
 <script src="estado.js"></script>
 <script src="estrutura.js"></script>
@@ -556,6 +561,12 @@ const form = document.getElementById('form'), f2 = Motor.f2, est = Estado.criar(
 // valores de custo (dados/custos.json); entram na avaliação estrutural e no card de custo
 let dadosCusto = null, historicoCusto = null, sinapiVivo = null;
 // vista do gráfico de custo: conveniência deste navegador
+// vista da planta: humanizada (padrão, etapa F1) ou técnica; a escolha fica neste navegador
+let vistaPlanta = 'humanizada'; try{ const sv = localStorage.getItem('plantas-vista'); if(sv === 'tecnica' || sv === 'humanizada') vistaPlanta = sv; }catch(e){}
+window.plantasVistaPlanta = () => vistaPlanta;
+const opPlanta = extra => Object.assign({estilo: vistaPlanta === 'tecnica' ? undefined : 'humanizada'}, extra || {});
+function marcaVista(){ for(const b of document.querySelectorAll('.seg-vista .btn')) b.setAttribute('aria-pressed', b.dataset.vista === vistaPlanta ? 'true' : 'false');
+  const lz = document.getElementById('legendaZonas'); if(lz) lz.hidden = vistaPlanta !== 'tecnica'; }
 let vistaCusto = 'parcelas'; try{ vistaCusto = localStorage.getItem('plantas-vista-custo') || 'parcelas'; }catch(e){}
 let vistaSolar = 'mensal'; try{ vistaSolar = localStorage.getItem('plantas-vista-solar') || 'mensal'; }catch(e){}
 let res = null, vi = 0, pi = 0, esp = false, blocos = null;
@@ -683,7 +694,8 @@ function render(){
   document.getElementById('ptabs').innerHTML = v.pav.map((p,i) =>
     `<button class="btn" type="button" role="tab" aria-selected="${i===pi}" aria-pressed="${i===pi}" data-p="${i}">${p.nome}</button>`).join('');
   const estBrises = q.brises ? Brises.estudar(v, q) : null;
-  document.getElementById('plan').innerHTML = Desenho.planta(v, pi, estBrises && estBrises.janelas ? {brises: estBrises.janelas} : undefined);
+  document.getElementById('plan').innerHTML = Desenho.planta(v, pi, opPlanta(estBrises && estBrises.janelas ? {brises: estBrises.janelas} : undefined));
+  marcaVista();
   brisesVisiveis();
   { const cv = document.getElementById('cardSolVento'); if(!cv.dataset.ok){ cv.dataset.ok = '1'; Animacao.iniciar(cv, {raiz:'../'}); } Animacao.atualizar(v, q, pi, estBrises); }
   const av = v.avisos.filter((a,i,arr) => arr.indexOf(a)===i);
@@ -830,9 +842,13 @@ document.getElementById('salvarBanco').addEventListener('click', function(){
   catch(e){ this.textContent = 'Não foi possível salvar'; }
   setTimeout(() => this.textContent = 'Salvar no banco', 2000);
 });
-document.getElementById('baixarSvg').addEventListener('click', () => baixar(nomeArq('svg'), new Blob([Desenho.planta(variante(), pi)], {type:'image/svg+xml'})));
+document.querySelectorAll('.seg-vista .btn').forEach(b => b.addEventListener('click', () => {
+  vistaPlanta = b.dataset.vista; try{ localStorage.setItem('plantas-vista', vistaPlanta); }catch(e){}
+  render();
+}));
+document.getElementById('baixarSvg').addEventListener('click', () => baixar(nomeArq('svg'), new Blob([Desenho.planta(variante(), pi, opPlanta())], {type:'image/svg+xml'})));
 document.getElementById('baixarPng').addEventListener('click', () => {
-  const svg = Desenho.planta(variante(), pi), m = svg.match(/width="(\d+)" height="(\d+)"/);
+  const svg = Desenho.planta(variante(), pi, opPlanta()), m = svg.match(/width="(\d+)" height="(\d+)"/);
   const w = +m[1], h = +m[2], img = new Image();
   img.onload = () => { const c = document.createElement('canvas'); c.width = w*2; c.height = h*2; const g = c.getContext('2d'); g.scale(2,2); g.drawImage(img, 0, 0); c.toBlob(b => baixar(nomeArq('png'), b), 'image/png'); };
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);

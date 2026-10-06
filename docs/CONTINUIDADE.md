@@ -67,15 +67,15 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
   - **E2.8:** íntimo nunca no poente; zoneamento invertido na térrea com a frente para leste; `intimoPoente`; a circulação enxuta não absorve fim de corredor lateral com laterais a leste e oeste; porta para cômodo isolado.
   - **Quadro** "Como o gerador decide" revisto.
   - **V3:** tema escuro na paleta Botânica Marítima Profunda (tokens em `assets/base.css` e no CSS próprio da casa simétrica; preenchimento das zonas = 18 % do traço sobre a superfície, AA); menu do topo com ícone sobre o rótulo, cores `--nav-inicio/gerador/banco/tema`, botão de tema dentro do menu, rótulos curtos no celular e sem menu suspenso. Capturas: https://claude.ai/artifact/MzoF4Z6Qg5w56Q9LFimGbx
-- **Testes:** `node gerador/testes.js` (21 casos, golden de 31, 45 testes de unidade, auditoria de 66 casos com regras G01–G19 e M01–M07). `node gerador/auditoria.js --detalhe` lista cada violação. Limites atuais da catraca: G10 82, G16 1, G19 11 (sobrado, subsolo e programas grandes ainda sem a inversão); o resto é 0.
+  - **F1 (planta humanizada):** `gerador/mobilia.js` (puro) posiciona os móveis por tipo de cômodo, com folgas (0,60 m em frente às portas, cama longe da porta, mesa com 0,75 m atrás das cadeiras, 0,45 m no aperto, sofá a 1,60–3,20 m da TV, peças altas fora de janela); `Desenho.planta(v, i, {estilo:'humanizada'})` desenha pisos com textura, paredes de 10/15 cm, sombra, móveis e rótulos com nome e área (ids dos padrões com sufixo `hzN_`). Gerador abre na humanizada (botões Humanizada | Técnica, chave `plantas-vista`); miniaturas da página inicial e do banco também. Auditoria M08 (móvel fora do cômodo) e M09 (móvel na abertura de porta), firmes, em 0. Golden com 145 hashes da humanizada. Plano: `docs/planos/2026-10-06-etapa-f1.md`.
+- **Testes:** `node gerador/testes.js` (21 casos, golden de 31, 50 testes de unidade, auditoria de 66 casos com regras G01–G19 e M01–M09). `node gerador/auditoria.js --detalhe` lista cada violação. Limites atuais da catraca: G10 82, G16 1, G19 11 (sobrado, subsolo e programas grandes ainda sem a inversão); o resto é 0.
 - **Ordem combinada das próximas etapas:**
-  1. **F1:** planta humanizada como vista principal.
-  2. **E2.4 a E2.7:** escritório ampliado, medidas do subsolo, pé-direito por cômodo, banho reversível (com opção de porta para o corredor).
-  3. **F2:** corte, depois da E2.6.
-  4. **V2:** brises legíveis e glossário para leigos.
-  5. **V1:** vento 24 h, com os quartos avaliados pelo vento da noite (aprovado).
-  6. **E3:** regras com fonte.
-  7. **F3** (vista 3D): futura.
+  1. **E2.4 a E2.7:** escritório ampliado, medidas do subsolo, pé-direito por cômodo, banho reversível (com opção de porta para o corredor).
+  2. **F2:** corte, depois da E2.6.
+  3. **V2:** brises legíveis e glossário para leigos.
+  4. **V1:** vento 24 h, com os quartos avaliados pelo vento da noite (aprovado).
+  5. **E3:** regras com fonte.
+  6. **F3** (vista 3D): futura.
 
 ## 4. Pendências conhecidas (nenhuma pedida)
 - Itens oferecidos e não aprovados: patamar plano no início da rampa e núcleo no fundo do subsolo.

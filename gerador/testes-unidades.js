@@ -553,6 +553,53 @@ t('íntimo nunca no poente: frente a leste inverte o zoneamento; nos 8 rumos nen
   ok(sub.variantes.length && sub.avisos.some(a => /fachada a oeste/.test(a)), 'com subsolo: recurso com aviso');
 });
 
+// ---------- mobília da planta humanizada (etapa F1) ----------
+const MOB = require('./mobilia.js');
+const pavMao = (salas, portas, janelas, vaos) => ({nome:'Térreo', salas, portas:portas || [], janelas:janelas || [], vaos:vaos || []});
+const cx = q => [(q.x0 + q.x1) / 2, (q.y0 + q.y1) / 2];
+t('mobília: cama com a cabeceira longe da porta e fora da parede da janela', () => {
+  // quarto 3,5 × 3,5; porta no lado y0 (frente), janela no lado x1
+  const S = [{id:1, tipo:'suite', nome:'Suíte', zona:'intimo', x0:0, y0:0, x1:3.5, y1:3.5}, {id:2, tipo:'circ', nome:'Circulação', zona:'circ', x0:0, y0:-1.2, x1:3.5, y1:0}];
+  const P = pavMao(S, [{o:'h', c:0, t0:0.2, t1:1.0, sala:1, viz:2, dentro:1}], [{o:'v', c:3.5, t0:1, t1:2.5, h:1.2}]);
+  const q = MOB.pavimento(P), cama = q.find(x => x.sala === 1 && x.tipo === 'cama');
+  ok(cama, 'sem cama');
+  ok(cama.lado === 'y1', 'cabeceira deveria ficar na parede do fundo (y1), longe da porta; ficou em ' + cama.lado);
+  ok(cama.x1 - cama.x0 >= 1.6 - 1e-6, 'suíte com cama de casal de 1,60 m');
+  ok(q.filter(x => x.sala === 1 && x.tipo === 'criado').length === 2, 'dois criados-mudos');
+});
+t('mobília: mesa de jantar centrada e cadeiras conforme a área', () => {
+  const S = [{id:1, tipo:'jantar', nome:'Jantar', zona:'social', x0:0, y0:0, x1:6, y1:4.5}];   // interno 5,85 × 4,35: cabe a mesa de 8 com 0,75 m em volta
+  const m = MOB.pavimento(pavMao(S)).find(x => x.tipo === 'mesa-jantar');
+  ok(m, 'sem mesa'); const [a, b] = cx(m);
+  ok(Math.abs(a - 3) < 0.01 && Math.abs(b - 2.25) < 0.01, 'mesa fora do centro: ' + a + ', ' + b);
+  igual(m.lugares, 8, 'jantar de 27 m²:');
+});
+t('mobília: nenhuma peça na faixa da porta nem fora do cômodo', () => {
+  const S = [{id:1, tipo:'cozinha', nome:'Cozinha', zona:'apoio', x0:0, y0:0, x1:3, y1:2.4}, {id:2, tipo:'circ', nome:'Circ', zona:'circ', x0:3, y0:0, x1:4.2, y1:2.4}];
+  const P = pavMao(S, [{o:'v', c:3, t0:0.8, t1:1.6, sala:1, viz:2, dentro:-1}]);
+  const q = MOB.pavimento(P).filter(x => x.sala === 1);
+  ok(q.some(x => x.tipo === 'bancada-cozinha') && q.some(x => x.tipo === 'geladeira'), 'cozinha sem bancada ou geladeira');
+  const zona = MOB.zonasPortas(S[0], P)[0];
+  ok(zona && Math.abs(zona.x0 - 2.2) < 1e-6, 'a folha de 0,80 m abre para a cozinha: a faixa livre tem a largura da folha');
+  for(const x of q){ ok(x.x0 >= 0.075 - 1e-6 && x.y0 >= 0.075 - 1e-6 && x.y1 <= 2.325 + 1e-6, x.tipo + ' fora do cômodo');
+    ok(!(x.x1 > zona.x0 && x.y0 < zona.y1 && x.y1 > zona.y0), x.tipo + ' na faixa da porta'); }
+});
+t('mobília: subsolo sem móveis e varanda com mesa externa', () => {
+  igual(MOB.pavimento({nome:'Subsolo', salas:[{id:1, tipo:'garagem', x0:0, y0:0, x1:6, y1:6}], portas:[], janelas:[], vaos:[]}).length, 0, 'subsolo:');
+  ok(MOB.pavimento(pavMao([{id:1, tipo:'varanda', nome:'Varanda', zona:'varanda', x0:0, y0:0, x1:6, y1:2}])).some(x => x.tipo === 'mesa-externa'), 'varanda sem mesa');
+});
+
+t('humanizada: pisos, paredes em escala, móveis e técnica intacta', () => {
+  const D = require('./desenho.js'), v = M.gerar({frente:12, fundo:30, quartos:3, suites:2}).variantes[0];
+  const h = D.planta(v, 0, {estilo:'humanizada'}), tec = D.planta(v, 0);
+  ok(/<pattern id="hz\d+_madeira"/.test(h) && /url\(#hz\d+_madeira\)/.test(h), 'piso de madeira nos quartos');
+  ok(/stroke-width="4.5"/.test(h) && /stroke-width="3"/.test(h), 'paredes de 15 e 10 cm (4,5 e 3 px)');
+  ok(/<title>Cama /.test(h) && /<title>Bacia sanitária /.test(h), 'cama e bacia desenhadas');
+  ok(!/<pattern/.test(tec) && !/<title>Cama /.test(tec), 'sem a opção, a planta técnica não muda');
+  const ids = [...h.matchAll(/<pattern id="(hz\d+_)/g)].map(m => m[1]), h2 = D.planta(v, 0, {estilo:'humanizada'});
+  ok(ids.length && !h2.includes('id="' + ids[0] + 'madeira"'), 'cada desenho com ids próprios');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

@@ -39,6 +39,8 @@ function caso(c){
   const svg = {};
   for(const v of r.variantes){
     v.pav.forEach((p, i) => { svg[`${v.nome}/${p.nome}`] = sha(D.planta(v, i)); });
+    // planta humanizada (etapa F1); os ids dos padrões têm um contador por desenho, neutralizado aqui
+    v.pav.forEach((p, i) => { svg[`${v.nome}/humanizada/${p.nome}`] = sha(D.planta(v, i, {estilo:'humanizada'}).replace(/hz\d+_/g, 'hz_')); });
     const ter = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo'));
     svg[`${v.nome}/espelhada/${v.pav[ter].nome}`] = sha(D.planta(D.espelha(v), ter));
     svg[`${v.nome}/lote`] = sha(D.lote(v, r.entrada, r));
