@@ -1621,7 +1621,8 @@ function avalia(v, q){
   av.push(...ori.avAb); pen += 6*ori.avAb.length;
   // íntimo nunca no poente: quarto encostado numa fachada a oeste perde pontos e só aparece se nenhuma variante escapar
   const noPoente = quartosNoPoente(v, q, ori.esp); v.intimoPoente = noPoente.length;
-  if(noPoente.length){ pen += 8*noPoente.length; av.push(`${noPoente.join(', ')} encostado(s) na fachada a oeste (poente).`); }
+  // (na busca do terreno mínimo as invertidas não são montadas: a penalidade ficaria só contra as normais)
+  if(noPoente.length && !q.subMin){ pen += 8*noPoente.length; av.push(`${noPoente.join(', ')} encostado(s) na fachada a oeste (poente).`); }
   // terreno
   const B = q.frente - q.recX0 - q.recX1, Dmax = q.fundo - q.recFrente - q.recFundo;
   if(v.W > B + 0.01){ pen += 40*(v.W-B); av.push(`A casa (${f2(v.W)} m) é mais larga que a área edificável (${f2(B)} m).`); }
@@ -1949,7 +1950,8 @@ function geraTodas(q, P, Ws){
       if(q.tipo==='sobrado' && v.Lsup && v.Lsup > v.Dter + 1.0){ const k = Math.min(1.3, 1 + (v.Lsup - v.Dter)/Math.max(1, v.Dter - (q.varanda?2:0))); v = linear(q, P, W, m, {cresce:k}); }
       out.push(v);
     }catch(e){ /* combinação inviável */ }
-      if(fundoNoPoente(q) && q.tipo==='terrea' && !q.subsolo) try{
+      // (a busca do terreno mínimo, q.subMin, não monta as invertidas: o retângulo é o mesmo e o custo dobraria)
+      if(fundoNoPoente(q) && q.tipo==='terrea' && !q.subsolo && !q.subMin) try{
         const qi = q.garagem==='coberta' ? Object.assign({}, q, {garagem:'descoberta'}) : q;
         const vi = inverteFrenteFundo(linear(qi, P, W, m), q); if(vi) out.push(vi);
       }catch(e){ /* inviável */ }
