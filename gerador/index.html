@@ -461,26 +461,49 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
       </div>
 
       <h2>Como o gerador decide</h2>
+      <p class="note">Ordem das decisões: primeiro o que torna a planta inválida, depois as regras que você escolheu, por fim a nota. Uma regra de cima sempre vence a de baixo.</p>
       <div class="grid2">
         <div class="card tint" style="--c:var(--patina)">
-          <h3>Zoneamento</h3>
+          <h3>1. Zoneamento (onde fica cada parte)</h3>
           <ul class="clean" style="--c:var(--patina)">
-            <li><strong>Bloco único:</strong> faixa social na frente (garagem, salas), faixa de apoio no meio (cozinha, serviço, banhos) e faixa íntima no fundo, com corredor central ou lateral.</li>
+            <li><strong>Bloco único:</strong> social na frente (garagem, salas), apoio no meio (cozinha, serviço, banhos) e íntimo no fundo, com corredor central (quartos dos dois lados) ou lateral (quartos de um lado só).</li>
             <li><strong>Em L:</strong> social e apoio na frente; ala íntima numa tira lateral, liberando quintal.</li>
-            <li><strong>Em U:</strong> salas e cozinha na frente; ala íntima e ala de apoio com galeria em volta de um pátio aberto para o fundo (térrea).</li>
-            <li><strong>Em H:</strong> ala íntima e ala social paralelas, ligadas por cozinha, serviço e galeria (lotes largos, térrea).</li>
-            <li><strong>Sobrado:</strong> em bloco único, L ou U; o superior pode ocupar toda a projeção ou só as seções escolhidas, com os cômodos que você levar para cima (master e suítes sobem primeiro).</li>
+            <li><strong>Em U:</strong> salas e cozinha na frente; ala íntima e ala de apoio em volta de um pátio aberto para o fundo.</li>
+            <li><strong>Em H</strong> (só térrea): ala íntima e ala social paralelas, ligadas por cozinha, serviço e galeria.</li>
+            <li><strong>Sobrado:</strong> bloco, L ou U; master e suítes sobem primeiro; o superior ocupa a projeção toda ou só as seções escolhidas.</li>
+            <li><strong>O íntimo fica sempre no fundo, qualquer que seja o sol.</strong> Quando o fundo dá para o poente (frente para leste, nordeste ou sudeste), os quartos continuam no fundo, mas as janelas vão para as laterais: a parede do fundo, a oeste, não recebe janela de quarto (fica cega ou com banho, closet e armários). O preço é perder a janela para o nascente (cada quarto sem ela perde 3 pontos).</li>
           </ul>
         </div>
         <div class="card tint" style="--c:var(--rust)">
-          <h3>Regras e limites</h3>
+          <h3>2. O que elimina uma variante</h3>
           <ul class="clean" style="--c:var(--rust)">
-            <li>Áreas e lados mínimos de um código de obras genérico (quarto 8 m² e 2,60 m; suíte 9 m² e 2,80 m; banho 2,4 m² e 1,20 m).</li>
-            <li>Suítes com banho na fachada e closet para dentro; banhos vizinhos encostados para concentrar a hidráulica.</li>
-            <li>Escada reta pela fórmula de Blondel; rampa de garagem pela inclinação informada.</li>
-            <li>Subsolo com o máximo de vagas que cabe, de preferência perpendiculares ao comprimento do lote (o campo de vagas só vale sem subsolo): escada na lateral junto ao elevador, manobra contínua de 5 m, rampa desenhada em escala e jardim de inverno a céu aberto, oposto à rampa.</li>
-            <li>Vento predominante de leste/sudeste: cada pavimento precisa de aberturas na face que recebe o vento e na oposta; entrada e saída de fundos em faces opostas; a versão espelhada é sugerida quando favorece o fluxo. Torre de calor opcional sobre a escada ou o estar.</li>
-            <li>Janelas dimensionadas por 1/8 da área do piso (luz) e 1/16 (ventilação). Subsolo sempre com ventilação cruzada: janelas altas no semienterrado, pátios ingleses de 1,50 m em lados opostos no enterrado.</li>
+            <li>Cômodo fora do lote ou dentro dos recuos (o subsolo pode ocupá-los se você marcar; jardim e rampa sempre podem).</li>
+            <li>Cômodo sem ligação com o resto da casa.</li>
+            <li>Quarto com janela a oeste: a variante só aparece se nenhuma outra escapar, e então o aviso diz isso. Com corredor central e frente para norte ou sul, um lado dos quartos fica a oeste; por isso o corredor lateral, com os quartos a leste, costuma vencer.</li>
+            <li>Sem nenhuma variante válida, o gerador mostra o motivo e o terreno mínimo.</li>
+          </ul>
+          <h3>3. Regras fixas</h3>
+          <ul class="clean" style="--c:var(--rust)">
+            <li>Nenhuma janela a menos de 1,50 m da divisa lateral ou de fundo (Código Civil, art. 1.301; texto ainda a confirmar no Planalto). Varanda ou terraço nessa faixa gera aviso.</li>
+            <li>Rooftop nunca aberto para o poente: a opção a oeste fica indisponível e as bordas a oeste recebem parede ou brise.</li>
+            <li>Janelas de cada cômodo em pontos distantes (ventilação cruzada), com área de 1/8 do piso para a luz.</li>
+            <li>Escada reta com 2 × espelho + piso entre 0,63 e 0,65 m (Blondel); espelho até 0,18 m.</li>
+            <li>Subsolo com o máximo de vagas (3,00 × 5,00 m), manobra contínua de 5 m, rampa em escala e jardim de inverno oposto à rampa; ventilação cruzada obrigatória.</li>
+          </ul>
+        </div>
+        <div class="card tint" style="--c:var(--steel)">
+          <h3>4. A nota (de 0 a 100)</h3>
+          <ul class="clean" style="--c:var(--steel)">
+            <li>Começa em 100 e perde pontos: cômodo abaixo do mínimo ou alongado, cômodo sem janela ou porta, falta de aberturas do lado do vento (leste/sudeste) ou do lado oposto, quarto a sudoeste ou noroeste, ocupação ou permeabilidade fora do limite, corredores acima de 14 % da área.</li>
+            <li>Entre a planta e a espelhada, fica a que recebe melhor o vento e o sol (você pode trocar no botão Espelhar).</li>
+            <li>As três melhores aparecem, de preferência com formatos diferentes.</li>
+          </ul>
+        </div>
+        <div class="card tint" style="--c:var(--brass)">
+          <h3>5. O que não está verificado</h3>
+          <ul class="clean" style="--c:var(--brass)">
+            <li>Áreas e lados mínimos dos cômodos (quarto 8 m² e 2,60 m; suíte 9 m² e 2,80 m; banho 2,4 m² e 1,20 m), recuos, ocupação e permeabilidade padrão são referências de projeto, <strong>não</strong> a lei do seu município. Confira na lei de uso do solo e no Código da Cidade (Fortaleza: LC 236/2017 e LC 270/2019).</li>
+            <li>Vento e sol são indicadores simplificados, não simulação.</li>
             <li>Estudo automático: confira acessibilidade, estrutura e legislação com um responsável técnico.</li>
           </ul>
         </div>
