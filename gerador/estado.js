@@ -62,6 +62,7 @@ function deHash(hash, padrao){
     const est = novo(padrao); Object.assign(est.entrada, ent);
     const v = (hash.match(/[#&]v=(\d+)/) || [])[1], e = (hash.match(/[#&]e=([01])/) || [])[1];
     est.ui.variante = v ? +v : 0; if(e !== undefined) est.ui.espelho = e === '1';
+    est.ui.processado = true;   // link antigo e projetos salvos no banco: a planta já foi gerada, o resultado aparece
     return est; }
   return null;
 }
