@@ -1954,11 +1954,18 @@ const VF_ACESSO = [['estar','jantar','tv','salaIntima'], ['master'], ['suite'], 
 function comVarandaFundos(v, q){
   if(!q.varandaFundos) return v;
   const t = v.pav.find(p => p.nome==='Térreo'); if(!t) return v;
-  const S = t.salas, P = q.varandaFundosP;
-  // já há varanda no fundo (a automática do sobrado ou, no zoneamento invertido, a varanda da sala): só ganha a profundidade pedida
-  const Dt = Math.max(...S.map(s => s.y1));
-  const auto = S.find(s => s.tipo==='varanda' && s.y0 > 0.001 && Math.abs(s.y1 - Dt) < 0.001 && s.x1 - s.x0 >= 1.5);
-  if(auto){ if(auto.y1 - auto.y0 < P - 0.001){ auto.y1 = r2(auto.y0 + P); v.D = r2(Math.max(v.D, auto.y1)); } auto.fundos = true; auto.nome = 'Varanda de fundos'; return v; }
+  const S = t.salas, Dlim = r2(q.fundo - q.recFrente - q.recFundo), Dcasa = Math.max(...S.map(s => s.y1)), sobra = Dlim - Dcasa;
+  const reduz = P => { if(P < q.varandaFundosP - 1e-6){ v.vfReduzida = P; v.avisos.push(`Varanda de fundos com ${f2(P)} m de profundidade (pedido ${f2(q.varandaFundosP)} m): é o que cabe antes do recuo de fundo nesta variante.`); } return P; };
+  const passo = x => Math.floor(x * 20 + 1e-6) / 20;   // múltiplos de 5 cm
+  // já há varanda no fundo (a automática do sobrado ou, no zoneamento invertido, a varanda da sala): só ganha a profundidade que falta e cabe
+  const auto = S.find(s => s.tipo==='varanda' && s.y0 > 0.001 && Math.abs(s.y1 - Dcasa) < 0.001 && s.x1 - s.x0 >= 1.5);
+  if(auto){ const atual = auto.y1 - auto.y0, P = reduz(Math.max(atual, Math.min(q.varandaFundosP, passo(atual + Math.max(0, sobra)))));
+    if(P > atual + 0.001){ auto.y1 = r2(auto.y0 + P); v.D = r2(Math.max(v.D, auto.y1)); }
+    auto.fundos = true; auto.nome = 'Varanda de fundos'; return v; }
+  // profundidade: a pedida ou, se faltar espaço antes do recuo de fundo, a que cabe (mínimo 1,50 m); abaixo disso, sem varanda
+  const cabe = passo(sobra);
+  if(cabe < 1.5 - 1e-6){ v.vfFalta = true; v.avisos.push(`Varanda de fundos: não coube nesta variante (sobram ${f2(Math.max(0, cabe))} m até o recuo de fundo; o mínimo é 1,50 m). Veja o terreno mínimo.`); return v; }
+  const P = reduz(Math.min(q.varandaFundosP, cabe));
   // trechos externos de fundos dos cômodos fechados, agrupados por linha (y) e emendados ao longo de x
   const segs = [];
   for(const s of S.filter(o => !TIPOS[o.tipo].aberto)) for(const e of trechosExternos(s, S)) if(e.o==='h' && Math.abs(e.c - s.y1) < 0.001) segs.push({c:e.c, t0:e.t0, t1:e.t1});
@@ -2000,6 +2007,10 @@ function geraTodas(q, P, Ws){
       let v = linear(q, P, W, m);
       // no sobrado, se o superior for bem mais longo, aumenta as faixas do térreo (até 30 %) antes de criar varanda
       if(q.tipo==='sobrado' && v.Lsup && v.Lsup > v.Dter + 1.0){ const k = Math.min(1.3, 1 + (v.Lsup - v.Dter)/Math.max(1, v.Dter - (q.varanda?2:0))); v = linear(q, P, W, m, {cresce:k}); }
+      // varanda de fundos: se a casa + a varanda passam do recuo de fundo, tenta faixas social e de apoio mais curtas
+      if(q.varandaFundos && q.tipo==='terrea'){ const Dlim = q.fundo - q.recFrente - q.recFundo;
+        for(const k of [0.92, 0.85]){ if(v.D + q.varandaFundosP <= Dlim + 0.001) break;
+          try{ const vc = linear(q, P, W, m, {cresce:k}); if(vc.D < v.D - 0.05){ vc.reservaVF = k; v = vc; } }catch(e){ break; } } }
       out.push(v);
     }catch(e){ /* combinação inviável */ }
       // (a busca do terreno mínimo, q.subMin, não monta as invertidas: o retângulo é o mesmo e o custo dobraria)
@@ -2060,7 +2071,7 @@ function gerar(entrada, opts){
     else { todas = monta(P); if(feitas.length) avisos.push(`A inversão de ${feitas.join(' e de ')} não coube neste terreno${q.cozinha==='aberta' ? ' com a cozinha aberta encostada no jantar' : ''}; as variantes mostram a ordem normal.`); }
   } else todas = monta(P);
   if(!todas.length && q.formato!=='auto') avisos.push(`O formato ${NOMES[q.formato]} não cabe na área edificável de ${f2(B)} m de largura. Veja o terreno mínimo para este formato ou escolha outro.`);
-  todas.sort((a,b) => b.score-a.score || a.W*a.D-b.W*b.D);
+  todas.sort((a,b) => (a.vfFalta ? 1 : 0) - (b.vfFalta ? 1 : 0) || b.score-a.score || a.W*a.D-b.W*b.D);
   // até 3 variantes, preferindo tipologias diferentes
   const escolhidas = [];
   // quarto voltado para o poente nunca: essas variantes só aparecem se nenhuma outra escapar

@@ -614,19 +614,31 @@ t('varanda de fundos: faixa na fachada de fundos, com porta, nos quatro formatos
     for(const v of r.variantes){
       const T = v.pav.find(p => p.nome==='Térreo'), vf = T.salas.find(s => s.fundos);
       ok(vf, f + ': sem varanda de fundos em ' + v.nome);
-      igual(Math.round((vf.y1 - vf.y0) * 100) / 100, 2, f + ': profundidade padrão:');
+      const pv = Math.round((vf.y1 - vf.y0) * 100) / 100;
+      ok(pv === 2 || (v.vfReduzida === pv && pv >= 1.5), f + ': profundidade padrão (ou reduzida com aviso): ' + pv);
       ok(T.portas.some(p => (p.sala === vf.acesso && p.viz === vf.id)), f + ': sem porta para a varanda');
       ok(Math.abs(vf.y1 - Math.max(...T.salas.map(s => s.y1))) < 0.001, f + ': a varanda não está no fundo');
     }
   }
 });
 t('varanda de fundos: largura parcial centrada no acesso e profundidade escolhida', () => {
-  const r = M.gerar({frente:12, fundo:32, quartos:3, suites:2, formato:'bloco', varandaFundos:true, varandaFundosL:4, varandaFundosP:3, orientacao:'N'});
+  const r = M.gerar({frente:12, fundo:36, quartos:3, suites:2, formato:'bloco', varandaFundos:true, varandaFundosL:4, varandaFundosP:3, orientacao:'N'});
   const v = r.variantes[0], T = v.pav.find(p => p.nome==='Térreo'), vf = T.salas.find(s => s.fundos), ac = T.salas.find(s => s.id === vf.acesso);
   igual([Math.round((vf.x1 - vf.x0) * 100) / 100, Math.round((vf.y1 - vf.y0) * 100) / 100], [4, 3], 'largura × profundidade:');
   ok(vf.x0 >= ac.x0 - 0.001 || vf.x1 <= ac.x1 + 0.001, 'varanda fora do cômodo de acesso');
   igual(M.normaliza({varandaFundosP:7, varandaFundosL:9}).varandaFundosP, 2, 'profundidade fora da lista:');
   igual(M.normaliza({}).varandaFundos, false, 'desligada por padrão:');
+});
+t('varanda de fundos: reserva o espaço (casa mais curta) e, se faltar, reduz ou avisa', () => {
+  // 12 × 32: a casa de corredor lateral (23,65 m) só cabe com a varanda de 2 m se ficar mais curta
+  const r = M.gerar({frente:12, fundo:32, quartos:3, suites:2, varandaFundos:true, orientacao:'N'}), v = r.variantes[0];
+  ok(/corredor lateral/.test(v.tipologia) && v.reservaVF, 'a melhor variante deveria ser a de corredor lateral encurtada');
+  const vf = v.pav.find(p => p.nome==='Térreo').salas.find(s => s.fundos);
+  ok(vf && Math.abs(vf.y1 - vf.y0 - 2) < 0.001 && v.D <= r.Dmax + 0.001, 'varanda de 2,00 m dentro da área edificável');
+  // 12 × 30 com 3 m: não cabe nem com a casa encurtada; a variante fica, sem varanda e com aviso
+  const r2 = M.gerar({frente:12, fundo:30, quartos:3, suites:2, varandaFundos:true, varandaFundosP:3, orientacao:'N'});
+  ok(r2.variantes.length && r2.variantes.every(x => x.vfFalta || x.vfReduzida || x.pav.find(p => p.nome==='Térreo').salas.some(s => s.fundos)), 'cada variante com varanda, reduzida ou sem ela com aviso');
+  ok(r2.variantes.filter(x => x.vfFalta).every(x => x.avisos.some(a => /Varanda de fundos: não coube/.test(a))), 'aviso de que não coube');
 });
 t('varanda de fundos: no zoneamento invertido, a varanda da sala ganha a profundidade pedida', () => {
   const r = M.gerar({frente:12, fundo:32, quartos:3, suites:2, varandaFundos:true, varandaFundosP:3, orientacao:'L'});
