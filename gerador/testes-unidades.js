@@ -602,6 +602,14 @@ t('desenho: SVG sem atributo repetido na mesma marca (o arquivo baixado precisa 
     for(const v of M.gerar(c).variantes) v.pav.forEach((p, i) => { for(const estilo of [undefined, 'humanizada']) for(const tag of D.planta(v, i, {estilo}).match(/<[a-zA-Z][^>]*>/g)){
       const at = [...tag.matchAll(/s([a-zA-Z:-]+)="/g)].map(m => m[1]); ok(new Set(at).size === at.length, 'atributo repetido: ' + tag.slice(0, 120)); } });
 });
+t('vista Apresentação e sala de estar: só a casa; tradicional com sofás e poltrona, com TV com rack', () => {
+  const D = require('./desenho.js'), r = M.gerar({orientacao:'N'}), v = r.variantes[0];
+  const ap = D.planta(v, 0, {estilo:'humanizada', apresentacao:true}), hu = D.planta(v, 0, {estilo:'humanizada'});
+  ok(/>RUA</.test(hu) && !/>RUA</.test(ap) && !/PORTÃO/.test(ap) && !/class="cota"/.test(ap), 'apresentação sem lote, portões e cotas');
+  ok(/<title>Poltrona /.test(hu) && !/<title>Rack da TV /.test(hu), 'sala tradicional por padrão');
+  const tv = M.gerar({orientacao:'N', estarTipo:'tv'}).variantes[0];
+  ok(/<title>Rack da TV /.test(D.planta(tv, 0, {estilo:'humanizada'})), 'sala com TV');
+});
 t('humanizada: pisos, paredes em escala, móveis e técnica intacta', () => {
   const D = require('./desenho.js'), v = M.gerar({frente:12, fundo:30, quartos:3, suites:2}).variantes[0];
   const h = D.planta(v, 0, {estilo:'humanizada'}), tec = D.planta(v, 0);

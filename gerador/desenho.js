@@ -210,7 +210,7 @@ function planta(v, idx, op){
   const L = v.lote; let lo = null;
   if(L){ const ed = p.anexo ? (v.anexos||[]).find(a => a.tipo==='edicula') : null;
     const ox = ed ? ed.x0 : v.x0, oy = ed ? ed.y0 : v.y0;
-    if(ox !== undefined){ lo = {x0:-ox, y0:-oy, x1:L.frente-ox, y1:L.fundo-oy, rf:L.recFrente, rl:L.recX0 !== undefined ? L.recX0 : L.recLat, rr:L.recX1 !== undefined ? L.recX1 : L.recLat, rb:L.recFundo}; extras.push(lo); } }
+    if(ox !== undefined && !op.apresentacao){ lo = {x0:-ox, y0:-oy, x1:L.frente-ox, y1:L.fundo-oy, rf:L.recFrente, rl:L.recX0 !== undefined ? L.recX0 : L.recLat, rr:L.recX1 !== undefined ? L.recX1 : L.recLat, rb:L.recFundo}; extras.push(lo); } }
   const mx0 = Math.min(0, ...pocos.map(q => q.x0), ...S.map(q => q.x0), ...extras.map(q => q.x0 - 1.6)), my0 = Math.min(0, ...pocos.map(q => q.y0), ...S.map(q => q.y0), ...extras.map(q => q.y0 - 1.2));
   const OX = 70 - mx0*K + (mx0<0 ? 12 : 0), OY = 96 - my0*K;
   const X = m => +(OX + m*K).toFixed(1), Y = m => +(OY + m*K).toFixed(1);
@@ -450,7 +450,7 @@ function planta(v, idx, op){
     o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${fs}px">${nome}<tspan x="${cx}" dy="8.5" class="rd" style="font-size:${big?6.6:5.8}px;font-weight:400">${sub}</tspan></text>`);
   }
   // cotas
-  const cota = (a0, a1, pos, t, vert) => {
+  const cota = (a0, a1, pos, t, vert) => { if(op.apresentacao) return;   // vista Apresentação: sem cotas
     if(!vert){ line(a0, pos, a1, pos, '#55595F', .7); for(const a of [a0,a1]) line(a, pos-.12, a, pos+.12, '#55595F', .7);
       o.push(`<text x="${((X(a0)+X(a1))/2).toFixed(1)}" y="${Y(pos)-3}" class="cota">${t}</text>`); }
     else { line(pos, a0, pos, a1, '#55595F', .7); for(const a of [a0,a1]) line(pos-.12, a, pos+.12, a, '#55595F', .7);
@@ -481,8 +481,8 @@ function planta(v, idx, op){
 <text x="20" y="30" class="tt">${esc(titulo)}</text>
 <text x="20" y="46" class="st">${esc(sub)}${F ? ' · planta girada: norte para cima' : ''}</text>
 ${gg.g}
-${rosa(LW - 62, 110, 26, rumoP)}
-${ventoSetas(20 + gg.Wr, 64, gg.Hr)}
+${op.apresentacao ? '' : rosa(LW - 62, 110, 26, rumoP)}
+${op.apresentacao ? '' : ventoSetas(20 + gg.Wr, 64, gg.Hr)}
 ${fora.length ? `<g transform="translate(20,${LH - 14})">${fora.join('')}</g>` : ''}
 </svg>`;
 }
