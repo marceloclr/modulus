@@ -4,14 +4,16 @@
    Uso: node gerador/auditoria.js            → resumo por regra
         node gerador/auditoria.js --detalhe  → cada violação
    Também é usado por gerador/testes-unidades.js (as regras firmes não podem ter violação). */
+(function(root, factory){
+  if(typeof module==='object'&&module.exports) module.exports=factory(require('./motor.js'), require('./mobilia.js')); else root.Auditoria=factory(root.Motor, root.Mobilia);
+})(this, function(M, Mob){
 'use strict';
-const M = require('./motor.js');
 const {compartilhado, trechosExternos} = M._interno;
 const E = 0.011;
 const area = s => (s.x1 - s.x0) * (s.y1 - s.y0);
 const f2 = M.f2;
 const ABERTO = s => !!(M.TIPOS[s.tipo] && M.TIPOS[s.tipo].aberto);
-const Mob = require('./mobilia.js');
+
 
 /* Regras: id, nome e limite. Limite 0 = regra firme (nenhuma violação). Limite > 0 = defeito conhecido em 06/10/2026:
    o teste é uma catraca (a contagem não pode subir); ao corrigir, baixe o limite até 0. */
@@ -360,9 +362,11 @@ function rodar(lista){
   return {cont, ex, porCaso, casos:Object.keys(C).length};
 }
 
-module.exports = {REGRAS, auditar, casos, rodar, uniao};
+return {REGRAS, auditar, casos, rodar, uniao};
+});
 
-if(require.main === module){
+if(typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module){
+  const {REGRAS, rodar} = module.exports;
   const t = Date.now(), r = rodar(), det = process.argv.includes('--detalhe');
   console.log(`auditoria: ${r.casos} casos, ${r.porCaso.reduce((t, c) => t + c.variantes, 0)} variantes, ${Date.now() - t} ms`);
   for(const [k, R] of Object.entries(REGRAS)){
