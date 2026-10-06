@@ -442,6 +442,53 @@ t('auditoria: regras firmes sem violação e defeitos conhecidos sem piorar (cat
   ok(!ruins.length, ruins.map(([k, R]) => `${k} ${R.nome}: ${r.cont[k]} (limite ${R.limite}); ex.: ${r.ex[k][0]}`).join(' | '));
 });
 
+// ---------- rooftop a partir da escada (etapa E2.1) ----------
+const rooftop = e => { const r = M.gerar(Object.assign({frente:12, fundo:30, quartos:3, suites:2, rooftop:true, orientacao:'N'}, e)); const v = r.variantes[0];
+  return {r, v, rt:v && v.pav.find(p => p.nome === 'Rooftop')}; };
+const areaDe = (rt, nome) => rt.salas.filter(s => s.nome === nome).reduce((t, s) => t + M.area(s), 0);
+t('rooftop: posição a partir da escada muda a laje (centralizado < até a frente; até o fundo vai da escada ao fundo)', () => {
+  const c = rooftop({}).rt, f = rooftop({rtPos:'frente'}).rt, b = rooftop({rtPos:'fundo'}).rt;
+  ok(c.posicao === 'centro' && f.posicao === 'frente' && b.posicao === 'fundo', 'posições');
+  ok(f.area > c.area + 5 && b.area > c.area + 5, `laje: centro ${c.area}, frente ${f.area}, fundo ${b.area}`);
+  const esc = b.salas.find(s => s.tipo === 'escada');
+  ok(b.salas.every(s => s.y0 >= esc.y0 - 0.01), 'até o fundo: nada à frente da escada');
+  const escF = f.salas.find(s => s.tipo === 'escada');
+  ok(f.salas.every(s => s.y1 <= escF.y1 + 0.01), 'até a frente: nada atrás da escada');
+});
+t('rooftop: itens marcados aparecem com as medidas de referência e ligados à caixa de escada', () => {
+  const {v, rt} = rooftop({});
+  ok(Math.abs(areaDe(rt, 'Varanda gourmet') - M.RT.gourmet) < 0.1, 'gourmet de 12 m²: ' + areaDe(rt, 'Varanda gourmet'));
+  ok(Math.abs(areaDe(rt, 'Banho') - M.RT.banho) < 0.1 && Math.abs(areaDe(rt, 'Área técnica / caixa d’água') - M.RT.tecnica) < 0.1, 'banho 3 m² e área técnica 4 m²');
+  const g = rt.salas.find(s => s.tipo === 'gourmet'); ok(Math.min(g.x1 - g.x0, g.y1 - g.y0) >= M.TIPOS.gourmet.lado - 0.01, 'gourmet com lado mínimo');
+  ok(!v.avisos.some(a => /Rooftop: .*(não se liga|sem acesso)/.test(a)), v.avisos.filter(a => a.startsWith('Rooftop')).join(' | '));
+  const sem = rooftop({rtGourmet:false, rtVaranda:false, rtBanho:false, rtTecnica:false}).rt;
+  ok(!sem.salas.some(s => ['gourmet','varanda','banhoSocial','deposito'].includes(s.tipo)), 'desmarcados não aparecem');
+});
+t('rooftop: spa tem efeito (aparece no desenho e reserva terraço de 3,00 m)', () => {
+  const D = require('./desenho.js');
+  for(const pos of ['centro', 'fundo']){
+    const {v, rt} = rooftop({rtSpa:true, rtPos:pos}); ok(rt.spa && rt.spa.lado === M.RT.spa, 'spa em ' + pos);
+    const svg = D.planta(v, v.pav.indexOf(rt)); ok(/>SPA</.test(svg), 'SPA no desenho (' + pos + ')');
+  }
+  ok(!rooftop({}).rt.spa, 'sem spa marcado, sem spa');
+});
+t('rooftop: nunca aberto para o poente (opção a oeste recusada, bordas a oeste fechadas, G17 acusa)', () => {
+  const ops = M.rooftopOpcoes({orientacao:'O'}); ok(ops.find(o => o.valor === 'frente').proibido && !ops.find(o => o.valor === 'fundo').proibido, 'frente a oeste proibida');
+  ok(M.rooftopOpcoes({orientacao:'SE'}).find(o => o.valor === 'fundo').tarde, 'fundo a noroeste: sol da tarde');
+  const {v, rt, r} = rooftop({orientacao:'O', rtPos:'frente'});
+  ok(rt.posicao === 'centro' && v.avisos.some(a => /fica a oeste/.test(a)), 'recusa e centraliza');
+  const l = rooftop({orientacao:'N'}); ok(l.rt.fechamentos.normal.length && l.rt.fechamentos.espelhada.length, 'lateral a oeste com fechamento nas duas plantas');
+  igual(AU.auditar(l.v, M.normaliza({frente:12, fundo:30, orientacao:'N'})).filter(x => x.regra === 'G17').length, 0, 'auditoria sem G17:');
+  const sem = JSON.parse(JSON.stringify(l.v)); sem.pav.find(p => p.nome === 'Rooftop').fechamentos = {normal:[], espelhada:[]};
+  ok(AU.auditar(sem, M.normaliza({frente:12, fundo:30, orientacao:'N'})).some(x => x.regra === 'G17'), 'G17 acusa rooftop sem fechamento');
+  const RU = require('./rooftop-ui.js'); ok(/indisponível/.test(RU.opcoes('O').find(o => o.valor === 'frente').dica) && /proibida/.test(RU.svg('O', 'centro')), 'rosa marca a opção a oeste');
+});
+t('rooftop: links antigos com áreas em m² continuam abrindo', () => {
+  const q = M.normaliza({rooftop:true, rtGourmetA:0, rtVarandaA:8, rtTecnicaA:4, rtTerracoA:40});
+  igual([q.rtGourmet, q.rtVaranda, q.rtTecnica, q.rtTerracoA], [false, true, true, undefined]);
+  const q2 = M.normaliza({rooftop:true}); igual([q2.rtGourmet, q2.rtVaranda, q2.rtTecnica, q2.rtBanho, q2.rtSpa], [true, true, true, true, false]);
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

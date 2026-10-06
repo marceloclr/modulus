@@ -42,6 +42,7 @@ function espelha(v){
     if(p.pilares) for(const pl of p.pilares) pl.x = fx(pl.x);
     if(p.nucleo){ const a = fx(p.nucleo.x1), b = fx(p.nucleo.x0); p.nucleo.x0 = a; p.nucleo.x1 = b; }
     if(p.spa) p.spa.x = fx(p.spa.x);
+    if(p.fechamentos) for(const k of ['normal', 'espelhada']) for(const e of p.fechamentos[k]){ if(e.o==='v') e.c = fx(e.c); else { const a = fx(e.t1), b = fx(e.t0); e.t0 = a; e.t1 = b; } }
     if(p.dim && p.dim.x0 !== undefined) p.dim.x0 = +(W - p.dim.x0 - p.dim.W).toFixed(2);
     if(p.rampa && p.rampa.x0 !== undefined) p.rampa.x0 = +(W - p.rampa.x0 - p.rampa.largura).toFixed(2);
     for(const s of p.salas){ const a = fx(s.x1), b = fx(s.x0); s.x0 = a; s.x1 = b; }
@@ -308,6 +309,10 @@ function planta(v, idx, op){
     if(d.entrada){ const mx = d.o==='h' ? (d.t0+d.t1)/2 : d.c, my = d.o==='h' ? d.c : (d.t0+d.t1)/2;
       o.push(`<text x="${X(mx)}" y="${Y(my) + (d.o==='h' ? -6 : 3)}" class="rn" style="font-size:6.4px;fill:${PORTA}">▼ ENTRADA</text>`); }
   }
+  // rooftop: fechamento (parede ou brise) nas bordas abertas voltadas para o poente
+  const fechOeste = p.fechamentos && (v.espelhada ? p.fechamentos.espelhada : p.fechamentos.normal);
+  for(const e of (fechOeste || [])){ const [ax, ay, bx, by] = e.o==='h' ? [e.t0, e.c, e.t1, e.c] : [e.c, e.t0, e.c, e.t1];
+    o.push(`<line x1="${X(ax)}" y1="${Y(ay)}" x2="${X(bx)}" y2="${Y(by)}" stroke="#9A5B45" stroke-width="5" stroke-linecap="square"><title>Fechamento a oeste (parede ou brise): o rooftop não se abre para o poente</title></line>`); }
   // spa do rooftop
   if(p.spa) o.push(`<circle cx="${X(p.spa.x)}" cy="${Y(p.spa.y)}" r="${p.spa.r*K}" fill="#CFE6F2" stroke="#4C86C6" stroke-width="1.2"><title>Spa</title></circle><text x="${X(p.spa.x)}" y="${Y(p.spa.y)+2.5}" class="rd" style="font-size:6.4px;font-weight:600">SPA</text>`);
   // pilares (subsolo)
