@@ -25,12 +25,13 @@ const REGRAS = {
   G08: {nome:'Janela em parede inexistente (interna ou atravessando cômodos)', limite:0},
   G09: {nome:'Corredor estreito (< 0,90 m)', limite:0},
   G10: {nome:'Corredor abaixo de 1,20 m', limite:90},
-  G11: {nome:'Circulação interrompida (cômodo sem ligação)', limite:2},
+  G11: {nome:'Circulação interrompida (cômodo sem ligação)', limite:0},
   G12: {nome:'Escada que não cabe no espaço', limite:0},
   G13: {nome:'Escada fora da faixa de Blondel (0,63–0,65 m)', limite:0},
   G14: {nome:'Garagem sem largura ou profundidade para os carros', limite:0},
   G15: {nome:'Vaga do subsolo sem acesso à manobra', limite:0},
   G16: {nome:'Mobiliário sobreposto ou fora do cômodo', limite:1},
+  G17: {nome:'Rooftop aberto para o poente sem fechamento', limite:0},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
   M03: {nome:'Projeção diferente da recalculada (térreo ∪ pavimentos de cima)', limite:0},
@@ -175,6 +176,15 @@ function auditar(v, q){
         const vis = new Set([ini]), fila = [ini];
         while(fila.length){ const x = fila.shift(); for(const y of adj.get(x) || []) if(!vis.has(y)){ vis.add(y); fila.push(y); } }
         for(const s of S) if(!vis.has(s.id) && !['rouparia','deposito','jardim'].includes(s.tipo) && !(s.tipo === 'terraco' && nome !== 'Térreo')) add('G11', nome, `${s.nome} sem ligação com ${nome === 'Térreo' ? 'a rua' : 'a escada'}`);
+      }
+    }
+    // G17: rooftop — toda borda aberta voltada para oeste tem fechamento, na planta normal e na espelhada
+    if(nome === 'Rooftop' && M.RUMOS[q.orientacao] !== undefined){
+      const F = M.RUMOS[q.orientacao], oeste = az => { const d = Math.abs(((az - 270) % 360 + 540) % 360 - 180); return d <= 22.5; };
+      for(const [k, esp] of [['normal', false], ['espelhada', true]]){
+        const fc = (p.fechamentos || {})[k] || [];
+        for(const s of S.filter(ABERTO)) for(const e of trechosExternos(s, S)) if(oeste(M.rumoFace(e.lado, F, esp)) && !fc.some(f => f.o === e.o && Math.abs(f.c - e.c) < E && f.t0 <= e.t0 + E && f.t1 >= e.t1 - E))
+          add('G17', nome, `${s.nome} aberto para o poente em ${e.o === 'h' ? 'y' : 'x'} = ${f2(e.c)} (planta ${k})`);
       }
     }
     // M06: iluminação declarada × janelas desenhadas

@@ -88,6 +88,20 @@
 .rosa-sel label:first-of-type span{color:#B4532A}
 .rosa-sel input:checked + span{background:var(--graphite);color:var(--bg);border-color:var(--graphite)}
 .rosa-sel input:focus-visible + span{outline:2px solid var(--steel);outline-offset:2px}
+.rt-rosa{width:180px;height:180px;margin:2px auto;color:var(--ink-2)}
+.rt-rosa svg{width:100%;height:100%}
+.rt-rosa .rt-casa{fill:var(--surface);stroke:var(--line)}
+.rt-rosa .rt-sel{fill:var(--z-varanda-f,#E9DFC6);stroke:var(--brass);stroke-width:1.2}
+.rt-rosa .rt-escada{fill:var(--graphite);opacity:.75}
+.rt-rosa .rt-zona{fill:transparent;cursor:pointer}
+.rt-rosa .rt-zona:hover{fill:var(--steel);fill-opacity:.12}
+.rt-rosa .rt-zona.proibida{fill:#9A5B45;fill-opacity:.18;cursor:not-allowed}
+.rt-rosa text{font:600 8px 'IBM Plex Sans',sans-serif;fill:currentColor}
+.rt-rosa .rt-rumo.poente{fill:#B4532A}
+.rt-rosa .rt-frente{font-size:7px;font-weight:400}
+.rt-ops label{flex-wrap:wrap;align-items:baseline}
+.rt-ops small{flex-basis:100%;margin-left:26px;color:var(--ink-2);font-size:11.5px}
+.rt-ops input:disabled + *, .rt-ops label:has(input:disabled){opacity:.55}
 .rosa-txt{text-align:center;font-size:13px;margin:0 0 6px;color:var(--ink-2)}
 @media (prefers-reduced-motion:reduce){#rosaSeta{transition:none}}
 .dimrow{display:grid;grid-template-columns:minmax(0,1fr) 54px 10px 54px 18px 52px;align-items:center;gap:4px;font-size:12.5px;color:var(--ink-2);margin:5px 0}
@@ -271,13 +285,19 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         </div>
         <label class="chk"><input type="checkbox" name="rooftop">Rooftop (cobertura usável)</label>
         <div id="rtOps">
-          <label class="fld">Posição sobre o pavimento de baixo<select name="rtPos"><option value="frente">Na frente</option><option value="centro">No centro</option><option value="fundo">No fundo</option></select><small>A escada sobe empilhada; o rooftop sempre inclui a caixa de escada.</small></label>
-          <label class="fld">Área técnica / caixa d’água (m²)<input type="number" name="rtTecnicaA" min="0" max="60" step="1"></label>
-          <label class="fld">Varanda gourmet coberta (m²)<input type="number" name="rtGourmetA" min="0" max="120" step="1"></label>
-          <label class="fld">Varanda coberta (m²)<input type="number" name="rtVarandaA" min="0" max="200" step="1"></label>
-          <label class="fld">Terraço descoberto (m²)<input type="number" name="rtTerracoA" min="0" max="300" step="1"></label>
+          <p class="fld wide"><small><strong>Até onde vai o rooftop, a partir da escada?</strong> Clique na casa ou escolha abaixo. Ele nunca se abre para o poente (oeste).</small></p>
+          <div id="rtRosa" class="rt-rosa"></div>
+          <div class="rt-ops" role="radiogroup" aria-label="Posição do rooftop">
+            <label class="chk"><input type="radio" name="rtPos" value="centro">Centralizado <small></small></label>
+            <label class="chk"><input type="radio" name="rtPos" value="frente">Até a fachada frontal <small></small></label>
+            <label class="chk"><input type="radio" name="rtPos" value="fundo">Até a fachada de fundo <small></small></label>
+          </div>
+          <label class="chk"><input type="checkbox" name="rtTecnica">Área técnica / caixa d’água</label>
+          <label class="chk"><input type="checkbox" name="rtGourmet">Varanda gourmet coberta</label>
+          <label class="chk"><input type="checkbox" name="rtVaranda">Varanda coberta</label>
           <label class="chk"><input type="checkbox" name="rtBanho">Banho</label>
-          <label class="chk"><input type="checkbox" name="rtSpa">Spa (no terraço)</label>
+          <label class="chk"><input type="checkbox" name="rtSpa">Spa (no terraço, 2,40 m)</label>
+          <p class="sub-nota">As áreas saem do desenho: o terraço é o que sobra da laje. Banho e área técnica ficam ao lado da caixa de escada, do lado do poente quando houver um.</p>
         </div>
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
@@ -500,6 +520,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
 <script src="cartoes.js"></script>
 <script src="ui-blocos.js"></script>
 <script src="zoom.js"></script>
+<script src="rooftop-ui.js"></script>
 <script>
 (function(){
 'use strict';
@@ -559,6 +580,7 @@ function sincroniza(){
   document.getElementById('vagasTOps').hidden = gl.value!=='ambos';
   document.getElementById('subVagasNota').hidden = gl.value==='terreo';
   document.getElementById('rtOps').hidden = !form.elements.rooftop.checked;
+  if(window.atualizaRooftop) window.atualizaRooftop();          // rosa do rooftop (gerador/rooftop-ui.js)
   document.getElementById('secOps').hidden = form.elements.supModo.value !== 'parcial';
   form.querySelectorAll('#secOps .chk').forEach(el => { el.hidden = fmt!=='auto' && !el.classList.contains('sec-' + chave); });
   form.querySelectorAll('#secOps .sec-txt').forEach(el => { el.textContent = el.dataset[chave.toLowerCase()] || el.dataset.b; });
@@ -791,6 +813,8 @@ document.getElementById('baixarPng').addEventListener('click', () => {
 });
 
 // zoom com botões + e − na planta e na implantação
+// rosa do rooftop: posição a partir da escada, sem abrir para o poente
+window.atualizaRooftop = RooftopUI.ligar(form, document.getElementById('rtRosa'));
 Zoom.ligar(document.getElementById('plan'), b => document.querySelector('.fig-tools').appendChild(b), 'Planta');
 Zoom.ligar(document.getElementById('lote'), b => document.getElementById('lote').before(b), 'Implantação');
 // sessão: o link (#s= ou o antigo #q=) tem prioridade; sem link, volta a última sessão deste navegador

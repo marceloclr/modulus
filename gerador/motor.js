@@ -72,7 +72,7 @@ const PADRAO = {
   supModo:'corresp', secFrente:true, secMeio:true, secFundo:true, secAlaE:true, secAlaD:false,
   supQuartos:-1, supEscritorio:false, supTv:false, supServico:false,
   torreTipo:'nenhuma',
-  rooftop:false, rtPos:'centro', rtTecnicaA:4, rtGourmetA:12, rtVarandaA:10, rtTerracoA:20, rtBanho:true, rtSpa:false,
+  rooftop:false, rtPos:'centro', rtTecnica:true, rtGourmet:true, rtVaranda:true, rtBanho:true, rtSpa:false,
   subRecuos:'nenhum', permeab:20, subVagasMax:0,
   acessivel:false,
   brises:false, brisesTipo:'auto', brisesFaces:'auto', brisesFace_N:false, brisesFace_NE:false, brisesFace_L:false, brisesFace_SE:false, brisesFace_S:false, brisesFace_SO:false, brisesFace_O:false, brisesFace_NO:false,
@@ -85,15 +85,15 @@ function normaliza(p){
   q.elevador = q.elevador===true||q.elevador==='true'||q.elevador===1||q.elevador==='1'||q.elevador==='on';
   q.vaoMax = clamp(q.vaoMax || 10, 5, 20);
   if(!['frente','centro','fundo'].includes(q.rtPos)) q.rtPos = 'centro';
-  if(p && p.rtGourmet===false && p.rtGourmetA===undefined) q.rtGourmetA = 0;
-  if(p && p.rtTecnica===false && p.rtTecnicaA===undefined) q.rtTecnicaA = 0;
-  for(const k of ['rtTecnicaA','rtGourmetA','rtVarandaA','rtTerracoA']) q[k] = clamp(+q[k] || 0, 0, 300);
+  // rooftop (E2.1): as áreas em m² deram lugar a itens marcados; links e arquivos antigos com m² viram "marcado se > 0"
+  for(const [k, a] of [['rtTecnica','rtTecnicaA'], ['rtGourmet','rtGourmetA'], ['rtVaranda','rtVarandaA']]) if(p && p[k] === undefined && p[a] !== undefined) q[k] = +p[a] > 0;
+  for(const a of ['rtTecnicaA','rtGourmetA','rtVarandaA','rtTerracoA','rtArea']) delete q[a];
   // torre de ar (Fase 4): torreTipo substitui torreCalor (true passa a valer chaminé)
   const torreAntiga = p && (p.torreCalor===true||p.torreCalor==='true'||p.torreCalor==='on'||p.torreCalor===1);
   if(!TORRES[q.torreTipo] && q.torreTipo !== 'auto') q.torreTipo = 'nenhuma';
   if(torreAntiga && (!p.torreTipo || p.torreTipo === 'nenhuma')) q.torreTipo = 'chamine';
   q.torreCalor = q.torreTipo !== 'nenhuma';
-  for(const k of ['secFrente','secMeio','secFundo','secAlaE','secAlaD','supEscritorio','supTv','supServico','rooftop','rtDeck','rtGourmet','rtBanho','rtSpa','rtTecnica']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
+  for(const k of ['secFrente','secMeio','secFundo','secAlaE','secAlaD','supEscritorio','supTv','supServico','rooftop','rtDeck','rtGourmet','rtVaranda','rtBanho','rtSpa','rtTecnica']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   if(q.supModo!=='parcial') q.supModo = 'corresp';
   q.supQuartos = Math.round(+q.supQuartos); if(!(q.supQuartos >= 0) || q.supQuartos > q.quartos) q.supQuartos = q.quartos;
   for(const k of ['gourmetDest','edGourmet','edBanho','edDeposito','edQuarto','piscina','pisPrainha','anexoFundo']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
@@ -1050,6 +1050,20 @@ function subsolo(q, W0, D0, cel0, av){
 }
 
 /* ---------- Rooftop: cobertura usável sobre o último pavimento, com acesso pela escada empilhada ---------- */
+/* ---------- Rooftop (etapa E2.1, 06/10/2026) ----------
+   A extensão parte da caixa de escada: centralizado (só o necessário para os itens), até a fachada frontal ou até a de fundo.
+   Os itens são marcados (área técnica, varanda gourmet, varanda coberta, banho, spa); as áreas saem da geometria.
+   Regra do usuário: o rooftop nunca se abre para o poente. A opção cuja fachada fica a oeste é recusada; toda borda aberta
+   voltada para oeste recebe fechamento (parede ou brise), e banho e área técnica ficam do lado do poente quando há um.
+   Medidas de referência (PREFERÊNCIA de projeto, sem norma): gourmet 12 m², varanda 10 m², banho 3 m², área técnica 4 m²,
+   terraço mínimo 10 m², spa de 2,40 m com 0,30 m de folga em volta. */
+const RT = {gourmet:12, varanda:10, banho:3.0, tecnica:4.0, terracoMin:10, spa:2.4, spaFolga:0.3};
+function rooftopOpcoes(q){
+  const F = RUMOS[q.orientacao];
+  return [{valor:'centro', rotulo:'Centralizado', face:null}, {valor:'frente', rotulo:'Até a fachada frontal', face:'y0'}, {valor:'fundo', rotulo:'Até a fachada de fundo', face:'y1'}]
+    .map(o => { if(F === undefined || !o.face) return Object.assign(o, {rumo:null, proibido:false, tarde:false});
+      const az = rumoFace(o.face, F, false), c = classeSol(az); return Object.assign(o, {rumo:rumoDe(az), proibido:c === 3, tarde:c === 2}); });
+}
 function comRooftop(v, q){
   if(!q.rooftop) return v;
   const casa = v.pav.filter(p => !p.anexo && p.nome!=='Subsolo');
@@ -1057,71 +1071,90 @@ function comRooftop(v, q){
   const E = topo.salas.find(s => s.tipo==='escada' && s.desce && !s.sobe && topo.nome!=='Térreo') || topo.salas.find(s => s.tipo==='escada');
   if(!E){ v.avisos.push('Rooftop: não há escada no último pavimento para chegar à cobertura.'); return v; }
   E.sobe = true;
-  // caixa de escada: escada + o pedaço de hall/circulação encostado nela
-  const viz = topo.salas.filter(s => (s.tipo==='hall' || s.tipo==='circ' || s.tipo==='elevador') && compartilhado(s, E));
-  const caixa = [{x0:E.x0, y0:E.y0, x1:E.x1, y1:E.y1, tipo:'escada'}];
-  for(const h of viz){ const y0 = Math.max(h.y0, E.y0), y1 = Math.min(h.y1, E.y1); if(y1 - y0 > 0.8) caixa.push({x0:h.x0, y0, x1:h.x1, y1, tipo:h.tipo==='elevador' ? 'elevador' : 'hall'}); }
-  const bx0 = Math.min(...caixa.map(c => c.x0)), bx1 = Math.max(...caixa.map(c => c.x1)), by0 = Math.min(...caixa.map(c => c.y0)), by1 = Math.max(...caixa.map(c => c.y1));
+  const F = RUMOS[q.orientacao];
   // faixa do pavimento de baixo: largura toda dos cômodos fechados na altura da escada
   const fech = topo.salas.filter(s => !TIPOS[s.tipo].aberto);
-  const yc = (by0 + by1)/2;
+  const by0 = E.y0, by1 = E.y1, Hb = by1 - by0, yc = (by0 + by1)/2;
   const naLinha = fech.filter(s => s.y0 <= yc && s.y1 >= yc);
   const x0 = Math.min(...naLinha.map(s => s.x0)), x1 = Math.max(...naLinha.map(s => s.x1));
   const col = fech.filter(s => s.x0 < x1 - 0.01 && s.x1 > x0 + 0.01);
-  const ymin = Math.min(...col.map(s => s.y0)), ymax = Math.max(...col.map(s => s.y1));
-  const Wr = x1 - x0, Hb = by1 - by0;
-  // áreas pedidas
-  const Ag = q.rtGourmetA, At = q.rtTecnicaA, Av = q.rtVarandaA, Atr = q.rtTerracoA, Abn = q.rtBanho ? 3.0 : 0;
-  const pedida = Ag + At + Av + Atr + Abn + (bx1-bx0)*Hb;
-  const maxA = Wr * (ymax - ymin);
-  let esc = 1;
-  if(pedida > maxA){ esc = Math.max(0.3, (maxA - (bx1-bx0)*Hb) / Math.max(1, pedida - (bx1-bx0)*Hb)); v.avisos.push(`Rooftop: a laje tem ${f2(maxA)} m²; as áreas pedidas (${f2(pedida)} m²) foram reduzidas na mesma proporção.`); }
-  const dv = Av*esc / Wr, dt = Atr*esc / Wr;               // faixas contínuas de varanda coberta e terraço
-  const dTot = Hb + dv + dt;
-  // posição sobre o pavimento de baixo
-  let ry0 = q.rtPos==='frente' ? ymin : q.rtPos==='fundo' ? ymax - dTot : (ymin + ymax)/2 - dTot/2;
-  ry0 = clamp(ry0, ymin, Math.max(ymin, ymax - dTot));
-  // a caixa de escada tem de ficar dentro: as faixas vão para os lados livres dela
-  let acima = clamp(by0 - ry0, 0, dv + dt);
-  if(by0 - acima < ymin) acima = by0 - ymin;
-  if(by1 + (dv + dt - acima) > ymax) acima = Math.min(by0 - ymin, dv + dt - Math.max(0, ymax - by1));
-  const abaixo = Math.max(0, dv + dt - acima);
-  if((q.rtPos==='frente' && ry0 < by0 - (dv+dt) - 0.5) || (q.rtPos==='fundo' && ry0 + dTot < by1 - 0.5)) v.avisos.push('Rooftop: a posição pedida foi aproximada para incluir a caixa de escada.');
-  const salas = [];
-  for(const c of caixa) salas.push(c.tipo==='escada' ? sala('escada', c.x0, c.y0, c.x1, c.y1, {desce:true, esc:E.esc, nucleo:E.nucleo}) : sala(c.tipo, c.x0, c.y0, c.x1, c.y1, c.tipo==='hall' ? {nome:'Caixa de escada'} : {}));
-  // faixas: varanda coberta encostada na linha da caixa, terraço depois (acima e/ou abaixo)
-  const faixas = (y, sentido, prof) => {
-    let resto = prof, yy = y;
-    const v1 = Math.min(resto, dv - usadoV); if(v1 > 0.3){ const a = sentido > 0 ? yy : yy - v1, b = sentido > 0 ? yy + v1 : yy; salas.push(sala('varanda', x0, a, x1, b, {nome:'Varanda coberta'})); usadoV += v1; resto -= v1; yy += sentido*v1; }
-    if(resto > 0.3){ const a = sentido > 0 ? yy : yy - resto, b = sentido > 0 ? yy + resto : yy; salas.push(sala('terraco', x0, a, x1, b, {nome:'Terraço'})); }
-  };
-  let usadoV = 0;
-  if(abaixo > 0.3) faixas(by1, 1, abaixo);
-  if(acima > 0.3) faixas(by0, -1, acima);
-  // linha da caixa: gourmet, banho e área técnica a partir dela; sobra emenda no terraço
-  const itens = [];
-  if(Ag > 0) itens.push({tipo:'gourmet', a:Ag*esc, extra:{nome:'Varanda gourmet'}});
-  if(Abn > 0) itens.push({tipo:'banhoSocial', a:Abn, extra:{nome:'Banho'}});
-  if(At > 0) itens.push({tipo:'deposito', a:At*esc, extra:{nome:'Área técnica / caixa d’água'}});
-  const lados = [{x0:x0, x1:bx0, dir:-1}, {x0:bx1, x1:x1, dir:1}].filter(l => l.x1 - l.x0 > 0.3).sort((a,b) => (b.x1-b.x0)-(a.x1-a.x0));
-  const fila = itens.slice();
-  for(const l of lados){
-    let x = l.dir > 0 ? l.x0 : l.x1;
-    while(fila.length){
-      const it = fila[0], w = Math.max(TIPOS[it.tipo].lado || 1.2, it.a / Hb), resta = l.dir > 0 ? l.x1 - x : x - l.x0;
-      if(resta < w - 0.01) break;
-      salas.push(sala(it.tipo, l.dir > 0 ? x : x - w, by0, l.dir > 0 ? x + w : x, by1, it.extra)); x += l.dir*w; fila.shift();
-    }
-    const a = l.dir > 0 ? x : l.x0, b = l.dir > 0 ? l.x1 : x;
-    if(b - a > 0.3) salas.push(sala('terraco', a, by0, b, by1, {nome:'Terraço'}));
+  const ymin = Math.min(...col.map(s => s.y0)), ymax = Math.max(...col.map(s => s.y1)), Wr = x1 - x0;
+  // posição pedida; a fachada a oeste é recusada
+  const ops = rooftopOpcoes(q);
+  let pos = ops.some(o => o.valor === q.rtPos) ? q.rtPos : 'centro';
+  const op = ops.find(o => o.valor === pos);
+  if(op.proibido){ v.avisos.push(`Rooftop: a fachada ${pos === 'frente' ? 'frontal' : 'de fundo'} fica a oeste (poente); o rooftop foi centralizado.`); pos = 'centro'; }
+  else if(op.tarde) v.avisos.push(`Rooftop ${op.rotulo.toLowerCase()} (${NOMES_RUMO[op.rumo].toLowerCase()}): sol da tarde em parte do ano; prever brise nessa borda.`);
+  // linha da escada: escada + elevador encostado + hall (a caixa de escada sempre tem hall, para as portas do banho e da área técnica)
+  const fechados = [];
+  if(q.rtTecnica) fechados.push({tipo:'deposito', a:RT.tecnica, extra:{nome:'Área técnica / caixa d’água'}});
+  if(q.rtBanho) fechados.push({tipo:'banhoSocial', a:RT.banho, extra:{nome:'Banho'}});
+  const el = topo.salas.find(s => s.tipo==='elevador' && compartilhado(s, E) && s.y0 >= by0 - 0.01 && s.y1 <= by1 + 0.01);
+  const ocupadoE = el ? [Math.min(E.x0, el.x0), Math.max(E.x1, el.x1)] : [E.x0, E.x1];
+  // lado do poente (sem espelho): banho e área técnica vão para ele; senão para o lado mais largo
+  const oeste = F === undefined ? null : ['x0','x1'].find(l => classeSol(rumoFace(l, F, false)) === 3);
+  const livreE = ocupadoE[0] - x0, livreD = x1 - ocupadoE[1];
+  const ladoItens = oeste === 'x0' && livreE >= 1.2 ? -1 : oeste === 'x1' && livreD >= 1.2 ? 1 : livreD >= livreE ? 1 : -1;
+  const salas = [sala('escada', E.x0, by0, E.x1, by1, {desce:true, esc:E.esc, nucleo:E.nucleo})];
+  if(el) salas.push(sala('elevador', el.x0, el.y0, el.x1, el.y1, {nucleo:true}));
+  const wHall = 1.2, wCol = fechados.length ? Math.max(1.5, fechados.reduce((t, i) => t + i.a, 0)/Hb) : 0;
+  let hx0, hx1, cx0, cx1;
+  if(ladoItens > 0){ hx0 = ocupadoE[1]; hx1 = Math.min(x1, hx0 + wHall); cx0 = hx1; cx1 = Math.min(x1, cx0 + wCol); }
+  else { hx1 = ocupadoE[0]; hx0 = Math.max(x0, hx1 - wHall); cx1 = hx0; cx0 = Math.max(x0, cx1 - wCol); }
+  if(hx1 - hx0 > 0.6) salas.push(sala('hall', hx0, by0, hx1, by1, {nome:'Caixa de escada'}));
+  if(fechados.length){
+    if(cx1 - cx0 >= 1.2 - 0.01) salas.push(...faixa(cx0, by0, cx1, by1, fechados, 'y'));
+    else for(const it of fechados) v.avisos.push(`Rooftop: sem espaço para ${it.extra.nome.toLowerCase()} ao lado da caixa de escada.`);
   }
-  for(const it of fila) v.avisos.push(`Rooftop: sem espaço para ${it.extra.nome.toLowerCase()} na linha da escada.`);
-  const ry0f = Math.min(...salas.map(s => s.y0)), ry1f = Math.max(...salas.map(s => s.y1));
-  const pav = {nome:'Rooftop', salas, area:r2(salas.reduce((t,x)=>t+area(x),0)),
-    base: topo.salas.map(x => ({tipo:x.tipo, zona:x.zona, x0:x.x0, y0:x.y0, x1:x.x1, y1:x.y1}))};   // pavimento de baixo, esmaecido no desenho
-  if(q.rtSpa){ const deck = salas.filter(s => s.tipo==='terraco').sort((a,b) => area(b)-area(a))[0];
-    if(deck && Math.min(deck.x1-deck.x0, deck.y1-deck.y0) >= 2.4) pav.spa = {x:r2((deck.x0+deck.x1)/2), y:r2((deck.y0+deck.y1)/2), r:1.0};
-    else v.avisos.push('Rooftop: o deck é estreito demais para o spa (precisa de 2,40 m).'); }
+  // o resto da linha da escada vira terraço
+  const usados = salas.map(s => [s.x0, s.x1]).sort((a, b) => a[0] - b[0]);
+  let x = x0; for(const [a, b] of usados){ if(a - x > 0.3) salas.push(sala('terraco', x, by0, a, by1, {nome:'Terraço'})); x = Math.max(x, b); }
+  if(x1 - x > 0.3) salas.push(sala('terraco', x, by0, x1, by1, {nome:'Terraço'}));
+  // faixas abertas: uma faixa coberta encostada na linha da escada (gourmet em bloco na ponta longe do banho, varanda no resto)
+  // e o terraço por fora, com o spa. Centralizado: cobertas de um lado da escada e terraço do outro.
+  const ladoSpa = RT.spa + 2*RT.spaFolga;
+  const dtMin = Math.max(RT.terracoMin/Wr, q.rtSpa ? ladoSpa : 0);
+  let gourmet = q.rtGourmet, varanda = q.rtVaranda;
+  const dcDe = () => (gourmet || varanda) ? Math.max(gourmet ? TIPOS.gourmet.lado : 2.0, ((gourmet ? RT.gourmet : 0) + (varanda ? RT.varanda : 0))/Wr) : 0;
+  const dispA = by0 - ymin, dispB = ymax - by1;           // A: para a frente; B: para o fundo
+  // tira itens cobertos (varanda primeiro) até a faixa coberta e o terraço mínimo caberem em `cap`
+  const cabe = cap => { while((gourmet || varanda) && dcDe() + dtMin > cap + 0.01){ const n = varanda ? 'varanda coberta' : 'varanda gourmet'; if(varanda) varanda = false; else gourmet = false;
+    v.avisos.push(`Rooftop: sem espaço para a ${n} (a laje nesta posição tem ${f2(cap)} m de profundidade além da escada).`); } };
+  let ladoCob = null, ladoTer = null;                     // {s: −1 frente | +1 fundo, d}
+  if(pos !== 'centro'){ const s = pos === 'frente' ? -1 : 1, disp = s < 0 ? dispA : dispB; cabe(disp); ladoCob = {s, d:dcDe()}; ladoTer = {s, d:disp - dcDe(), depois:true}; }
+  else {
+    const dc0 = dcDe();
+    if(dispA >= dc0 - 0.01 && dispB >= dtMin - 0.01){ ladoCob = {s:-1, d:dc0}; ladoTer = {s:1, d:dtMin}; }
+    else if(dispB >= dc0 - 0.01 && dispA >= dtMin - 0.01){ ladoCob = {s:1, d:dc0}; ladoTer = {s:-1, d:dtMin}; }
+    else { const s = dispA >= dispB ? -1 : 1, disp = Math.max(dispA, dispB); cabe(disp); ladoCob = {s, d:dcDe()}; ladoTer = {s, d:Math.min(disp - dcDe(), dtMin), depois:true}; }
+  }
+  const tira = (s, ini, d, tipo, nome, xa, xb) => { const a = s > 0 ? ini : ini - d, b = s > 0 ? ini + d : ini; salas.push(sala(tipo, xa, a, xb, b, {nome})); };
+  if(ladoCob.d > 0.3){
+    const yIni = ladoCob.s < 0 ? by0 : by1, dc = ladoCob.d;
+    // a gourmet fica na ponta oposta ao banho e à área técnica
+    const wg = gourmet ? Math.min(Wr, Math.max(TIPOS.gourmet.lado, RT.gourmet/dc)) : 0, gEsq = ladoItens > 0;
+    const gx0 = gEsq ? x0 : x1 - wg, gx1 = gEsq ? x0 + wg : x1;
+    if(gourmet) tira(ladoCob.s, yIni, dc, 'gourmet', 'Varanda gourmet', gx0, gx1);
+    const rx0 = gourmet ? (gEsq ? gx1 : x0) : x0, rx1 = gourmet ? (gEsq ? x1 : gx0) : x1;
+    if(rx1 - rx0 > 0.3) tira(ladoCob.s, yIni, dc, varanda ? 'varanda' : 'terraco', varanda ? 'Varanda coberta' : 'Terraço', rx0, rx1);
+  }
+  if(ladoTer.d > 0.3){
+    const ini = ladoTer.depois ? (ladoTer.s < 0 ? by0 - ladoCob.d : by1 + ladoCob.d) : (ladoTer.s < 0 ? by0 : by1);
+    tira(ladoTer.s, ini, ladoTer.d, 'terraco', 'Terraço', x0, x1);
+  }
+  const pav = {nome:'Rooftop', salas, area:r2(salas.reduce((t, s) => t + area(s), 0)), posicao:pos,
+    base: topo.salas.map(s => ({tipo:s.tipo, zona:s.zona, x0:s.x0, y0:s.y0, x1:s.x1, y1:s.y1}))};   // pavimento de baixo, esmaecido no desenho
+  // spa: no maior terraço com 3,00 m nos dois lados
+  if(q.rtSpa){
+    const deck = salas.filter(s => s.tipo==='terraco' && s.x1 - s.x0 >= ladoSpa - 0.01 && s.y1 - s.y0 >= ladoSpa - 0.01).sort((a, b) => area(b) - area(a))[0];
+    if(deck) pav.spa = {x:r2((deck.x0 + deck.x1)/2), y:r2((deck.y0 + deck.y1)/2), r:RT.spa/2, lado:RT.spa};
+    else v.avisos.push(`Rooftop: o spa precisa de um terraço de ${f2(ladoSpa)} × ${f2(ladoSpa)} m; escolha "até a fachada" ou desmarque a varanda coberta.`);
+  }
+  // fechamento a oeste: bordas abertas voltadas para o poente, na planta normal e na espelhada
+  pav.fechamentos = {normal:[], espelhada:[]};
+  if(F !== undefined) for(const s of salas.filter(s => TIPOS[s.tipo].aberto))
+    for(const e of trechosExternos(s, salas)) for(const [k, esp] of [['normal', false], ['espelhada', true]])
+      if(classeSol(rumoFace(e.lado, F, esp)) === 3) pav.fechamentos[k].push({o:e.o, c:r2(e.c), t0:r2(e.t0), t1:r2(e.t1)});
   v.pav.push(pav);
   return v;
 }
@@ -1596,7 +1629,7 @@ function cobertura(v){
 function projecao(v){ return uniao(cobertura(v)); }
 /* Motivos que tornam a variante inválida (etapa E1): ela sai do ranking em vez de só perder pontos.
    Cômodo fora do lote; cômodo nos recuos (o subsolo pode ocupá-los com a opção, e o jardim e a rampa sempre);
-   cômodo sem ligação com o resto da casa (o rooftop entra quando a etapa E2.1 ligar banho e área técnica). */
+   cômodo sem ligação com o resto da casa (inclusive no rooftop). */
 function invalidez(v, q, av){
   const E = 0.011, m = [];
   const lote = {x0:-v.x0, y0:-v.y0, x1:q.frente - v.x0, y1:q.fundo - v.y0};
@@ -1611,7 +1644,7 @@ function invalidez(v, q, av){
     if(fora.length) m.push(`${p.nome}: ${lista(fora)} fora do lote`);
     if(recuo.length) m.push(`${p.nome}: ${lista(recuo)} nos recuos`);
   }
-  for(const a of av) if(/não se liga ao resto da casa/.test(a) && !a.startsWith('Rooftop')) m.push(a.replace(/.$/, ''));
+  for(const a of av) if(/não se liga ao resto da casa/.test(a)) m.push(a.replace(/.$/, ''));
   return m;
 }
 /* Retângulos impermeáveis no sistema da casa. */
@@ -1923,5 +1956,5 @@ function loteMinimo(q0, P){
 // versão do motor (gravada nos arquivos de projeto): ano.mês.dia da última mudança de regra
 const VERSAO = '2026.10.06';
 
-return {VERSAO, gerar, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
+return {VERSAO, gerar, rooftopOpcoes, RT, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
 });
