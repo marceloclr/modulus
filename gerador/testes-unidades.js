@@ -21,6 +21,7 @@ t('estado: ida e volta pela URL com acentos, blocos e ui', () => {
   igual(r.ui, {blocos:{b1:'concluido', b2:'a-definir', b3:'a-definir', b4:'a-definir'}, abertos:['b1'], variante:2, pavimento:1, espelho:true, processado:true});
 });
 t('estado: resultado só depois da primeira conclusão das dimensões', () => {
+  igual(Estado.deHash('#q=' + Estado._b64(JSON.stringify({frente:12})) + '&v=1&e=0', P).ui.processado, true, 'projeto salvo (link #q=) abre com o resultado:');
   const e = Estado.novo(P); igual(e.ui.processado, false, 'estado novo:');
   igual(Estado.deHash(Estado.paraHash(e, P), P).ui.processado, false, 'sem a marca no link:');
   e.ui.processado = true; e.ui.blocos.b1 = 'em-edicao';
