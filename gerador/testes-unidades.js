@@ -647,6 +647,34 @@ t('varanda de fundos: no zoneamento invertido, a varanda da sala ganha a profund
   ok(vf && Math.abs(vf.y1 - vf.y0 - 3) < 0.001, 'varanda de fundos com 3,00 m');
 });
 
+// ---------- escritório ampliado (E2.4) ----------
+const escAmp = c => M.gerar(Object.assign({quartos:3, suites:2, escritorio:true, escritorioAmpliado:true}, c));
+const escDe = v => { const T = v.pav.find(p => p.nome==='Térreo'), e = T.salas.find(s => s.tipo==='escritorio');
+  return {T, e, ext: T.portas.filter(d => d.escritorio && d.externa), int: T.portas.filter(d => (d.sala === e.id || d.viz === e.id) && !d.externa)}; };
+t('escritório ampliado: 14 m², na frente, com porta externa e porta interna', () => {
+  for(const c of [{frente:15, fundo:30, orientacao:'SE'}, {frente:15, fundo:30, orientacao:'SE', varanda:false}, {frente:22, fundo:30, formato:'U', orientacao:'SE'}]){
+    const r = escAmp(c); ok(r.variantes.length, JSON.stringify(c) + ': sem variantes');
+    const {T, e, ext, int} = escDe(r.variantes[0]);
+    ok(e && (e.x1 - e.x0) * (e.y1 - e.y0) >= 11, 'escritório com área perto de 14 m²');
+    igual(ext.length, 1, 'uma porta externa:'); ok(int.length >= 1, 'porta interna');
+    const viz = T.salas.find(s => s.id === ext[0].viz);
+    ok(c.varanda === false ? !viz && Math.abs(ext[0].c - e.y0) < 0.001 : viz && viz.tipo === 'varanda', 'porta para a varanda frontal (ou direto para fora, sem varanda)');
+  }
+  igual(M.normaliza({escritorioAmpliado:true}).escritorioAmpliado, false, 'sem escritório, o ampliado não vale:');
+});
+t('escritório ampliado: no zoneamento invertido fica na frente; no sobrado, no térreo; em H, porta na lateral', () => {
+  const inv = escAmp({frente:12, fundo:32, orientacao:'L'}).variantes.find(v => v.zoneamento === 'invertido'); ok(inv, 'sem variante invertida');
+  const a = escDe(inv); ok(a.e.y0 < 0.001 && a.ext.length === 1, 'invertido: escritório na frente com porta para a rua');
+  const sob = escAmp({frente:12, fundo:30, tipo:'sobrado', quartos:4, suites:3, supEscritorio:true, orientacao:'SE'}).variantes[0];
+  ok(escDe(sob).e && !sob.pav.find(p => p.nome==='Superior').salas.some(s => s.tipo==='escritorio'), 'sobrado: o ampliado fica no térreo');
+  const h = escAmp({frente:22, fundo:32, formato:'H', orientacao:'N'}).variantes[0], b = escDe(h);
+  ok(b.ext.length === 1 && b.ext[0].o === 'v', 'H: porta externa na fachada lateral');
+});
+t('entrada: térreo sem porta de entrada torna a variante inválida', () => {
+  const r = escAmp({frente:12, fundo:30, tipo:'sobrado', quartos:4, suites:3, supEscritorio:true, orientacao:'SE'});
+  for(const v of r.variantes) ok(v.pav.find(p => p.nome==='Térreo').portas.some(d => d.entrada), v.nome + ' sem porta de entrada no ranking');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

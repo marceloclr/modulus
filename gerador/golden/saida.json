@@ -1,6 +1,6 @@
 {
  "Térrea 10 × 30, 2 quartos": {
-  "motor": "bd8bcfe6b0e23151",
+  "motor": "881e27f705afbe3e",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,00 × 19,35 m, 104,10 m², nota 91",
    "Variante B: Bloco único, corredor central, 7,00 × 21,90 m, 144,50 m², nota 67",
@@ -22,7 +22,7 @@
   }
  },
  "Térrea 12 × 30, 3 suítes, 2 vagas": {
-  "motor": "7bac0f84fa1ea778",
+  "motor": "7db00116e13e7508",
   "resumo": [
    "Variante A: Bloco único, corredor central, 9,00 × 20,38 m, 170,62 m², nota 84"
   ],
@@ -34,7 +34,7 @@
   }
  },
  "Casa em H, 22 × 30": {
-  "motor": "5cbfb6aecba0a3f2",
+  "motor": "2f987413d0381e46",
   "resumo": [
    "Variante A: Em H, 16,00 × 17,30 m, 184,60 m², nota 92",
    "Variante B: Em H, 17,00 × 17,30 m, 188,27 m², nota 92",
@@ -56,7 +56,7 @@
   }
  },
  "Sobrado 10 × 25, 4 quartos, subsolo 2 vagas": {
-  "motor": "871769386b512610",
+  "motor": "eb245b1bfca1ce91",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 7,00 × 16,62 m, 256,21 m², nota 81"
   ],
@@ -72,7 +72,7 @@
   }
  },
  "Térrea com subsolo, 15 × 30": {
-  "motor": "9fd04884ca084bbd",
+  "motor": "618a16323d085089",
   "resumo": [
    "Variante A: Bloco único, corredor central, 8,00 × 21,26 m, 272,40 m², nota 89",
    "Variante B: Bloco único, corredor central, 9,00 × 19,87 m, 339,39 m², nota 86",
@@ -100,7 +100,7 @@
   }
  },
  "Em U, 22 × 30": {
-  "motor": "5b409a79a33d9563",
+  "motor": "a3be3932688afe72",
   "resumo": [
    "Variante A: Em U, 18,50 × 20,13 m, 180,43 m², nota 99"
   ],
@@ -112,7 +112,7 @@
   }
  },
  "Edícula 2 pav. e piscina, 16 × 42": {
-  "motor": "02506f2db3a6479b",
+  "motor": "57defde22fcb8ec0",
   "resumo": [
    "Variante A: Bloco único, corredor central, 13,00 × 15,80 m, 240,73 m², nota 61",
    "Variante B: Bloco único, corredor central, 12,00 × 16,32 m, 233,17 m², nota 51",
@@ -146,7 +146,7 @@
   }
  },
  "Subsolo enterrado, 12 × 32": {
-  "motor": "c7527985b8b74683",
+  "motor": "29359fb6210ce7da",
   "resumo": [
    "Variante A: Bloco único, corredor central, 8,00 × 21,26 m, 277,80 m², nota 99",
    "Variante B: Bloco único, corredor lateral, 7,50 × 23,88 m, 287,82 m², nota 81",
@@ -174,7 +174,7 @@
   }
  },
  "Sobrado em L, só a frente sobe, 16 × 32": {
-  "motor": "39d4fb10392f4985",
+  "motor": "c0aede22fd9c7da4",
   "resumo": [
    "Variante A: Em L, 11,50 × 15,44 m, 263,37 m², nota 70",
    "Variante B: Em L, 12,50 × 14,85 m, 268,76 m², nota 69",
@@ -202,7 +202,7 @@
   }
  },
  "Sobrado em U, frente e ala esquerda, 22 × 30": {
-  "motor": "0c14c937d0fe6259",
+  "motor": "6ceda825240667bd",
   "resumo": [
    "Variante A: Em U, 19,00 × 14,36 m, 288,48 m², nota 81"
   ],
@@ -216,7 +216,7 @@
   }
  },
  "Sobrado correspondente com TV e escritório em cima, 12 × 30": {
-  "motor": "b90d306831f713db",
+  "motor": "4efa513fe899c264",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,00 × 21,26 m, 197,58 m², nota 96",
    "Variante B: Em L, 9,00 × 14,66 m, 218,78 m², nota 77",
@@ -244,7 +244,7 @@
   }
  },
  "Térrea com rooftop e spa, 14 × 30": {
-  "motor": "19ad2edce0ea7ce1",
+  "motor": "f0088f219fa1dbc0",
   "resumo": [
    "Variante A: Bloco único, corredor central, 8,50 × 21,49 m, 187,41 m², nota 85",
    "Variante B: Bloco único, corredor central, 11,00 × 19,44 m, 218,78 m², nota 70",
@@ -272,7 +272,7 @@
   }
  },
  "Sobrado com rooftop, 12 × 30": {
-  "motor": "52c78318fd915d96",
+  "motor": "63dece60b2fdd223",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,50 × 14,70 m, 180,90 m², nota 94",
    "Variante B: Em L, 9,00 × 14,16 m, 233,13 m², nota 83",
@@ -306,7 +306,7 @@
   }
  },
  "Subsolo com elevador e sobrado, 12 × 32": {
-  "motor": "73a8d036224d71e0",
+  "motor": "b77c4f85dd9d7761",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 7,00 × 14,52 m, 302,51 m², nota 93",
    "Variante B: Bloco único, corredor central, 8,00 × 13,64 m, 312,60 m², nota 89",
@@ -340,7 +340,7 @@
   }
  },
  "U com subsolo, 22 × 34": {
-  "motor": "a21f6989dcf86aae",
+  "motor": "d855c7b441a30e0c",
   "resumo": [
    "Variante A: Em U, 13,50 × 24,61 m, 419,33 m², nota 100",
    "Variante B: Em U, 14,50 × 24,61 m, 422,93 m², nota 100",
@@ -368,7 +368,7 @@
   }
  },
  "H com subsolo, 22 × 34": {
-  "motor": "042a1e98bf1ca1cb",
+  "motor": "e8735f6b9cc413c2",
   "resumo": [
    "Variante A: Em H, 15,50 × 19,01 m, 557,56 m², nota 95",
    "Variante B: Em H, 16,50 × 19,01 m, 559,77 m², nota 95",
@@ -396,7 +396,7 @@
   }
  },
  "L com subsolo, 16 × 36": {
-  "motor": "d7f9c489b6dbefd3",
+  "motor": "95619730d2e2a7b3",
   "resumo": [
    "Variante A: Em L, 9,00 × 26,65 m, 335,17 m², nota 93",
    "Variante B: Em L, 10,00 × 26,65 m, 415,13 m², nota 93",
@@ -424,7 +424,7 @@
   }
  },
  "Subsolo nos recuos laterais e de fundo, 10 × 25": {
-  "motor": "9700c2553c7c0ae4",
+  "motor": "38ba162393b541ad",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 7,00 × 16,62 m, 284,71 m², nota 91"
   ],
@@ -440,7 +440,7 @@
   }
  },
  "Subsolo em todos os recuos, 12 × 30": {
-  "motor": "23d00441f988bacf",
+  "motor": "ec416c640201cebb",
   "resumo": [
    "Variante A: Bloco único, corredor central, 8,00 × 21,26 m, 424,22 m², nota 99",
    "Variante B: Bloco único, corredor central, 9,00 × 19,87 m, 430,97 m², nota 86"
@@ -461,7 +461,7 @@
   }
  },
  "Frente para o sul, torre de calor e rooftop no fundo, 12 × 30": {
-  "motor": "02e141fd6a188551",
+  "motor": "eeb24fc3931bb309",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,50 × 14,70 m, 180,90 m², nota 94",
    "Variante B: Bloco único, corredor central, 8,00 × 17,95 m, 217,92 m², nota 83"
@@ -486,12 +486,12 @@
   }
  },
  "Programa grande demais, 8 × 20": {
-  "motor": "fc7d6237496320a2",
+  "motor": "3cb3f3321aacf1e6",
   "resumo": [],
   "svg": {}
  },
  "Padrão da página": {
-  "motor": "e086b5cef1a4a023",
+  "motor": "2673ab8cb8b6e09e",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,00 × 21,95 m, 119,70 m², nota 91",
    "Variante B: Bloco único, corredor central, 8,50 × 19,45 m, 153,53 m², nota 84",
@@ -513,7 +513,7 @@
   }
  },
  "Térrea em bloco com subsolo, 12 × 30": {
-  "motor": "e383dd68798e5d16",
+  "motor": "65c30b4b0bde86a4",
   "resumo": [
    "Variante A: Bloco único, corredor central, 8,00 × 21,26 m, 272,40 m², nota 99",
    "Variante B: Bloco único, corredor central, 9,00 × 19,87 m, 339,39 m², nota 86"
@@ -534,12 +534,12 @@
   }
  },
  "Térrea em L com subsolo semienterrado, 16 × 34": {
-  "motor": "fad4e1f1a0ac269c",
+  "motor": "e2e972db3f0c8eec",
   "resumo": [],
   "svg": {}
  },
  "Sobrado em L com subsolo, 16 × 34": {
-  "motor": "2958fccd455a5b49",
+  "motor": "9f9e17404b92419d",
   "resumo": [
    "Variante A: Em L, 10,50 × 13,55 m, 478,31 m², nota 77",
    "Variante B: Em L, 11,50 × 13,55 m, 497,07 m², nota 76",
@@ -573,7 +573,7 @@
   }
  },
  "Sobrado em U com subsolo, 22 × 34": {
-  "motor": "bb7478eb55509bbc",
+  "motor": "e26f1dcc5f5cae62",
   "resumo": [
    "Variante A: Em U, 19,00 × 14,36 m, 671,15 m², nota 79",
    "Variante B: Em U, 18,00 × 14,36 m, 660,75 m², nota 74",
@@ -607,7 +607,7 @@
   }
  },
  "Sobrado em bloco, subsolo enterrado e vagas nos dois, 12 × 32": {
-  "motor": "d8938e6994cdd571",
+  "motor": "d47ca9c31220c3e1",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,50 × 14,70 m, 311,34 m², nota 93",
    "Variante B: Bloco único, corredor central, 9,00 × 12,48 m, 411,20 m², nota 87",
@@ -641,7 +641,7 @@
   }
  },
  "Frente para oeste, 12 × 30": {
-  "motor": "201bf5df398dbfa4",
+  "motor": "237f1ab8ac2a3636",
   "resumo": [
    "Variante A: Bloco único, corredor central, 8,50 × 19,45 m, 153,53 m², nota 79"
   ],
@@ -653,7 +653,7 @@
   }
  },
  "Frente para nordeste com varanda em L, 14 × 30": {
-  "motor": "2641622392f51b7d",
+  "motor": "4ff357ac16770e3c",
   "resumo": [
    "Variante A: Bloco único, corredor central, 9,00 × 18,31 m, 143,55 m², nota 47",
    "Variante B: Bloco único, corredor central, 8,00 × 20,82 m, 145,76 m², nota 32",
@@ -675,7 +675,7 @@
   }
  },
  "Edícula de 1 pavimento, 14 × 40": {
-  "motor": "bd2b12a91b317dee",
+  "motor": "7a54f38addcc3d04",
   "resumo": [
    "Variante A: Bloco único, corredor lateral, 6,00 × 21,95 m, 146,10 m², nota 90",
    "Variante B: Em L, 9,00 × 22,95 m, 163,49 m², nota 87",
@@ -703,7 +703,7 @@
   }
  },
  "Programa mínimo, 8 × 20": {
-  "motor": "8b7b560ce626e14a",
+  "motor": "3463e7465bfed022",
   "resumo": [],
   "svg": {}
  }

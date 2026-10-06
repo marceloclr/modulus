@@ -25,7 +25,7 @@ const REGRAS = {
   G07: {nome:'Portas ou porta e janela sobrepostas', limite:0},
   G08: {nome:'Janela em parede inexistente (interna ou atravessando cômodos)', limite:0},
   G09: {nome:'Corredor estreito (< 0,90 m)', limite:0},
-  G10: {nome:'Corredor abaixo de 1,20 m', limite:82},
+  G10: {nome:'Corredor abaixo de 1,20 m', limite:84},
   G11: {nome:'Circulação interrompida (cômodo sem ligação)', limite:0},
   G12: {nome:'Escada que não cabe no espaço', limite:0},
   G13: {nome:'Escada fora da faixa de Blondel (0,63–0,65 m)', limite:0},
@@ -35,6 +35,8 @@ const REGRAS = {
   G17: {nome:'Rooftop aberto para o poente sem fechamento', limite:0},
   G18: {nome:'Janela a menos de 1,50 m da divisa (Código Civil, art. 1.301)', limite:0},
   G19: {nome:'Quarto encostado em fachada a oeste (íntimo nunca no poente)', limite:11},
+  G20: {nome:'Porta externa do escritório fora da fachada (ou da parede com a varanda frontal)', limite:0},
+  G22: {nome:'Escritório ampliado sem as duas portas (interna e externa)', limite:0},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
   M03: {nome:'Projeção diferente da recalculada (térreo ∪ pavimentos de cima)', limite:0},
@@ -259,6 +261,16 @@ function auditar(v, q){
   const W = Math.max(...casa.flatMap(p => p.salas.map(s => s.x1))) - Math.min(...casa.flatMap(p => p.salas.map(s => s.x0)));
   const D = Math.max(...casa.flatMap(p => p.salas.map(s => s.y1))) - Math.min(...casa.flatMap(p => p.salas.map(s => s.y0)));
   if(Math.abs(W - v.W) > 0.02 || Math.abs(D - v.D) > 0.02) add('M07', 'Casa', `declarada ${f2(v.W)} × ${f2(v.D)} m, desenhada ${f2(W)} × ${f2(D)} m`);
+  // G20, G22: escritório ampliado (E2.4) — porta externa numa parede de fachada ou na da varanda frontal, e as duas portas
+  if(q.escritorioAmpliado){ const T = v.pav.find(p => p.nome==='Térreo');
+    for(const s of (T ? T.salas.filter(x => x.tipo==='escritorio') : [])){
+      const fech = T.salas.filter(x => !ABERTO(x)), ext = trechosExternos(s, fech);
+      const ps = (T.portas || []).filter(d => d.sala === s.id || d.viz === s.id), exts = ps.filter(d => d.escritorio && d.externa);
+      for(const d of exts) if(!ext.some(e => e.o === d.o && Math.abs(e.c - d.c) < E && d.t0 >= e.t0 - E && d.t1 <= e.t1 + E)) add('G20', 'Térreo', `porta externa do escritório em ${f2(d.t0)}–${f2(d.t1)} fora da fachada`);
+      const internas = ps.filter(d => !d.externa && d.viz !== undefined).length + (T.vaos || []).filter(x => x.a === s.id || x.b === s.id).length;
+      if(!exts.length || !internas) add('G22', 'Térreo', `escritório com ${exts.length} porta(s) externa(s) e ${internas} interna(s)`);
+    }
+  }
   // M08, M09: mobília da planta humanizada (gerador/mobilia.js), conferida com a geometria das paredes e portas
   for(const p of v.pav){
     const fech = p.salas.filter(s => !ABERTO(s));
@@ -298,6 +310,10 @@ function casos(){
     'Acessível, térrea 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, acessivel:true, orientacao:'N'},
     'Acessível, sobrado com elevador 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, acessivel:true, elevador:true, orientacao:'SE'},
     'Cozinha fechada e lavabo, 12 × 30': {frente:12, fundo:30, quartos:3, suites:1, cozinha:'fechada', lavabo:true, orientacao:'L'},
+    'Escritório ampliado, 15 × 30': {frente:15, fundo:30, quartos:3, suites:2, escritorio:true, escritorioAmpliado:true, orientacao:'SE'},
+    'Escritório ampliado no invertido, 12 × 32': {frente:12, fundo:32, quartos:3, suites:2, escritorio:true, escritorioAmpliado:true, orientacao:'L'},
+    'Escritório ampliado em H, 22 × 32': {frente:22, fundo:32, formato:'H', quartos:3, suites:2, escritorio:true, escritorioAmpliado:true, orientacao:'N'},
+    'Escritório ampliado no sobrado (pedido em cima), 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:4, suites:3, escritorio:true, escritorioAmpliado:true, supEscritorio:true, orientacao:'SE'},
     'Varanda de fundos parcial, 12 × 34': {frente:12, fundo:34, quartos:3, suites:2, varandaFundos:true, varandaFundosL:4, varandaFundosP:2.5, orientacao:'N'},
     'Em U com varanda de fundos, 22 × 32': {frente:22, fundo:32, quartos:3, suites:2, formato:'U', varandaFundos:true, orientacao:'SE'},
     'Garagem descoberta, 3 vagas, 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, garagem:'descoberta', vagas:3, orientacao:'NE'},
