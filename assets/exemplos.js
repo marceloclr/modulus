@@ -21,7 +21,7 @@ function gerar(raiz){
     try{
       const v = root.Motor.gerar(programa).variantes[0]; if(!v) return null;
       const pi = Math.max(0, v.pav.findIndex(p => p.nome === 'Térreo'));
-      const svg = root.Desenho.planta(v, pi, {titulo: ex.nome + ' · 3 suítes · 3 vagas', sub: v.tipologia});
+      const svg = root.Desenho.planta(v, pi, {titulo: ex.nome + ' · 3 suítes · 3 vagas', sub: v.tipologia, estilo:'humanizada'});
       const link = `${raiz}gerador/#q=${codifica(root.Motor.normaliza(programa))}&v=0&e=0`;
       return {ex, programa, v, svg, link, f2};
     }catch(e){ return null; }

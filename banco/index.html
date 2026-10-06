@@ -80,6 +80,7 @@
 <footer><div>Estudos conceituais, sem valor de projeto executivo. As plantas salvas ficam apenas neste navegador.</div></footer>
 
 <script src="../gerador/motor.js"></script>
+<script src="../gerador/mobilia.js"></script>
 <script src="../gerador/desenho.js"></script>
 <script src="../gerador/projeto.js"></script>
 <script src="../assets/exemplos.js"></script>
@@ -142,7 +143,7 @@ function miniatura(item){
     if(!v) return '';
     v = item.espelhada ? Desenho.espelha(v) : Motor.semEspelho(v);
     const pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo'));
-    return Desenho.planta(v, pi, {titulo: item.nome, sub: v.tipologia});
+    return Desenho.planta(v, pi, {titulo: item.nome, sub: v.tipologia, estilo:'humanizada'});
   }catch(e){ return ''; }
 }
 
