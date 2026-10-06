@@ -1195,8 +1195,8 @@ function janelasSubsolo(pav, q, S, av){
     for(const e of ext){
       if(obt >= exig && lados.has(e.lado)) continue;
       const L = e.t1-e.t0;
+      if(L - 0.3 < 0.8) continue;                     // trecho curto: a janela mínima de 0,80 m passaria do fim da parede
       const w = clamp(Math.max(1.0, (exig-obt)/h), 0.8, semi ? L-0.3 : Math.min(4.0, L-0.3));
-      if(w < 0.8) continue;
       const m = (e.t0+e.t1)/2;
       janelas.push({o:e.o, c:e.c, t0:r2(m-w/2), t1:r2(m+w/2), alta:semi, h});
       obt += w*h; lados.add(e.lado);
@@ -1236,7 +1236,10 @@ function aberturas(pav, q, ehTerreo, espelho){
     for(const t of pref){
       const viz = S.filter(o => o!==s && o.tipo===t).map(o => ({o, sh:compartilhado(s,o)})).filter(v => v.sh && v.sh.t1-v.sh.t0 >= 0.85)
         .sort((a,b) => (b.sh.t1-b.sh.t0)-(a.sh.t1-a.sh.t0));
-      if(viz.length){ portas.push(porta(s, viz[0].o, viz[0].sh, q.acessivel ? Math.max(0.9, larguraPorta(s)) : larguraPorta(s))); feito = true; break; }
+      if(viz.length){ const o = viz[0].o;
+        // uma porta só por par de cômodos (garagem ↔ serviço gerava duas no mesmo ponto)
+        if(!portas.some(p => (p.sala===s.id && p.viz===o.id) || (p.sala===o.id && p.viz===s.id))) portas.push(porta(s, o, viz[0].sh, q.acessivel ? Math.max(0.9, larguraPorta(s)) : larguraPorta(s)));
+        feito = true; break; }
     }
     if(!feito && s.tipo!=='estar' && pref.length && !['garagem','gourmet'].includes(s.tipo) && s.nome!=='Área técnica' && !(s.tipo==='rouparia' && area(s) < 1.5)) av.push(`${pav.nome}: ${rotulo(s)} sem acesso por ${pref.slice(0,3).map(t=>TIPOS[t].nome.toLowerCase()).join(', ')}.`);
   }
@@ -1311,9 +1314,9 @@ function aberturas(pav, q, ehTerreo, espelho){
     // premissa (05/10/2026): sempre que possível, janelas em pontos distantes entre si, para a ventilação cruzada.
     // 1) escolhe as faces e as larguras; um cômodo de permanência com duas faces externas sempre ganha janela na segunda face
     const cruzada = !!t.hab && !alta && !vidro, sel = [];
-    // trecho livre de cada face: o maior pedaço fora da porta de entrada (com 0,20 m de folga)
+    // trecho livre de cada face: o maior pedaço fora das portas dessa parede (com 0,20 m de folga; auditoria G07)
     const livre = e => { let seg = [[e.t0, e.t1]];
-      for(const p of portas.filter(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001)) seg = seg.flatMap(([a,b]) => [[a, Math.min(b, p.t0-0.2)], [Math.max(a, p.t1+0.2), b]]).filter(([a,b]) => b-a > 0.05);
+      for(const p of portas.filter(p => p.o===e.o && Math.abs(p.c-e.c)<0.001)) seg = seg.flatMap(([a,b]) => [[a, Math.min(b, p.t0-0.2)], [Math.max(a, p.t1+0.2), b]]).filter(([a,b]) => b-a > 0.05);
       const m = seg.sort((x,y) => (y[1]-y[0]) - (x[1]-x[0]))[0]; return m ? Object.assign({}, e, {t0:m[0], t1:m[1]}) : null; };
     ext.forEach((e0, i) => {
       const e = livre(e0); if(!e) return;
@@ -1348,8 +1351,9 @@ function aberturas(pav, q, ehTerreo, espelho){
     sel.forEach(({e, w}, i) => {
       let mm = centros[i];
       // não sobrepor porta de entrada
-      const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>mm-w/2 && p.t0<mm+w/2);
+      const pe = portas.find(p => p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>mm-w/2 && p.t0<mm+w/2);
       if(pe){ if(pe.t1 + 0.3 + w <= e.t1) mm = pe.t1+0.3+w/2; else if(pe.t0 - 0.3 - w >= e.t0) mm = pe.t0-0.3-w/2; else { w = Math.max(0, Math.max(e.t1-pe.t1, pe.t0-e.t0) - 0.4); mm = e.t1-pe.t1 > pe.t0-e.t0 ? pe.t1+0.2+w/2 : pe.t0-0.2-w/2; } }
+      w = Math.min(w, e.t1 - e.t0); mm = clamp(mm, e.t0 + w/2, e.t1 - w/2);      // nunca passa do fim da face
       if(w < 0.5) return;
       janelas.push({o:e.o, c:e.c, t0:r2(mm-w/2), t1:r2(mm+w/2), alta, vidro, h});
       obt += w*h;
@@ -1359,7 +1363,7 @@ function aberturas(pav, q, ehTerreo, espelho){
     for(const e of ext){
       if(falta <= 0.01 || sel.some(x => x.e0 === e)) continue;
       const L = e.t1-e.t0, w = clamp(Math.max(alta ? 0.6 : 1.0, falta/h), alta ? 0.6 : 1.0, Math.min(alta ? 1.6 : 3.0, L-0.3)), m = (e.t0+e.t1)/2;
-      if(w < 0.5 || portas.some(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2)) continue;
+      if(w < 0.5 || portas.some(p => p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2-0.2 && p.t0<m+w/2+0.2)) continue;
       janelas.push({o:e.o, c:e.c, t0:r2(m-w/2), t1:r2(m+w/2), alta, vidro, h}); obt += w*h; falta = exig - obt;
     }
     if(exig){
@@ -1853,7 +1857,7 @@ function loteMinimo(q0, P){
 }
 
 // versão do motor (gravada nos arquivos de projeto): ano.mês.dia da última mudança de regra
-const VERSAO = '2026.10.05';
+const VERSAO = '2026.10.06';
 
 return {VERSAO, gerar, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
 });
