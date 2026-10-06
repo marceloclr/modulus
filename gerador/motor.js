@@ -60,7 +60,7 @@ const DIMENSIONAVEIS = ['quarto','suite','master','banhoSuite','closet','banhoSo
 
 const PADRAO = {
   frente:12, fundo:30, recFrente:5, recLatE:1.5, recLatD:1.5, recFundo:3, taxa:60, orientacao:'',
-  tipo:'terrea', formato:'auto', peDireito:3.0, pdSalas:2.8, pdDemais:2.6,
+  tipo:'terrea', formato:'auto', peDireito:3.0, pdSalas:2.8, pdDemais:2.6, estarDuplo:false,
   quartos:3, suites:1, master:true, tamanho:'medio',
   banhosSociais:1, lavabo:false,
   estar:true, estarTipo:'tradicional', jantar:true, tv:false, escritorio:false, escritorioAmpliado:false,
@@ -109,7 +109,7 @@ function normaliza(p){
   if(q.edicula==='2'){ q.edQuarto = true; q.edGourmet = true; }
   if(!['retangular','raia','L','oval'].includes(q.pisForma)) q.pisForma = 'retangular';
   q.pisC = clamp(q.pisC || 8, 2, 25); q.pisL = clamp(q.pisL || 4, 1.5, 12); q.pisP = clamp(q.pisP || 1.4, 0.4, 3); q.afastAnexo = clamp(q.afastAnexo, 1.5, 10);
-  for(const k of ['master','lavabo','estar','jantar','tv','escritorio','escritorioAmpliado','servico','despensa','varanda','varandaFundos','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
+  for(const k of ['estarDuplo','master','lavabo','estar','jantar','tv','escritorio','escritorioAmpliado','servico','despensa','varanda','varandaFundos','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   q.quartos = clamp(Math.round(q.quartos), 1, 8);
   q.suites = clamp(Math.round(q.suites), 0, q.quartos);
   q.banhosSociais = clamp(Math.round(q.banhosSociais), 0, 4);
@@ -1770,6 +1770,13 @@ function comPeDireito(v, q){
       let pd = PD_SALAS.includes(s.tipo) ? q.pdSalas : q.pdDemais;
       const coberto = acima && acima.salas.some(o => o.tipo !== 'jardim' && o.x0 < s.x1 - 0.01 && s.x0 < o.x1 - 0.01 && o.y0 < s.y1 - 0.01 && s.y0 < o.y1 - 0.01);
       const lim = r2(q.peDireito - PD_LAJE);
+      // pé-direito duplo só no estar: dois pisos a piso menos a laje, sem pavimento em cima (no sobrado, pede o vazio: etapa futura)
+      if(s.tipo === 'estar' && q.estarDuplo){
+        if(coberto) v.avisos.push(`${p.nome}: o pé-direito duplo no estar não cabe, porque há pavimento em cima; o estar ficou com o pé-direito das salas.`);
+        else { pd = r2(2 * q.peDireito - PD_LAJE); s.duplo = true;
+          const integ = p.salas.filter(o => o !== s && compartilhado(s, o) && ABERTOS.some(([x, y]) => (x === s.tipo && y === o.tipo) || (y === s.tipo && x === o.tipo)));   // integrados (sem parede)
+          if(integ.length) v.avisos.push(`${p.nome}: estar com pé-direito duplo (${f2(pd)} m) encostado em ${integ.map(o => rotulo(o)).join(', ')}: o forro muda de altura na divisa (viga ou sanca).`); }
+      }
       if(coberto && pd > lim + 0.001){ pd = lim; red.add(p.nome); }
       s.pd = r2(pd);
     }
@@ -1783,7 +1790,7 @@ function quadro(v){
   for(const p of v.pav){
     const fech = p.salas.filter(s => !TIPOS[s.tipo].aberto);
     const abertas = p.salas.filter(s => TIPOS[s.tipo].aberto);
-    linhas.push({pav:p.nome, salas: p.salas.map(s => ({nome:s.nome, tipo:s.tipo, zona:s.zona, w:r2(s.x1-s.x0), h:r2(s.y1-s.y0), a:r2(area(s)), ilum:s.ilum||null, pd:s.pd || null, vol:s.pd ? r2(area(s) * s.pd) : null})),
+    linhas.push({pav:p.nome, salas: p.salas.map(s => ({nome:s.nome, tipo:s.tipo, zona:s.zona, w:r2(s.x1-s.x0), h:r2(s.y1-s.y0), a:r2(area(s)), ilum:s.ilum||null, pd:s.pd || null, vol:s.pd ? r2(area(s) * s.pd) : null, ...(s.duplo ? {duplo:true} : {})})),
       fechada:r2(fech.reduce((t,s)=>t+area(s),0)), aberta:r2(abertas.reduce((t,s)=>t+area(s),0)), volume:r2(fech.reduce((t,s)=>t+(s.pd ? area(s)*s.pd : 0),0))});
   }
   const fechada = r2(linhas.reduce((t,l)=>t+l.fechada,0)), aberta = r2(linhas.reduce((t,l)=>t+l.aberta,0));

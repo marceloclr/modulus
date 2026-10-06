@@ -717,6 +717,16 @@ t('pé-direito: salas e demais cômodos, limite com pavimento em cima', () => {
   ok(s.avisos.some(x => /pé-direito livre reduzido/.test(x)), 'aviso da redução');
   igual(a.quadro.volume, Math.round(a.pav.flatMap(p => p.salas).filter(x => x.pd && !M.TIPOS[x.tipo].aberto).reduce((u, x) => u + M.area(x) * x.pd, 0) * 100) / 100, 'volume total do quadro:');
 });
+t('pé-direito duplo só no estar: térrea sim, sob pavimento não', () => {
+  const v = M.gerar({orientacao:'SE', estarDuplo:true}).variantes[0], T = v.pav.find(p => p.nome==='Térreo');
+  const e = T.salas.find(s => s.tipo==='estar'), j = T.salas.find(s => s.tipo==='jantar');
+  igual([e.pd, !!e.duplo, j.pd], [5.85, true, 2.8], 'estar duplo e jantar no pé-direito das salas:');
+  ok(v.avisos.some(a => /forro muda de altura/.test(a)), 'aviso do degrau no forro com o jantar integrado');
+  ok(require('./desenho.js').planta(v, 0, {estilo:'humanizada'}).includes('pé-direito duplo 5,85 m'), 'marca no desenho');
+  const s = M.gerar({orientacao:'SE', estarDuplo:true, tipo:'sobrado', quartos:3, suites:2}).variantes[0];
+  ok(!s.pav[0].salas.some(x => x.duplo) || s.pav.find(p => p.nome==='Térreo').salas.find(x => x.tipo==='estar').pd <= 2.85, 'sobrado: sem duplo sob o superior');
+  ok(s.avisos.some(a => /duplo no estar não cabe/.test(a)), 'aviso no sobrado');
+});
 t('pé-direito: custo da parede a mais (estimativa), sombra e volume da torre', () => {
   const dados = require('../dados/custos.json'), CU = require('./custos.js'), IN = require('./insolacao.js');
   const baixo = M.gerar({orientacao:'SE', pdSalas:2.6}).variantes[0], alto = M.gerar({orientacao:'SE', pdSalas:3.6}).variantes[0];

@@ -437,7 +437,7 @@ function planta(v, idx, op){
     if(pw < 34 || ph < 18){ if(pw >= 22 && ph >= 12) o.push(`<text x="${cx}" y="${cy+2.5}" class="rd" style="font-size:5.6px">${f2(a)}</text>`); continue; }
     const big = pw >= 70 && ph >= 34;
     const fs = big ? 8.2 : 6.4;
-    const sub = big && !hum ? `${f2(w)} × ${f2(h)} · ${f2(a)} m²` : `${f2(a)} m²`;
+    const sub = (big && !hum ? `${f2(w)} × ${f2(h)} · ${f2(a)} m²` : `${f2(a)} m²`) + (s.duplo ? ` · pé-direito duplo ${f2(s.pd)} m` : '');
     const bw = Math.min(pw-4, Math.max(nome.length*fs*0.66, sub.length*(big?3.7:3.4)) + 8);
     // humanizada: o rótulo procura um lugar do cômodo sem móvel (centro, depois terços), para não cobrir cama ou mesa
     if(hum){ const ps = pecasHum.filter(q => q.sala === s.id).map(q => ({x0:X(q.x0), x1:X(q.x1), y0:Y(q.y0), y1:Y(q.y1)}));
