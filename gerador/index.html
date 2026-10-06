@@ -266,7 +266,9 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
           <label><input type="radio" name="tipo" value="sobrado">Sobrado</label>
         </div>
         <label class="fld">Formato<select name="formato"><option value="auto">Automático (melhores)</option><option value="bloco">Bloco único</option><option value="L">Em L</option><option value="U">Em U</option><option value="H">Em H (só térrea)</option></select></label>
-        <label class="fld">Pé-direito piso a piso (m)<input type="number" name="peDireito" min="2.6" max="4.5" step="0.05"></label>
+        <label class="fld" data-tip="Do piso de um pavimento ao piso do seguinte: define a escada, o elevador e o subsolo">Pé-direito piso a piso (m)<input type="number" name="peDireito" min="2.6" max="4.5" step="0.05"></label>
+        <label class="fld" data-tip="Pé-direito livre (do piso ao forro) do estar, jantar, TV, sala íntima, escritório e varanda gourmet. Com pavimento em cima, no máximo o piso a piso menos 0,15 m">Pé-direito das salas (m)<input type="number" name="pdSalas" min="2.4" max="6" step="0.05"></label>
+        <label class="fld" data-tip="Pé-direito livre (do piso ao forro) dos quartos, banhos, cozinha, serviço e circulação">Pé-direito dos demais cômodos (m)<input type="number" name="pdDemais" min="2.4" max="6" step="0.05"></label>
         <div id="supOps">
           <label class="fld">Pavimento superior<select name="supModo"><option value="corresp">Correspondente (toda a projeção)</option><option value="parcial">Parcial (escolher seções)</option></select></label>
           <div id="secOps">
@@ -514,6 +516,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
             <li>Subsolo com o máximo de vagas (3,00 × 5,00 m), manobra contínua de 5 m, rampa em escala e jardim de inverno oposto à rampa; ventilação cruzada obrigatória.</li>
             <li>Varanda de fundos (opcional): faixa aberta no trecho mais longo da fachada de fundos, com a profundidade e a largura escolhidas; a porta sai das salas (quando ficam no fundo), da suíte master, de uma suíte ou da circulação. Quando a casa mais a varanda passam do recuo de fundo, o gerador primeiro tenta uma casa mais curta (salas e apoio um pouco menores); se ainda faltar, reduz a varanda até 1,50 m, com aviso; abaixo disso, a variante fica sem varanda, com aviso, e vai para o fim da lista.</li>
             <li>Escritório ampliado (opcional): 14 m² e lado de 3,00 m (preferência de projeto), na frente, com porta para dentro e porta própria para a varanda frontal ou para a rua; o caminho do portão social ganha um ramal até ele, sem cruzar a faixa dos carros. Com o fundo a oeste (quartos na frente), ele vai para a frente junto da entrada; no sobrado, fica no térreo.</li>
+            <li>Pé-direito: o piso a piso define a escada, o elevador e o subsolo; o pé-direito livre (do piso ao forro) tem um valor para as salas (estar, jantar, TV, sala íntima, escritório e varanda gourmet) e outro para os demais cômodos (preferência de projeto; o mínimo legal será conferido na E3). Com pavimento em cima, o livre fica no máximo no piso a piso menos 0,15 m de laje e forro; sem pavimento em cima, a cobertura sobe sobre os cômodos mais altos. A parede a mais acima de 2,60 m aparece como estimativa no card de custo, fora do total.</li>
             <li>Planta humanizada: móvel só onde cabe com folga. Nada na faixa de 0,60 m em frente às portas nem no arco da folha; cama com a cabeceira longe da porta; mesa de jantar com 0,75 m livres atrás das cadeiras (0,45 m no aperto); sofá de 1,60 a 3,20 m da TV; armário e geladeira nunca na frente de janela. Paredes desenhadas com 10 cm (internas) e 15 cm (externas).</li>
           </ul>
         </div>
@@ -732,13 +735,13 @@ function render(){
     : `<div class="warn ok">Nenhuma regra violada nesta variante.</div>`;
   // quadro
   const zonaTag = {intimo:'z-intimo', molhado:'z-molhado', social:'z-social', apoio:'z-apoio', circ:'z-circ', varanda:'z-varanda', garagem:'z-garagem'};
-  let h = '<thead><tr><th>Ambiente</th><th class="n">Medidas</th><th class="n">Área</th><th class="n"><span class="calc" data-tip="Área de janela obtida e exigida: iluminação de 1/8 da área do piso (ventilação de 1/16, metade de uma janela de correr)">Janela / exigida</span></th></tr></thead><tbody>';
+  let h = '<thead><tr><th>Ambiente</th><th class="n">Medidas</th><th class="n">Área</th><th class="n"><span class="calc" data-tip="Área de janela obtida e exigida: iluminação de 1/8 da área do piso (ventilação de 1/16, metade de uma janela de correr)">Janela / exigida</span></th><th class="n"><span class="calc" data-tip="Pé-direito livre (do piso ao forro) e volume do cômodo (área × pé-direito)">Pé-direito · volume</span></th></tr></thead><tbody>';
   for(const pv of v.quadro.pavimentos){
     h += `<tr class="zone"><td colspan="4">${pv.pav}</td></tr>`;
-    for(const s of pv.salas) h += `<tr><td><span class="tag ${zonaTag[s.zona]||'z-apoio'}">${esc(s.nome)}</span></td><td class="n">${f2(s.w)} × ${f2(s.h)} m</td><td class="n">${f2(s.a)} m²</td><td class="n">${s.ilum ? (s.ilum.obt >= s.ilum.exig - 0.01 ? '' : '⚠ ') + f2(s.ilum.obt) + ' / ' + f2(s.ilum.exig) + ' m²' : ''}</td></tr>`;
+    for(const s of pv.salas) h += `<tr><td><span class="tag ${zonaTag[s.zona]||'z-apoio'}">${esc(s.nome)}</span></td><td class="n">${f2(s.w)} × ${f2(s.h)} m</td><td class="n">${f2(s.a)} m²</td><td class="n">${s.ilum ? (s.ilum.obt >= s.ilum.exig - 0.01 ? '' : '⚠ ') + f2(s.ilum.obt) + ' / ' + f2(s.ilum.exig) + ' m²' : ''}</td><td class="n">${s.pd ? f2(s.pd) + ' m · ' + f2(s.vol) + ' m³' : ''}</td></tr>`;
     h += `<tr class="total"><td>Área fechada do ${pv.pav.toLowerCase()}</td><td></td><td class="n">${f2(pv.fechada)} m²</td><td></td></tr>`;
   }
-  h += `<tr class="total"><td>Total fechado</td><td></td><td class="n">${f2(v.quadro.fechada)} m²</td><td></td></tr>`;
+  h += `<tr class="total"><td>Total fechado</td><td></td><td class="n">${f2(v.quadro.fechada)} m²</td><td></td><td class="n">${v.quadro.volume ? f2(v.quadro.volume) + ' m³' : ''}</td></tr>`;
   h += `<tr><td>Varandas e terraços</td><td></td><td class="n">${f2(v.quadro.aberta)} m²</td></tr>`;
   for(const a of (v.anexos||[])){
     if(a.tipo==='piscina') h += `<tr><td><span class="tag z-varanda">Piscina ${a.forma}${a.pr?' com prainha':''}</span></td><td class="n">${f2(a.C)} × ${f2(a.L)} × ${f2(a.P)} m</td><td class="n">${f2(a.lamina)} m² · ${f2(a.volume)} m³</td></tr>`;

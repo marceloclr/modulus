@@ -704,6 +704,29 @@ t('entrada: térreo sem porta de entrada torna a variante inválida', () => {
   for(const v of r.variantes) ok(v.pav.find(p => p.nome==='Térreo').portas.some(d => d.entrada), v.nome + ' sem porta de entrada no ranking');
 });
 
+// ---------- pé-direito (E2.6) ----------
+t('pé-direito: salas e demais cômodos, limite com pavimento em cima', () => {
+  const pdDe = (v, tipo, pav) => v.pav.find(p => p.nome === (pav || 'Térreo')).salas.find(s => s.tipo === tipo).pd;
+  const a = M.gerar({orientacao:'SE'}).variantes[0];
+  igual([pdDe(a, 'estar'), pdDe(a, 'cozinha')], [2.8, 2.6], 'padrões salas / demais:');
+  ok(!a.pav[0].salas.some(s => s.tipo === 'jardim' && s.pd), 'jardim sem pé-direito');
+  const t = M.gerar({orientacao:'SE', pdSalas:3.5}).variantes[0];
+  igual(pdDe(t, 'estar'), 3.5, 'térrea: sala alta sem pavimento em cima:');
+  const s = M.gerar({orientacao:'SE', tipo:'sobrado', quartos:3, suites:2, pdSalas:4}).variantes[0];
+  igual(pdDe(s, 'estar'), 2.85, 'sobrado: sala limitada ao piso a piso menos 0,15 m:');
+  ok(s.avisos.some(x => /pé-direito livre reduzido/.test(x)), 'aviso da redução');
+  igual(a.quadro.volume, Math.round(a.pav.flatMap(p => p.salas).filter(x => x.pd && !M.TIPOS[x.tipo].aberto).reduce((u, x) => u + M.area(x) * x.pd, 0) * 100) / 100, 'volume total do quadro:');
+});
+t('pé-direito: custo da parede a mais (estimativa), sombra e volume da torre', () => {
+  const dados = require('../dados/custos.json'), CU = require('./custos.js'), IN = require('./insolacao.js');
+  const baixo = M.gerar({orientacao:'SE', pdSalas:2.6}).variantes[0], alto = M.gerar({orientacao:'SE', pdSalas:3.6}).variantes[0];
+  igual(CU.peDireitoExtra(baixo, dados).m2, 0, 'tudo em 2,60 m, sem parede a mais:');
+  const ex = CU.peDireitoExtra(alto, dados); ok(ex.m2 > 10 && ex.valor.med > 0 && /2,60/.test(ex.formula), 'salas de 3,60 m: parede a mais com fórmula');
+  if(IN.sombras){ const sol = {h:30, az:270}, q = M.normaliza({orientacao:'SE'});
+    const hmax = v => Math.max(...IN.sombras(v, Object.assign({}, q, {pdSalas:v === alto ? 3.6 : 2.6}), sol).map(c => c.altura));
+    ok(hmax(alto) > hmax(baixo), 'sala alta faz sombra mais alta'); }
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
