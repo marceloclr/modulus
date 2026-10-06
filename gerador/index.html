@@ -368,6 +368,11 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="fld">Garagem<select name="garagem"><option value="coberta">Coberta, na casa</option><option value="descoberta">Descoberta, no recuo</option><option value="nenhuma">Sem garagem</option></select></label>
         <label class="chk"><input type="checkbox" name="varanda">Varanda frontal</label>
         <label class="fld" id="varOps">Forma da varanda<select name="varandaForma"><option value="corrida">Corrida, em toda a fachada</option><option value="L">Em L, frente e lateral</option></select></label>
+        <label class="chk"><input type="checkbox" name="varandaFundos">Varanda de fundos</label>
+        <div id="varFundOps">
+          <label class="fld">Profundidade da varanda de fundos<select name="varandaFundosP"><option value="1.5">1,50 m</option><option value="2">2,00 m</option><option value="2.5">2,50 m</option><option value="3">3,00 m</option></select></label>
+          <label class="fld">Largura da varanda de fundos<select name="varandaFundosL"><option value="0">Toda a fachada de fundos</option><option value="3">3,00 m</option><option value="4">4,00 m</option><option value="5">5,00 m</option><option value="6">6,00 m</option></select></label>
+        </div>
         <label class="chk"><input type="checkbox" name="gourmet">Varanda gourmet junto à casa</label>
       </fieldset>
 
@@ -621,6 +626,7 @@ function sincroniza(){
     estar: E.estar.checked, jantar: E.jantar.checked, tv: E.tv.checked, escritorio: E.escritorio.checked, cozinha: true, servico: E.servico.checked, despensa: E.despensa.checked, gourmet: E.gourmet.checked || E.gourmetDest.checked};
   form.querySelectorAll('.dimrow').forEach(el => { el.hidden = !vis[el.dataset.t]; });
   document.getElementById('varOps').hidden = !form.elements.varanda.checked;
+  document.getElementById('varFundOps').hidden = !form.elements.varandaFundos.checked;
   const sub = form.elements.subsolo.checked, gl = form.elements.garagemLocal;
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
   if(!sub) gl.value = 'terreo';

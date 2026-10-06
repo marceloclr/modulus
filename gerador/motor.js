@@ -66,6 +66,7 @@ const PADRAO = {
   estar:true, jantar:true, tv:false, escritorio:false,
   cozinha:'aberta', servico:true, despensa:false,
   vagas:2, garagem:'coberta', varanda:true, varandaForma:'corrida', gourmet:false,
+  varandaFundos:false, varandaFundosP:2, varandaFundosL:0,
   gourmetDest:false, edicula:'nenhuma', edGourmet:true, edBanho:true, edDeposito:true, edQuarto:true,
   piscina:false, pisForma:'retangular', pisC:8, pisL:4, pisP:1.4, pisPrainha:false, afastAnexo:3, anexoFundo:true,
   elevador:false, vaoMax:10,
@@ -108,7 +109,7 @@ function normaliza(p){
   if(q.edicula==='2'){ q.edQuarto = true; q.edGourmet = true; }
   if(!['retangular','raia','L','oval'].includes(q.pisForma)) q.pisForma = 'retangular';
   q.pisC = clamp(q.pisC || 8, 2, 25); q.pisL = clamp(q.pisL || 4, 1.5, 12); q.pisP = clamp(q.pisP || 1.4, 0.4, 3); q.afastAnexo = clamp(q.afastAnexo, 1.5, 10);
-  for(const k of ['master','lavabo','estar','jantar','tv','escritorio','servico','despensa','varanda','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
+  for(const k of ['master','lavabo','estar','jantar','tv','escritorio','servico','despensa','varanda','varandaFundos','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   q.quartos = clamp(Math.round(q.quartos), 1, 8);
   q.suites = clamp(Math.round(q.suites), 0, q.quartos);
   q.banhosSociais = clamp(Math.round(q.banhosSociais), 0, 4);
@@ -122,6 +123,9 @@ function normaliza(p){
   if(q.vagas===0 && !q.subsolo) q.garagem = 'nenhuma';
   if(!['meio','inteiro'].includes(q.subNivel)) q.subNivel = 'meio';
   if(q.varandaForma!=='L') q.varandaForma = 'corrida';
+  // varanda de fundos (06/10/2026): profundidade 1,50 / 2,00 / 2,50 / 3,00 m; largura 0 = toda a fachada de fundos, ou 3 a 6 m
+  q.varandaFundosP = [1.5, 2, 2.5, 3].includes(+q.varandaFundosP) ? +q.varandaFundosP : 2;
+  q.varandaFundosL = [0, 3, 4, 5, 6].includes(+q.varandaFundosL) ? +q.varandaFundosL : 0;
   if(!Object.prototype.hasOwnProperty.call(RUMOS, q.orientacao)) q.orientacao = '';
   // dimensões pedidas: d_<tipo>_w × d_<tipo>_l, ou só a área d_<tipo>_a
   q.dims = {};
@@ -1322,6 +1326,14 @@ function aberturas(pav, q, ehTerreo, espelho, W){
       }
     }
   }
+  // varanda de fundos pedida: porta a partir do cômodo de acesso (larga e centrada nas salas)
+  if(ehTerreo) for(const vf of S.filter(s => s.fundos && s.acesso)){
+    const a = S.find(s => s.id === vf.acesso), sh = a && compartilhado(a, vf);
+    if(sh && sh.t1 - sh.t0 >= 0.85 && !portas.some(p => (p.sala === a.id && p.viz === vf.id) || (p.sala === vf.id && p.viz === a.id))){
+      const social = ['estar','jantar','tv','salaIntima'].includes(a.tipo);
+      portas.push(porta(a, vf, sh, social ? 1.2 : (q.acessivel ? 0.9 : 0.8), social));
+    }
+  }
   // saída de fundos: na face mais oposta à entrada, por cozinha, serviço, jantar ou gourmet
   if(ehTerreo){
     const ent = portas.find(p => p.entrada);
@@ -1934,10 +1946,50 @@ function inverteFrenteFundo(v, q){
   return v;
 }
 
+/* Varanda de fundos pedida (06/10/2026): faixa aberta encostada no trecho contínuo mais longo da fachada de fundos do térreo
+   (lado y1 dos cômodos fechados), com a profundidade escolhida e a largura toda ou parcial (centrada no cômodo de acesso).
+   Acesso: estar, jantar, TV ou sala íntima (zoneamento invertido), senão suíte master, senão suíte, senão circulação.
+   Se já houver varanda no fundo (a automática do sobrado ou a da sala no zoneamento invertido), ela só ganha a profundidade pedida. */
+const VF_ACESSO = [['estar','jantar','tv','salaIntima'], ['master'], ['suite'], ['circ','hall','galeria']];
+function comVarandaFundos(v, q){
+  if(!q.varandaFundos) return v;
+  const t = v.pav.find(p => p.nome==='Térreo'); if(!t) return v;
+  const S = t.salas, P = q.varandaFundosP;
+  // já há varanda no fundo (a automática do sobrado ou, no zoneamento invertido, a varanda da sala): só ganha a profundidade pedida
+  const Dt = Math.max(...S.map(s => s.y1));
+  const auto = S.find(s => s.tipo==='varanda' && s.y0 > 0.001 && Math.abs(s.y1 - Dt) < 0.001 && s.x1 - s.x0 >= 1.5);
+  if(auto){ if(auto.y1 - auto.y0 < P - 0.001){ auto.y1 = r2(auto.y0 + P); v.D = r2(Math.max(v.D, auto.y1)); } auto.fundos = true; auto.nome = 'Varanda de fundos'; return v; }
+  // trechos externos de fundos dos cômodos fechados, agrupados por linha (y) e emendados ao longo de x
+  const segs = [];
+  for(const s of S.filter(o => !TIPOS[o.tipo].aberto)) for(const e of trechosExternos(s, S)) if(e.o==='h' && Math.abs(e.c - s.y1) < 0.001) segs.push({c:e.c, t0:e.t0, t1:e.t1});
+  const corridas = [];
+  for(const g of segs.sort((a,b) => a.c - b.c || a.t0 - b.t0)){
+    const u = corridas.find(r => Math.abs(r.c - g.c) < 0.001 && g.t0 <= r.t1 + 0.001 && g.t1 >= r.t0 - 0.001);
+    if(u){ u.t0 = Math.min(u.t0, g.t0); u.t1 = Math.max(u.t1, g.t1); } else corridas.push({...g});
+  }
+  corridas.sort((a,b) => (b.t1 - b.t0) - (a.t1 - a.t0) || b.c - a.c);
+  for(const r of corridas){
+    if(r.t1 - r.t0 < 1.5) break;
+    // cômodo de acesso: o de maior prioridade que encosta na corrida com ao menos 0,90 m
+    const enc = S.filter(s => !TIPOS[s.tipo].aberto && Math.abs(s.y1 - r.c) < 0.001).map(s => ({s, l:Math.min(s.x1, r.t1) - Math.max(s.x0, r.t0)})).filter(z => z.l >= 0.9);
+    let ac = null; for(const grupo of VF_ACESSO){ const z = enc.filter(z => grupo.includes(z.s.tipo)).sort((a,b) => b.l - a.l)[0]; if(z){ ac = z.s; break; } }
+    if(!ac) continue;
+    let x0 = r.t0, x1 = r.t1;
+    if(q.varandaFundosL && q.varandaFundosL < r.t1 - r.t0){ const m = (Math.max(ac.x0, r.t0) + Math.min(ac.x1, r.t1))/2, w = q.varandaFundosL;
+      x0 = clamp(m - w/2, r.t0, r.t1 - w); x1 = x0 + w; }
+    const vf = sala('varanda', r2(x0), r.c, r2(x1), r2(r.c + P), {nome:'Varanda de fundos', fundos:true, acesso:ac.id});
+    if(S.some(o => o.x0 < vf.x1 - 0.001 && vf.x0 < o.x1 - 0.001 && o.y0 < vf.y1 - 0.001 && vf.y0 < o.y1 - 0.001)) continue;   // invade outro cômodo
+    S.push(vf); v.D = r2(Math.max(v.D, vf.y1));
+    return v;
+  }
+  v.avisos.push('Varanda de fundos: a fachada de fundos não tem trecho livre com acesso por sala, suíte ou circulação nesta variante.');
+  return v;
+}
+
 function geraTodas(q, P, Ws){
   const out = [];
   const push0 = out.push.bind(out);
-  out.push = (...vs) => push0(...vs.map(v => comTorre(comRooftop(enxuga(v, q), q), q)));
+  out.push = (...vs) => push0(...vs.map(v => comVarandaFundos(comTorre(comRooftop(enxuga(v, q), q), q), q)));
   for(const W of Ws){
     const modos = [], f = q.formato, quer = x => f==='auto' || f===x;
     const larguraCol = (q.tipo==='sobrado'||q.subsolo) ? COL : C;

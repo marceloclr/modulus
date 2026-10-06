@@ -606,6 +606,35 @@ t('humanizada: pisos, paredes em escala, móveis e técnica intacta', () => {
   ok(ids.length && !h2.includes('id="' + ids[0] + 'madeira"'), 'cada desenho com ids próprios');
 });
 
+// ---------- varanda de fundos (06/10/2026) ----------
+t('varanda de fundos: faixa na fachada de fundos, com porta, nos quatro formatos', () => {
+  for(const [f, fr] of [['bloco', 12], ['U', 22], ['H', 22]]){
+    const r = M.gerar({frente:fr, fundo:32, quartos:3, suites:2, formato:f, varandaFundos:true, orientacao:'N'});
+    ok(r.variantes.length, f + ': sem variantes');
+    for(const v of r.variantes){
+      const T = v.pav.find(p => p.nome==='Térreo'), vf = T.salas.find(s => s.fundos);
+      ok(vf, f + ': sem varanda de fundos em ' + v.nome);
+      igual(Math.round((vf.y1 - vf.y0) * 100) / 100, 2, f + ': profundidade padrão:');
+      ok(T.portas.some(p => (p.sala === vf.acesso && p.viz === vf.id)), f + ': sem porta para a varanda');
+      ok(Math.abs(vf.y1 - Math.max(...T.salas.map(s => s.y1))) < 0.001, f + ': a varanda não está no fundo');
+    }
+  }
+});
+t('varanda de fundos: largura parcial centrada no acesso e profundidade escolhida', () => {
+  const r = M.gerar({frente:12, fundo:32, quartos:3, suites:2, formato:'bloco', varandaFundos:true, varandaFundosL:4, varandaFundosP:3, orientacao:'N'});
+  const v = r.variantes[0], T = v.pav.find(p => p.nome==='Térreo'), vf = T.salas.find(s => s.fundos), ac = T.salas.find(s => s.id === vf.acesso);
+  igual([Math.round((vf.x1 - vf.x0) * 100) / 100, Math.round((vf.y1 - vf.y0) * 100) / 100], [4, 3], 'largura × profundidade:');
+  ok(vf.x0 >= ac.x0 - 0.001 || vf.x1 <= ac.x1 + 0.001, 'varanda fora do cômodo de acesso');
+  igual(M.normaliza({varandaFundosP:7, varandaFundosL:9}).varandaFundosP, 2, 'profundidade fora da lista:');
+  igual(M.normaliza({}).varandaFundos, false, 'desligada por padrão:');
+});
+t('varanda de fundos: no zoneamento invertido, a varanda da sala ganha a profundidade pedida', () => {
+  const r = M.gerar({frente:12, fundo:32, quartos:3, suites:2, varandaFundos:true, varandaFundosP:3, orientacao:'L'});
+  const v = r.variantes.find(x => x.zoneamento === 'invertido'); ok(v, 'sem variante invertida');
+  const vf = v.pav.find(p => p.nome==='Térreo').salas.find(s => s.fundos);
+  ok(vf && Math.abs(vf.y1 - vf.y0 - 3) < 0.001, 'varanda de fundos com 3,00 m');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
