@@ -11,6 +11,7 @@ const E = 0.011;
 const area = s => (s.x1 - s.x0) * (s.y1 - s.y0);
 const f2 = M.f2;
 const ABERTO = s => !!(M.TIPOS[s.tipo] && M.TIPOS[s.tipo].aberto);
+const Mob = require('./mobilia.js');
 
 /* Regras: id, nome e limite. Limite 0 = regra firme (nenhuma violação). Limite > 0 = defeito conhecido em 06/10/2026:
    o teste é uma catraca (a contagem não pode subir); ao corrigir, baixe o limite até 0. */
@@ -41,6 +42,8 @@ const REGRAS = {
   M05: {nome:'Permeabilidade diferente da recalculada (com pisos de acesso)', limite:0},
   M06: {nome:'Iluminação: área de janela declarada diferente da desenhada', limite:0},
   M07: {nome:'Largura ou profundidade da casa diferente do desenho', limite:0},
+  M08: {nome:'Móvel da planta humanizada fora do cômodo (descontada a espessura da parede)', limite:0},
+  M09: {nome:'Móvel na abertura de porta (arco da folha ou 0,60 m em frente ao vão)', limite:0},
 };
 
 /* União de retângulos (área exata, por varredura das coordenadas). */
@@ -256,6 +259,27 @@ function auditar(v, q){
   const W = Math.max(...casa.flatMap(p => p.salas.map(s => s.x1))) - Math.min(...casa.flatMap(p => p.salas.map(s => s.x0)));
   const D = Math.max(...casa.flatMap(p => p.salas.map(s => s.y1))) - Math.min(...casa.flatMap(p => p.salas.map(s => s.y0)));
   if(Math.abs(W - v.W) > 0.02 || Math.abs(D - v.D) > 0.02) add('M07', 'Casa', `declarada ${f2(v.W)} × ${f2(v.D)} m, desenhada ${f2(W)} × ${f2(D)} m`);
+  // M08, M09: mobília da planta humanizada (gerador/mobilia.js), conferida com a geometria das paredes e portas
+  for(const p of v.pav){
+    const fech = p.salas.filter(s => !ABERTO(s));
+    for(const q of Mob.pavimento(p)){
+      const s = p.salas.find(x => x.id === q.sala); if(!s) continue;
+      // meia parede: 0,075 m no lado com trecho externo, 0,05 m nos internos; cômodo aberto não tem parede
+      const ext = ABERTO(s) ? [] : trechosExternos(s, fech);
+      const meia = l => ABERTO(s) ? 0 : ext.some(e => ladoDe(e, s) === l || (e.o === (l[0] === 'y' ? 'h' : 'v') && Math.abs(e.c - s[l]) < E)) ? 0.075 : 0.05;
+      const R = {x0:s.x0 + meia('x0'), x1:s.x1 - meia('x1'), y0:s.y0 + meia('y0'), y1:s.y1 - meia('y1')};
+      if(!dentroDe(q, R)) add('M08', p.nome, `${q.tipo} em ${s.nome}: ${f2(q.x0)}–${f2(q.x1)} × ${f2(q.y0)}–${f2(q.y1)} fora de ${f2(R.x0)}–${f2(R.x1)} × ${f2(R.y0)}–${f2(R.y1)}`);
+      for(const d of (p.portas || []).concat((p.vaos || []).filter(x => !x.livre))){
+        const l = d.o === 'h' ? (Math.abs(d.c - s.y0) < E ? 'y0' : Math.abs(d.c - s.y1) < E ? 'y1' : null) : (Math.abs(d.c - s.x0) < E ? 'x0' : Math.abs(d.c - s.x1) < E ? 'x1' : null);
+        if(!l) continue;
+        const t0 = Math.max(d.t0, d.o === 'h' ? s.x0 : s.y0), t1 = Math.min(d.t1, d.o === 'h' ? s.x1 : s.y1); if(t1 - t0 < E) continue;
+        const w = d.t1 - d.t0, sg = d.dentro || 1, folha = d.sala !== undefined && ((l === 'x0' || l === 'y0') ? sg > 0 : sg < 0);
+        const p0 = Math.max(0.6, folha ? w : 0);
+        const Z = l === 'y0' ? {x0:t0, x1:t1, y0:s.y0, y1:s.y0 + p0} : l === 'y1' ? {x0:t0, x1:t1, y0:s.y1 - p0, y1:s.y1} : l === 'x0' ? {y0:t0, y1:t1, x0:s.x0, x1:s.x0 + p0} : {y0:t0, y1:t1, x0:s.x1 - p0, x1:s.x1};
+        if(sobrepoe(q, Z)) add('M09', p.nome, `${q.tipo} em ${s.nome} na abertura da porta (${f2(t0)}–${f2(t1)} no lado ${l})`);
+      }
+    }
+  }
   return out;
 }
 
