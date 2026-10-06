@@ -75,6 +75,7 @@ const PADRAO = {
   rooftop:false, rtPos:'centro', rtTecnica:true, rtGourmet:true, rtVaranda:true, rtBanho:true, rtSpa:false,
   subRecuos:'nenhum', permeab:20, subVagasMax:0,
   acessivel:false,
+  invEstarJantar:false, invCozinhaServico:false,
   brises:false, brisesTipo:'auto', brisesFaces:'auto', brisesFace_N:false, brisesFace_NE:false, brisesFace_L:false, brisesFace_SE:false, brisesFace_S:false, brisesFace_SO:false, brisesFace_O:false, brisesFace_NO:false,
   subsolo:false, subNivel:'meio', garagemLocal:'subsolo', vagasTerreo:1, subLazer:false, inclinacao:20,
 };
@@ -136,6 +137,7 @@ function normaliza(p){
   q.brises = sim(q.brises);
   // acessibilidade (NBR 9050) é opcional; com ela, ao menos um banho social, que será o banho acessível
   q.acessivel = sim(q.acessivel);
+  q.invEstarJantar = sim(q.invEstarJantar); q.invCozinhaServico = sim(q.invCozinhaServico);
   if(q.acessivel && q.banhosSociais < 1) q.banhosSociais = 1;
   if(!['auto','horizontal','vertical','misto','movel'].includes(q.brisesTipo)) q.brisesTipo = 'auto';
   if(q.brisesFaces !== 'escolha') q.brisesFaces = 'auto';
@@ -1906,9 +1908,24 @@ function geraTodas(q, P, Ws){
   return out;
 }
 
+/* Inversões pedidas (E2.3): estar ↔ jantar na faixa social e cozinha ↔ serviço na coluna de apoio. Devolve outro programa. */
+function invertido(P, q){
+  const troca = (arr, a, b) => { const i = arr.indexOf(a), j = arr.indexOf(b); if(i < 0 || j < 0) return false; arr[i] = b; arr[j] = a; return true; };
+  const Pi = Object.assign({}, P, {social:P.social.slice(), apoioDir:P.apoioDir.slice()}), feitas = [];
+  if(q.invEstarJantar && troca(Pi.social, 'estar', 'jantar')) feitas.push('estar e jantar');
+  if(q.invCozinhaServico && troca(Pi.apoioDir, 'cozinha', 'servico')) feitas.push('cozinha e serviço');
+  return {Pi, feitas};
+}
+/* Com cozinha aberta, a cozinha precisa continuar encostada no jantar (ao menos 1,00 m de parede comum). */
+function cozinhaNoJantar(v){
+  const t = v.pav.find(p => p.nome==='Térreo'); if(!t) return true;
+  const k = t.salas.find(s => s.tipo==='cozinha'), j = t.salas.find(s => s.tipo==='jantar'); if(!k || !j) return true;
+  const sh = compartilhado(k, j); return !!sh && sh.t1 - sh.t0 >= 1.0;
+}
+
 function gerar(entrada, opts){
   const q = normaliza(entrada);
-  const P = programa(q);
+  let P = programa(q);
   const B = r2(q.frente - q.recX0 - q.recX1), Dmax = r2(q.fundo - q.recFrente - q.recFundo);
   const avisos = [];
   if(!q.orientacao) avisos.push('Informe para onde a frente do terreno está voltada (rosa dos ventos no bloco Terreno). Sem isso, a rosa das plantas não mostra a orientação real.');
@@ -1922,7 +1939,16 @@ function gerar(entrada, opts){
   const NOMES = {bloco:'bloco único', L:'em L', U:'em U', H:'em H'};
   if(q.formato==='H' && q.tipo==='sobrado') avisos.push('O formato em H está disponível só para casa térrea (com ou sem subsolo).');
   // opts.posAvalia: avaliações extras (estrutura etc.), aplicadas antes da ordenação; sem elas o resultado não muda
-  const todas = geraTodas(q, P, Ws).map(v => avalia(comAnexos(v, q), q)).map(v => { for(const fn of ((opts && opts.posAvalia) || [])) fn(v, q); return v; });
+  const monta = P0 => geraTodas(q, P0, Ws).map(v => avalia(comAnexos(v, q), q)).map(v => { for(const fn of ((opts && opts.posAvalia) || [])) fn(v, q); return v; });
+  let todas;
+  if(q.invEstarJantar || q.invCozinhaServico){
+    const {Pi, feitas} = invertido(P, q);
+    if(!feitas.length) avisos.push('Inversão pedida sem efeito: o programa não tem os dois cômodos de cada par.');
+    const inv = feitas.length ? monta(Pi).map(v => Object.assign(v, {invertido:feitas})) : [];
+    const ok = v => q.cozinha!=='aberta' || cozinhaNoJantar(v);          // cozinha aberta continua encostada no jantar
+    if(inv.some(v => ok(v) && !v.invalida.length)){ todas = inv.filter(ok); P = Pi; }
+    else { todas = monta(P); if(feitas.length) avisos.push(`A inversão de ${feitas.join(' e de ')} não coube neste terreno${q.cozinha==='aberta' ? ' com a cozinha aberta encostada no jantar' : ''}; as variantes mostram a ordem normal.`); }
+  } else todas = monta(P);
   if(!todas.length && q.formato!=='auto') avisos.push(`O formato ${NOMES[q.formato]} não cabe na área edificável de ${f2(B)} m de largura. Veja o terreno mínimo para este formato ou escolha outro.`);
   todas.sort((a,b) => b.score-a.score || a.W*a.D-b.W*b.D);
   // até 3 variantes, preferindo tipologias diferentes
