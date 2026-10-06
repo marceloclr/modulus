@@ -26,6 +26,9 @@ function desenhaAcessos(a, tx, ty, k, o, semRotulos){
   if(a.caminho){ const pts = a.caminho.pontos.map(([x,y]) => `${tx(x)},${ty(y)}`).join(' '), w = a.caminho.largura*k;
     o.push(`<polyline points="${pts}" fill="none" stroke="${AC.caminho[1]}" stroke-width="${(w + 1.4).toFixed(1)}" stroke-linejoin="miter"/>`);
     o.push(`<polyline points="${pts}" fill="none" stroke="${AC.caminho[0]}" stroke-width="${w.toFixed(1)}" stroke-linejoin="miter"><title>Caminho de pedestres ${f2(a.caminho.largura)} m</title></polyline>`); }
+  if(a.ramal){ const pts = a.ramal.pontos.map(([x,y]) => `${tx(x)},${ty(y)}`).join(' '), w = a.ramal.largura*k;   // ramal até o escritório (E2.4)
+    o.push(`<polyline points="${pts}" fill="none" stroke="${AC.caminho[1]}" stroke-width="${(w + 1.4).toFixed(1)}" stroke-linejoin="miter"/>`);
+    o.push(`<polyline points="${pts}" fill="none" stroke="${AC.caminho[0]}" stroke-width="${w.toFixed(1)}" stroke-linejoin="miter"><title>Caminho até o escritório ${f2(a.ramal.largura)} m</title></polyline>`); }
   for(const p of a.portoes){ const c = p.tipo==='veiculos' ? AC.veiculos : AC.pedestres, y = ty(p.y);
     o.push(`<line x1="${tx(p.x0)}" y1="${y}" x2="${tx(p.x1)}" y2="${y}" stroke="${c}" stroke-width="4" stroke-linecap="butt"><title>${p.tipo==='veiculos' ? 'Portão de veículos' : 'Portão social'} ${f2(p.largura)} m</title></line>`);
     if(!semRotulos) o.push(`<text x="${((tx(p.x0)+tx(p.x1))/2).toFixed(1)}" y="${(y - 5).toFixed(1)}" class="rd" style="font-size:5.8px;font-weight:600;fill:${c}">${p.tipo==='veiculos' ? 'PORTÃO VEÍC.' : 'PORTÃO SOCIAL'} ${f2(p.largura)}</text>`); }
@@ -140,7 +143,7 @@ function hzMoveis(pecas, X, Y){
         break; }
       case 'criado': R(0, 0, W, P, 'rx="1" ' + MAD); C(W / 2, P / 2, 0.1, 'fill="#FFF6DD" stroke="#B59B6A" stroke-width=".6"'); break;
       case 'armario': case 'prateleiras': case 'estante': {
-        R(0, 0, W, P, (q.tipo === 'armario' ? 'fill="#EDE5D6" stroke="#8C8270"' : MAD) + ' stroke-width=".9"');
+        R(0, 0, W, P, (q.tipo === 'armario' ? 'fill="#EDE5D6" stroke="#8C8270"' : 'fill="#E2D5BE" stroke="#8C7B5C"') + ' stroke-width=".9"');
         const n = Math.max(2, Math.round(W / 0.6));
         for(let i = 1; i < n; i++) R(i * W / n, 0, i * W / n, P, 'stroke="#8C8270" stroke-width=".6"');
         if(q.tipo === 'armario') R(0, P - 0.04, W, P - 0.04, 'stroke="#8C8270" stroke-width=".5"');
@@ -384,7 +387,7 @@ function planta(v, idx, op){
     o.push(`<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="#4C6E8F" stroke-width="1.8" stroke-dasharray="4 2"><title>Brise ${esc(b.nomeTipo || '')}</title></line>`);
   }
   for(const d of (ehSub ? [] : (p.portas||[]))){
-    seg(d, d.entrada ? '#FFFFFF' : PISO, 4.6);
+    seg(d, d.entrada || (d.externa && d.viz === undefined) ? '#FFFFFF' : PISO, 4.6);
     const w = d.t1 - d.t0, s = d.dentro || 1;
     const h0 = d.dobra ? d.t1 : d.t0, h1 = d.dobra ? d.t0 : d.t1;   // dobradiça e batente
     if(d.o==='h'){
@@ -396,6 +399,8 @@ function planta(v, idx, op){
       const sweep = s>0 ? 0 : 1;
       o.push(`<path d="M${X(d.c)},${Y(d.t1)} A${w*K},${w*K} 0 0 ${sweep} ${X(d.c+s*w)},${Y(d.t0)}" fill="none" stroke="${PORTA}" stroke-width=".7" stroke-dasharray="2 2"/>`);
     }
+    if(d.escritorio && d.externa){ const mx = d.o==='h' ? (d.t0+d.t1)/2 : d.c, my = d.o==='h' ? d.c : (d.t0+d.t1)/2;
+      o.push(`<text x="${X(mx) + (d.o==='h' ? 0 : -(d.dentro || 1)*4)}" y="${Y(my) + (d.o==='h' ? -(d.dentro || 1)*6 + ((d.dentro || 1) < 0 ? 6 : 0) : 3)}" class="rn" style="font-size:6.4px;fill:${PORTA}${d.o==='v' ? ';text-anchor:' + ((d.dentro || 1) > 0 ? 'end' : 'start') : ''}">▼ ESCRITÓRIO</text>`); }
     if(d.entrada){ const mx = d.o==='h' ? (d.t0+d.t1)/2 : d.c, my = d.o==='h' ? d.c : (d.t0+d.t1)/2;
       o.push(`<text x="${X(mx)}" y="${Y(my) + (d.o==='h' ? -6 : 3)}" class="rn" style="font-size:6.4px;fill:${PORTA}">▼ ENTRADA</text>`); }
   }

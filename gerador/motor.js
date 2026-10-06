@@ -1853,7 +1853,35 @@ function acessos(v, q){
     caminho = {largura:CAMINHO, pontos: pts.map(([x,y]) => [r2(x), r2(y)])};
   }
   const faltam = Math.max(0, nFora - vagasFora.length);
-  return {yF, xL, xR, vias, vagasFora, portoes, caminho, faltam};
+  // escritório ampliado (E2.4): ramal do caminho até a porta externa própria, sem cruzar a faixa dos carros nem as vagas.
+  // Porta para a varanda frontal: o caminho principal já chega à varanda, e a ligação é por ela (sem ramal).
+  let ramal = null, ramalMotivo = null;
+  const dEsc = (ter.portas || []).find(d => d.escritorio && d.externa);
+  if(dEsc && caminho){
+    const viz = dEsc.viz !== undefined ? ter.salas.find(s => s.id === dEsc.viz) : null;
+    if(viz && viz.tipo === 'varanda') ramalMotivo = 'varanda';
+    else {
+      const m = (dEsc.t0 + dEsc.t1)/2, s = dEsc.dentro || 1;
+      // ponto em frente à porta, do lado de fora: 0,75 m da parede (a meia largura do caminho mais folga)
+      const fora = dEsc.o === 'h' ? [m, r2(dEsc.c - s*0.75)] : [r2(dEsc.c - s*0.75), m];
+      const porta = dEsc.o === 'h' ? [m, dEsc.c] : [dEsc.c, m];
+      const [gx, gy] = caminho.pontos[0], obst = vias.concat(vagasFora).map(r => ({x0:r.x0 - CAMINHO/2, x1:r.x1 + CAMINHO/2, y0:r.y0 - CAMINHO/2, y1:r.y1 + CAMINHO/2}));
+      const corta = (a, b) => obst.some(r => Math.min(a[0], b[0]) < r.x1 - 0.001 && Math.max(a[0], b[0]) > r.x0 + 0.001 && Math.min(a[1], b[1]) < r.y1 - 0.001 && Math.max(a[1], b[1]) > r.y0 + 0.001);
+      const casa = ter.salas.filter(x => !TIPOS[x.tipo].aberto), naCasa = (a, b) => casa.some(r => Math.min(a[0], b[0]) < r.x1 - 0.001 && Math.max(a[0], b[0]) > r.x0 + 0.001 && Math.min(a[1], b[1]) < r.y1 - 0.001 && Math.max(a[1], b[1]) > r.y0 + 0.001);
+      // sai do portão social, sobe até uma linha y, atravessa até o alinhamento da porta e chega a ela
+      const ys = [];
+      for(let y = gy + 0.7; y <= Math.min(fora[1], 0) - 0.3 + 0.001; y += 0.3) ys.push(r2(y));
+      if(dEsc.o === 'v') ys.push(fora[1]);
+      for(const y of ys){
+        const pts = dEsc.o === 'h' ? [[gx, gy], [gx, y], [fora[0], y], porta] : [[gx, gy], [gx, y], [fora[0], y], [fora[0], fora[1]], porta];
+        const segs = pts.slice(1).map((p, i) => [pts[i], p]).filter(([a, b]) => Math.hypot(a[0]-b[0], a[1]-b[1]) > 0.01);
+        if(segs.some(([a, b]) => corta(a, b)) || segs.slice(0, -1).some(([a, b]) => naCasa(a, b))) continue;
+        ramal = {largura:CAMINHO, pontos:pts.map(([x, y]) => [r2(x), r2(y)])}; break;
+      }
+      if(!ramal) ramalMotivo = 'cruza';
+    }
+  }
+  return Object.assign({yF, xL, xR, vias, vagasFora, portoes, caminho, faltam}, ramal ? {ramal} : {}, ramalMotivo ? {ramalMotivo} : {});   // só com o escritório ampliado
 }
 
 /* ---------- Geração ---------- */
@@ -2112,6 +2140,7 @@ function gerar(entrada, opts){
     // acessos da versão espelhada: a casa vira no lugar e o lote não (com recuos diferentes, espelhar os acessos em torno do lote erraria)
     const ve = espelharCasa(v); v.acessosEsp = acessos(ve, q);
     if(v.acessos && v.acessos.portoes.some(p => p.junto)) v.avisos.push('A frente do lote não comporta portão social separado do portão de veículos; os dois ficam juntos.');
+    if(v.acessos && v.acessos.ramalMotivo === 'cruza') v.avisos.push('Escritório ampliado: não há traçado do portão social até a porta do escritório sem cruzar a faixa dos carros; o cliente entra pela porta principal.');
     if(v.acessos && v.acessos.faltam) v.avisos.push(`Só ${v.acessos.vagasFora.length} vaga(s) descoberta(s) cabem no recuo frontal; faltam ${v.acessos.faltam}.`); });
   const lm = loteMinimo(q, P);
   if(escolhidas.length && escolhidas[0].score < 60) avisos.push('O programa não cabe bem neste terreno. Veja o terreno mínimo sugerido.');

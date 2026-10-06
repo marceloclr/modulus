@@ -595,6 +595,12 @@ t('mobília: subsolo sem móveis e varanda com mesa externa', () => {
   ok(MOB.pavimento(pavMao([{id:1, tipo:'varanda', nome:'Varanda', zona:'varanda', x0:0, y0:0, x1:6, y1:2}])).some(x => x.tipo === 'mesa-externa'), 'varanda sem mesa');
 });
 
+t('desenho: SVG sem atributo repetido na mesma marca (o arquivo baixado precisa ser XML válido)', () => {
+  const D = require('./desenho.js');
+  for(const c of [{}, {frente:15, fundo:30, quartos:4, suites:2, despensa:true, escritorio:true, escritorioAmpliado:true, varanda:false, orientacao:'SE'}, {frente:22, fundo:32, formato:'H', tv:true, orientacao:'N'}])
+    for(const v of M.gerar(c).variantes) v.pav.forEach((p, i) => { for(const estilo of [undefined, 'humanizada']) for(const tag of D.planta(v, i, {estilo}).match(/<[a-zA-Z][^>]*>/g)){
+      const at = [...tag.matchAll(/s([a-zA-Z:-]+)="/g)].map(m => m[1]); ok(new Set(at).size === at.length, 'atributo repetido: ' + tag.slice(0, 120)); } });
+});
 t('humanizada: pisos, paredes em escala, móveis e técnica intacta', () => {
   const D = require('./desenho.js'), v = M.gerar({frente:12, fundo:30, quartos:3, suites:2}).variantes[0];
   const h = D.planta(v, 0, {estilo:'humanizada'}), tec = D.planta(v, 0);
@@ -669,6 +675,20 @@ t('escritório ampliado: no zoneamento invertido fica na frente; no sobrado, no 
   ok(escDe(sob).e && !sob.pav.find(p => p.nome==='Superior').salas.some(s => s.tipo==='escritorio'), 'sobrado: o ampliado fica no térreo');
   const h = escAmp({frente:22, fundo:32, formato:'H', orientacao:'N'}).variantes[0], b = escDe(h);
   ok(b.ext.length === 1 && b.ext[0].o === 'v', 'H: porta externa na fachada lateral');
+});
+t('escritório ampliado: ramal do portão social até a porta, sem cruzar os carros', () => {
+  const D = require('./desenho.js');
+  const v = escAmp({frente:15, fundo:30, orientacao:'SE', varanda:false}).variantes[0], a = v.acessos, {ext} = escDe(v);
+  ok(a.ramal, 'sem ramal');
+  const fim = a.ramal.pontos[a.ramal.pontos.length - 1], d = ext[0];
+  ok(Math.abs(fim[0] - (d.t0 + d.t1)/2) < 0.01 && Math.abs(fim[1] - d.c) < 0.01, 'o ramal termina na porta do escritório');
+  igual(a.ramal.pontos[0], a.caminho.pontos[0], 'o ramal sai do portão social:');
+  ok(/Caminho até o escritório/.test(D.planta(v, 0)) && /ESCRITÓRIO</.test(D.planta(v, 0)), 'ramal e marca da porta desenhados');
+  const comVar = escAmp({frente:15, fundo:30, orientacao:'SE'}).variantes[0].acessos;
+  ok(!comVar.ramal && comVar.ramalMotivo === 'varanda', 'com a varanda frontal, o acesso é pela varanda');
+  const h = escAmp({frente:22, fundo:32, formato:'H', orientacao:'N'}).variantes[0].acessos;
+  ok(h.ramal, 'H: ramal pela lateral');
+  igual(M.gerar({}).variantes[0].acessos.ramal, undefined, 'sem a opção, nada muda:');
 });
 t('entrada: térreo sem porta de entrada torna a variante inválida', () => {
   const r = escAmp({frente:12, fundo:30, tipo:'sobrado', quartos:4, suites:3, supEscritorio:true, orientacao:'SE'});

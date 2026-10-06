@@ -36,6 +36,7 @@ const REGRAS = {
   G18: {nome:'Janela a menos de 1,50 m da divisa (Código Civil, art. 1.301)', limite:0},
   G19: {nome:'Quarto encostado em fachada a oeste (íntimo nunca no poente)', limite:11},
   G20: {nome:'Porta externa do escritório fora da fachada (ou da parede com a varanda frontal)', limite:0},
+  G21: {nome:'Caminho até o escritório cruzando a faixa de veículos ou as vagas', limite:0},
   G22: {nome:'Escritório ampliado sem as duas portas (interna e externa)', limite:0},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
@@ -270,6 +271,13 @@ function auditar(v, q){
       const internas = ps.filter(d => !d.externa && d.viz !== undefined).length + (T.vaos || []).filter(x => x.a === s.id || x.b === s.id).length;
       if(!exts.length || !internas) add('G22', 'Térreo', `escritório com ${exts.length} porta(s) externa(s) e ${internas} interna(s)`);
     }
+  }
+  // G21: o ramal até o escritório não cruza a faixa de veículos nem as vagas descobertas
+  for(const ac of [v.acessos, v.acessosEsp]) if(ac && ac.ramal){
+    const P = ac.ramal.pontos, r0 = ac.vias.concat(ac.vagasFora);
+    for(let i = 1; i < P.length; i++){ const [a, b] = [P[i-1], P[i]], h = ac.ramal.largura/2;
+      const seg = {x0:Math.min(a[0], b[0]) - h, x1:Math.max(a[0], b[0]) + h, y0:Math.min(a[1], b[1]) - h, y1:Math.max(a[1], b[1]) + h};
+      if(r0.some(r => sobrepoe(seg, r))) add('G21', 'Térreo', `ramal do escritório cruza faixa ou vaga (${f2(a[0])}, ${f2(a[1])} → ${f2(b[0])}, ${f2(b[1])})`); }
   }
   // M08, M09: mobília da planta humanizada (gerador/mobilia.js), conferida com a geometria das paredes e portas
   for(const p of v.pav){
