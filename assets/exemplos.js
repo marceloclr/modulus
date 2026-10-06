@@ -46,8 +46,16 @@ function cartao(g, opc){
 // recorta as miniaturas para o lote desenhado (o desenho completo tem margens, rosa e legenda)
 function ajustar(el){
   for(const svg of el.querySelectorAll('.thumb > svg')){
-    try{ const lote = [...svg.querySelectorAll('rect')].find(r => /^Lote /.test((r.querySelector('title') || {}).textContent || ''));
-      const b = (lote || svg).getBBox(), m = 16; if(b.width > 10) svg.setAttribute('viewBox', [b.x - m, b.y - m, b.width + 2*m, b.height + 2*m].join(' ')); svg.removeAttribute('width'); svg.removeAttribute('height'); }catch(e){ /* fora da tela */ }
+    // recorta na área edificável (onde está a casa); sem ela, no lote
+    try{ const titulo = re => [...svg.querySelectorAll('rect')].find(r => re.test((r.querySelector('title') || {}).textContent || ''));
+      const lote = titulo(/^Área edificável/) || titulo(/^Lote /);
+      if(!lote) continue;
+      // caixa do retângulo levada para o sistema do SVG (considera os grupos deslocados e girados)
+      const bb = lote.getBBox(), M = svg.getScreenCTM().inverse().multiply(lote.getScreenCTM()), m = 18;
+      const pts = [[bb.x, bb.y], [bb.x + bb.width, bb.y], [bb.x, bb.y + bb.height], [bb.x + bb.width, bb.y + bb.height]].map(([x, y]) => [M.a*x + M.c*y + M.e, M.b*x + M.d*y + M.f]);
+      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]), x0 = Math.min(...xs), y0 = Math.min(...ys);
+      if(bb.width > 2) svg.setAttribute('viewBox', [x0 - m, y0 - m, Math.max(...xs) - x0 + 2*m, Math.max(...ys) - y0 + 2*m].join(' '));
+      svg.removeAttribute('width'); svg.removeAttribute('height'); }catch(e){ /* fora da tela */ }
   }
 }
 

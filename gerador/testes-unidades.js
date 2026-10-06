@@ -392,6 +392,36 @@ t('acessibilidade (opção): portas, banho acessível, quartos, rota e nada muda
   ok(require('./desenho.js').planta(v, 0).includes('Banho acessível: giro de 1,50 m'), 'giro desenhado');
 });
 
+t('lote grande: U e H com largura real, sem variante de nota 0 e rampa livre até a manobra', () => {
+  const r = M.gerar({frente:40, fundo:50});
+  const tip = r.variantes.map(v => v.tipologia).join(' | ');
+  ok(/Em U/.test(tip) && /Em H/.test(tip), tip);
+  ok(r.variantes.every(v => v.W <= 25 && v.score > 0), r.variantes.map(v => v.W + ' m, nota ' + v.score).join('; '));
+  for(const e of [{frente:12, fundo:30, formato:'bloco', subsolo:true}, {frente:40, fundo:50, formato:'bloco', subsolo:true}, {frente:15, fundo:30, subsolo:true, quartos:3, suites:2}]){
+    for(const v of M.gerar(e).variantes){
+      const sub = v.pav.find(p => p.nome === 'Subsolo'); if(!sub || sub.arranjo !== 'faixas') continue;
+      const rp = sub.salas.find(x => x.tipo === 'rampa'); if(!rp) continue;
+      const faixa = {x0:rp.x0 + 0.01, x1:rp.x1 - 0.01, y0:rp.y1, y1:sub.manobra.y0};
+      const bloqueia = sub.salas.filter(x => x.vaga && x.x0 < faixa.x1 && x.x1 > faixa.x0 && x.y0 < faixa.y1 - 0.01 && x.y1 > faixa.y0 + 0.01);
+      ok(!bloqueia.length, JSON.stringify(e) + ' ' + v.nome + ': vaga entre a rampa e a manobra');
+    }
+  }
+});
+
+t('arquivo do projeto: salvar, abrir, formatos antigos e item do banco', () => {
+  const P = require('./projeto.js'), CU = require('./custos.js');
+  const q = M.normaliza({quartos:4, frente:14}), v = M.gerar(q).variantes[1], custo = CU.calcular(v, q, DADOS);
+  const arq = P.criar(q, {v, variante:1, espelhada:true, pavimento:0, custo, mesRef:DADOS.cub.mesRef, nome:'Casa da praia'});
+  igual([arq.tipo, arq.motor, arq.nome, arq.escolha.variante, arq.escolha.espelhada], ['modulus-projeto', M.VERSAO, 'Casa da praia', 1, true]);
+  ok(arq.custo.med > 0 && arq.custo.min <= arq.custo.med && arq.custo.med <= arq.custo.max && arq.custo.mesRef === DADOS.cub.mesRef, 'custo com o mês de referência');
+  const lido = P.ler(JSON.stringify(arq)); igual([lido.origem, lido.entrada.quartos, lido.escolha.variante], ['projeto', 4, 1]);
+  igual(P.ler(JSON.stringify({frente:15, quartos:2})).origem, 'programa', 'programa.json antigo:');
+  const item = P.paraBanco(arq); ok(item.programa.quartos === 4 && item.variante === 1 && item.resumo.area > 0, 'item do banco');
+  igual(P.ler(JSON.stringify([item])).origem, 'banco', 'exportação do banco:');
+  let erro = ''; try{ P.ler('{"x":1}'); }catch(e){ erro = e.message; } ok(/não reconhecido/.test(erro), 'formato desconhecido: ' + erro);
+  igual(P.nomeArquivo('Casa · Praia', '2026-10-05T10:00:00Z'), 'modulus-casa-praia-2026-10-05.json');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

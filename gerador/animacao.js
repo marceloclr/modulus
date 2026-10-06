@@ -1,4 +1,4 @@
-/* Card "Sol e vento ao longo do ano" (beta): régua numerada de meses, animação da incidência solar sobre a planta
+/* Card "Sol e vento ao longo do ano" : régua numerada de meses, animação da incidência solar sobre a planta
    (sol, sombras no lote, fachadas iluminadas e manchas de sol pelas janelas) e do vento do mês (rosa, linhas de
    corrente, janelas de entrada e saída). Só no navegador. Usa Motor, Desenho, Brises, Insolacao e Vento.
    Plano: docs/planos/2026-10-05-sol-vento-animacao.md. */

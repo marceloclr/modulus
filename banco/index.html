@@ -71,7 +71,7 @@
       <div class="acts">
         <a class="btn" href="../gerador/" data-tip="Abre o gerador para criar e salvar uma planta">Nova planta</a>
         <button class="btn" type="button" id="exportarTudo" data-tip="Baixa todas as plantas salvas em um arquivo JSON">Exportar tudo</button>
-        <label class="btn" data-tip="Adiciona plantas de um arquivo JSON exportado antes">Importar<input type="file" id="importar" accept="application/json,.json" hidden></label>
+        <label class="btn" data-tip="Adiciona ao banco um arquivo de projeto salvo no gerador ou uma exportação do banco">Abrir arquivo<input type="file" id="importar" accept="application/json,.json" hidden></label>
       </div>
     </div>
     <div class="projs" id="salvos"></div>
@@ -81,6 +81,7 @@
 
 <script src="../gerador/motor.js"></script>
 <script src="../gerador/desenho.js"></script>
+<script src="../gerador/projeto.js"></script>
 <script src="../assets/exemplos.js"></script>
 <script>
 (function(){
@@ -175,7 +176,7 @@ document.getElementById('salvos').addEventListener('click', e => {
   const b = e.target.closest('[data-acao]'); if(!b) return;
   const card = b.closest('[data-id]'), id = card.dataset.id, lista = ler(), it = lista.find(x => x.id===id); if(!it) return;
   const acao = b.dataset.acao;
-  if(acao==='exportar') baixar(`planta-${id}.json`, JSON.stringify([it], null, 2));
+  if(acao==='exportar'){ const arq = Projeto.criar(it.programa, {nome: it.nome, variante: it.variante, espelhada: it.espelhada}); arq.resumo = it.resumo; baixar(Projeto.nomeArquivo(it.nome, arq.criadoEm), JSON.stringify(arq, null, 2)); }
   if(acao==='excluir'){
     if(b.dataset.confirma){ gravar(lista.filter(x => x.id!==id)); renderSalvos(); }
     else { b.dataset.confirma = '1'; b.textContent = 'Confirmar exclusão'; setTimeout(() => { if(b.isConnected){ delete b.dataset.confirma; b.textContent = 'Excluir'; } }, 3000); }
@@ -195,7 +196,9 @@ document.getElementById('importar').addEventListener('change', e => {
   f.text().then(t => {
     try{
       let novos = JSON.parse(t); if(!Array.isArray(novos)) novos = [novos];
-      novos = novos.filter(x => x && x.programa && x.resumo);
+      // arquivo de projeto do gerador (ou programa.json antigo) vira item do banco
+      novos = novos.map(x => x && x.programa && x.resumo ? x : (() => { try{ return Projeto.paraBanco(JSON.stringify(x)); }catch(e){ return null; } })()).filter(Boolean);
+      if(!novos.length) throw new Error('vazio');
       const lista = ler(), ids = new Set(lista.map(x => x.id));
       for(const n of novos){ if(ids.has(n.id)) n.id = n.id + Math.random().toString(36).slice(2,6); lista.unshift(n); }
       gravar(lista); renderSalvos();

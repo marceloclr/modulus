@@ -231,7 +231,7 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .proj{display:flex;flex-direction:column;background:var(--surface-2);border:1px solid var(--line);border-top:3px solid var(--c,var(--brass));border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;color:inherit;text-decoration:none;transition:transform .15s,border-color .15s}
 .proj:hover{transform:translateY(-2px);border-color:var(--ink-3)}
 .proj:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
-.proj .thumb{aspect-ratio:16/10;background:#FBFAF7;display:grid;place-items:center;overflow:hidden;border-bottom:1px solid var(--line)}
+.proj .thumb{aspect-ratio:4/3;background:#FBFAF7;display:grid;place-items:center;overflow:hidden;border-bottom:1px solid var(--line)}
 .proj .thumb img{width:100%;height:100%;object-fit:contain;padding:8px}
 .proj .body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
 .proj h2{font-size:20px;margin:0}
@@ -335,8 +335,6 @@ main.page .panel{display:block;max-width:none;margin-bottom:34px}
 .card.res{border-top:3px solid var(--c);padding-top:0;overflow:hidden}
 .card.res>.res-head{margin:0 -22px 14px;padding:12px 22px;background:color-mix(in srgb,var(--c) 9%,var(--surface-2));border-bottom:1px solid var(--line)}
 .card.res>.res-head h3{margin:0}
-/* sinalizador beta (assets/base.js): .so-beta só aparece com ?beta=1; .sem-beta some quando o beta está ligado */
-html:not(.beta) .so-beta,html.beta .sem-beta{display:none!important}
 
 /* Barra superior com contraste em relação ao conteúdo */
 :root{--hdr-bg:#1F242C;--hdr-ink:#F1F2F4;--hdr-ink-2:#B9BEC6;--hdr-line:#343A44;--hdr-btn:#2B313B}

@@ -1,4 +1,4 @@
-/* Menu lateral do gerador em blocos sanfonados guiados (beta).
+/* Menu lateral do gerador em blocos sanfonados guiados.
    Monta os blocos a partir dos fieldset existentes (data-secao), mostra número, título, chip de estado e resumo,
    e guarda no estado único quais blocos estão abertos. A lógica de transição dos blocos é pura e testada no Node. */
 (function(root, factory){

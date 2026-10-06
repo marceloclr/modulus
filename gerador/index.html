@@ -106,7 +106,7 @@
 .lote-col .zoom-barra{margin:0 0 6px}
 .vtab small{font-size:11.5px;color:inherit;opacity:.8;font-weight:400}
 .vtab .vdim{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;font-variant-numeric:tabular-nums}
-/* blocos guiados (beta, gerador/ui-blocos.js) */
+/* blocos guiados (gerador/ui-blocos.js) */
 .blocos{display:flex;flex-direction:column;gap:10px;margin:4px 0 12px}
 .bloco{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;background:var(--surface-2)}
 .bloco>summary{list-style:none;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-radius:9px;background:color-mix(in srgb,var(--c) 9%,var(--surface-2))}
@@ -142,7 +142,7 @@ details.sub>.fs>legend{display:none}
 .bloco-res:empty{display:none}
 .bloco-res{margin:-2px 0 4px}
 .bloco-res .panel{max-width:none;margin:0}
-html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variante)!important}
+section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variante)!important}
 #analises,#energia,#conforto{margin-top:28px}
 .grid-energia .card{margin:0;max-width:940px}
 .grid-analise{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px;align-items:start}
@@ -206,7 +206,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
   <aside class="sb" aria-label="Programa de necessidades">
     <form class="form" id="form" autocomplete="off">
       <div class="form-acts">
-        <button class="btn prim" type="submit" data-tip="Gera as variantes com os campos preenchidos"><span class="sem-beta">Gerar plantas</span><span class="so-beta">Gerar novamente</span></button>
+        <button class="btn prim" type="submit" data-tip="Gera as variantes com os campos preenchidos">Gerar novamente</button>
         <button class="btn" type="button" id="restaurar" data-tip="Volta todos os campos aos valores iniciais">Restaurar</button>
         <button class="btn" type="button" id="link" data-tip="Copia um link com estes campos preenchidos">Copiar link</button>
       </div>
@@ -260,8 +260,8 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
           <label class="chk"><input type="checkbox" name="supTv">Sala de TV / sala íntima</label>
           <label class="chk"><input type="checkbox" name="supServico">Lavanderia</label>
         </div>
-        <label class="fld">Torre de ar<select name="torreTipo"><option value="nenhuma">Nenhuma</option><option value="auto" class="so-beta">Recomendada para esta casa</option><option value="chamine">Chaminé (efeito chaminé)</option><option value="succao" class="so-beta">Coroamento de sucção</option><option value="solar" class="so-beta">Chaminé solar</option><option value="captador" class="so-beta">Captador de vento</option><option value="combinado" class="so-beta">Captador e exaustão combinados</option><option value="hibrida" class="so-beta">Híbrida (sucção, chaminé solar e exaustor EC)</option><option value="shed" class="so-beta">Captador com shed</option></select><small>Na zona bioclimática 8 o vento rende mais que o efeito chaminé. <a href="../torre/" target="_blank" rel="noopener">Veja o dossiê das torres</a>.</small></label>
-        <div id="brisesOps" class="so-beta">
+        <label class="fld">Torre de ar<select name="torreTipo"><option value="nenhuma">Nenhuma</option><option value="auto">Recomendada para esta casa</option><option value="chamine">Chaminé (efeito chaminé)</option><option value="succao">Coroamento de sucção</option><option value="solar">Chaminé solar</option><option value="captador">Captador de vento</option><option value="combinado">Captador e exaustão combinados</option><option value="hibrida">Híbrida (sucção, chaminé solar e exaustor EC)</option><option value="shed">Captador com shed</option></select><small>Na zona bioclimática 8 o vento rende mais que o efeito chaminé. <a href="../torre/" target="_blank" rel="noopener">Veja o dossiê das torres</a>.</small></label>
+        <div id="brisesOps">
           <label class="chk"><input type="checkbox" name="brises">Brises (estudo do tipo e do ângulo pela geometria solar)</label>
           <div id="brisesDet">
             <label class="fld">Tipo de brise<select name="brisesTipo"><option value="auto">Automático (o mais simples que sombreia bem)</option><option value="horizontal">Lâminas horizontais</option><option value="vertical">Lâminas verticais</option><option value="misto">Grelha (horizontais e verticais)</option><option value="movel">Lâminas móveis</option></select></label>
@@ -362,7 +362,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
         <label class="chk"><input type="checkbox" name="anexoFundo">Anexos podem ocupar o recuo de fundo</label>
       </fieldset>
 
-      <fieldset class="fs so-beta" data-secao="estrutura"><legend>Sistema estrutural</legend>
+      <fieldset class="fs" data-secao="estrutura"><legend>Sistema estrutural</legend>
         <label class="fld">Sistema<select name="estSistema">
           <option value="alvenariaEstrutural">Alvenaria estrutural</option>
           <option value="concretoArmado">Concreto armado</option>
@@ -376,7 +376,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
         <label class="fld">Balanço das varandas (m)<input type="number" name="estBalanco" min="0" max="6" step="0.25"><small>0 = sem balanço. O limite usual depende do sistema.</small></label>
       </fieldset>
 
-      <fieldset class="fs so-beta" data-secao="custo"><legend>Padrão e local da obra</legend>
+      <fieldset class="fs" data-secao="custo"><legend>Padrão e local da obra</legend>
         <label class="fld">Município<select name="municipio"><option value="fortaleza">Fortaleza</option><option value="eusebio">Eusébio</option><option value="aquiraz">Aquiraz (sede)</option><option value="portoDasDunas">Porto das Dunas (Aquiraz)</option></select></label>
         <label class="chk"><input type="checkbox" name="condominio">Casa em condomínio (regras e taxas de obra)</label>
         <label class="fld">Distância do mar<select name="distMar"><option value="acima2000">Mais de 2 km</option><option value="de500a2000">De 500 m a 2 km</option><option value="ate500">Até 500 m (agressividade marinha)</option></select></label>
@@ -386,18 +386,18 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
         <label class="chk"><input type="checkbox" name="custoIncc">Projetar pelo INCC-M até hoje (estimado)</label>
       </fieldset>
 
-      <fieldset class="fs so-beta" data-secao="solar"><legend>Energia solar básica</legend>
+      <fieldset class="fs" data-secao="solar"><legend>Energia solar básica</legend>
         <p class="fld wide"><small>Projeção de custo do sistema básico: portão automático, iluminação interna e externa, câmeras de segurança, geladeira, um ar-condicionado e ventiladores, com bateria para seguirem ligados quando a rede cai.</small></p>
         <label class="fld">Autonomia da bateria<select name="solAutonomia"><option value="4">4 horas</option><option value="8">8 horas</option><option value="12">12 horas</option><option value="24">24 horas</option></select></label>
       </fieldset>
 
-      <fieldset class="fs so-beta" data-secao="valores"><legend>Valores e atualização</legend>
+      <fieldset class="fs" data-secao="valores"><legend>Valores e atualização</legend>
         <div id="valoresCusto"><p class="note">Carregando os valores de custo…</p></div>
       </fieldset>
 
       <div class="form-acts">
-        <button class="btn" type="button" id="salvar" data-tip="Baixa os campos em um arquivo JSON">Salvar programa</button>
-        <label class="btn" data-tip="Carrega um programa salvo antes">Carregar<input type="file" id="carregar" accept="application/json,.json" hidden></label>
+        <button class="btn" type="button" id="salvar" data-tip="Baixa um arquivo com o programa, a variante escolhida, o resumo e o custo estimado. Guarde onde quiser: computador, Drive, Dropbox…">Salvar arquivo do projeto</button>
+        <label class="btn" data-tip="Abre um arquivo de projeto salvo antes (também aceita o programa.json antigo e a exportação do banco)">Abrir arquivo<input type="file" id="carregar" accept="application/json,.json" hidden></label>
       </div>
     </form>
   </aside>
@@ -419,7 +419,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
         <button class="btn" type="button" id="espelhar" aria-pressed="false" data-tip="Inverte a planta da esquerda para a direita">Espelhar</button>
         <button class="btn" type="button" id="baixarSvg" data-tip="Baixa o pavimento atual em SVG">Baixar SVG</button>
         <button class="btn" type="button" id="baixarPng" data-tip="Baixa o pavimento atual em PNG (2×)">Baixar PNG</button>
-        <span class="salvar-banco"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto para o banco" maxlength="80"><button class="btn prim" type="button" id="salvarBanco" data-tip="Guarda esta variante no banco de projetos deste navegador">Salvar no banco</button></span>
+        <span class="salvar-banco"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto para o banco" maxlength="80"><button class="btn prim" type="button" id="salvarBanco" data-tip="Guarda esta variante no banco de projetos deste navegador">Salvar no banco</button><button class="btn" type="button" id="salvarArquivo" data-tip="Baixa o arquivo do projeto (programa, variante, resumo e custo) para guardar onde quiser">Salvar arquivo</button></span>
       </div>
       <div class="plan-box" id="plan"></div>
       <div class="legenda-zonas" aria-label="Legenda de cores">
@@ -465,15 +465,15 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
         </div>
       </div>
     </section>
-    <section class="panel so-beta" id="analises" style="--c:var(--card-custo)" aria-labelledby="tAnalises">
+    <section class="panel" id="analises" style="--c:var(--card-custo)" aria-labelledby="tAnalises">
       <div class="panel-head"><p class="eyebrow">Análises da variante escolhida</p><h2 id="tAnalises">Custo, estrutura e acessibilidade</h2></div>
       <div id="cardsAnalise" class="grid-analise"><p class="note">Carregando os valores de custo…</p></div>
     </section>
-    <section class="panel so-beta" id="energia" style="--c:var(--card-solar)" aria-labelledby="tEnergia">
+    <section class="panel" id="energia" style="--c:var(--card-solar)" aria-labelledby="tEnergia">
       <div class="panel-head"><p class="eyebrow">Energia da variante escolhida</p><h2 id="tEnergia">Energia solar</h2></div>
       <div id="cardsEnergia" class="grid-energia"><p class="note">Carregando os valores…</p></div>
     </section>
-    <section class="panel so-beta" id="conforto" style="--c:var(--card-torre)" aria-labelledby="tConforto">
+    <section class="panel" id="conforto" style="--c:var(--card-torre)" aria-labelledby="tConforto">
       <div class="panel-head"><p class="eyebrow">Conforto passivo da variante escolhida</p><h2 id="tConforto">Torre de ar e brises</h2></div>
       <div id="cardsConforto" class="grid-analise"></div>
       <div id="cardSolVento"></div>
@@ -493,6 +493,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
 <script src="insolacao.js"></script>
 <script src="vento.js"></script>
 <script src="animacao.js"></script>
+<script src="projeto.js"></script>
 <script src="../tools/valida-schema.js"></script>
 <script src="valores.js"></script>
 <script src="graficos.js"></script>
@@ -505,7 +506,7 @@ html.beta section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--ca
 // padrões de todos os campos: motor, sistema estrutural e custo
 const PADRAO = Object.assign({}, Motor.PADRAO, Estrutura.PADRAO, Custos.PADRAO, Solar.PADRAO);
 const form = document.getElementById('form'), f2 = Motor.f2, est = Estado.criar(PADRAO);
-// valores de custo (dados/custos.json); no beta entram na avaliação estrutural e no card de custo
+// valores de custo (dados/custos.json); entram na avaliação estrutural e no card de custo
 let dadosCusto = null, historicoCusto = null, sinapiVivo = null;
 // vista do gráfico de custo: conveniência deste navegador
 let vistaCusto = 'parcelas'; try{ vistaCusto = localStorage.getItem('plantas-vista-custo') || 'parcelas'; }catch(e){}
@@ -575,14 +576,14 @@ function sincroniza(){
     if(sis) document.getElementById('estInfo').textContent = `${sis.norma} · vão econômico ${f2(sis.vaoEcon[0])}–${f2(sis.vaoEcon[1])} m, máximo ${f2(sis.vaoMax)} m · balanço até ${f2(sis.balanco)} m · prazo ${sis.prazo} · ${sis.oferta}. ${sis.restricoes === '—' ? '' : sis.restricoes}`; }
 }
 
-// ao vivo (beta): cada alteração gera de novo; a mesma entrada não é recalculada, salvo pedido explícito (forcar)
+// ao vivo: cada alteração gera de novo; a mesma entrada não é recalculada, salvo pedido explícito (forcar)
 let ultimaEntrada = null, espera = null, pedido = 0;
 function gerar(forcar){
   const d = lerForm(), chave = JSON.stringify(d);
   if(!forcar && res && chave === ultimaEntrada) return;
   ultimaEntrada = chave;
   const t0 = performance.now();
-  res = Motor.gerar(d, window.plantasBeta && dadosCusto ? {posAvalia:[(v, q) => Estrutura.avaliar(v, q, dadosCusto)]} : undefined);
+  res = Motor.gerar(d, dadosCusto ? {posAvalia:[(v, q) => Estrutura.avaliar(v, q, dadosCusto)]} : undefined);
   document.getElementById('plan').dataset.ms = (performance.now() - t0).toFixed(1);
   vi = 0; pi = Math.max(0, res.variantes[0] ? res.variantes[0].pav.findIndex(p => p.nome==='Térreo') : 0);
   if(!inicial || inicial.espelho === null){ const v0 = res.variantes[0]; esp = !!(v0 && v0.espelharVento); }
@@ -596,14 +597,14 @@ function gerar(forcar){
 function atualizaHash(){
   est.escrever('entrada', lerForm()); est.escrever('ui.variante', vi); est.escrever('ui.pavimento', pi); est.escrever('ui.espelho', esp);
   try{ history.replaceState(null, '', est.serializar()); }catch(e){}
-  if(window.plantasBeta) try{ localStorage.setItem(Estado.CHAVE_LOCAL, est.paraLocal()); }catch(e){}
+  try{ localStorage.setItem(Estado.CHAVE_LOCAL, est.paraLocal()); }catch(e){}
 }
 function variante(){ const v = res.variantes[vi]; return v && esp ? Desenho.espelha(v) : v; }
 
 // dica do card Pontuação: como a nota é calculada (Motor.avalia) e quanto esta variante perdeu
 function dicaNota(v){
   const faixa = v.score >= 80 ? 'boa (verde-azulado, 80 ou mais)' : v.score >= 60 ? 'razoável (dourado, 60 a 79)' : 'fraca (avermelhado, abaixo de 60)';
-  const beta = document.documentElement.classList.contains('beta') ? ';\n• conflito com o sistema estrutural' : '';
+  const estr = ';\n• conflito com o sistema estrutural';
   const acess = res && res.entrada.acessivel ? ';\n• com a acessibilidade marcada: porta estreita (2), falta de banho acessível (8), quarto com lado abaixo de 2,80 m (3), corredor estreito (3) e degrau na rota (8)' : '';
   return `Nota de 0 a 100 para a qualidade da variante. Começa em 100 e perde pontos a cada problema:
 • cômodo abaixo da área ou da largura mínima, ou alongado demais;
@@ -612,7 +613,7 @@ function dicaNota(v){
 • casa maior que a área edificável, ocupação acima do limite ou permeabilidade abaixo do mínimo;
 • corredores e halls acima de 14 % da área;
 • falta de aberturas do lado do vento ou do lado oposto (8 cada);
-• quarto com janela a oeste (25), a sudoeste ou noroeste (6) ou sem janela a nascente (3)${beta}${acess}.
+• quarto com janela a oeste (25), a sudoeste ou noroeste (6) ou sem janela a nascente (3)${estr}${acess}.
 Esta variante: ${v.score} (perdeu ${100 - v.score}), nota ${faixa}. Os motivos estão em “Pontos de atenção”.`;
 }
 
@@ -631,10 +632,10 @@ function render(){
     `<button class="btn vtab" type="button" role="tab" aria-selected="${i===vi}" aria-pressed="${i===vi}" data-v="${i}">${x.nome}<span class="score">${x.score}</span><small>${x.tipologia}</small><small class="vdim"><span data-tip="Terreno: frente × fundo = área do lote">Terreno ${f2(q.frente)} × ${f2(q.fundo)} m · ${f2(q.frente*q.fundo)} m²</span><span data-tip="Construção: largura × profundidade da casa; área = soma das áreas fechadas de todos os pavimentos">Casa ${f2(x.W)} × ${f2(x.D)} m · ${f2(x.quadro.fechada)} m² construídos</span></small></button>`).join('');
   document.getElementById('ptabs').innerHTML = v.pav.map((p,i) =>
     `<button class="btn" type="button" role="tab" aria-selected="${i===pi}" aria-pressed="${i===pi}" data-p="${i}">${p.nome}</button>`).join('');
-  const estBrises = window.plantasBeta && q.brises ? Brises.estudar(v, q) : null;
+  const estBrises = q.brises ? Brises.estudar(v, q) : null;
   document.getElementById('plan').innerHTML = Desenho.planta(v, pi, estBrises && estBrises.janelas ? {brises: estBrises.janelas} : undefined);
   brisesVisiveis();
-  if(window.plantasBeta){ const cv = document.getElementById('cardSolVento'); if(!cv.dataset.ok){ cv.dataset.ok = '1'; Animacao.iniciar(cv, {raiz:'../'}); } Animacao.atualizar(v, q, pi, estBrises); }
+  { const cv = document.getElementById('cardSolVento'); if(!cv.dataset.ok){ cv.dataset.ok = '1'; Animacao.iniciar(cv, {raiz:'../'}); } Animacao.atualizar(v, q, pi, estBrises); }
   const av = v.avisos.filter((a,i,arr) => arr.indexOf(a)===i);
   document.getElementById('avisos').innerHTML = av.length
     ? `<div class="warn"><strong>Pontos de atenção desta variante</strong><ul>${av.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`
@@ -668,16 +669,16 @@ function render(){
   if(sub && sub.rampa && q.subGaragem) t += `<tr><td>Rampa</td><td class="n">${f2(sub.rampa.L)} m a ${q.inclinacao} % (${f2(sub.rampa.Lout)} m no recuo)</td></tr>`;
   document.getElementById('terreno').innerHTML = t + '</tbody>';
   document.getElementById('crumbSec').textContent = `${v.nome} · ${v.pav[pi].nome}`;
-  if(window.plantasBeta) renderAnalises();
+  renderAnalises();
 }
-// conforto passivo (beta): torre de ar e brises da variante escolhida
+// conforto passivo: torre de ar e brises da variante escolhida
 function renderConforto(v, q){
   const t = Torre.calcular(v, q), cards = [], b = Brises.estudar(v, q);
   if(t) cards.push(Cartoes.cartaoTorre(t));
   if(b) cards.push(Cartoes.cartaoBrises(b, Brises, dadosCusto));
   document.getElementById('cardsConforto').innerHTML = cards.length ? cards.join('') : '<p class="note">Escolha uma torre de ar ou brises em “Conforto passivo”, no bloco 1, para ver o estudo desta variante.</p>';
 }
-// cards de custo e estrutura (beta): custo da variante escolhida e de todas, para comparar
+// cards de custo e estrutura: custo da variante escolhida e de todas, para comparar
 function renderAnalises(){
   const box = document.getElementById('cardsAnalise');
   if(!dadosCusto || !res || !res.variantes[vi]){ box.innerHTML = '<p class="note">Carregando os valores de custo…</p>'; return; }
@@ -712,13 +713,13 @@ function baixar(nome, blob){ const a = document.createElement('a'); a.href = URL
 function nomeArq(ext){ const v = variante(); return `planta-${v.nome.replace(/\s+/g,'-').toLowerCase()}-${v.pav[pi].nome.toLowerCase()}.${ext}`; }
 
 form.addEventListener('submit', e => { e.preventDefault(); if(document.activeElement && document.activeElement.closest('.bloco-res')) return; clearTimeout(espera); gerar(true); });
-// no beta, com algum número fora da faixa, a planta espera a correção (o bloco mostra o problema)
+// com algum número fora da faixa, a planta espera a correção (o bloco mostra o problema)
 const faixasOk = () => ![...form.querySelectorAll('input[type=number]')].some(i => !i.disabled && !i.closest('[hidden]') && (i.validity.badInput || i.validity.rangeUnderflow || i.validity.rangeOverflow));
 form.addEventListener('change', e => { if(e.target.closest('.bloco-res')) return; clearTimeout(espera); sincroniza(); if(e.target.id!=='carregar' && (!window.plantasBeta || faixasOk())) gerar(); });
 // números: gera enquanto se digita, 200 ms depois da última tecla; um pedido mais novo descarta o anterior; valor fora da faixa espera a correção
 form.addEventListener('input', e => {
   const el = e.target;
-  if(!window.plantasBeta || el.type !== 'number' || el.closest('.bloco-res')) return;
+  if(el.type !== 'number' || el.closest('.bloco-res')) return;
   clearTimeout(espera);
   const v = el.validity;
   if(v.badInput || v.rangeUnderflow || v.rangeOverflow || (el.value === '' && !el.name.startsWith('d_'))) return;
@@ -738,10 +739,30 @@ document.getElementById('link').addEventListener('click', async function(){
   const url = location.href; try{ await navigator.clipboard.writeText(url); this.textContent = 'Link copiado'; }catch(e){ this.textContent = 'Copie da barra'; }
   setTimeout(() => this.textContent = 'Copiar link', 1800);
 });
-document.getElementById('salvar').addEventListener('click', () => baixar('programa.json', new Blob([JSON.stringify(Motor.normaliza(lerForm()), null, 2)], {type:'application/json'})));
+// arquivo do projeto (gerador/projeto.js): o usuário decide onde guardar; não há conta nem servidor
+function salvarArquivo(){
+  const v = res && res.variantes[vi], nome = (document.getElementById('nomeBanco').value || '').trim();
+  let custo = null; try{ if(v && dadosCusto) custo = Custos.calcular(res.variantes[vi], res.entrada, dadosCusto); }catch(e){}
+  const arq = Projeto.criar(lerForm(), {nome, v, variante: vi, espelhada: esp, pavimento: pi, custo, mesRef: dadosCusto && dadosCusto.cub ? dadosCusto.cub.mesRef : null});
+  baixar(Projeto.nomeArquivo(arq.nome, arq.criadoEm), new Blob([JSON.stringify(arq, null, 2)], {type:'application/json'}));
+}
+document.getElementById('salvar').addEventListener('click', salvarArquivo);
+document.getElementById('salvarArquivo').addEventListener('click', salvarArquivo);
 document.getElementById('carregar').addEventListener('change', e => {
   const f = e.target.files[0]; if(!f) return;
-  f.text().then(t => { try{ preencher(Object.assign({}, PADRAO, JSON.parse(t))); gerar(); }catch(err){ document.getElementById('avisosGerais').innerHTML = '<div class="warn">Arquivo inválido.</div>'; } });
+  f.text().then(t => {
+    try{
+      const a = Projeto.ler(t);
+      preencher(Object.assign({}, PADRAO, a.entrada)); gerar(true);
+      if(res && res.variantes.length){
+        vi = Math.min(a.escolha.variante || 0, res.variantes.length - 1); esp = !!a.escolha.espelhada;
+        const v = res.variantes[vi]; pi = a.escolha.pavimento != null && v.pav[a.escolha.pavimento] ? a.escolha.pavimento : Math.max(0, v.pav.findIndex(p => p.nome==='Térreo'));
+        document.getElementById('espelhar').setAttribute('aria-pressed', esp); atualizaHash(); render();
+      }
+      if(a.nome) document.getElementById('nomeBanco').value = a.nome;
+      document.getElementById('avisosGerais').insertAdjacentHTML('afterbegin', `<div class="warn ok">Projeto aberto${a.nome ? ': ' + esc(a.nome) : ''}.${a.motor && a.motor !== Motor.VERSAO ? ` Foi salvo com o motor de ${esc(a.motor)}; a planta foi gerada de novo com as regras atuais (${Motor.VERSAO}).` : ''}</div>`);
+    }catch(err){ document.getElementById('avisosGerais').innerHTML = `<div class="warn">Não foi possível abrir: ${esc(err.message)}</div>`; }
+  });
   e.target.value = '';
 });
 document.getElementById('vtabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if(!b) return; vi = +b.dataset.v; const v = res.variantes[vi]; pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo')); esp = !!v.espelharVento; document.getElementById('espelhar').setAttribute('aria-pressed', esp); atualizaHash(); render(); });
@@ -770,17 +791,17 @@ document.getElementById('baixarPng').addEventListener('click', () => {
 // zoom com botões + e − na planta e na implantação
 Zoom.ligar(document.getElementById('plan'), b => document.querySelector('.fig-tools').appendChild(b), 'Planta');
 Zoom.ligar(document.getElementById('lote'), b => document.getElementById('lote').before(b), 'Implantação');
-// sessão: o link (#s= ou o antigo #q=) tem prioridade; no beta, sem link, volta a última sessão deste navegador
+// sessão: o link (#s= ou o antigo #q=) tem prioridade; sem link, volta a última sessão deste navegador
 let salvo = null;
-if(window.plantasBeta && !location.hash) try{ salvo = Estado.deLocal(localStorage.getItem(Estado.CHAVE_LOCAL), PADRAO); }catch(e){}
+if(!location.hash) try{ salvo = Estado.deLocal(localStorage.getItem(Estado.CHAVE_LOCAL), PADRAO); }catch(e){}
 const ini = Estado.deHash(location.hash, PADRAO) || salvo;
 if(ini) est.substituir(ini);
 let inicial = ini ? ini.ui : null;
-if(window.plantasBeta) blocos = UiBlocos.montar(form, est, {primeiraVisita: !ini, persistir: () => { if(res) atualizaHash(); }});
+blocos = UiBlocos.montar(form, est, {primeiraVisita: !ini, persistir: () => { if(res) atualizaHash(); }});
 preencher(Object.assign({}, PADRAO, ini ? ini.entrada : {}));
 gerar();
-// valores de custo (beta): oficiais aceitos neste navegador + ajustes; a cada mudança refaz a avaliação e os cards
-if(window.plantasBeta) fetch('../dados/custos.schema.json').then(r => r.json()).then(schema => Valores.montar(document.getElementById('valoresCusto'), {
+// valores de custo: oficiais aceitos neste navegador + ajustes; a cada mudança refaz a avaliação e os cards
+fetch('../dados/custos.schema.json').then(r => r.json()).then(schema => Valores.montar(document.getElementById('valoresCusto'), {
     raiz:'../', mesTxt:Cartoes.mesTxt, validar: d => ValidaSchema.validar(d, schema),
     aoMudar: (efetivo, hist) => { dadosCusto = efetivo; historicoCusto = hist; sincroniza(); gerar(true); } }))
   .catch(() => { document.getElementById('avisosGerais').insertAdjacentHTML('beforeend', '<div class="warn">Não foi possível carregar os valores de custo (dados/custos.json).</div>'); });
