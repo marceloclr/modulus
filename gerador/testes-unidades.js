@@ -422,6 +422,26 @@ t('arquivo do projeto: salvar, abrir, formatos antigos e item do banco', () => {
   igual(P.nomeArquivo('Casa · Praia', '2026-10-05T10:00:00Z'), 'modulus-casa-praia-2026-10-05.json');
 });
 
+// ---------- auditoria geométrica e matemática (etapa D) ----------
+const AU = require('./auditoria.js');
+t('auditoria: cada regra acusa a falha montada à mão', () => {
+  const sala = (id, tipo, nome, x0, y0, x1, y1) => ({id, tipo, nome, x0, y0, x1, y1});
+  // lote 10 × 20, recuos 1 / 1,5 / 2; casa de 6 × 8 a partir de x = 2, y = 2
+  const q = {frente:10, fundo:20, recFrente:2, recLat:1.5, recFundo:2, permeab:0};
+  const S = [sala(1, 'estar', 'Estar', 0, 0, 4, 4), sala(2, 'quarto', 'Quarto', 4, 0, 6, 4), sala(3, 'circ', 'Circulação', 0, 4, 0.8, 8),
+    sala(4, 'cozinha', 'Cozinha', 0.5, 4, 6, 8), sala(5, 'quarto', 'Quarto 2', 6, 0, 7, 3)];
+  const v = {x0:2, y0:2, W:6, D:8, lote:Object.assign({}, q), pav:[{nome:'Térreo', salas:S,
+    portas:[{o:'v', c:4, t0:4.5, t1:5.3, sala:1, viz:2, dentro:1}, {o:'h', c:0, t0:1, t1:2, sala:1, entrada:true, dentro:1}],
+    janelas:[{o:'v', c:4, t0:1, t1:2, h:1.2}, {o:'h', c:0, t0:3.5, t1:4.5, h:1.2}, {o:'h', c:0, t0:1.2, t1:1.8, h:1.2}], vaos:[]}]};
+  const achou = new Set(AU.auditar(v, q).map(x => x.regra));
+  for(const r of ['G01', 'G04', 'G05', 'G07', 'G08', 'G09', 'G11', 'G16', 'M07']) ok(achou.has(r), `a regra ${r} não acusou: ${[...achou].join(' ')}`);
+  igual(Math.round(AU.uniao([{x0:0, y0:0, x1:2, y1:2}, {x0:1, y0:1, x1:3, y1:3}]) * 100) / 100, 7, 'união de dois quadrados de 2 m com 1 m² em comum:');
+});
+t('auditoria: regras firmes sem violação e defeitos conhecidos sem piorar (catraca)', () => {
+  const r = AU.rodar(), ruins = Object.entries(AU.REGRAS).filter(([k, R]) => r.cont[k] > R.limite);
+  ok(!ruins.length, ruins.map(([k, R]) => `${k} ${R.nome}: ${r.cont[k]} (limite ${R.limite}); ex.: ${r.ex[k][0]}`).join(' | '));
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }
