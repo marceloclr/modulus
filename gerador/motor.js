@@ -60,7 +60,7 @@ const DIMENSIONAVEIS = ['quarto','suite','master','banhoSuite','closet','banhoSo
 
 const PADRAO = {
   frente:12, fundo:30, recFrente:5, recLatE:1.5, recLatD:1.5, recFundo:3, taxa:60, orientacao:'',
-  tipo:'terrea', formato:'auto', peDireito:3.0,
+  tipo:'terrea', formato:'auto', peDireito:3.0, pdSalas:2.8, pdDemais:2.6, estarDuplo:false,
   quartos:3, suites:1, master:true, tamanho:'medio',
   banhosSociais:1, lavabo:false,
   estar:true, estarTipo:'tradicional', jantar:true, tv:false, escritorio:false, escritorioAmpliado:false,
@@ -83,7 +83,7 @@ const PADRAO = {
 
 function normaliza(p){
   const q = Object.assign({}, PADRAO, p||{});
-  for(const k of ['frente','fundo','recFrente','recLatE','recLatD','recFundo','taxa','peDireito','quartos','suites','banhosSociais','vagas','inclinacao','pisC','pisL','pisP','afastAnexo','vaoMax']) q[k] = +q[k] || 0;
+  for(const k of ['frente','fundo','recFrente','recLatE','recLatD','recFundo','taxa','peDireito','pdSalas','pdDemais','quartos','suites','banhosSociais','vagas','inclinacao','pisC','pisL','pisP','afastAnexo','vaoMax']) q[k] = +q[k] || 0;
   // recuos laterais (E2.2): esquerdo e direito de quem olha da rua para o lote. Pela convenção do motor, a esquerda de quem
   // olha da rua é o lado x1 e a direita é o x0. Links e arquivos antigos com um só recuo lateral (recLat) valem para os dois.
   // (o estado expande links antigos com o padrão: o recLat antigo vale quando os dois campos novos estão no padrão)
@@ -109,12 +109,14 @@ function normaliza(p){
   if(q.edicula==='2'){ q.edQuarto = true; q.edGourmet = true; }
   if(!['retangular','raia','L','oval'].includes(q.pisForma)) q.pisForma = 'retangular';
   q.pisC = clamp(q.pisC || 8, 2, 25); q.pisL = clamp(q.pisL || 4, 1.5, 12); q.pisP = clamp(q.pisP || 1.4, 0.4, 3); q.afastAnexo = clamp(q.afastAnexo, 1.5, 10);
-  for(const k of ['master','lavabo','estar','jantar','tv','escritorio','escritorioAmpliado','servico','despensa','varanda','varandaFundos','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
+  for(const k of ['estarDuplo','master','lavabo','estar','jantar','tv','escritorio','escritorioAmpliado','servico','despensa','varanda','varandaFundos','gourmet','subsolo','subGaragem','subDeposito','subLazer']) q[k] = q[k]===true||q[k]==='true'||q[k]===1||q[k]==='1'||q[k]==='on';
   q.quartos = clamp(Math.round(q.quartos), 1, 8);
   q.suites = clamp(Math.round(q.suites), 0, q.quartos);
   q.banhosSociais = clamp(Math.round(q.banhosSociais), 0, 4);
   q.vagas = clamp(Math.round(q.vagas), 0, 6);
   q.peDireito = clamp(q.peDireito || 3, 2.6, 4.5);
+  // pé-direito livre (piso ao forro), E2.6: salas e demais cômodos; PREFERÊNCIA de projeto (mínimo legal NÃO VERIFICADO até a E3)
+  q.pdSalas = clamp(q.pdSalas || 2.8, 2.4, 6.0); q.pdDemais = clamp(q.pdDemais || 2.6, 2.4, 6.0);
   q.inclinacao = clamp(q.inclinacao || 20, 8, 25);
   if(!FATOR[q.tamanho]) q.tamanho = 'medio';
   if(q.tipo!=='sobrado') q.tipo = 'terrea';
@@ -1755,16 +1757,44 @@ function impermeaveis(v, q, anexosCasa, subA){
   return out;
 }
 
+/* Pé-direito livre por cômodo (E2.6). Salas: estar, jantar, TV, sala íntima, escritório e varanda gourmet; demais: o resto.
+   Com pavimento em cima (laje), o livre não passa do piso a piso menos 0,15 m (laje e forro): reduz e avisa. Sem pavimento em
+   cima, pode passar; a cobertura sobe naquele trecho. Terraço descoberto e jardim não têm pé-direito. */
+const PD_SALAS = ['estar','jantar','tv','salaIntima','escritorio','gourmet'], PD_LAJE = 0.15;
+function comPeDireito(v, q){
+  const pavs = v.pav.filter(p => p.nome !== 'Subsolo'), red = new Set();
+  pavs.forEach((p, i) => {
+    const acima = pavs.slice(i + 1).find(o => !!o.anexo === !!p.anexo);
+    for(const s of p.salas){
+      if(['terraco','jardim','escada','elevador'].includes(s.tipo)) continue;
+      let pd = PD_SALAS.includes(s.tipo) ? q.pdSalas : q.pdDemais;
+      const coberto = acima && acima.salas.some(o => o.tipo !== 'jardim' && o.x0 < s.x1 - 0.01 && s.x0 < o.x1 - 0.01 && o.y0 < s.y1 - 0.01 && s.y0 < o.y1 - 0.01);
+      const lim = r2(q.peDireito - PD_LAJE);
+      // pé-direito duplo só no estar: dois pisos a piso menos a laje, sem pavimento em cima (no sobrado, pede o vazio: etapa futura)
+      if(s.tipo === 'estar' && q.estarDuplo){
+        if(coberto) v.avisos.push(`${p.nome}: o pé-direito duplo no estar não cabe, porque há pavimento em cima; o estar ficou com o pé-direito das salas.`);
+        else { pd = r2(2 * q.peDireito - PD_LAJE); s.duplo = true;
+          const integ = p.salas.filter(o => o !== s && compartilhado(s, o) && ABERTOS.some(([x, y]) => (x === s.tipo && y === o.tipo) || (y === s.tipo && x === o.tipo)));   // integrados (sem parede)
+          if(integ.length) v.avisos.push(`${p.nome}: estar com pé-direito duplo (${f2(pd)} m) encostado em ${integ.map(o => rotulo(o)).join(', ')}: o forro muda de altura na divisa (viga ou sanca).`); }
+      }
+      if(coberto && pd > lim + 0.001){ pd = lim; red.add(p.nome); }
+      s.pd = r2(pd);
+    }
+  });
+  for(const n of red) v.avisos.push(`${n}: pé-direito livre reduzido para ${f2(r2(q.peDireito - PD_LAJE))} m nos cômodos com pavimento em cima (piso a piso de ${f2(q.peDireito)} m menos 0,15 m de laje e forro).`);
+  return v;
+}
+
 function quadro(v){
   const linhas = [];
   for(const p of v.pav){
     const fech = p.salas.filter(s => !TIPOS[s.tipo].aberto);
     const abertas = p.salas.filter(s => TIPOS[s.tipo].aberto);
-    linhas.push({pav:p.nome, salas: p.salas.map(s => ({nome:s.nome, tipo:s.tipo, zona:s.zona, w:r2(s.x1-s.x0), h:r2(s.y1-s.y0), a:r2(area(s)), ilum:s.ilum||null})),
-      fechada:r2(fech.reduce((t,s)=>t+area(s),0)), aberta:r2(abertas.reduce((t,s)=>t+area(s),0))});
+    linhas.push({pav:p.nome, salas: p.salas.map(s => ({nome:s.nome, tipo:s.tipo, zona:s.zona, w:r2(s.x1-s.x0), h:r2(s.y1-s.y0), a:r2(area(s)), ilum:s.ilum||null, pd:s.pd || null, vol:s.pd ? r2(area(s) * s.pd) : null, ...(s.duplo ? {duplo:true} : {})})),
+      fechada:r2(fech.reduce((t,s)=>t+area(s),0)), aberta:r2(abertas.reduce((t,s)=>t+area(s),0)), volume:r2(fech.reduce((t,s)=>t+(s.pd ? area(s)*s.pd : 0),0))});
   }
   const fechada = r2(linhas.reduce((t,l)=>t+l.fechada,0)), aberta = r2(linhas.reduce((t,l)=>t+l.aberta,0));
-  return {pavimentos:linhas, fechada, aberta, total:r2(fechada+aberta)};
+  return {pavimentos:linhas, fechada, aberta, total:r2(fechada+aberta), volume:r2(linhas.reduce((t,l)=>t+l.volume,0))};
 }
 
 const f2 = n => (Math.round(n*100)/100).toFixed(2).replace('.', ',');
@@ -2137,7 +2167,7 @@ function gerar(entrada, opts){
   if(!semPoente.length && validas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
-  escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); if(q.estarTipo === 'tv') v.estarTipo = 'tv'; v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recX0:q.recX0, recX1:q.recX1, recFundo:q.recFundo}; v.acessos = acessos(v, q);
+  escolhidas.forEach((v,i) => { comPeDireito(v, q); v.nome = 'Variante ' + String.fromCharCode(65+i); if(q.estarTipo === 'tv') v.estarTipo = 'tv'; v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recX0:q.recX0, recX1:q.recX1, recFundo:q.recFundo}; v.acessos = acessos(v, q);
     // acessos da versão espelhada: a casa vira no lugar e o lote não (com recuos diferentes, espelhar os acessos em torno do lote erraria)
     const ve = espelharCasa(v); v.acessosEsp = acessos(ve, q);
     if(v.acessos && v.acessos.portoes.some(p => p.junto)) v.avisos.push('A frente do lote não comporta portão social separado do portão de veículos; os dois ficam juntos.');

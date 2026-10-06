@@ -57,7 +57,8 @@ function sombras(v, q, s){
   const F = Motor.RUMOS[q.orientacao] || 0, d = direcao(s.az, F), k = 1 / Math.tan(rad(s.h)), out = [];
   const caixa = (r, H) => { const dx = -d.x * H * k, dy = -d.y * H * k, c = [[r.x0, r.y0], [r.x1, r.y0], [r.x1, r.y1], [r.x0, r.y1]];
     out.push({pts: envoltorio(c.concat(c.map(([x, y]) => [x + dx, y + dy]))), altura: H}); };
-  for(const {p, topo} of andares(v, q)) for(const r of p.salas) if(!ABERTOS.includes(r.tipo)) caixa(r, topo);
+  // E2.6: o topo de cada cômodo é o do pavimento ou, se o pé-direito livre + 0,15 m de laje passar dele, o do próprio cômodo
+  for(const {p, topo, piso} of andares(v, q)) for(const r of p.salas) if(!ABERTOS.includes(r.tipo)) caixa(r, Math.max(topo, r.pd ? piso + r.pd + 0.15 : topo));
   if(v.torre) caixa(v.torre, andares(v, q).slice(-1)[0].topo + 1.5);
   for(const a of (v.anexos || [])) if(a.tipo === 'edicula') caixa(a, (a.dois ? 2 : 1) * (q.peDireito || 3));
   return out;

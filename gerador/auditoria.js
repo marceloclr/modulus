@@ -38,6 +38,8 @@ const REGRAS = {
   G20: {nome:'Porta externa do escritório fora da fachada (ou da parede com a varanda frontal)', limite:0},
   G21: {nome:'Caminho até o escritório cruzando a faixa de veículos ou as vagas', limite:0},
   G22: {nome:'Escritório ampliado sem as duas portas (interna e externa)', limite:0},
+  G23: {nome:'Pé-direito livre acima do piso a piso menos a laje, com pavimento em cima', limite:0},
+  G24: {nome:'Pé-direito livre abaixo de 2,50 m em sala ou quarto (preferência de projeto; mínimo legal a verificar na E3)', limite:0},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
   M03: {nome:'Projeção diferente da recalculada (térreo ∪ pavimentos de cima)', limite:0},
@@ -279,6 +281,13 @@ function auditar(v, q){
       const seg = {x0:Math.min(a[0], b[0]) - h, x1:Math.max(a[0], b[0]) + h, y0:Math.min(a[1], b[1]) - h, y1:Math.max(a[1], b[1]) + h};
       if(r0.some(r => sobrepoe(seg, r))) add('G21', 'Térreo', `ramal do escritório cruza faixa ou vaga (${f2(a[0])}, ${f2(a[1])} → ${f2(b[0])}, ${f2(b[1])})`); }
   }
+  // G23, G24: pé-direito livre (E2.6)
+  if(q.peDireito){ const pavs = v.pav.filter(p => p.nome !== 'Subsolo');
+    pavs.forEach((p, i) => { const acima = pavs.slice(i + 1).find(o => !!o.anexo === !!p.anexo);
+      for(const s of p.salas.filter(x => x.pd)){
+        if(acima && acima.salas.some(o => o.tipo !== 'jardim' && sobrepoe(o, s)) && s.pd > q.peDireito - 0.15 + E) add('G23', p.nome, `${s.nome}: ${f2(s.pd)} m com pavimento em cima (piso a piso ${f2(q.peDireito)} m)`);
+        if(['estar','jantar','tv','salaIntima','escritorio','quarto','suite','master'].includes(s.tipo) && s.pd < 2.5 - E) add('G24', p.nome, `${s.nome}: ${f2(s.pd)} m`);
+      } }); }
   // M08, M09: mobília da planta humanizada (gerador/mobilia.js), conferida com a geometria das paredes e portas
   for(const p of v.pav){
     const fech = p.salas.filter(s => !ABERTO(s));
@@ -322,6 +331,8 @@ function casos(){
     'Escritório ampliado no invertido, 12 × 32': {frente:12, fundo:32, quartos:3, suites:2, escritorio:true, escritorioAmpliado:true, orientacao:'L'},
     'Escritório ampliado em H, 22 × 32': {frente:22, fundo:32, formato:'H', quartos:3, suites:2, escritorio:true, escritorioAmpliado:true, orientacao:'N'},
     'Escritório ampliado no sobrado (pedido em cima), 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:4, suites:3, escritorio:true, escritorioAmpliado:true, supEscritorio:true, orientacao:'SE'},
+    'Salas com pé-direito de 4,00 m, térrea com rooftop 14 × 30': {frente:14, fundo:30, quartos:3, suites:2, rooftop:true, pdSalas:4.0, pdDemais:2.6, orientacao:'SE'},
+    'Salas com pé-direito de 3,50 m, térrea 15 × 30': {frente:15, fundo:30, quartos:3, suites:2, pdSalas:3.5, pdDemais:2.7, orientacao:'SE'},
     'Varanda de fundos parcial, 12 × 34': {frente:12, fundo:34, quartos:3, suites:2, varandaFundos:true, varandaFundosL:4, varandaFundosP:2.5, orientacao:'N'},
     'Em U com varanda de fundos, 22 × 32': {frente:22, fundo:32, quartos:3, suites:2, formato:'U', varandaFundos:true, orientacao:'SE'},
     'Garagem descoberta, 3 vagas, 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, garagem:'descoberta', vagas:3, orientacao:'NE'},

@@ -23,7 +23,7 @@ function calcular(v, q){
   const qVentoFraco = qVento / 2;                                   // vento a 2 m/s (fim de tarde, noite)
   const casa = v.pav.filter(p => !p.anexo && p.nome !== 'Subsolo' && p.nome !== 'Rooftop');
   const area = casa.reduce((s, p) => s + p.salas.filter(x => !Motor.TIPOS[x.tipo].aberto).reduce((u, x) => u + Motor.area(x), 0), 0);
-  const volume = area * pd;
+  const volume = casa.reduce((s, p) => s + p.salas.filter(x => !Motor.TIPOS[x.tipo].aberto).reduce((u, x) => u + Motor.area(x) * (x.pd || pd), 0), 0);   // E2.6: pé-direito de cada cômodo
   const total = Math.max(qCham, qVento) , minimo = Math.max(qCham, qVentoFraco, TP.ec || 0);
   return {tipo:t.tipo, nome:TP.nome, sobre:t.sobre, auto:t.auto, recomendada:t.recomendada, nomeRecomendada:Motor.TORRES[t.recomendada].nome,
     H, A:A_SAIDA, dT:TP.dT, dCp:TP.dCp, ec:TP.ec, qCham, qVento, qVentoFraco, area, volume,

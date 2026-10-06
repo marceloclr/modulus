@@ -39,6 +39,7 @@ function cartaoCusto(r, extra){
   h += vivo ? (vivo.erro ? ` · <span class="aviso-vivo">consulta ao IBGE falhou (${esc(vivo.erro)})</span>` : ` · <strong>ao vivo: ${brl(vivo.valor)}/m² em ${esc(vivo.mes)}</strong>`)
     : ` · <button class="btn btn-mini" type="button" data-acao="sinapi" data-tip="Consulta agora a API do SIDRA/IBGE (tabela ${sn.tabela}, Ceará). O SINAPI mede outra cesta: serve para conferir a tendência, não substitui o CUB">Consultar o IBGE agora</button>`;
   h += `</p>`;
+  if(r.peDireito && r.peDireito.m2 > 0) h += `<p class="nota-custo"><strong>Pé-direito acima de 2,60 m (ESTIMATIVA, fora do total):</strong> <span class="calc" data-tip="${esc(r.peDireito.formula)}">+${f2(r.peDireito.m2)} m² de parede, ${brlCurto(r.peDireito.valor.min)} a ${brlCurto(r.peDireito.valor.max)}</span>.</p>`;
   if(r.entrada.custoIncc) h += `<p class="nota-custo"><strong>Projeção pelo INCC-M (estimada):</strong> o total já inclui ${f2(100*((r.parcelas.find(p => p.id === 'incc') || {valor:{med:0}}).valor.med)/r.total.med)} % de reajuste estimado desde ${mesTxt(r.mesRef)}.</p>`;
   // gráfico com troca de vista
   h += `<div class="tabs vistas" role="group" aria-label="Visualização do gráfico">${VISTAS.map(([id, nome, dica]) => `<button class="btn" type="button" data-vista="${id}" aria-pressed="${id === vista}" data-tip="${esc(dica)}">${nome}</button>`).join('')}</div>`;

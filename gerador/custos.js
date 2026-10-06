@@ -98,9 +98,24 @@ function calcular(v, q, dados){
     porM2: tri(n => areaConstruida ? total[n]/areaConstruida : 0),
     formulaTotal:`Total = construção ${brl(construcao.med)} + adicionais ${brl(obra.med - construcao.med)} + projetos ${brl(projetos.med)}${bdi ? ' + BDI ' + brl(bdi.med) : ''}${incc ? ' × INCC ' + f2(incc.fator) : ''}`,
     formulaM2:`Total ÷ ${f2(areaConstruida)} m² construídos (área fechada)`,
+    peDireito: peDireitoExtra(v, dados),
     aviso:dados.aviso
   };
 }
 
-return {PADRAO, NIVEIS, areas, calcular, inccAcumulado, brl};
+/* E2.6: parede a mais nos cômodos com pé-direito livre acima de 2,60 m (referência de projeto, NÃO VERIFICADA no CUB).
+   ESTIMATIVA fora do total: perímetro × (pé-direito − 2,60) × custo do m² de alvenaria rebocada e pintada, tirado do muro de
+   2 m de dados/custos.json (valor por metro ÷ 2 m de altura; inclui a fundação corrida, por isso tende a sobrar). */
+const PD_REF = 2.6;
+function peDireitoExtra(v, dados){
+  const mu = dados.muro && dados.muro.alvenaria2m; if(!mu) return null;
+  let m2 = 0;
+  for(const p of v.pav) for(const s of p.salas) if(s.pd && s.pd > PD_REF + 0.001 && !Motor.TIPOS[s.tipo].aberto) m2 += 2 * ((s.x1 - s.x0) + (s.y1 - s.y0)) * (s.pd - PD_REF);
+  if(m2 < 0.01) return {m2:0, valor:{min:0, med:0, max:0}, formula:'Nenhum cômodo acima de 2,60 m.'};
+  const v2 = n => m2 * mu[n] / 2;
+  return {m2:Math.round(m2 * 100) / 100, valor:{min:v2('min'), med:v2('med'), max:v2('max')},
+    formula:`${f2(m2)} m² de parede (perímetro × altura acima de 2,60 m) × ${brl(mu.med / 2)}/m² (${mu.nome}: ${brl(mu.med)}/m ÷ 2 m)`};
+}
+
+return {PADRAO, NIVEIS, areas, calcular, inccAcumulado, brl, peDireitoExtra};
 });
