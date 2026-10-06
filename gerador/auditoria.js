@@ -17,26 +17,26 @@ const ABERTO = s => !!(M.TIPOS[s.tipo] && M.TIPOS[s.tipo].aberto);
 const REGRAS = {
   G01: {nome:'Ambientes sobrepostos', limite:0},
   G02: {nome:'Área nula ou negativa', limite:0},
-  G03: {nome:'Ambiente fora do lote', limite:83},
-  G04: {nome:'Ambiente fora da área edificável (recuos)', limite:62},
+  G03: {nome:'Ambiente fora do lote', limite:0},
+  G04: {nome:'Ambiente fora da área edificável (recuos)', limite:0},
   G05: {nome:'Porta fora de uma parede real', limite:0},
   G06: {nome:'Porta sem espaço para abrir', limite:0},
-  G07: {nome:'Portas ou porta e janela sobrepostas', limite:81},
-  G08: {nome:'Janela em parede inexistente (interna ou atravessando cômodos)', limite:43},
+  G07: {nome:'Portas ou porta e janela sobrepostas', limite:0},
+  G08: {nome:'Janela em parede inexistente (interna ou atravessando cômodos)', limite:0},
   G09: {nome:'Corredor estreito (< 0,90 m)', limite:0},
-  G10: {nome:'Corredor abaixo de 1,20 m', limite:98},
-  G11: {nome:'Circulação interrompida (cômodo sem ligação)', limite:20},
+  G10: {nome:'Corredor abaixo de 1,20 m', limite:90},
+  G11: {nome:'Circulação interrompida (cômodo sem ligação)', limite:2},
   G12: {nome:'Escada que não cabe no espaço', limite:0},
-  G13: {nome:'Escada fora da faixa de Blondel (0,63–0,65 m)', limite:6},
+  G13: {nome:'Escada fora da faixa de Blondel (0,63–0,65 m)', limite:0},
   G14: {nome:'Garagem sem largura ou profundidade para os carros', limite:0},
   G15: {nome:'Vaga do subsolo sem acesso à manobra', limite:0},
-  G16: {nome:'Mobiliário sobreposto ou fora do cômodo', limite:33},
+  G16: {nome:'Mobiliário sobreposto ou fora do cômodo', limite:1},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
-  M03: {nome:'Projeção ignora o superior em balanço', limite:44},
-  M04: {nome:'Ocupação diferente da recalculada', limite:17},
-  M05: {nome:'Permeabilidade sem descontar pisos de acesso', limite:163},
-  M06: {nome:'Iluminação: área de janela declarada diferente da desenhada', limite:39},
+  M03: {nome:'Projeção diferente da recalculada (térreo ∪ pavimentos de cima)', limite:0},
+  M04: {nome:'Ocupação diferente da recalculada', limite:0},
+  M05: {nome:'Permeabilidade diferente da recalculada (com pisos de acesso)', limite:0},
+  M06: {nome:'Iluminação: área de janela declarada diferente da desenhada', limite:0},
   M07: {nome:'Largura ou profundidade da casa diferente do desenho', limite:0},
 };
 
@@ -151,7 +151,7 @@ function auditar(v, q){
     }
     for(const s of S.filter(x => ['suite','master','quarto'].includes(x.tipo))){
       const w = s.x1 - s.x0, h = s.y1 - s.y0;
-      if(w < 2.6 || h < 2.6) add('G16', nome, `${s.nome} de ${f2(w)} × ${f2(h)} m sem cama desenhada`);
+      if(w < 2.6 - 0.005 || h < 2.6 - 0.005) add('G16', nome, `${s.nome} de ${f2(w)} × ${f2(h)} m sem cama desenhada`);
     }
     // G15: vagas do subsolo encostadas numa manobra (ou numa vaga, em fila)
     if(nome === 'Subsolo'){
@@ -197,26 +197,28 @@ function auditar(v, q){
     });
     if(Math.abs(fT - Q.fechada) > 0.011 || Math.abs(aT - Q.aberta) > 0.011 || Math.abs(Q.fechada + Q.aberta - Q.total) > 0.011) add('M02', 'Total', `fechada ${f2(Q.fechada)}, aberta ${f2(Q.aberta)}, total ${f2(Q.total)}`);
   }
-  // M03, M04: projeção e ocupação (térreo ∪ superior ∪ rooftop, sem o subsolo e sem a edícula)
-  const ter = v.pav.find(p => p.nome === 'Térreo');
+  // M03, M04: projeção e ocupação recalculadas (térreo ∪ superior ∪ rooftop coberto, sem o subsolo e sem a edícula)
+  const ter = v.pav.find(p => p.nome === 'Térreo'), loteA = L.frente * L.fundo;
+  const anexosCasa = (v.anexos || []).map(a => ({tipo:a.tipo, x0:a.x0 - v.x0, y0:a.y0 - v.y0, x1:a.x1 - v.x0, y1:a.y1 - v.y0}));
   if(ter){
     const cob = s => s.tipo !== 'terraco' && s.tipo !== 'jardim';
     const altos = v.pav.filter(p => !p.anexo && p.nome !== 'Subsolo' && p.nome !== 'Térreo');
-    const projReal = uniao(ter.salas.filter(cob).concat(...altos.map(p => p.salas.filter(s => s.tipo !== 'terraco' || p.nome === 'Superior'))));
-    const projTer = uniao(ter.salas.filter(cob));
-    if(projReal > projTer + 0.05) add('M03', 'Projeção', `térreo ${f2(projTer)} m², com os pavimentos de cima ${f2(projReal)} m² (motor: ${f2(v.projecao)} m²)`);
-    const anexos = (v.anexos || []).filter(a => a.tipo !== 'piscina').reduce((t, a) => t + (a.x1 - a.x0) * (a.y1 - a.y0), 0);
-    const ocup = 100 * (projReal + anexos) / (L.frente * L.fundo);
+    const projReal = uniao(ter.salas.filter(cob).concat(...altos.map(p => p.salas.filter(s => p.nome === 'Superior' || cob(s)))));
+    // a projeção do motor inclui os anexos cobertos (edícula, gourmet destacada), sem a piscina
+    const anexos = anexosCasa.filter(a => a.tipo !== 'piscina').reduce((t, a) => t + (a.x1 - a.x0) * (a.y1 - a.y0), 0);
+    if(Math.abs(projReal + anexos - v.projecao) > 0.05) add('M03', 'Projeção', `motor ${f2(v.projecao)} m², recalculada ${f2(projReal + anexos)} m² (térreo ${f2(uniao(ter.salas.filter(cob)))} m², anexos ${f2(anexos)} m²)`);
+    const ocup = 100 * (projReal + anexos) / loteA;
     if(Math.abs(ocup - v.ocupacao) > 0.05) add('M04', 'Ocupação', `motor ${f2(v.ocupacao)} %, recalculada ${f2(ocup)} %`);
   }
-  // M05: permeabilidade descontando faixas de veículos, vagas descobertas e caminho de pedestres
-  if(v.permeavel !== undefined && v.acessos){
-    const A = v.acessos, pisos = A.vias.map(a => ({x0:a.x0, x1:a.x1, y0:a.y0, y1:a.y1})).concat(A.vagasFora);
-    if(A.caminho) for(let i = 0; i < A.caminho.pontos.length - 1; i++){ const [a, b] = [A.caminho.pontos[i], A.caminho.pontos[i+1]], m = A.caminho.largura/2;
-      pisos.push({x0:Math.min(a[0], b[0]) - m, x1:Math.max(a[0], b[0]) + m, y0:Math.min(a[1], b[1]), y1:Math.max(a[1], b[1])}); }
-    const ext = uniao(pisos.filter(r => r.y1 <= 0.001 || r.y0 < 0));   // só os pisos no recuo frontal (fora da casa)
-    const nova = v.permeavel - 100 * ext / (L.frente * L.fundo);
-    if(ext > 0.5) add('M05', 'Permeabilidade', `motor ${f2(v.permeavel)} %; descontando ${f2(ext)} m² de pisos de acesso, ${f2(nova)} %${nova < q.permeab ? ` (abaixo do mínimo de ${f2(q.permeab)} %)` : ''}`);
+  // M05: permeabilidade recalculada (lote menos a união de térreo, anexos, laje do subsolo, rampa no recuo e pisos de acesso)
+  if(ter && v.permeavel !== undefined && v.acessos){
+    const A = v.acessos, imp = ter.salas.filter(s => s.tipo !== 'terraco' && s.tipo !== 'jardim').concat(anexosCasa, A.vias, A.vagasFora);
+    const sub = v.pav.find(p => p.nome === 'Subsolo');
+    if(sub){ imp.push({x0:sub.dim.x0, y0:sub.dim.y0, x1:sub.dim.x0 + sub.dim.W, y1:sub.dim.y0 + sub.dim.D}); if(sub.rampaFora && q.subGaragem) imp.push(sub.rampaFora); }
+    if(A.caminho) for(let i = 0; i < A.caminho.pontos.length - 1; i++){ const [a, b] = [A.caminho.pontos[i], A.caminho.pontos[i+1]], m = A.caminho.largura / 2;
+      imp.push({x0:Math.min(a[0], b[0]) - (a[0] === b[0] ? m : 0), x1:Math.max(a[0], b[0]) + (a[0] === b[0] ? m : 0), y0:Math.min(a[1], b[1]) - (a[0] === b[0] ? 0 : m), y1:Math.max(a[1], b[1]) + (a[0] === b[0] ? 0 : m)}); }
+    const pct = 100 * Math.max(0, loteA - uniao(imp)) / loteA;
+    if(Math.abs(pct - v.permeavel) > 0.02) add('M05', 'Permeabilidade', `motor ${f2(v.permeavel)} %, recalculada com os pisos de acesso ${f2(pct)} %`);
   }
   // M07: W e D declarados × desenho (pavimentos da casa, sem subsolo e sem edícula)
   const casa = v.pav.filter(p => !p.anexo && p.nome !== 'Subsolo');

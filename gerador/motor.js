@@ -314,8 +314,10 @@ function faixaIntima(mods, tiras, y0, compMin, fixo){
 
 /* ---------- Escada reta ---------- */
 function escada(q){
-  const n = Math.ceil(q.peDireito/0.18);
-  const espelho = q.peDireito/n, piso = 0.28;
+  const n = Math.ceil(q.peDireito/0.18 - 1e-9);         // 2,70 / 0,18 = 15,000…02 em ponto flutuante: sem a folga, viravam 16 degraus
+  const espelho = q.peDireito/n;
+  // piso de 0,28 m; se 2e + p sair da faixa de Blondel (0,63–0,65 m), o piso é ajustado para entrar nela
+  const piso = 2*espelho + 0.28 < 0.63 ? Math.ceil((0.63 - 2*espelho)*100)/100 : 2*espelho + 0.28 > 0.65 ? Math.floor((0.65 - 2*espelho)*100)/100 : 0.28;
   return {n, espelho: r2(espelho*1000)/1000, piso, L: r2((n-1)*piso), blondel: r2(2*espelho+piso)};
 }
 
@@ -1195,8 +1197,8 @@ function janelasSubsolo(pav, q, S, av){
     for(const e of ext){
       if(obt >= exig && lados.has(e.lado)) continue;
       const L = e.t1-e.t0;
+      if(L - 0.3 < 0.8) continue;                     // trecho curto: a janela mínima de 0,80 m passaria do fim da parede
       const w = clamp(Math.max(1.0, (exig-obt)/h), 0.8, semi ? L-0.3 : Math.min(4.0, L-0.3));
-      if(w < 0.8) continue;
       const m = (e.t0+e.t1)/2;
       janelas.push({o:e.o, c:e.c, t0:r2(m-w/2), t1:r2(m+w/2), alta:semi, h});
       obt += w*h; lados.add(e.lado);
@@ -1236,7 +1238,16 @@ function aberturas(pav, q, ehTerreo, espelho){
     for(const t of pref){
       const viz = S.filter(o => o!==s && o.tipo===t).map(o => ({o, sh:compartilhado(s,o)})).filter(v => v.sh && v.sh.t1-v.sh.t0 >= 0.85)
         .sort((a,b) => (b.sh.t1-b.sh.t0)-(a.sh.t1-a.sh.t0));
-      if(viz.length){ portas.push(porta(s, viz[0].o, viz[0].sh, q.acessivel ? Math.max(0.9, larguraPorta(s)) : larguraPorta(s))); feito = true; break; }
+      if(viz.length){ const o = viz[0].o;
+        // uma porta só por par de cômodos (garagem ↔ serviço gerava duas no mesmo ponto)
+        if(!portas.some(p => (p.sala===s.id && p.viz===o.id) || (p.sala===o.id && p.viz===s.id))) portas.push(porta(s, o, viz[0].sh, q.acessivel ? Math.max(0.9, larguraPorta(s)) : larguraPorta(s)));
+        feito = true; break; }
+    }
+    // suíte sem parede na circulação (a escada ocupou o trecho do corredor): entra pelo closet do módulo, se ele encosta no hall
+    if(!feito && (s.tipo==='suite' || s.tipo==='master')){
+      const cl = S.find(o => o.mod===s.mod && (o.tipo==='closet' || o.tipo==='closetMaster') && compartilhado(o, s));
+      const viz = cl && S.filter(o => ['circ','hall'].includes(o.tipo)).map(o => ({o, sh:compartilhado(cl, o)})).filter(z => z.sh && z.sh.t1 - z.sh.t0 >= 0.85).sort((a,b) => (b.sh.t1-b.sh.t0)-(a.sh.t1-a.sh.t0))[0];
+      if(viz){ portas.push(porta(cl, viz.o, viz.sh, q.acessivel ? 0.9 : 0.8)); feito = true; av.push(`${pav.nome}: ${rotulo(s)} com entrada pelo closet (a escada ocupa o trecho do corredor).`); }
     }
     if(!feito && s.tipo!=='estar' && pref.length && !['garagem','gourmet'].includes(s.tipo) && s.nome!=='Área técnica' && !(s.tipo==='rouparia' && area(s) < 1.5)) av.push(`${pav.nome}: ${rotulo(s)} sem acesso por ${pref.slice(0,3).map(t=>TIPOS[t].nome.toLowerCase()).join(', ')}.`);
   }
@@ -1311,9 +1322,9 @@ function aberturas(pav, q, ehTerreo, espelho){
     // premissa (05/10/2026): sempre que possível, janelas em pontos distantes entre si, para a ventilação cruzada.
     // 1) escolhe as faces e as larguras; um cômodo de permanência com duas faces externas sempre ganha janela na segunda face
     const cruzada = !!t.hab && !alta && !vidro, sel = [];
-    // trecho livre de cada face: o maior pedaço fora da porta de entrada (com 0,20 m de folga)
+    // trecho livre de cada face: o maior pedaço fora das portas dessa parede (com 0,20 m de folga; auditoria G07)
     const livre = e => { let seg = [[e.t0, e.t1]];
-      for(const p of portas.filter(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001)) seg = seg.flatMap(([a,b]) => [[a, Math.min(b, p.t0-0.2)], [Math.max(a, p.t1+0.2), b]]).filter(([a,b]) => b-a > 0.05);
+      for(const p of portas.filter(p => p.o===e.o && Math.abs(p.c-e.c)<0.001)) seg = seg.flatMap(([a,b]) => [[a, Math.min(b, p.t0-0.2)], [Math.max(a, p.t1+0.2), b]]).filter(([a,b]) => b-a > 0.05);
       const m = seg.sort((x,y) => (y[1]-y[0]) - (x[1]-x[0]))[0]; return m ? Object.assign({}, e, {t0:m[0], t1:m[1]}) : null; };
     ext.forEach((e0, i) => {
       const e = livre(e0); if(!e) return;
@@ -1348,8 +1359,9 @@ function aberturas(pav, q, ehTerreo, espelho){
     sel.forEach(({e, w}, i) => {
       let mm = centros[i];
       // não sobrepor porta de entrada
-      const pe = portas.find(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>mm-w/2 && p.t0<mm+w/2);
+      const pe = portas.find(p => p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>mm-w/2 && p.t0<mm+w/2);
       if(pe){ if(pe.t1 + 0.3 + w <= e.t1) mm = pe.t1+0.3+w/2; else if(pe.t0 - 0.3 - w >= e.t0) mm = pe.t0-0.3-w/2; else { w = Math.max(0, Math.max(e.t1-pe.t1, pe.t0-e.t0) - 0.4); mm = e.t1-pe.t1 > pe.t0-e.t0 ? pe.t1+0.2+w/2 : pe.t0-0.2-w/2; } }
+      w = Math.min(w, e.t1 - e.t0); mm = clamp(mm, e.t0 + w/2, e.t1 - w/2);      // nunca passa do fim da face
       if(w < 0.5) return;
       janelas.push({o:e.o, c:e.c, t0:r2(mm-w/2), t1:r2(mm+w/2), alta, vidro, h});
       obt += w*h;
@@ -1359,7 +1371,7 @@ function aberturas(pav, q, ehTerreo, espelho){
     for(const e of ext){
       if(falta <= 0.01 || sel.some(x => x.e0 === e)) continue;
       const L = e.t1-e.t0, w = clamp(Math.max(alta ? 0.6 : 1.0, falta/h), alta ? 0.6 : 1.0, Math.min(alta ? 1.6 : 3.0, L-0.3)), m = (e.t0+e.t1)/2;
-      if(w < 0.5 || portas.some(p => p.entrada && p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2 && p.t0<m+w/2)) continue;
+      if(w < 0.5 || portas.some(p => p.o===e.o && Math.abs(p.c-e.c)<0.001 && p.t1>m-w/2-0.2 && p.t0<m+w/2+0.2)) continue;
       janelas.push({o:e.o, c:e.c, t0:r2(m-w/2), t1:r2(m+w/2), alta, vidro, h}); obt += w*h; falta = exig - obt;
     }
     if(exig){
@@ -1522,19 +1534,19 @@ function avalia(v, q){
   const B = q.frente - 2*q.recLat, Dmax = q.fundo - q.recFrente - q.recFundo;
   if(v.W > B + 0.01){ pen += 40*(v.W-B); av.push(`A casa (${f2(v.W)} m) é mais larga que a área edificável (${f2(B)} m).`); }
   if(v.D > Dmax + 0.01){ pen += 25*(v.D-Dmax); av.push(`A casa precisa de ${f2(v.D)} m de profundidade; o terreno permite ${f2(Dmax)} m.`); }
-  const proj = projecao(v) + (v.anexos||[]).filter(a => a.tipo!=='piscina').reduce((t,a)=>t+(a.x1-a.x0)*(a.y1-a.y0),0);
+  // anexos estão em coordenadas do lote; aqui passam para as da casa
+  const anexosCasa = (v.anexos||[]).map(a => ({tipo:a.tipo, x0:a.x0 - v.x0, y0:a.y0 - v.y0, x1:a.x1 - v.x0, y1:a.y1 - v.y0}));
+  const proj = uniao(cobertura(v).concat(anexosCasa.filter(a => a.tipo!=='piscina')));
   if(v.anexoFalta) pen += 25*v.anexoFalta;
   const subA = v.pav.find(p => p.nome==='Subsolo');
   if(subA && q.subGaragem && subA.vagas < q.vagas) pen += 10*(q.vagas - subA.vagas);
   if(q.permeab > 0){
-    // impermeável: projeção do térreo, anexos (inclusive piscina), subsolo fora da projeção e rampa no recuo
-    let imp = projecao(v) + (v.anexos||[]).reduce((t,a)=>t+(a.x1-a.x0)*(a.y1-a.y0),0);
-    if(subA){ const d = subA.dim, sx0 = d.x0, sx1 = d.x0 + d.W, sy0 = d.y0, sy1 = d.y0 + d.D;
-      const ov = Math.max(0, Math.min(sx1, v.W) - Math.max(sx0, 0)) * Math.max(0, Math.min(sy1, v.D) - Math.max(sy0, 0));
-      imp += d.W*d.D - ov; if(subA.rampa && q.subGaragem) imp += subA.rampa.Lout * subA.rampa.largura; }
-    const lote = q.frente*q.fundo, perm = Math.max(0, lote - imp), pct = 100*perm/lote;
+    // impermeável (união, sem contar duas vezes o que se sobrepõe): térreo, anexos (inclusive piscina), laje do subsolo,
+    // rampa no recuo e os pisos de acesso (faixa de veículos, vagas descobertas e caminho de pedestres; auditoria M05)
+    const imp = impermeaveis(v, q, anexosCasa, subA);
+    const lote = q.frente*q.fundo, perm = Math.max(0, lote - uniao(imp)), pct = 100*perm/lote;
     v.permeavel = r2(pct);
-    if(pct < q.permeab - 0.01){ pen += 2*(q.permeab - pct); av.push(`Área permeável de ${f2(pct)} % do lote, abaixo do mínimo de ${f2(q.permeab)} % (sem contar pisos externos).`); }
+    if(pct < q.permeab - 0.01){ pen += 2*(q.permeab - pct); av.push(`Área permeável de ${f2(pct)} % do lote, abaixo do mínimo de ${f2(q.permeab)} % (descontados a casa, os anexos, o subsolo e os pisos de acesso).`); }
   }
   if(subA){ const fimSub = q.recFrente + subA.dim.y0 + subA.dim.D + 2.0; if(fimSub > q.fundo + 0.01){ pen += 25*(fimSub - q.fundo); av.push(`O subsolo com o jardim de inverno vai até ${f2(fimSub)} m; o lote tem ${f2(q.fundo)} m.`); } }
   if(v.anexoLarg) pen += 25*v.anexoLarg;
@@ -1552,14 +1564,67 @@ function avalia(v, q){
   if(v.espelharVento) av.push(RUMOS[q.orientacao] !== undefined ? 'A versão espelhada recebe melhor o vento de leste/sudeste e o sol; ela já aparece espelhada.' : 'A versão espelhada recebe melhor o vento de leste/sudeste; ela já aparece espelhada.');
   v.score = Math.max(0, Math.round(100 - pen));
   v.avisos = (v.avisos||[]).concat(av);
+  v.invalida = invalidez(v, q, av);
   v.ocupacao = r2(taxa); v.projecao = r2(proj); v.circPct = r2(100*circ/tot);
   return v;
 }
 
-function projecao(v){
-  // área da projeção: térreo (inclui varandas cobertas) unido com superior
-  const ter = v.pav.find(p => p.nome==='Térreo');
-  return ter.salas.filter(s => s.tipo!=='terraco').reduce((t,s)=>t+area(s),0);
+/* Área exata da união de retângulos {x0,y0,x1,y1} (varredura pelas coordenadas x). */
+function uniao(rs){
+  rs = rs.filter(r => r.x1 - r.x0 > 1e-6 && r.y1 - r.y0 > 1e-6);
+  const xs = [...new Set(rs.flatMap(r => [r.x0, r.x1]))].sort((a, b) => a - b);
+  let A = 0;
+  for(let i = 0; i < xs.length - 1; i++){
+    const xm = (xs[i] + xs[i+1]) / 2, iv = rs.filter(r => r.x0 < xm && r.x1 > xm).map(r => [r.y0, r.y1]).sort((a, b) => a[0] - b[0]);
+    let tot = 0, a = null, b = null;
+    for(const [p, q] of iv){ if(a === null || p > b){ if(a !== null) tot += b - a; a = p; b = q; } else b = Math.max(b, q); }
+    if(a !== null) tot += b - a;
+    A += tot * (xs[i+1] - xs[i]);
+  }
+  return A;
+}
+/* Cobertura da casa: térreo (com varandas cobertas, sem terraço descoberto) unido aos pavimentos de cima
+   (o superior inteiro, inclusive balanços e terraços sobre o térreo; o rooftop sem o terraço descoberto). */
+function cobertura(v){
+  const out = [];
+  for(const p of v.pav){
+    if(p.anexo || p.nome==='Subsolo') continue;
+    out.push(...p.salas.filter(s => p.nome==='Superior' || (s.tipo!=='terraco' && s.tipo!=='jardim')));
+  }
+  return out;
+}
+function projecao(v){ return uniao(cobertura(v)); }
+/* Motivos que tornam a variante inválida (etapa E1): ela sai do ranking em vez de só perder pontos.
+   Cômodo fora do lote; cômodo nos recuos (o subsolo pode ocupá-los com a opção, e o jardim e a rampa sempre);
+   cômodo sem ligação com o resto da casa (o rooftop entra quando a etapa E2.1 ligar banho e área técnica). */
+function invalidez(v, q, av){
+  const E = 0.011, m = [];
+  const lote = {x0:-v.x0, y0:-v.y0, x1:q.frente - v.x0, y1:q.fundo - v.y0};
+  const edif = {x0:q.recLat - v.x0, y0:q.recFrente - v.y0, x1:q.frente - q.recLat - v.x0, y1:q.fundo - q.recFundo - v.y0};
+  const dentro = (s, r) => s.x0 >= r.x0 - E && s.x1 <= r.x1 + E && s.y0 >= r.y0 - E && s.y1 <= r.y1 + E;
+  for(const p of v.pav){
+    if(p.anexo) continue;
+    const sub = p.nome==='Subsolo', livre = sub && q.subRecuos !== 'nenhum';
+    const fora = p.salas.filter(s => !dentro(s, lote)), recuo = p.salas.filter(s => dentro(s, lote) && !dentro(s, edif) && !(sub && (livre || s.tipo==='jardim' || s.tipo==='rampa')));
+    // nomes agrupados com contagem: "3 × suíte, 3 × banho"
+    const lista = L => { const c = new Map(); for(const s of L) c.set(rotulo(s), (c.get(rotulo(s)) || 0) + 1); return [...c].map(([n, k]) => k > 1 ? `${k} × ${n}` : n).join(', '); };
+    if(fora.length) m.push(`${p.nome}: ${lista(fora)} fora do lote`);
+    if(recuo.length) m.push(`${p.nome}: ${lista(recuo)} nos recuos`);
+  }
+  for(const a of av) if(/não se liga ao resto da casa/.test(a) && !a.startsWith('Rooftop')) m.push(a.replace(/.$/, ''));
+  return m;
+}
+/* Retângulos impermeáveis no sistema da casa. */
+function impermeaveis(v, q, anexosCasa, subA){
+  const ter = v.pav.find(p => p.nome==='Térreo'), out = ter.salas.filter(s => s.tipo!=='terraco' && s.tipo!=='jardim').concat(anexosCasa);
+  if(subA){ const d = subA.dim; out.push({x0:d.x0, y0:d.y0, x1:d.x0 + d.W, y1:d.y0 + d.D}); if(subA.rampaFora && q.subGaragem) out.push(subA.rampaFora); }
+  const ac = acessos(v, q);
+  if(ac){
+    out.push(...ac.vias, ...ac.vagasFora);
+    if(ac.caminho) for(let i = 0; i < ac.caminho.pontos.length - 1; i++){ const [a, b] = [ac.caminho.pontos[i], ac.caminho.pontos[i+1]], m = ac.caminho.largura/2;
+      out.push(a[0]===b[0] ? {x0:a[0]-m, x1:a[0]+m, y0:Math.min(a[1], b[1]), y1:Math.max(a[1], b[1])} : {x0:Math.min(a[0], b[0]), x1:Math.max(a[0], b[0]), y0:a[1]-m, y1:a[1]+m}); }
+  }
+  return out;
 }
 
 function quadro(v){
@@ -1798,10 +1863,13 @@ function gerar(entrada, opts){
   // até 3 variantes, preferindo tipologias diferentes
   const escolhidas = [];
   // quarto voltado para o poente nunca: essas variantes só aparecem se nenhuma outra escapar
-  const semPoente = todas.filter(v => !v.quartosPoente), elegiveis0 = semPoente.length ? semPoente : todas;
+  // variantes inválidas (fora do lote, nos recuos, cômodo sem ligação) não entram no ranking
+  const validas = todas.filter(v => !v.invalida.length);
+  if(todas.length && !validas.length){ const m = todas[0].invalida; avisos.push(`Nenhuma variante cabe neste terreno com este programa. A mais próxima tem: ${m.slice(0, 3).join('; ')}${m.length > 3 ? '…' : ''}. Veja o terreno mínimo ou reduza o programa.`); }
+  const semPoente = validas.filter(v => !v.quartosPoente), elegiveis0 = semPoente.length ? semPoente : validas;
   // variantes com nota 0 só aparecem se nenhuma outra montar
   const comNota = elegiveis0.filter(v => v.score > 0), elegiveis = comNota.length ? comNota : elegiveis0;
-  if(!semPoente.length && todas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
+  if(!semPoente.length && validas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.some(e => e.tipologia===v.tipologia)) escolhidas.push(v); }
   for(const v of elegiveis){ if(escolhidas.length>=3) break; if(!escolhidas.includes(v) && !escolhidas.some(e => e.tipologia===v.tipologia && Math.abs(e.W-v.W)<1)) escolhidas.push(v); }
   escolhidas.forEach((v,i) => { v.nome = 'Variante ' + String.fromCharCode(65+i); v.quadro = quadro(v); v.loteFrente = q.frente; v.rumo = q.orientacao; v.lote = {frente:q.frente, fundo:q.fundo, recFrente:q.recFrente, recLat:q.recLat, recFundo:q.recFundo}; v.acessos = acessos(v, q);
@@ -1835,7 +1903,7 @@ function loteMinimo(q0, P){
       avalia(comAnexos(v, q2), q2);
       const proj = v.projecao;
       if(100*proj/(fr*fu) > q.taxa) fu = r2(Math.ceil(proj/(q.taxa/100)/fr*2)/2);
-      if(v.score < 70) continue;
+      if(v.score < 70 || v.invalida.length) continue;
       const a = fr*fu;
       if(!best || a < best.area - 0.01) best = {frente:fr, fundo:fu, area:r2(a), tipologia:v.tipologia, W:v.W, D:v.D};
     }
@@ -1845,7 +1913,7 @@ function loteMinimo(q0, P){
   const q9 = Object.assign({}, q, {fundo: 999});
   const vs = geraTodas(q, P, [r2(q.frente - 2*q.recLat)]).map(v => avalia(comAnexos(v, q9), q9));
   const fundoDe = v => v.D + atrasDe(v, q);
-  const bons = vs.filter(v => v.score >= 70);
+  const bons = vs.filter(v => v.score >= 70 && !v.invalida.length);
   (bons.length ? bons : vs).sort((a,b) => bons.length ? fundoDe(a)-fundoDe(b) : b.score-a.score);
   if(vs.length){ const v = (bons.length ? bons : vs)[0]; const atras = atrasDe(v, q);
     comFrente = {frente:q.frente, fundo:r2(Math.ceil((v.D + q.recFrente + atras)*2)/2), tipologia:v.tipologia}; }
@@ -1853,7 +1921,7 @@ function loteMinimo(q0, P){
 }
 
 // versão do motor (gravada nos arquivos de projeto): ano.mês.dia da última mudança de regra
-const VERSAO = '2026.10.05';
+const VERSAO = '2026.10.06';
 
-return {VERSAO, gerar, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia}};
+return {VERSAO, gerar, acessos, edicula, normaliza, BANHO_ACESSIVEL, verificaAcessibilidade, TORRES, torreRecomendada, ladoDaJanela, rumoFace, DIMENSIONAVEIS, RUMOS, NOMES_RUMO, programa, escada, TIPOS, PADRAO, f2, area, _interno:{linear, emH, faixa, faixaIntima, compartilhado, trechosExternos, avalia, uniao, cobertura}};
 });

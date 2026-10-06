@@ -620,7 +620,9 @@ Esta variante: ${v.score} (perdeu ${100 - v.score}), nota ${faixa}. Os motivos e
 function render(){
   const q = res.entrada, v = variante();
   const st = document.getElementById('stats');
-  if(!v){ st.innerHTML=''; document.getElementById('plan').innerHTML = '<p class="warn">Nenhuma variante pôde ser montada com estes dados.</p>'; return; }
+  if(!v){ st.innerHTML=''; const lm = res.loteMinimo && res.loteMinimo.minimo;
+    document.getElementById('plan').innerHTML = `<p class="warn">Nenhuma variante válida com estes dados.${lm ? ` Terreno mínimo para este programa: ${f2(lm.frente)} × ${f2(lm.fundo)} m (${esc(lm.tipologia)}).` : ''}</p>`;
+    document.getElementById('avisosGerais').innerHTML = res.avisos.length ? `<div class="warn">${res.avisos.map(esc).join('<br>')}</div>` : ''; return; }
   st.innerHTML = [
     ['Área edificável', `${f2(res.B)} × ${f2(res.Dmax)} m`, 'var(--moss)'],
     ['Área fechada', `${f2(v.quadro.fechada)} m²`, 'var(--slate)'],
@@ -715,7 +717,7 @@ function nomeArq(ext){ const v = variante(); return `planta-${v.nome.replace(/\s
 form.addEventListener('submit', e => { e.preventDefault(); if(document.activeElement && document.activeElement.closest('.bloco-res')) return; clearTimeout(espera); gerar(true); });
 // com algum número fora da faixa, a planta espera a correção (o bloco mostra o problema)
 const faixasOk = () => ![...form.querySelectorAll('input[type=number]')].some(i => !i.disabled && !i.closest('[hidden]') && (i.validity.badInput || i.validity.rangeUnderflow || i.validity.rangeOverflow));
-form.addEventListener('change', e => { if(e.target.closest('.bloco-res')) return; clearTimeout(espera); sincroniza(); if(e.target.id!=='carregar' && (!window.plantasBeta || faixasOk())) gerar(); });
+form.addEventListener('change', e => { if(e.target.closest('.bloco-res')) return; clearTimeout(espera); sincroniza(); if(e.target.id!=='carregar' && faixasOk()) gerar(); });
 // números: gera enquanto se digita, 200 ms depois da última tecla; um pedido mais novo descarta o anterior; valor fora da faixa espera a correção
 form.addEventListener('input', e => {
   const el = e.target;
