@@ -57,7 +57,7 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
 - **Visual:** marca Modulus: ícone (M modular azul e laranja com folhas) em `assets/logo.svg`, logo completo com "Modulus" e o subtítulo "SISTEMA" em `assets/logo-completo.svg` e embutido na página inicial; nome em uma cor só, em IBM Plex Sans. Repositório, endereço e pasta local se chamam `modulus`; as chaves do navegador continuam `plantas-*` (estado, banco, custos, tema) para não apagar o que os usuários já salvaram; paleta forte por zona; barra superior escura, com contraste em relação ao conteúdo.
 
 ## 3. Estado atual (06/10/2026, 10h35)
-- **`main` em `4f8c0f0`, publicada.** Plano vigente: `docs/planos/2026-10-06-etapa-e.md` (etapas E, F, pacote V, com todas as decisões do usuário). Auditoria de partida: `docs/auditoria/2026-10-06-etapa-d.md`.
+- **`main` em `5a2a754`, publicada.** Plano vigente: `docs/planos/2026-10-06-etapa-e.md` (etapas E, F, pacote V, com todas as decisões do usuário). Auditoria de partida: `docs/auditoria/2026-10-06-etapa-d.md`.
 - **Concluídas em 06/10/2026:**
   - **D:** auditoria, `gerador/auditoria.js` com catraca de limites.
   - **E1:** validade; variantes fora do lote, nos recuos ou sem ligação saem do ranking; janelas e portas; Blondel; projeção e permeabilidade pela união exata.
@@ -66,16 +66,16 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
   - **E2.3:** inverter estar e jantar e cozinha e serviço (cozinha aberta tem de encostar no jantar).
   - **E2.8:** íntimo nunca no poente; zoneamento invertido na térrea com a frente para leste; `intimoPoente`; a circulação enxuta não absorve fim de corredor lateral com laterais a leste e oeste; porta para cômodo isolado.
   - **Quadro** "Como o gerador decide" revisto.
+  - **V3:** tema escuro na paleta Botânica Marítima Profunda (tokens em `assets/base.css` e no CSS próprio da casa simétrica; preenchimento das zonas = 18 % do traço sobre a superfície, AA); menu do topo com ícone sobre o rótulo, cores `--nav-inicio/gerador/banco/tema`, botão de tema dentro do menu, rótulos curtos no celular e sem menu suspenso. Capturas: https://claude.ai/artifact/MzoF4Z6Qg5w56Q9LFimGbx
 - **Testes:** `node gerador/testes.js` (21 casos, golden de 31, 45 testes de unidade, auditoria de 66 casos com regras G01–G19 e M01–M07). `node gerador/auditoria.js --detalhe` lista cada violação. Limites atuais da catraca: G10 82, G16 1, G19 11 (sobrado, subsolo e programas grandes ainda sem a inversão); o resto é 0.
 - **Ordem combinada das próximas etapas:**
-  1. **V3:** tema escuro com a paleta Botânica Marítima Profunda e botões do topo com ícone sobre o rótulo (proposta em https://claude.ai/artifact/14kuCFQVKTySnG3ozAish6).
-  2. **F1:** planta humanizada como vista principal.
-  3. **E2.4 a E2.7:** escritório ampliado, medidas do subsolo, pé-direito por cômodo, banho reversível (com opção de porta para o corredor).
-  4. **F2:** corte, depois da E2.6.
-  5. **V2:** brises legíveis e glossário para leigos.
-  6. **V1:** vento 24 h, com os quartos avaliados pelo vento da noite (aprovado).
-  7. **E3:** regras com fonte.
-  8. **F3** (vista 3D): futura.
+  1. **F1:** planta humanizada como vista principal.
+  2. **E2.4 a E2.7:** escritório ampliado, medidas do subsolo, pé-direito por cômodo, banho reversível (com opção de porta para o corredor).
+  3. **F2:** corte, depois da E2.6.
+  4. **V2:** brises legíveis e glossário para leigos.
+  5. **V1:** vento 24 h, com os quartos avaliados pelo vento da noite (aprovado).
+  6. **E3:** regras com fonte.
+  7. **F3** (vista 3D): futura.
 
 ## 4. Pendências conhecidas (nenhuma pedida)
 - Itens oferecidos e não aprovados: patamar plano no início da rampa e núcleo no fundo do subsolo.
