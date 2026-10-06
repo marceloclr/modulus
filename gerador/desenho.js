@@ -1,7 +1,8 @@
 /* Desenho das variantes geradas pelo motor: planta humanizada em SVG (estilo de casa-h/gerar.js) e implantação no lote. */
 (function(root, factory){
-  if(typeof module==='object'&&module.exports) module.exports=factory(require('./motor.js'), require('./mobilia.js')); else root.Desenho=factory(root.Motor, root.Mobilia);
-})(this, function(Motor, Mobilia){
+  if(typeof module==='object'&&module.exports) module.exports=factory(require('./motor.js'), require('./mobilia.js'), require('./simbolos.js'), require('./texturas.js'));
+  else root.Desenho=factory(root.Motor, root.Mobilia, root.Simbolos, root.Texturas);
+})(this, function(Motor, Mobilia, Simbolos, Texturas){
 'use strict';
 const K = 30;
 const f2 = Motor.f2;
@@ -225,7 +226,7 @@ function planta(v, idx, op){
   // humanizada: pisos com textura, paredes de 10/15 cm, móveis, vegetação e sombra; o subsolo mantém as cores técnicas
   const hum = op.estilo === 'humanizada' && !!Mobilia, hz = hum ? 'hz' + (++HZN) + '_' : '';
   const WI = hum ? PAREDE_INT : 3.2, WE = hum ? PAREDE_EXT : 6;
-  if(hum) o.push(hzDefs(hz));
+  if(hum) o.push(Simbolos ? Simbolos.defs(hz, Texturas) : hzDefs(hz));   // F1.5: símbolos e texturas das referências
   const oculto = s => false;
 
   // terreno: lote, área edificável e rua
@@ -345,8 +346,8 @@ function planta(v, idx, op){
                   : `<text x="${cx.toFixed(1)}" y="${(cy - 5).toFixed(1)}" class="rn" style="font-size:${fs}px;fill:${AZ};paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px">${txt}</text>`);
     }
   }
-  const pecasHum = hum && !ehSub ? Mobilia.pavimento(p) : [];
-  if(pecasHum.length) o.push(hzMoveis(pecasHum, X, Y));
+  const pecasHum = hum && !ehSub ? Mobilia.pavimento(p, {estarTipo: op.estarTipo || v.estarTipo}) : [];
+  if(pecasHum.length) o.push(Simbolos ? pecasHum.map(q => Simbolos.peca(q, X, Y, K, hz)).join('') : hzMoveis(pecasHum, X, Y));
   // paredes internas e vãos livres
   const livres = (p.vaos||[]).filter(e => e.livre);
   for(let i=0;i<S.length;i++) for(let j=i+1;j<S.length;j++){
@@ -444,6 +445,7 @@ function planta(v, idx, op){
         && !ps.some(r => x - bw/2 < r.x1 && x + bw/2 > r.x0 && y - fs - 2 < r.y1 && y + 10 > r.y0);
       const c0 = [cx, cy], alvo = [[0,0],[0,-.25],[0,.25],[-.25,0],[.25,0],[0,-.35],[0,.35],[-.32,0],[.32,0],[-.25,-.25],[.25,-.25],[-.25,.25],[.25,.25]].map(([dx, dy]) => [c0[0] + dx*pw, c0[1] + dy*ph]).find(([x, y]) => livre(x, y));
       if(alvo){ cx = +alvo[0].toFixed(1); cy = +alvo[1].toFixed(1); } }
+    if(hum && Simbolos){ const nm = esc(s.nome || ''); o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${big ? 8.6 : 7}px;fill:#3A3733;paint-order:stroke;stroke:#F8F6F2;stroke-width:2.4px;letter-spacing:0">${nm}<tspan x="${cx}" dy="${big ? 10 : 8.5}" style="font-size:${big ? 7.4 : 6.2}px;font-weight:400;fill:#6B655D">${sub}</tspan></text>`); continue; }
     o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(cy-fs-2).toFixed(1)}" width="${bw.toFixed(1)}" height="${(fs+12).toFixed(1)}" rx="2" fill="#FFFFFF" fill-opacity=".8"/>`);
     o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${fs}px">${nome}<tspan x="${cx}" dy="8.5" class="rd" style="font-size:${big?6.6:5.8}px;font-weight:400">${sub}</tspan></text>`);
   }

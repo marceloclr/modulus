@@ -8,6 +8,11 @@
 })(this, function(){
 'use strict';
 const n2 = x => +x.toFixed(3);
+const f2 = x => x.toFixed(2).replace('.', ',');
+const NOMES = {cama:'Cama', criado:'Criado-mudo', armario:'Armário', escrivaninha:'Escrivaninha', boxe:'Boxe', bacia:'Bacia sanitária', lavatorio:'Lavatório', bancada:'Bancada',
+  'bancada-cozinha':'Bancada com cuba e cooktop', geladeira:'Geladeira', tanque:'Tanque', maquina:'Máquina de lavar', rack:'Rack da TV', sofa:'Sofá', poltrona:'Poltrona',
+  'mesa-centro':'Mesa de centro', 'mesa-jantar':'Mesa de jantar', 'mesa-externa':'Mesa externa', 'mesa-atendimento':'Mesa de atendimento', vaso:'Vaso com planta',
+  churrasqueira:'Churrasqueira', prateleiras:'Prateleiras', estante:'Estante', arvore:'Árvore', tapete:'Tapete'};
 const PAL = {
   parede:'#2E2D2B', madeira:['#CFAE8A','#C9A782','#D4B593','#C6A27D'], veio:'#AE8963', porc:['#E6E3DE','#E1DDD7','#E9E6E1'], rejunte:'#D3CEC6',
   cer:['#E9ECEB','#E3E7E6'], deck:['#B98D64','#AE835B','#C29A72'], grama:['#B9CF98','#AFC78C','#C3D6A4'],
@@ -17,8 +22,10 @@ const PAL = {
   sombra:'#2B2620', linha:'#6F685F',
 };
 /* Padrões e filtros. id: prefixo único do desenho. */
-function defs(id){
-  const P = (n, w, h, corpo) => `<pattern id="${id}${n}" width="${w}" height="${h}" patternUnits="userSpaceOnUse">${corpo}</pattern>`;
+function defs(id, tex){
+  // com as texturas em imagem (gerador/texturas.js), os pisos usam as imagens; sem elas, os padrões vetoriais abaixo
+  const img = n => tex && tex[n] ? `<pattern id="${id}${n}" width="${n2(tex[n].w * 30)}" height="${n2(tex[n].h * 30)}" patternUnits="userSpaceOnUse"><image href="${tex[n].src}" width="${n2(tex[n].w * 30)}" height="${n2(tex[n].h * 30)}" preserveAspectRatio="none"/></pattern>` : null;
+  const P = (n, w, h, corpo) => img(n) || `<pattern id="${id}${n}" width="${w}" height="${h}" patternUnits="userSpaceOnUse">${corpo}</pattern>`;
   // madeira: 6 fiadas de tábuas de 0,15 m (4,5 px a 30 px/m), emendas desencontradas, três tons e veios finos
   let mad = `<rect width="96" height="27" fill="${PAL.madeira[0]}"/>`;
   const emendas = [[0, 38, 71], [17, 55, 88], [9, 46, 80], [28, 63], [4, 41, 77], [22, 59, 93]];
@@ -85,6 +92,7 @@ function peca(q, X, Y, k, id){
       R(.26, .26, .34, .3, `fill="${PAL.almofada}" transform="rotate(-12 .43 .41)"`, .05); R(W - .62, .26, .34, .3, `fill="${PAL.manta2}" transform="rotate(10 ${n2(W - .45)} .41)"`, .05);
       Pth(`M${n2(W * .55)} .24 q.12 ${n2(P * .5)} .02 ${n2(P - .3)} h.35 q-.05 -${n2(P * .4)} .05 -${n2(P - .3)}z`, `fill="${PAL.manta}" opacity=".9"`);   // manta
       break; }
+    case 'poltrona': R(0, 0, W, P, tr(PAL.tecido2, .014), .12); R(.14, .16, W - .28, P - .22, `fill="${PAL.tecido}" stroke="#B5AFA5" stroke-width=".01"`, .1); R(W * .3, .2, W * .4, .22, `fill="${PAL.almofada}"`, .05); break;
     case 'rack': R(0, 0, W, P, `fill="url(#${id}mad)" stroke="${PAL.madEsc}" stroke-width=".012"`, .02); R(W * .18, .04, W * .64, .05, `fill="#1F1F1F"`); planta(W * .9, P / 2, .14); break;
     case 'mesa-centro': R(0, 0, W, P, `fill="url(#${id}mad)" stroke="${PAL.madEsc}" stroke-width=".012"`, .06); C(W * .3, P / 2, .09, `fill="#E9E4DA" stroke="${PAL.linha}" stroke-width=".008"`); R(W * .55, P * .3, .22, .16, `fill="#7D8C74"`); break;
     case 'mesa-jantar': case 'mesa-externa': {
@@ -117,7 +125,7 @@ function peca(q, X, Y, k, id){
       for(let i = 0; i < 7; i++){ const a = i * .9; C(W / 2 + Math.cos(a) * r * .45, P / 2 + Math.sin(a) * r * .45, r * .42, `fill="${PAL.folha[i % 3]}" opacity=".85"`); } break; }
     default: R(0, 0, W, P, tr('#FFFFFF'), .02);
   }
-  const t = `<title>${q.nome || q.tipo}</title>`;
+  const t = `<title>${NOMES[q.tipo] || q.tipo} ${f2(W)} × ${f2(P)} m</title>`;
   const sombra = ['tapete', 'arvore', 'vaso'].includes(q.tipo) ? '' : ` filter="url(#${id}sm)"`;
   // a sombra fica num grupo de fora, sem escala: o desfoque do filtro é em px, não em metros
   return `<g${sombra}><g transform="translate(${n2(X(ox))} ${n2(Y(oy))}) rotate(${rot}) scale(${k})">${t}${o.join('')}</g></g>`;

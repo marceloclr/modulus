@@ -282,7 +282,7 @@ function auditar(v, q){
   // M08, M09: mobília da planta humanizada (gerador/mobilia.js), conferida com a geometria das paredes e portas
   for(const p of v.pav){
     const fech = p.salas.filter(s => !ABERTO(s));
-    for(const q of Mob.pavimento(p)){
+    for(const q of Mob.pavimento(p, {estarTipo: v.estarTipo})){
       const s = p.salas.find(x => x.id === q.sala); if(!s) continue;
       // meia parede: 0,075 m no lado com trecho externo, 0,05 m nos internos; cômodo aberto não tem parede
       const ext = ABERTO(s) ? [] : trechosExternos(s, fech);
