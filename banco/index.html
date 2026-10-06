@@ -140,7 +140,7 @@ function miniatura(item){
     const r = Motor.gerar(item.programa);
     let v = r.variantes[Math.min(item.variante||0, r.variantes.length-1)];
     if(!v) return '';
-    if(item.espelhada) v = Desenho.espelha(v);
+    v = item.espelhada ? Desenho.espelha(v) : Motor.semEspelho(v);
     const pi = Math.max(0, v.pav.findIndex(p => p.nome==='Térreo'));
     return Desenho.planta(v, pi, {titulo: item.nome, sub: v.tipologia});
   }catch(e){ return ''; }

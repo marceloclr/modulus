@@ -489,6 +489,33 @@ t('rooftop: links antigos com áreas em m² continuam abrindo', () => {
   const q2 = M.normaliza({rooftop:true}); igual([q2.rtGourmet, q2.rtVaranda, q2.rtTecnica, q2.rtBanho, q2.rtSpa], [true, true, true, true, false]);
 });
 
+// ---------- recuos laterais diferentes (etapa E2.2) ----------
+t('recuos: esquerdo e direito diferentes posicionam a casa na faixa edificável, também espelhada', () => {
+  const D = require('./desenho.js');
+  for(const e of [{recLatE:3, recLatD:1.5}, {recLatE:1.5, recLatD:3}, {recLatE:0, recLatD:2.5, frente:10}, {recLatE:2, recLatD:1, edicula:'1', piscina:true, fundo:45}]){
+    const r = M.gerar(Object.assign({frente:14, fundo:32, quartos:3, suites:2, vagas:2, orientacao:'N'}, e)), q = r.entrada;
+    ok(r.variantes.length, JSON.stringify(e) + ': sem variante');
+    igual(r.B, Math.round((q.frente - q.recLatE - q.recLatD)*100)/100, 'largura edificável:');
+    for(const v of r.variantes){
+      ok(v.x0 >= q.recX0 - 0.01 && v.x0 + v.W <= q.frente - q.recX1 + 0.01, `${v.nome}: casa fora da faixa (${v.x0} + ${v.W})`);
+      const ruins = AU.auditar(v, q).filter(x => ['G03','G04','G18'].includes(x.regra)); ok(!ruins.length, ruins.map(x => x.msg).join('; '));
+      // espelhada: anexos dentro da faixa e acessos dentro do lote
+      const s = D.espelha(v);
+      for(const a of (s.anexos || [])) ok(a.x0 >= q.recX0 - 0.01 && a.x1 <= q.frente - q.recX1 + 0.01, `${v.nome} espelhada: ${a.tipo} invade o recuo (${a.x0}–${a.x1})`);
+      for(const g of s.acessos.portoes.concat(s.acessos.vagasFora)) ok(v.x0 + g.x0 >= -0.01 && v.x0 + g.x1 <= q.frente + 0.01, `${v.nome} espelhada: ${g.tipo || 'vaga'} fora do lote`);
+    }
+  }
+});
+t('recuos: menos de 1,50 m da divisa não recebe janela (art. 1.301), e o link antigo com recLat continua valendo', () => {
+  const r = M.gerar({frente:8, fundo:30, recLatE:0, recLatD:0, quartos:2, suites:1, vagas:1, orientacao:'N'});
+  for(const v of r.variantes) for(const p of v.pav.filter(p => !p.anexo)) for(const j of p.janelas.filter(j => j.o === 'v')){
+    const xl = v.x0 + j.c; ok(xl > 1.49 && r.entrada.frente - xl > 1.49, `${v.nome}/${p.nome}: janela lateral a ${xl.toFixed(2)} m da divisa`); }
+  ok(r.variantes.some(v => v.avisos.some(a => /art\. 1\.301/.test(a))), 'aviso do art. 1.301');
+  const q = M.normaliza({recLat:2.5}); igual([q.recLatE, q.recLatD, q.recX0, q.recX1, 'recLat' in q], [2.5, 2.5, 2.5, 2.5, false]);
+  const ex = Estado.deHash(Estado.paraHash(Object.assign(Estado.novo(M.PADRAO), {entrada:Object.assign({}, M.PADRAO, {recLat:3})}), M.PADRAO), M.PADRAO);
+  igual([M.normaliza(ex.entrada).recX0, M.normaliza(ex.entrada).recX1], [3, 3], 'link antigo expandido pelo estado:');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

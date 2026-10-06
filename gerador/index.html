@@ -246,7 +246,8 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="fld">Frente (m)<input type="number" name="frente" min="5" max="60" step="0.5"></label>
         <label class="fld">Fundo (m)<input type="number" name="fundo" min="10" max="80" step="0.5"></label>
         <label class="fld">Recuo frontal (m)<input type="number" name="recFrente" min="0" max="15" step="0.25"></label>
-        <label class="fld">Recuos laterais (m)<input type="number" name="recLat" min="0" max="5" step="0.25"></label>
+        <label class="fld" data-tip="Esquerdo de quem olha da rua para o lote">Recuo lateral esquerdo (m)<input type="number" name="recLatE" min="0" max="20" step="0.25"></label>
+        <label class="fld" data-tip="Direito de quem olha da rua para o lote">Recuo lateral direito (m)<input type="number" name="recLatD" min="0" max="20" step="0.25"></label>
         <label class="fld">Recuo de fundo (m)<input type="number" name="recFundo" min="0" max="15" step="0.25"></label>
         <label class="fld">Permeabilidade mínima (%)<input type="number" name="permeab" min="0" max="80" step="5"></label>
         <label class="fld">Taxa de ocupação máx. (%)<input type="number" name="taxa" min="20" max="100" step="5"><small>Recuos e taxa variam por município: confira a lei de uso do solo.</small></label>
@@ -621,7 +622,7 @@ function atualizaHash(){
   try{ history.replaceState(null, '', est.serializar()); }catch(e){}
   try{ localStorage.setItem(Estado.CHAVE_LOCAL, est.paraLocal()); }catch(e){}
 }
-function variante(){ const v = res.variantes[vi]; return v && esp ? Desenho.espelha(v) : v; }
+function variante(){ const v = res.variantes[vi]; return !v ? v : esp ? Desenho.espelha(v) : Motor.semEspelho(v); }
 
 // dica do card Pontuação: como a nota é calculada (Motor.avalia) e quanto esta variante perdeu
 function dicaNota(v){
@@ -684,7 +685,7 @@ function render(){
   document.getElementById('lote').innerHTML = Desenho.lote(v, q, res);
   const lm = res.loteMinimo;
   let t = `<tbody><tr><td>Frente voltada para</td><td class="n">${q.orientacao ? Motor.NOMES_RUMO[q.orientacao] + ' (' + q.orientacao + ')' : 'não informado'}</td></tr><tr><td>Terreno informado</td><td class="n">${f2(q.frente)} × ${f2(q.fundo)} m = ${f2(q.frente*q.fundo)} m²</td></tr>`;
-  t += `<tr><td>Recuos</td><td class="n">frente ${f2(q.recFrente)} · laterais ${f2(q.recLat)} · fundo ${f2(q.recFundo)} m</td></tr>`;
+  t += `<tr><td>Recuos</td><td class="n">frente ${f2(q.recFrente)} · laterais ${q.recLatE === q.recLatD ? f2(q.recLatE) : `esquerdo ${f2(q.recLatE)}, direito ${f2(q.recLatD)}`} · fundo ${f2(q.recFundo)} m</td></tr>`;
   t += `<tr><td>Casa desta variante</td><td class="n">${f2(v.W)} × ${f2(v.D)} m · projeção ${f2(v.projecao)} m²</td></tr>`;
   if(lm.minimo) t += `<tr class="total"><td>Terreno mínimo</td><td class="n">${f2(lm.minimo.frente)} × ${f2(lm.minimo.fundo)} m = ${f2(lm.minimo.area)} m²<br><small>${lm.minimo.tipologia}</small></td></tr>`;
   if(lm.comFrente) t += `<tr><td>Fundo mínimo com ${f2(lm.comFrente.frente)} m de frente</td><td class="n">${f2(lm.comFrente.fundo)} m</td></tr>`;
