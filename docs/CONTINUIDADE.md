@@ -1,6 +1,6 @@
 # Modulus — instruções de continuidade
 
-Atualizado em 06/10/2026. Cole este arquivo num chat novo (ou peça "leia docs/CONTINUIDADE.md") para retomar.
+Atualizado em 06/10/2026, 10h35. Cole este arquivo num chat novo (ou peça "leia docs/CONTINUIDADE.md") para retomar.
 
 ## 1. Objetivo
 O **Modulus** (antes GerPlantas; nome trocado em 05/10/2026) é um gerador de plantas residenciais por regras. É um site estático (HTML/JS, sem servidor e sem IA) publicado no GitHub Pages: https://marceloclr.github.io/modulus/. O repositório é `marceloclr/modulus` (antes `plantas`; renomeado em 05/10/2026, o endereço antigo do Pages deixou de funcionar), branch `main`; pasta local `Documents/GitHub/modulus`.
@@ -56,20 +56,26 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
 - **Rodada em curso (05/10/2026):** plano `docs/planos/2026-10-05-blocos-custos-solar-estilos.md`, em 8 fases (0 a 7), cada uma num branch próprio e com aprovação do usuário antes da seguinte. Decisões: quatro blocos (Dimensões · Tipo de estrutura e padrão de custos · Energia solar · Estilo arquitetônico); concluir bloco só pelo botão; solar antes do estilo, com cobertura provisória; coleta do CUB por GitHub Action que abre pull request; token `--plum`; fatores de custo como estimativas editáveis; subsolo em térrea e sobrado; brises com estudo do melhor ângulo.
 - **Visual:** marca Modulus: ícone (M modular azul e laranja com folhas) em `assets/logo.svg`, logo completo com "Modulus" e o subtítulo "SISTEMA" em `assets/logo-completo.svg` e embutido na página inicial; nome em uma cor só, em IBM Plex Sans. Repositório, endereço e pasta local se chamam `modulus`; as chaves do navegador continuam `plantas-*` (estado, banco, custos, tema) para não apagar o que os usuários já salvaram; paleta forte por zona; barra superior escura, com contraste em relação ao conteúdo.
 
-## 3. Estado atual
-- **Rodadas concluídas:** veja os planos em `docs/planos/`. A última concluída é `2026-10-02-norte-ventos-rooftop.md`. Em curso: `2026-10-05-blocos-custos-solar-estilos.md`, com a **Fase 0 concluída e na `main`** e a **Fase 1 concluída** no branch `fase-1-blocos-estado-ao-vivo`, aguardando aprovação para entrar na `main`. Depois da Fase 1, uma rodada de premissas (branch `premissas-sol-subsolo-acessos`): sol nos quartos, vagas do subsolo, destaque de rampa e manobra, carros no H, acessos e portões, cards com terreno e casa, zoom. Fase 2 (estrutura e custos) na `main`. Fase 3 (energia solar) na `main`; ajuste "solar só básico" no branch `solar-basico`, aguardando aprovação. Mesclado na `main` em 05/10/2026 (b912d75), junto com `regras-circulacao-subsolo` (c80acf9: circulação enxuta, subsolo com máximo de vagas, dica da pontuação, página inicial e exemplos do banco). Teto opcional de vagas na `main` (4a89aaa). **Fases 4 e 4-B na `main` (ad85e4c, 834a019). Revisão de janelas, humanizada, acessibilidade e implantação no branch `revisao-janelas-acessibilidade` (plano `docs/planos/2026-10-05-janelas-acessibilidade-modulus.md`), mesclada na `main`. Próxima: Fase 5 (estilos). Próxima: Fase 5 (estilos). Próxima: Fase 4 (dossiê da torre de ar, tipos de torre e brises).
-- **Etapa D (auditoria, 06/10/2026):** relatório em `docs/auditoria/2026-10-06-etapa-d.md` (inventário, arquitetura, matemática, geometria, regras fixas classificadas, fontes oficiais consultadas, tabelas de problemas e de funcionalidades, plano E–I). `gerador/auditoria.js` confere 64 casos (163 variantes) em 23 regras (G01–G16, M01–M07); `node gerador/auditoria.js --detalhe` lista cada violação. Os defeitos conhecidos têm limite (catraca) no próprio arquivo: ao corrigir, baixe o limite até 0. Achado normativo: a Lei 5.530/1981 (Código de Obras de Fortaleza) foi revogada pela LC 270/2019; a LC 450/2025 manda aplicar a LC 236/2017 compatibilizada por decreto até a nova LPUOS (art. 601).
-- **Testes:** `node gerador/testes.js` roda 21 casos de regras (também em `gerador/testes.html`), o **golden** (`gerador/golden.js`: 31 casos, saída canônica do motor e SHA-256 de cada planta, espelhada e implantação, gravados em `gerador/golden/saida.json`) e o tempo de geração (avisa acima de 150 ms; hoje o máximo é ~65–80 ms). Para regravar o golden de propósito: `node gerador/testes.js --atualizar-golden`, com justificativa no commit.
-- **Portão de commit:** `.githooks/pre-commit` roda `node --check` em todo JS, os testes com golden e `node tools/verifica-html.js` (equilíbrio de tags e sintaxe dos scripts embutidos). Ative uma vez por clone: `git config core.hooksPath .githooks`.
-- **Beta encerrado (05/10/2026, decisão do usuário):** tudo vale para todos; não há mais `?beta=1`, selo nem classes `so-beta`/`sem-beta`; o `base.js` só apaga a chave antiga `plantas-beta`.
-- **Fase 1:** `gerador/estado.js` (estado único; link `#s=` só com o que difere do padrão; links antigos `#q=` aceitos; `localStorage` `plantas-estado` restaura a sessão) e `gerador/ui-blocos.js` (blocos 1 Dimensões · 2 Tipo de estrutura e padrão de custos · 3 Energia solar · 4 Estilo, montados a partir dos `fieldset[data-secao]`; chips a definir/em edição/pronto/concluído/revisar/bloqueado; "Concluir bloco" só pelo botão; o 4 trava até o 1 ser concluído; mudar o 1 manda 3 e 4 para "revisar"; no celular o painel do resultado desce para baixo do bloco concluído). Ao vivo: `input` nos números com espera de 200 ms; com número fora da faixa, espera a correção; tempo em `#plan[data-ms]` (30–60 ms no navegador). Tokens novos `--plum`, `--brass-ink` e `--card-*` em `base.css`. Testes unitários em `gerador/testes-unidades.js` (21: estado, blocos, sol, acessos, dados e esquemas, estrutura, custos e solar com contas à mão, cards e valores).
-- **Arquivos:**
-  - `gerador/motor.js`: funções puras. Destaques: `gerar`, `normaliza`, `programa`, `linear` (bloco/L), `emU`, `emH`, `nucleo`, `subsolo`, `comRooftop`, `comTorre`, `comAnexos`, `edicula`, `aberturas` (portas, janelas, saída de fundos), `janelasSubsolo`, `avaliaVento`, `avalia`, `loteMinimo`.
-  - `gerador/desenho.js`: `planta` (terreno, rotação, rótulos legíveis, rosa, setas de vento), `lote`, `rosa`, `girado`, `textosLegiveis`, `espelha`.
-  - `gerador/index.html`: formulário e resultados.
-  - `banco/`: estudos publicados e plantas salvas no navegador.
-  - `assets/`: `base.css` (tokens e cabeçalho), `base.js` (menu e tema), `projetos.json`, logo.
-  - `casa-simetrica/` e `casa-h/`: estudos publicados.
+## 3. Estado atual (06/10/2026, 10h35)
+- **`main` em `4f8c0f0`, publicada.** Plano vigente: `docs/planos/2026-10-06-etapa-e.md` (etapas E, F, pacote V, com todas as decisões do usuário). Auditoria de partida: `docs/auditoria/2026-10-06-etapa-d.md`.
+- **Concluídas em 06/10/2026:**
+  - **D:** auditoria, `gerador/auditoria.js` com catraca de limites.
+  - **E1:** validade; variantes fora do lote, nos recuos ou sem ligação saem do ranking; janelas e portas; Blondel; projeção e permeabilidade pela união exata.
+  - **E2.1:** rooftop a partir da escada (centralizado / até a frente / até o fundo), itens marcados, nunca aberto para o poente, rosa em `gerador/rooftop-ui.js`.
+  - **E2.2:** recuos laterais esquerdo e direito (`recLatE` = lado x1, `recLatD` = lado x0, de quem olha da rua); janela a menos de 1,50 m da divisa proibida (Código Civil, art. 1.301, a confirmar no Planalto); espelho no motor (`espelharCasa`, `semEspelho`, `acessosEsp`, `aberturasPor`).
+  - **E2.3:** inverter estar e jantar e cozinha e serviço (cozinha aberta tem de encostar no jantar).
+  - **E2.8:** íntimo nunca no poente; zoneamento invertido na térrea com a frente para leste; `intimoPoente`; a circulação enxuta não absorve fim de corredor lateral com laterais a leste e oeste; porta para cômodo isolado.
+  - **Quadro** "Como o gerador decide" revisto.
+- **Testes:** `node gerador/testes.js` (21 casos, golden de 31, 45 testes de unidade, auditoria de 66 casos com regras G01–G19 e M01–M07). `node gerador/auditoria.js --detalhe` lista cada violação. Limites atuais da catraca: G10 82, G16 1, G19 11 (sobrado, subsolo e programas grandes ainda sem a inversão); o resto é 0.
+- **Ordem combinada das próximas etapas:**
+  1. **V3:** tema escuro com a paleta Botânica Marítima Profunda e botões do topo com ícone sobre o rótulo (proposta em https://claude.ai/artifact/14kuCFQVKTySnG3ozAish6).
+  2. **F1:** planta humanizada como vista principal.
+  3. **E2.4 a E2.7:** escritório ampliado, medidas do subsolo, pé-direito por cômodo, banho reversível (com opção de porta para o corredor).
+  4. **F2:** corte, depois da E2.6.
+  5. **V2:** brises legíveis e glossário para leigos.
+  6. **V1:** vento 24 h, com os quartos avaliados pelo vento da noite (aprovado).
+  7. **E3:** regras com fonte.
+  8. **F3** (vista 3D): futura.
 
 ## 4. Pendências conhecidas (nenhuma pedida)
 - Itens oferecidos e não aprovados: patamar plano no início da rampa e núcleo no fundo do subsolo.
