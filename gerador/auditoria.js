@@ -298,6 +298,8 @@ function casos(){
     'Acessível, térrea 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, acessivel:true, orientacao:'N'},
     'Acessível, sobrado com elevador 12 × 30': {frente:12, fundo:30, tipo:'sobrado', quartos:3, suites:2, acessivel:true, elevador:true, orientacao:'SE'},
     'Cozinha fechada e lavabo, 12 × 30': {frente:12, fundo:30, quartos:3, suites:1, cozinha:'fechada', lavabo:true, orientacao:'L'},
+    'Varanda de fundos parcial, 12 × 34': {frente:12, fundo:34, quartos:3, suites:2, varandaFundos:true, varandaFundosL:4, varandaFundosP:2.5, orientacao:'N'},
+    'Em U com varanda de fundos, 22 × 32': {frente:22, fundo:32, quartos:3, suites:2, formato:'U', varandaFundos:true, orientacao:'SE'},
     'Garagem descoberta, 3 vagas, 12 × 30': {frente:12, fundo:30, quartos:3, suites:2, garagem:'descoberta', vagas:3, orientacao:'NE'},
     'Subsolo em lote largo, 30 × 50': {frente:30, fundo:50, quartos:4, suites:4, subsolo:true, orientacao:'S'},
     'Inversões estar/jantar e cozinha/serviço, 12 × 30': {frente:12, fundo:30, quartos:3, suites:1, invEstarJantar:true, invCozinhaServico:true, orientacao:'L'},

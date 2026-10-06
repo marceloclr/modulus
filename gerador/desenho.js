@@ -335,7 +335,8 @@ function planta(v, idx, op){
                   : `<text x="${cx.toFixed(1)}" y="${(cy - 5).toFixed(1)}" class="rn" style="font-size:${fs}px;fill:${AZ};paint-order:stroke;stroke:#FBFAF7;stroke-width:2.4px">${txt}</text>`);
     }
   }
-  if(hum && !ehSub) o.push(hzMoveis(Mobilia.pavimento(p), X, Y));
+  const pecasHum = hum && !ehSub ? Mobilia.pavimento(p) : [];
+  if(pecasHum.length) o.push(hzMoveis(pecasHum, X, Y));
   // paredes internas e vãos livres
   const livres = (p.vaos||[]).filter(e => e.livre);
   for(let i=0;i<S.length;i++) for(let j=i+1;j<S.length;j++){
@@ -414,7 +415,7 @@ function planta(v, idx, op){
     const w = s.x1-s.x0, h = s.y1-s.y0, a = w*h;
     if(s.tipo==='escada' || s.tipo==='rampa' || s.tipo==='elevador' || oculto(s)) continue;
     if(ehSub && (s.tipo==='hall' || s.tipo==='manobra')) continue;   // a manobra tem rótulo próprio, junto das setas
-    const cx = (X(s.x0)+X(s.x1))/2, cy = (Y(s.y0)+Y(s.y1))/2;
+    let cx = (X(s.x0)+X(s.x1))/2, cy = (Y(s.y0)+Y(s.y1))/2;
     const nome = esc((s.nome||'').toUpperCase());
     const pw = w*K, ph = h*K;
     if(['circ','galeria'].includes(s.tipo) && ph > pw*2.5){
@@ -425,6 +426,12 @@ function planta(v, idx, op){
     const fs = big ? 8.2 : 6.4;
     const sub = big && !hum ? `${f2(w)} × ${f2(h)} · ${f2(a)} m²` : `${f2(a)} m²`;
     const bw = Math.min(pw-4, Math.max(nome.length*fs*0.66, sub.length*(big?3.7:3.4)) + 8);
+    // humanizada: o rótulo procura um lugar do cômodo sem móvel (centro, depois terços), para não cobrir cama ou mesa
+    if(hum){ const ps = pecasHum.filter(q => q.sala === s.id).map(q => ({x0:X(q.x0), x1:X(q.x1), y0:Y(q.y0), y1:Y(q.y1)}));
+      const livre = (x, y) => x - bw/2 >= X(s.x0) + 3 && x + bw/2 <= X(s.x1) - 3 && y - fs - 2 >= Y(s.y0) + 3 && y + 10 <= Y(s.y1) - 3
+        && !ps.some(r => x - bw/2 < r.x1 && x + bw/2 > r.x0 && y - fs - 2 < r.y1 && y + 10 > r.y0);
+      const c0 = [cx, cy], alvo = [[0,0],[0,-.25],[0,.25],[-.25,0],[.25,0],[0,-.35],[0,.35],[-.32,0],[.32,0],[-.25,-.25],[.25,-.25],[-.25,.25],[.25,.25]].map(([dx, dy]) => [c0[0] + dx*pw, c0[1] + dy*ph]).find(([x, y]) => livre(x, y));
+      if(alvo){ cx = +alvo[0].toFixed(1); cy = +alvo[1].toFixed(1); } }
     o.push(`<rect x="${(cx-bw/2).toFixed(1)}" y="${(cy-fs-2).toFixed(1)}" width="${bw.toFixed(1)}" height="${(fs+12).toFixed(1)}" rx="2" fill="#FFFFFF" fill-opacity=".8"/>`);
     o.push(`<text x="${cx}" y="${cy}" class="rn" style="font-size:${fs}px">${nome}<tspan x="${cx}" dy="8.5" class="rd" style="font-size:${big?6.6:5.8}px;font-weight:400">${sub}</tspan></text>`);
   }

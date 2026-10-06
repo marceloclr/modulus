@@ -47,8 +47,8 @@ Branch `ajustes-reset-cards-varanda`, um commit por passo. A ordem vai do mais s
   - a auditoria inteira continua firme (porta real, janela fora da divisa, M08 e M09);
   - o golden não muda, porque a opção vem desligada.
 
-## Decisões para o usuário
+## Decisões do usuário (06/10/2026)
 
-1. **Plantas salvas no banco:** a limpeza preserva por padrão, com a caixa desmarcada (recomendado), ou apaga sempre?
-2. **Planta antes da primeira conclusão:** continua visível, com só os cards vazios (recomendado, é o que foi pedido), ou fica escondida também?
-3. **Medidas da varanda:** estas listas de profundidade e largura bastam?
+1. **Dois botões de limpeza:** "Limpar dados do navegador" apaga tudo, menos as plantas salvas; "Apagar plantas salvas" é exclusivo para o banco.
+2. **Planta e cards ocultos até as seleções do usuário:** o resultado do gerador (cards, variantes, planta e quadro) carrega oculto e só aparece depois da primeira conclusão do bloco Dimensões. Isto substitui a parte B acima, onde a planta continuava visível.
+3. **Medidas da varanda de fundos:** as listas de profundidade e largura servem.

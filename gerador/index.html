@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/base.css">
 <script src="../assets/base.js"></script>
+<script src="../assets/limpeza.js"></script>
 <style>
 .gen .layout{--sbw:330px}
 .gen main{max-width:none}
@@ -154,6 +155,11 @@ details.sub>.fs{border:0;margin:0;padding-top:0;background:transparent}
 details.sub>.fs>legend{display:none}
 [aria-invalid="true"]{outline:2px solid var(--rust)!important;outline-offset:1px}
 .bloco-res:empty{display:none}
+/* resultado oculto até a primeira conclusão do bloco Dimensões (06/10/2026) */
+.vazio-res{display:none;border:1px dashed var(--line);border-radius:var(--radius);background:var(--surface);padding:18px 20px;margin:0 0 22px}
+.vazio-res strong{font-family:'IBM Plex Serif',Georgia,serif;font-weight:500;font-size:19px}.vazio-res p{margin:.4rem 0 0;color:var(--ink-2)}
+body.aguardando .vazio-res{display:block}
+body.aguardando :is(#resultado,#analises,#energia,#conforto){display:none!important}
 .bloco-res{margin:-2px 0 4px}
 .bloco-res .panel{max-width:none;margin:0}
 section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variante)!important}
@@ -212,7 +218,6 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
   <div class="bar-in">
     <div class="brand">
       <div class="brand-mark" aria-hidden="true"><span></span></div>
-      <div class="crumb"><span class="chip" style="--c:var(--brass)">Gerador</span><span class="sec" id="crumbSec">Plantas por programa de necessidades</span></div>
     </div>
     <button class="btn" id="themeBtn" type="button" data-tip="Alterna entre o tema claro e o escuro. A escolha fica guardada neste navegador">Tema escuro</button>
   </div>
@@ -362,6 +367,11 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="fld">Garagem<select name="garagem"><option value="coberta">Coberta, na casa</option><option value="descoberta">Descoberta, no recuo</option><option value="nenhuma">Sem garagem</option></select></label>
         <label class="chk"><input type="checkbox" name="varanda">Varanda frontal</label>
         <label class="fld" id="varOps">Forma da varanda<select name="varandaForma"><option value="corrida">Corrida, em toda a fachada</option><option value="L">Em L, frente e lateral</option></select></label>
+        <label class="chk"><input type="checkbox" name="varandaFundos">Varanda de fundos</label>
+        <div id="varFundOps">
+          <label class="fld">Profundidade da varanda de fundos<select name="varandaFundosP"><option value="1.5">1,50 m</option><option value="2">2,00 m</option><option value="2.5">2,50 m</option><option value="3">3,00 m</option></select></label>
+          <label class="fld">Largura da varanda de fundos<select name="varandaFundosL"><option value="0">Toda a fachada de fundos</option><option value="3">3,00 m</option><option value="4">4,00 m</option><option value="5">5,00 m</option><option value="6">6,00 m</option></select></label>
+        </div>
         <label class="chk"><input type="checkbox" name="gourmet">Varanda gourmet junto à casa</label>
       </fieldset>
 
@@ -435,6 +445,11 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <p>Preencha o terreno e o programa no formulário. O gerador monta variantes por regras (zoneamento social, serviço e íntimo, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores.</p>
       </div>
 
+      <div class="vazio-res" id="resultadoVazio">
+        <strong>O resultado aparece depois das suas escolhas</strong>
+        <p>Preencha o bloco 1, Dimensões (terreno, tipo da casa e programa), e toque em "Concluir bloco". Aí o gerador calcula as variantes e mostra os indicadores, a planta, o quadro de áreas e a implantação.</p>
+      </div>
+      <div id="resultado">
       <div class="stats" id="stats"></div>
       <div id="avisosGerais"></div>
 
@@ -465,6 +480,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         </div>
       </div>
 
+      </div><!-- #resultado -->
       <h2>Como o gerador decide</h2>
       <p class="note">Ordem das decisões: primeiro o que torna a planta inválida, depois as regras que você escolheu, por fim a nota. Uma regra de cima sempre vence a de baixo.</p>
       <div class="grid2">
@@ -494,6 +510,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
             <li>Janelas de cada cômodo em pontos distantes (ventilação cruzada), com área de 1/8 do piso para a luz.</li>
             <li>Escada reta com 2 × espelho + piso entre 0,63 e 0,65 m (Blondel); espelho até 0,18 m.</li>
             <li>Subsolo com o máximo de vagas (3,00 × 5,00 m), manobra contínua de 5 m, rampa em escala e jardim de inverno oposto à rampa; ventilação cruzada obrigatória.</li>
+            <li>Varanda de fundos (opcional): faixa aberta no trecho mais longo da fachada de fundos, com a profundidade e a largura escolhidas; a porta sai das salas (quando ficam no fundo), da suíte master, de uma suíte ou da circulação. Quando a casa mais a varanda passam do recuo de fundo, o gerador primeiro tenta uma casa mais curta (salas e apoio um pouco menores); se ainda faltar, reduz a varanda até 1,50 m, com aviso; abaixo disso, a variante fica sem varanda, com aviso, e vai para o fim da lista.</li>
             <li>Planta humanizada: móvel só onde cabe com folga. Nada na faixa de 0,60 m em frente às portas nem no arco da folha; cama com a cabeceira longe da porta; mesa de jantar com 0,75 m livres atrás das cadeiras (0,45 m no aperto); sofá de 1,60 a 3,20 m da TV; armário e geladeira nunca na frente de janela. Paredes desenhadas com 10 cm (internas) e 15 cm (externas).</li>
           </ul>
         </div>
@@ -609,6 +626,7 @@ function sincroniza(){
     estar: E.estar.checked, jantar: E.jantar.checked, tv: E.tv.checked, escritorio: E.escritorio.checked, cozinha: true, servico: E.servico.checked, despensa: E.despensa.checked, gourmet: E.gourmet.checked || E.gourmetDest.checked};
   form.querySelectorAll('.dimrow').forEach(el => { el.hidden = !vis[el.dataset.t]; });
   document.getElementById('varOps').hidden = !form.elements.varanda.checked;
+  document.getElementById('varFundOps').hidden = !form.elements.varandaFundos.checked;
   const sub = form.elements.subsolo.checked, gl = form.elements.garagemLocal;
   gl.querySelectorAll('option').forEach(o => { o.disabled = !sub && o.value!=='terreo'; });
   if(!sub) gl.value = 'terreo';
@@ -676,7 +694,10 @@ function dicaNota(v){
 Esta variante: ${v.score} (perdeu ${100 - v.score}), nota ${faixa}. Os motivos estão em “Pontos de atenção”.`;
 }
 
+function marcaProcessado(){ document.body.classList.toggle('aguardando', !est.ler().ui.processado); }
+est.assinar && est.assinar((e, caminho) => { if(caminho === 'ui.processado' || caminho === '') marcaProcessado(); });
 function render(){
+  marcaProcessado();
   const q = res.entrada, v = variante();
   const st = document.getElementById('stats');
   if(!v){ st.innerHTML=''; const lm = res.loteMinimo && res.loteMinimo.minimo;
@@ -730,7 +751,6 @@ function render(){
   const sub = v.pav.find(p => p.nome==='Subsolo');
   if(sub && sub.rampa && q.subGaragem) t += `<tr><td>Rampa</td><td class="n">${f2(sub.rampa.L)} m a ${q.inclinacao} % (${f2(sub.rampa.Lout)} m no recuo)</td></tr>`;
   document.getElementById('terreno').innerHTML = t + '</tbody>';
-  document.getElementById('crumbSec').textContent = `${v.nome} · ${v.pav[pi].nome}`;
   renderAnalises();
 }
 // conforto passivo: torre de ar e brises da variante escolhida
@@ -796,7 +816,7 @@ function brisesVisiveis(){
 form.addEventListener('change', e => { if(/^brises/.test(e.target.name || '')) brisesVisiveis(); });
 // subsolo: ao marcar, as vagas vão para o subsolo (antes ficavam no térreo e o subsolo saía sem rampa nem vagas)
 form.elements.subsolo.addEventListener('change', e => { if(e.target.checked && form.elements.garagemLocal.value==='terreo') form.elements.garagemLocal.value = 'subsolo'; });
-document.getElementById('restaurar').addEventListener('click', () => { preencher(PADRAO); gerar(); });
+document.getElementById('restaurar').addEventListener('click', () => { est.escrever('ui.processado', false); est.escrever('ui.blocos', Estado.blocosIniciais()); preencher(PADRAO); gerar(); if(blocos && blocos.pintar) blocos.pintar(); });
 document.getElementById('link').addEventListener('click', async function(){
   const url = location.href; try{ await navigator.clipboard.writeText(url); this.textContent = 'Link copiado'; }catch(e){ this.textContent = 'Copie da barra'; }
   setTimeout(() => this.textContent = 'Copiar link', 1800);
