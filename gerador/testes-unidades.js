@@ -534,6 +534,25 @@ t('inversões: estar ↔ jantar e cozinha ↔ serviço trocam de lugar; cozinha 
   ok(M.gerar(Object.assign({invEstarJantar:true, jantar:false}, base)).avisos.some(a => /sem efeito/.test(a)), 'sem jantar: aviso de inversão sem efeito');
 });
 
+// ---------- íntimo nunca no poente (etapa E2.8) ----------
+t('íntimo nunca no poente: frente a leste inverte o zoneamento; nos 8 rumos nenhum quarto térreo encosta a oeste', () => {
+  const r = M.gerar({frente:12, fundo:30, quartos:3, suites:1, vagas:2, orientacao:'L'}), v = r.variantes[0];
+  ok(v.zoneamento === 'invertido' && /íntimo na frente/.test(v.tipologia), 'frente a leste: ' + v.tipologia);
+  const ter = v.pav.find(p => p.nome === 'Térreo'), ent = ter.portas.find(d => d.entrada), c = ter.salas.find(s => s.entrada);
+  ok(ent && ent.o === 'h' && Math.abs(ent.c) < 0.01 && c && c.tipo === 'circ', 'entrada pela ponta do corredor, na fachada da frente');
+  ok(v.acessos.caminho && v.acessos.vagasFora.length === 2 && v.avisos.some(a => /vagas ficam descobertas/.test(a)), 'vagas descobertas no recuo e caminho até a porta');
+  const yq = Math.max(...ter.salas.filter(s => ['quarto','suite','master'].includes(s.tipo)).map(s => s.y1)), ys = Math.min(...ter.salas.filter(s => ['estar','jantar'].includes(s.tipo)).map(s => s.y0));
+  ok(yq <= ys + 0.01, 'quartos na frente, salas no fundo');
+  for(const o of Object.keys(M.RUMOS)) for(const fr of [10, 12, 15]){
+    const x = M.gerar({frente:fr, fundo:32, quartos:3, suites:1, orientacao:o}).variantes[0];
+    ok(x && !x.intimoPoente && !x.quartosPoente, `${o}, ${fr} m: quarto encostado a oeste (${x && x.tipologia})`);
+    ok(!AU.auditar(x, M.normaliza({frente:fr, fundo:32, orientacao:o})).some(a => a.regra === 'G19'), `${o}, ${fr} m: auditoria G19`);
+  }
+  igual(M.gerar({frente:12, fundo:30, quartos:3, suites:1, orientacao:'O'}).variantes.some(x => x.zoneamento === 'invertido'), false, 'frente a oeste não inverte:');
+  const sub = M.gerar({frente:12, fundo:30, quartos:3, suites:1, subsolo:true, orientacao:'L'});
+  ok(sub.variantes.length && sub.avisos.some(a => /fachada a oeste/.test(a)), 'com subsolo: recurso com aviso');
+});
+
 function rodar(){
   const linhas = []; let falhas = 0;
   for(const {nome, fn} of testes){ try{ fn(); }catch(e){ falhas++; linhas.push(`FALHA unidade ${nome}: ${e.message}`); } }

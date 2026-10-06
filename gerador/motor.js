@@ -1306,8 +1306,11 @@ function aberturas(pav, q, ehTerreo, espelho, W){
     }
     if(!feito && s.tipo!=='estar' && pref.length && !['garagem','gourmet'].includes(s.tipo) && s.nome!=='Área técnica' && !(s.tipo==='rouparia' && area(s) < 1.5)) av.push(`${pav.nome}: ${rotulo(s)} sem acesso por ${pref.slice(0,3).map(t=>TIPOS[t].nome.toLowerCase()).join(', ')}.`);
   }
+  // zoneamento invertido (E2.8): entrada pela ponta do corredor dos quartos, na fachada da frente
+  if(ehTerreo && pav.entradaFrente){ const c = S.find(s => s.entrada && s.tipo==='circ');
+    if(c){ const w = Math.min(1.0, c.x1 - c.x0 - 0.2), m = (c.x0 + c.x1)/2; portas.push({o:'h', c:c.y0, t0:r2(m - w/2), t1:r2(m + w/2), sala:c.id, dentro:1, entrada:true}); } }
   // entrada principal: estar → varanda ou fachada frontal
-  if(ehTerreo){
+  if(ehTerreo && !portas.some(p => p.entrada)){
     const estar = S.find(s => s.tipo==='estar') || S.find(s => s.tipo==='jantar') || S.find(s => s.tipo==='tv');
     if(estar){
       const v = S.find(o => o.tipo==='varanda' && compartilhado(estar,o));
@@ -1346,6 +1349,16 @@ function aberturas(pav, q, ehTerreo, espelho, W){
     }
     const vis = new Set([ini]), fila=[ini];
     while(fila.length){ const x=fila.shift(); for(const y of adj.get(x)||[]) if(!vis.has(y)){ vis.add(y); fila.push(y); } }
+    // cômodo isolado: abre porta para um vizinho já ligado, pela preferência de portas de um dos dois (ex.: a cozinha fechada que
+    // só tinha passagem aberta para o corredor ganha a porta do jantar). Repete até nada mudar.
+    const percorre = x0 => { const f = [x0]; vis.add(x0); while(f.length){ const x = f.shift(); for(const y of adj.get(x)||[]) if(!vis.has(y)){ vis.add(y); f.push(y); } } };
+    for(let mudou = true; mudou;){ mudou = false;
+      for(const s of S){ if(vis.has(s.id) || ['rouparia','deposito','terraco','jardim'].includes(s.tipo) || s.vaga || TIPOS[s.tipo].aberto) continue;
+        const z = S.filter(o => o !== s && vis.has(o.id) && !TIPOS[o.tipo].aberto && ((PREF[s.tipo]||[]).includes(o.tipo) || (PREF[o.tipo]||[]).includes(s.tipo)))
+          .map(o => ({o, sh:compartilhado(s, o)})).filter(z => z.sh && z.sh.t1 - z.sh.t0 >= 0.85).sort((a, b) => (b.sh.t1-b.sh.t0) - (a.sh.t1-a.sh.t0))[0];
+        if(!z) continue;
+        portas.push(porta(s, z.o, z.sh, q.acessivel ? 0.9 : larguraPorta(s))); liga(s.id, z.o.id); percorre(s.id); mudou = true; }
+    }
     for(const s of S) if(!vis.has(s.id) && !['rouparia','deposito','terraco','jardim'].includes(s.tipo) && !s.vaga) av.push(`${pav.nome}: ${rotulo(s)} não se liga ao resto da casa.`);
   }
   // janelas: área mínima de iluminação = 1/8 da área do piso (ventilação 1/16 = metade de uma janela de correr)
@@ -1458,6 +1471,18 @@ function ladoDaJanela(j, s){
   const E = 0.001;
   if(j.o === 'v'){ if(j.t0 < s.y0 - E || j.t1 > s.y1 + E) return null; return Math.abs(j.c - s.x0) < E ? 'x0' : Math.abs(j.c - s.x1) < E ? 'x1' : null; }
   if(j.t0 < s.x0 - E || j.t1 > s.x1 + E) return null; return Math.abs(j.c - s.y0) < E ? 'y0' : Math.abs(j.c - s.y1) < E ? 'y1' : null;
+}
+/* Quartos com alguma parede de fachada voltada para oeste (poente), com ou sem janela nela. */
+function quartosNoPoente(v, q, espelho){
+  const F = RUMOS[q.orientacao]; if(F === undefined) return [];
+  const out = [];
+  for(const p of v.pav){
+    if(p.anexo || p.nome === 'Subsolo' || p.nome === 'Rooftop') continue;
+    const fech = p.salas.filter(s => !TIPOS[s.tipo].aberto);
+    for(const s of p.salas.filter(x => QUARTOS.includes(x.tipo)))
+      if(trechosExternos(s, fech).some(e => classeSol(rumoFace(e.lado, F, espelho)) === 3)) out.push(`${p.nome}: ${rotulo(s)}`);
+  }
+  return out;
 }
 function avaliaSol(v, q, espelho){
   const F = RUMOS[q.orientacao]; if(F === undefined) return {pen:0, av:[]};
@@ -1588,12 +1613,15 @@ function avalia(v, q){
     else for(const p of v.pav) if(p.aberturasPor) p.aberturasPor.espelhada = p.aberturasPor.normal;
   } else {
     for(const esp of [false, true]){
-      const avAb = abrir(esp), vt = avaliaVento(v, q, esp), sl = avaliaSol(v, q, esp), pn = 6*avAb.length + vt.pen + sl.pen;
+      const avAb = abrir(esp), vt = avaliaVento(v, q, esp), sl = avaliaSol(v, q, esp), pn = 6*avAb.length + vt.pen + sl.pen + 25*quartosNoPoente(v, q, esp).length;
       if(!ori || pn < ori.pn) ori = {esp, avAb, vt, sl, pn};
     }
     if(!ori.esp){ abrir(false); avaliaSol(v, q, false); }   // a última rodada foi a espelhada: refaz a escolhida
   }   // a última rodada foi a espelhada: refaz as aberturas da escolhida
   av.push(...ori.avAb); pen += 6*ori.avAb.length;
+  // íntimo nunca no poente: quarto encostado numa fachada a oeste perde pontos e só aparece se nenhuma variante escapar
+  const noPoente = quartosNoPoente(v, q, ori.esp); v.intimoPoente = noPoente.length;
+  if(noPoente.length){ pen += 8*noPoente.length; av.push(`${noPoente.join(', ')} encostado(s) na fachada a oeste (poente).`); }
   // terreno
   const B = q.frente - q.recX0 - q.recX1, Dmax = q.fundo - q.recFrente - q.recFundo;
   if(v.W > B + 0.01){ pen += 40*(v.W-B); av.push(`A casa (${f2(v.W)} m) é mais larga que a área edificável (${f2(B)} m).`); }
@@ -1838,7 +1866,11 @@ function comTorre(v, q){
    e todos os vizinhos mantêm acesso. */
 const ABSORVE = ['quarto','suite','master','salaIntima','closet','closetMaster'];
 const DO_MODULO = ['banhoSuite','banhoMaster','closet','closetMaster'];
-function enxuga(v){
+function enxuga(v, q){
+  // íntimo nunca no poente (E2.8): com laterais a leste e oeste (frente norte ou sul), o fim de corredor encostado numa lateral
+  // não vira parte do quarto, senão o quarto ganharia parede na fachada a oeste depois do espelho
+  const F = q ? RUMOS[q.orientacao] : undefined;
+  const lateralPoente = F !== undefined && ['x0','x1'].some(l => [false, true].some(e => classeSol(rumoFace(l, F, e)) === 3));
   for(const p of v.pav){
     if(p.nome==='Subsolo') continue;
     const S = p.salas;
@@ -1858,7 +1890,7 @@ function enxuga(v){
       k.integra = 1; S.splice(S.indexOf(h), 1);
     }
     // ponta do corredor → quarto do fim
-    for(const c of S.filter(s => s.tipo==='circ')){
+    for(const c of S.filter(s => s.tipo==='circ' && !s.entrada)){
       const vert = (c.y1-c.y0) >= (c.x1-c.x0), a0 = vert ? 'y0' : 'x0', a1 = vert ? 'y1' : 'x1', b0 = vert ? 'x0' : 'y0', b1 = vert ? 'x1' : 'y1';
       for(const fim of [a1, a0]){
         const E = c[fim], pos = fim===a1;
@@ -1873,6 +1905,7 @@ function enxuga(v){
         const ok = lado.filter(z => z.o!==R && !(DO_MODULO.includes(z.o.tipo) && z.o.mod && z.o.mod===R.mod))
           .every(z => (pos ? Math.min(z.sh.t1, corte) - z.sh.t0 : z.sh.t1 - Math.max(z.sh.t0, corte)) >= 1.0 - 0.001);
         if(!ok) continue;
+        if(lateralPoente){ const xs = S.map(x => [x.x0, x.x1]).flat(), xa = Math.min(...xs), xb = Math.max(...xs); if(c.x0 <= xa + 0.01 || c.x1 >= xb - 0.01) continue; }
         if(Math.abs(R[b1] - c[b0]) < 0.001) R[b1] = c[b1]; else R[b0] = c[b0];
         c[fim] = r2(corte); R.integra = 1;
       }
@@ -1881,10 +1914,29 @@ function enxuga(v){
   return v;
 }
 
+/* Íntimo nunca no poente (E2.8, decisão de 06/10/2026). Com o fundo voltado para oeste (frente para leste), o gerador cria
+   também variantes com o zoneamento invertido: quartos na frente, voltados para o nascente; salas e varanda no fundo; entrada
+   pela ponta do corredor dos quartos. A garagem coberta não cabe na frente junto com os quartos: as vagas ficam descobertas
+   no recuo. Por ora só na casa térrea sem subsolo (no sobrado e com subsolo, escada e rampa precisam ficar no lugar). */
+function fundoNoPoente(q){ const F = RUMOS[q.orientacao]; return F !== undefined && classeSol(rumoFace('y1', F, false)) === 3; }
+function inverteFrenteFundo(v, q){
+  const D = v.D, fy = y => r2(D - y);
+  for(const p of v.pav) for(const s of p.salas){ const a = fy(s.y1), b = fy(s.y0); s.y0 = a; s.y1 = b; }
+  v.cotasY = (v.cotasY || []).map(fy).reverse();
+  const ter = v.pav.find(p => p.nome==='Térreo');
+  const c = ter && ter.salas.filter(s => s.tipo==='circ' && s.y0 < 0.01).sort((a, b) => (b.x1-b.x0) - (a.x1-a.x0))[0];
+  if(!c) return null;                                     // sem corredor na frente não há por onde entrar
+  c.entrada = true; c.nome = 'Hall de entrada e circulação'; ter.entradaFrente = true;
+  v.zoneamento = 'invertido'; v.tipologia += ', íntimo na frente';
+  v.avisos.push('Com o fundo voltado para o poente (oeste), os quartos foram para a frente, voltados para o nascente; salas e varanda ficam no fundo, e a entrada é pelo corredor dos quartos.');
+  if(q.garagem==='coberta' && q.vagasT > 0) v.avisos.push('Nesta variante as vagas ficam descobertas no recuo frontal: a garagem coberta não cabe na frente junto com os quartos.');
+  return v;
+}
+
 function geraTodas(q, P, Ws){
   const out = [];
   const push0 = out.push.bind(out);
-  out.push = (...vs) => push0(...vs.map(v => comTorre(comRooftop(enxuga(v), q), q)));
+  out.push = (...vs) => push0(...vs.map(v => comTorre(comRooftop(enxuga(v, q), q), q)));
   for(const W of Ws){
     const modos = [], f = q.formato, quer = x => f==='auto' || f===x;
     const larguraCol = (q.tipo==='sobrado'||q.subsolo) ? COL : C;
@@ -1897,6 +1949,10 @@ function geraTodas(q, P, Ws){
       if(q.tipo==='sobrado' && v.Lsup && v.Lsup > v.Dter + 1.0){ const k = Math.min(1.3, 1 + (v.Lsup - v.Dter)/Math.max(1, v.Dter - (q.varanda?2:0))); v = linear(q, P, W, m, {cresce:k}); }
       out.push(v);
     }catch(e){ /* combinação inviável */ }
+      if(fundoNoPoente(q) && q.tipo==='terrea' && !q.subsolo) try{
+        const qi = q.garagem==='coberta' ? Object.assign({}, q, {garagem:'descoberta'}) : q;
+        const vi = inverteFrenteFundo(linear(qi, P, W, m), q); if(vi) out.push(vi);
+      }catch(e){ /* inviável */ }
       if(q.tipo==='sobrado' && (q.subsolo || q.elevador)) try{ let ve = linear(q, P, W, m, {empilha:true});
         if(ve.Lsup && ve.Lsup > ve.Dter + 1.0){ const k = Math.min(1.3, 1 + (ve.Lsup - ve.Dter)/Math.max(1, ve.Dter - (q.varanda?2:0))); ve = linear(q, P, W, m, {empilha:true, cresce:k}); }
         out.push(ve); }catch(e){ /* inviável */ }
@@ -1957,7 +2013,9 @@ function gerar(entrada, opts){
   // variantes inválidas (fora do lote, nos recuos, cômodo sem ligação) não entram no ranking
   const validas = todas.filter(v => !v.invalida.length);
   if(todas.length && !validas.length){ const m = todas[0].invalida; avisos.push(`Nenhuma variante cabe neste terreno com este programa. A mais próxima tem: ${m.slice(0, 3).join('; ')}${m.length > 3 ? '…' : ''}. Veja o terreno mínimo ou reduza o programa.`); }
-  const semPoente = validas.filter(v => !v.quartosPoente), elegiveis0 = semPoente.length ? semPoente : validas;
+  const semIntimo = validas.filter(v => !v.quartosPoente && !v.intimoPoente);
+  const semPoente = semIntimo.length ? semIntimo : validas.filter(v => !v.quartosPoente), elegiveis0 = semPoente.length ? semPoente : validas;
+  if(validas.length && !semIntimo.length && validas.some(v => v.intimoPoente)) avisos.push(`Nenhuma variante tirou todos os quartos da fachada a oeste (poente) neste terreno${q.subsolo || q.tipo==='sobrado' ? ' (com subsolo ou sobrado, o íntimo ainda não vai para a frente)' : ''}; veja os pontos de atenção.`);
   // variantes com nota 0 só aparecem se nenhuma outra montar
   const comNota = elegiveis0.filter(v => v.score > 0), elegiveis = comNota.length ? comNota : elegiveis0;
   if(!semPoente.length && validas.length) avisos.push('Nenhuma variante deixou todos os quartos fora do poente (oeste) neste terreno; veja os pontos de atenção.');
