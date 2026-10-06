@@ -24,7 +24,7 @@ const REGRAS = {
   G07: {nome:'Portas ou porta e janela sobrepostas', limite:0},
   G08: {nome:'Janela em parede inexistente (interna ou atravessando cômodos)', limite:0},
   G09: {nome:'Corredor estreito (< 0,90 m)', limite:0},
-  G10: {nome:'Corredor abaixo de 1,20 m', limite:90},
+  G10: {nome:'Corredor abaixo de 1,20 m', limite:82},
   G11: {nome:'Circulação interrompida (cômodo sem ligação)', limite:0},
   G12: {nome:'Escada que não cabe no espaço', limite:0},
   G13: {nome:'Escada fora da faixa de Blondel (0,63–0,65 m)', limite:0},
@@ -33,6 +33,7 @@ const REGRAS = {
   G16: {nome:'Mobiliário sobreposto ou fora do cômodo', limite:1},
   G17: {nome:'Rooftop aberto para o poente sem fechamento', limite:0},
   G18: {nome:'Janela a menos de 1,50 m da divisa (Código Civil, art. 1.301)', limite:0},
+  G19: {nome:'Quarto encostado em fachada a oeste (íntimo nunca no poente)', limite:11},
   M01: {nome:'Quadro de áreas: parcela diferente de largura × comprimento', limite:0},
   M02: {nome:'Quadro de áreas: somatórios', limite:0},
   M03: {nome:'Projeção diferente da recalculada (térreo ∪ pavimentos de cima)', limite:0},
@@ -223,6 +224,10 @@ function auditar(v, q){
       if(d < 1.5 - 0.011) add('G18', p.nome, `janela ${j.o === 'h' ? 'y' : 'x'} = ${f2(j.c)} a ${f2(d)} m da divisa${w.espelhada ? ' (planta espelhada)' : ''}`);
     }
   }
+  // G19: na orientação recomendada, nenhum quarto encosta numa fachada a oeste (o motor só mostra isso quando nada escapa)
+  if(M.RUMOS[q.orientacao] !== undefined){ const F = M.RUMOS[q.orientacao], w = v.espelharVento ? M.espelharCasa(v) : M.semEspelho(v);
+    for(const p of w.pav){ if(p.anexo || p.nome === 'Subsolo' || p.nome === 'Rooftop') continue; const fe = p.salas.filter(s => !ABERTO(s));
+      for(const s of p.salas.filter(x => ['quarto','suite','master'].includes(x.tipo))) if(trechosExternos(s, fe).some(e => { const d = Math.abs(((M.rumoFace(e.lado, F, false) - 270) % 360 + 540) % 360 - 180); return d <= 22.5; })) add('G19', p.nome, s.nome + ' encostado na fachada a oeste'); } }
   // M03, M04: projeção e ocupação recalculadas (térreo ∪ superior ∪ rooftop coberto, sem o subsolo e sem a edícula)
   const ter = v.pav.find(p => p.nome === 'Térreo'), loteA = L.frente * L.fundo;
   const anexosCasa = (v.anexos || []).map(a => ({tipo:a.tipo, x0:a.x0 - v.x0, y0:a.y0 - v.y0, x1:a.x1 - v.x0, y1:a.y1 - v.y0}));
