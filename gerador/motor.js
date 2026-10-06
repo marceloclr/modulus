@@ -1606,8 +1606,10 @@ function invalidez(v, q, av){
     if(p.anexo) continue;
     const sub = p.nome==='Subsolo', livre = sub && q.subRecuos !== 'nenhum';
     const fora = p.salas.filter(s => !dentro(s, lote)), recuo = p.salas.filter(s => dentro(s, lote) && !dentro(s, edif) && !(sub && (livre || s.tipo==='jardim' || s.tipo==='rampa')));
-    if(fora.length) m.push(`${p.nome}: ${fora.map(rotulo).join(', ')} fora do lote`);
-    if(recuo.length) m.push(`${p.nome}: ${recuo.map(rotulo).join(', ')} nos recuos`);
+    // nomes agrupados com contagem: "3 × suíte, 3 × banho"
+    const lista = L => { const c = new Map(); for(const s of L) c.set(rotulo(s), (c.get(rotulo(s)) || 0) + 1); return [...c].map(([n, k]) => k > 1 ? `${k} × ${n}` : n).join(', '); };
+    if(fora.length) m.push(`${p.nome}: ${lista(fora)} fora do lote`);
+    if(recuo.length) m.push(`${p.nome}: ${lista(recuo)} nos recuos`);
   }
   for(const a of av) if(/não se liga ao resto da casa/.test(a) && !a.startsWith('Rooftop')) m.push(a.replace(/.$/, ''));
   return m;
