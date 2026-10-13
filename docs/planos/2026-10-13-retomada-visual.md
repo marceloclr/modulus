@@ -135,3 +135,16 @@ A opção B da casa simétrica fica parada até o usuário escolher entre a vers
   - Conferir com `node tools/percurso-manual.mjs` (achados altos em zero).
 - **Torres de ar na V3 (pergunta do usuário em 13/10/2026):** hoje `gerador/torre.js` só dá a vazão total do card (vento fixo de 4 m/s, sem mês e hora, sem cômodos, sem desenho). Na V3 a torre vira uma abertura do grafo do ar interno: saída no alto com Cp de sucção (tipo da torre em `Motor.TORRES`) e efeito chaminé Q = Cd · A · √(2gHΔT/T); combinação Q = √(Q_vento² + Q_chaminé²) (CIBSE AM10); vento do mês e da hora; na planta, partículas convergindo para a torre e subindo (círculos concêntricos), e as renovações dos cômodos ligados a ela no painel.
 - **Aprovado em 13/10/2026:** V0 inteira ("o restante está aprovado. siga"). Próxima: V1.
+
+## V1 feita (branch `v-tela-limpa`, 13/10/2026): para onde foi cada texto
+| Texto que saiu da tela | Destino |
+|---|---|
+| Parágrafo de apresentação do gerador | "?" do título → manual #como-decide |
+| "Como o gerador decide" (5 cartões) | manual #como-decide (íntegra); na tela, um link |
+| Nota do terreno mínimo | "?" de Implantação → manual #implantacao |
+| Tabela completa do quadro de áreas | recolhida em "Tabela completa"; na tela, total e pavimentos |
+| Notas do formulário: taxa, quartos no superior, torre, rooftop (2), subsolo (4), dimensões, edícula, balanço, CUB, solar | "?" ao lado do campo → manual #terreno, #tipo, #conforto, #rooftop, #subsolo, #dimensoes, #anexos, #estrutura, #custo, #solar |
+| Notas dos cards: custo, solar (fontes e normas), torre, brises, acessibilidade | "?" no título do card; torre mantém o link "Dossiê das torres →" |
+| Nota de método do card Sol e vento | "?" no título → manual #sol-vento |
+| Botões Baixar SVG/PNG e Salvar no banco/arquivo | menus "Baixar" e "Salvar" da barra da planta |
+Verificação: testes (golden 31, 64 unidades), verifica-html, capturas 1440 px e 390 px (sem rolagem horizontal; a do Edge headless com --window-size abaixo de ~500 px engana, usar CDP), "?" e menus testados por CDP.
