@@ -1,6 +1,6 @@
 # Modulus — instruções de continuidade
 
-Atualizado em 06/10/2026, 10h35. Cole este arquivo num chat novo (ou peça "leia docs/CONTINUIDADE.md") para retomar.
+Atualizado em 13/10/2026 (retomada; plano em `docs/planos/2026-10-13-retomada-visual.md`). Cole este arquivo num chat novo (ou peça "leia docs/CONTINUIDADE.md") para retomar.
 
 ## 1. Objetivo
 O **Modulus** (antes GerPlantas; nome trocado em 05/10/2026) é um gerador de plantas residenciais por regras. É um site estático (HTML/JS, sem servidor e sem IA) publicado no GitHub Pages: https://marceloclr.github.io/modulus/. O repositório é `marceloclr/modulus` (antes `plantas`; renomeado em 05/10/2026, o endereço antigo do Pages deixou de funcionar), branch `main`; pasta local `Documents/GitHub/modulus`.
@@ -73,14 +73,14 @@ O usuário preenche um formulário com terreno, recuos, orientação, cômodos, 
   - **F1.5 (estilo das referências):** `gerador/simbolos.js` (móveis, tapetes, plantas, sombra) e `gerador/texturas.js` (texturas procedurais em JPEG, geradas por `tools/gerar-texturas.mjs`; não editar à mão); rótulos sem caixa; tapetes e plantas em `mobilia.js` (lista `decor`, desenhada por baixo); sala `estarTipo` tradicional (padrão: sofás de 3 e 2 lugares, poltrona) ou com TV (`v.estarTipo` só quando 'tv'); vista Apresentação (`op.apresentacao`: sem lote, cotas, rosa e setas), terceiro botão da planta. Amostra: https://claude.ai/artifact/Ea7L5Hj4Z5A3RwDBZmELSe
   - **E2.6 (pé-direito):** `pdSalas` (padrão 2,80) e `pdDemais` (2,60), livres do piso ao forro, separados do piso a piso (`peDireito`, que manda na escada, no elevador e no subsolo); `comPeDireito` grava `s.pd` nas variantes escolhidas, limitando ao piso a piso − 0,15 m quando há pavimento em cima (com aviso); quadro com pé-direito e volume; sombras e torre usam o pé-direito de cada cômodo; `Custos.peDireitoExtra` (ESTIMATIVA fora do total, parede acima de 2,60 m pelo muro de 2 m de dados/custos.json); auditoria G23 e G24. Duplo no sobrado e ajuste por cômodo ficaram para depois. Plano: `docs/planos/2026-10-06-etapa-e2-6.md`.
 - **Testes:** `node gerador/testes.js` (21 casos, golden de 31, 63 testes de unidade, auditoria de 74 casos com regras G01–G24 e M01–M09). `node gerador/auditoria.js --detalhe` lista cada violação. Limites atuais da catraca: G10 84, G16 1, G19 11 (sobrado, subsolo e programas grandes ainda sem a inversão); o resto é 0.
-- **Ordem combinada das próximas etapas:**
-  1. **J (edição direta, inteira, antecipada em 06/10/2026):** arrastar paredes internas, portas e janelas, trocar cômodos, desfazer/refazer e persistência (avaliação na seção "Arrastar" de `docs/planos/2026-10-06-etapa-e.md`).
-  2. **E2.5 e E2.7:** medidas do subsolo e banho reversível (com opção de porta para o corredor).
-  3. **F2:** corte, depois da E2.6.
-  4. **V2:** brises legíveis e glossário para leigos.
-  5. **V1:** vento 24 h, com os quartos avaliados pelo vento da noite (aprovado).
-  6. **E3:** regras com fonte.
-  7. **F3** (vista 3D): futura.
+- **Ordem combinada das próximas etapas (13/10/2026):**
+  1. **Revisão das plantas feitas à mão** (A, C, D da casa simétrica e casa H): só diagnóstico e plano, sem alterar; relatório em `docs/auditoria/`.
+  2. **V0, benchmarking visual:** artifact com referências (Shadowmap, Andrew Marsh, Forma, Ladybug, Windy/nullschool) e protótipo da nova animação, para aprovação.
+  3. **V1, tela limpa:** página `manual/`, ícone de ajuda "?" com dica e "Saiba mais", barra da planta com menus, quadro de áreas resumido.
+  4. **V2, animação do sol:** luz da hora, sombras suaves, anel do horizonte, transições contínuas.
+  5. **V3, animação do vento:** partículas que contornam a casa, vento por hora (inclui o antigo "V1, vento 24 h").
+  6. **J2–J6 (edição direta):** J1 feito no branch `etapa-j-edicao` (rebaseado sobre a main em 13/10/2026).
+  7. Depois: opção B da casa simétrica (aguarda escolha: principal ou simétrica), E2.5 e E2.7, F2 (corte), brises legíveis, E3 (regras com fonte), F3 (3D, futura).
 
 ## 4. Pendências conhecidas (nenhuma pedida)
 - Itens oferecidos e não aprovados: patamar plano no início da rampa e núcleo no fundo do subsolo.
