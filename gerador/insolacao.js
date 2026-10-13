@@ -91,7 +91,9 @@ function luzPavimento(v, q, p, s, est){
     const luz = fatorBrise(est, f.rumo, f.hsa, f.vsa); if(luz <= 0.02) continue;
     const [z0, z1] = ALTURAS(j), P = (t, z) => { const w = j.o === 'h' ? [t, j.c] : [j.c, t]; return [w[0] - d.x * z * k, w[1] - d.y * z * k]; };
     const poly = recorta([P(j.t0, z0), P(j.t1, z0), P(j.t1, z1), P(j.t0, z1)], sala);
-    if(poly.length >= 3 && areaPoly(poly) > 0.01) manchas.push({pts:poly, sala:sala.id, nomeSala:sala.nome, intensidade:f.cosi * luz, rumo:f.rumo, area:areaPoly(poly)});
+    if(poly.length >= 3 && areaPoly(poly) > 0.01) { // V2: feixe da janela até a borda mais funda da mancha (para o desenho), recortado no cômodo
+      const feixe = recorta([P(j.t0, 0), P(j.t1, 0), P(j.t1, z1), P(j.t0, z1)], sala);
+      manchas.push({pts:poly, sala:sala.id, nomeSala:sala.nome, intensidade:f.cosi * luz, rumo:f.rumo, area:areaPoly(poly), feixe, janela: j.o === 'h' ? [j.t0, j.c, j.t1, j.c] : [j.c, j.t0, j.c, j.t1]}); }
   }
   return {manchas, fachadas};
 }
@@ -125,6 +127,27 @@ function horasSolComodos(v, q, mes, est){
   return [...acc.values()].sort((a, b) => b.horas - a.horas);
 }
 
+/* V2: horas de sol direto no lote no dia 21 do mês (passo de 30 min), numa grade de "passo" metros, fora da casa.
+   {x0, y0, passo, nx, ny, horas:[…], max}: horas[iy*nx + ix] no centro da célula; null dentro da casa. */
+function horasNoLote(v, q, mes, passo){
+  passo = passo || 0.5;
+  const L = v.lote, cx0 = L && v.x0 !== undefined ? -v.x0 : 0, cy0 = L && v.y0 !== undefined ? -v.y0 : 0;
+  const cx1 = L ? L.frente + cx0 : v.W, cy1 = L ? L.fundo + cy0 : v.D, nx = Math.max(1, Math.round((cx1 - cx0) / passo)), ny = Math.max(1, Math.round((cy1 - cy0) / passo));
+  const casa = andares(v, q).flatMap(a => a.p.salas.filter(r => !ABERTOS.includes(r.tipo)));
+  const horas = new Array(nx * ny).fill(0);
+  for(let iy = 0; iy < ny; iy++) for(let ix = 0; ix < nx; ix++){ const x = cx0 + (ix + 0.5) * passo, y = cy0 + (iy + 0.5) * passo;
+    if(casa.some(r => x > r.x0 && x < r.x1 && y > r.y0 && y < r.y1)) horas[iy * nx + ix] = null; }
+  const dentro = (p, x, y) => { let r = false; for(let i = 0, j = p.length - 1; i < p.length; j = i++){ const a = p[i], b = p[j]; if((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) r = !r; } return r; };
+  for(let t = 6; t <= 18.001; t += 0.5){
+    const s = solEm(mes, t); if(s.h <= 0.5) continue;
+    const sb = sombras(v, q, s).map(o => { const xs = o.pts.map(p => p[0]), ys = o.pts.map(p => p[1]); return {pts:o.pts, x0:Math.min(...xs), x1:Math.max(...xs), y0:Math.min(...ys), y1:Math.max(...ys)}; });
+    for(let iy = 0; iy < ny; iy++) for(let ix = 0; ix < nx; ix++){ const k = iy * nx + ix; if(horas[k] === null) continue;
+      const x = cx0 + (ix + 0.5) * passo, y = cy0 + (iy + 0.5) * passo;
+      if(!sb.some(o => x >= o.x0 && x <= o.x1 && y >= o.y0 && y <= o.y1 && dentro(o.pts, x, y))) horas[k] += 0.5; }
+  }
+  return {x0:cx0, y0:cy0, passo, nx, ny, horas, max:Math.max(0, ...horas.filter(h => h !== null))};
+}
+
 /* Quadro de um instante: sol, sombras e luz de um pavimento. */
 function quadro(v, q, pi, mes, hora, est){
   const s = solEm(mes, hora), p = v.pav[pi];
@@ -132,5 +155,5 @@ function quadro(v, q, pi, mes, hora, est){
   return Object.assign({sol:s, sombras:sob}, p && !p.anexo && p.nome !== 'Subsolo' ? luzPavimento(v, q, p, s, est) : {manchas:[], fachadas:[]});
 }
 
-return {direcao, solEm, sombras, luzPavimento, incidenciaFaces, horasSolComodos, quadro, envoltorio, recorta, areaPoly, ALTURAS, MESES};
+return {direcao, solEm, sombras, luzPavimento, incidenciaFaces, horasSolComodos, horasNoLote, quadro, envoltorio, recorta, areaPoly, ALTURAS, MESES};
 });
