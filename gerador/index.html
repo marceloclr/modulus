@@ -119,6 +119,10 @@
 .score{display:inline-block;min-width:34px;text-align:center;font-size:12px;padding:3px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);margin-left:6px}
 .btn[aria-pressed="true"] .score{background:transparent;color:inherit;border-color:currentColor}
 .salvar-banco{display:inline-flex;gap:6px;flex-wrap:wrap}
+.ao-vivo{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.vivo-ind{margin:0 0 8px;font-size:12.5px;color:var(--ink-3);min-height:1.2em;font-variant-numeric:tabular-nums}
+.vivo-ind.fresco{color:var(--patina)}
+.vivo-ind.parado{color:var(--rust)}
 .bp-ops{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}
 .bp-ops>small{grid-column:1/-1}
 .bp-ops .fld{margin:0}
@@ -292,6 +296,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
   <aside class="sb" aria-label="Programa de necessidades">
     <form class="form" id="form" autocomplete="off">
       <div class="form-acts">
+        <label class="chk ao-vivo"><input type="checkbox" id="aoVivo" checked>Gerar ao vivo<button type="button" class="ajuda" data-ajuda="Ligado: depois de concluir o bloco Dimensões, cada mudança no formulário refaz as plantas na hora. Desligado: as plantas só mudam no botão Gerar novamente. A escolha fica guardada neste navegador." data-manual="usar" aria-label="Ajuda: gerar ao vivo" aria-expanded="false">?</button></label>
         <button class="btn prim" type="submit" data-tip="Gera as variantes com os campos preenchidos">Gerar novamente</button>
         <button class="btn" type="button" id="restaurar" data-tip="Volta todos os campos aos valores iniciais">Restaurar</button>
         <button class="btn" type="button" id="link" data-tip="Copia um link com estes campos preenchidos">Copiar link</button>
@@ -520,6 +525,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <p>Preencha o bloco 1, Dimensões (terreno, tipo da casa e programa), e toque em "Concluir bloco". Aí o gerador calcula as variantes e mostra os indicadores, a planta, o quadro de áreas e a implantação.</p>
       </div>
       <div id="resultado">
+      <p class="vivo-ind" id="vivoInd" aria-live="polite"></p>
       <div class="stats" id="stats"></div>
       <div id="avisosGerais"></div>
 
@@ -684,13 +690,27 @@ function sincroniza(){
 
 // ao vivo: cada alteração gera de novo; a mesma entrada não é recalculada, salvo pedido explícito (forcar)
 let ultimaEntrada = null, espera = null, pedido = 0;
+// geração ao vivo (etapa T, 13/10/2026): ligada por padrão; desligada, só o botão Gerar novamente refaz as plantas
+let aoVivo = true; try{ aoVivo = localStorage.getItem('plantas-ao-vivo') !== '0'; }catch(e){}
+document.getElementById('aoVivo').checked = aoVivo;
+document.getElementById('aoVivo').addEventListener('change', e => { aoVivo = e.target.checked; try{ localStorage.setItem('plantas-ao-vivo', aoVivo ? '1' : '0'); }catch(err){} indicaVivo(); if(aoVivo && faixasOk()) gerar(); });
+let ultimaMs = 0, indT = null;
+function indicaVivo(atualizou){
+  const el = document.getElementById('vivoInd'); if(!el) return;
+  if(!aoVivo){ el.className = 'vivo-ind parado'; el.textContent = 'Ao vivo desligado: as mudanças só valem no botão Gerar novamente.'; return; }
+  el.className = 'vivo-ind' + (atualizou ? ' fresco' : ''); el.textContent = ultimaMs ? `Atualizado ao vivo · ${ultimaMs.toFixed(0)} ms` : '';
+  clearTimeout(indT); if(atualizou) indT = setTimeout(() => el.classList.remove('fresco'), 1200);
+}
+// mudança no formulário: gera ao vivo (ou só sincroniza os campos, com o interruptor desligado)
+function talvezGerar(){ if(aoVivo) gerar(); else indicaVivo(); }
 function gerar(forcar){
   const d = lerForm(), chave = JSON.stringify(d);
   if(!forcar && res && chave === ultimaEntrada) return;
   ultimaEntrada = chave;
   const t0 = performance.now();
   res = Motor.gerar(d, dadosCusto ? {posAvalia:[(v, q) => Estrutura.avaliar(v, q, dadosCusto)]} : undefined);
-  document.getElementById('plan').dataset.ms = (performance.now() - t0).toFixed(1);
+  ultimaMs = performance.now() - t0; document.getElementById('plan').dataset.ms = ultimaMs.toFixed(1);
+  if(!forcar || res) indicaVivo(true);
   vi = 0; pi = Math.max(0, res.variantes[0] ? res.variantes[0].pav.findIndex(p => p.nome==='Térreo') : 0);
   if(!inicial || inicial.espelho === null){ const v0 = res.variantes[0]; esp = !!(v0 && v0.espelharVento); }
   if(inicial){ vi = Math.min(inicial.variante||0, Math.max(0, res.variantes.length-1)); if(inicial.espelho !== null) esp = inicial.espelho;
@@ -827,7 +847,7 @@ function nomeArq(ext){ const v = variante(); return `planta-${v.nome.replace(/\s
 form.addEventListener('submit', e => { e.preventDefault(); if(document.activeElement && document.activeElement.closest('.bloco-res')) return; clearTimeout(espera); gerar(true); });
 // com algum número fora da faixa, a planta espera a correção (o bloco mostra o problema)
 const faixasOk = () => ![...form.querySelectorAll('input[type=number]')].some(i => !i.disabled && !i.closest('[hidden]') && (i.validity.badInput || i.validity.rangeUnderflow || i.validity.rangeOverflow));
-form.addEventListener('change', e => { if(e.target.closest('.bloco-res')) return; clearTimeout(espera); sincroniza(); if(e.target.id!=='carregar' && faixasOk()) gerar(); });
+form.addEventListener('change', e => { if(e.target.closest('.bloco-res') || e.target.id === 'aoVivo') return; clearTimeout(espera); sincroniza(); if(e.target.id!=='carregar' && faixasOk()) talvezGerar(); });
 // números: gera enquanto se digita, 200 ms depois da última tecla; um pedido mais novo descarta o anterior; valor fora da faixa espera a correção
 form.addEventListener('input', e => {
   const el = e.target;
@@ -836,7 +856,7 @@ form.addEventListener('input', e => {
   const v = el.validity;
   if(v.badInput || v.rangeUnderflow || v.rangeOverflow || (el.value === '' && !el.name.startsWith('d_'))) return;
   const meu = ++pedido;
-  espera = setTimeout(() => { if(meu !== pedido || !faixasOk()) return; sincroniza(); gerar(); }, 200);
+  espera = setTimeout(() => { if(meu !== pedido || !faixasOk()) return; sincroniza(); talvezGerar(); }, ultimaMs > 150 ? 500 : 200);
 });
 // brises: detalhes só com a opção marcada; faces só na escolha manual (fora de sincroniza, que fica como está)
 function brisesVisiveis(){
