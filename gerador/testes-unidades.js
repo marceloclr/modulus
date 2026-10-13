@@ -336,6 +336,15 @@ t('insolação: sombra de um cubo, mancha de sol pela janela e incidência por f
   const fx = (m, r) => (I.incidenciaFaces(v, qq, m).find(x => x.rumo === r) || {kwh:0}).kwh;
   ok(fx(12, 'S') > fx(12, 'N') && fx(6, 'N') > fx(6, 'S'), 'sazonalidade norte/sul');
   ok(I.horasSolComodos(v, qq, 3).length > 0, 'horas de sol por cômodo');
+  // V2: a mancha leva a janela de origem e o feixe (da janela até a verga projetada), dentro do cômodo
+  const m0 = L.manchas[0]; igual(m0.janela, [1, 0, 2, 0], 'janela da mancha:');
+  ok(m0.feixe.length >= 3 && Math.min(...m0.feixe.map(p => p[1])) >= -1e-9 && Math.abs(Math.max(...m0.feixe.map(p => p[1])) - 2.2/Math.tan(62.82*Math.PI/180)) < 0.01, 'feixe até a borda funda da mancha');
+  // V2: horas de sol no lote: longe da casa, o dia inteiro de sol; colado à face sul em junho (sol ao norte), menos
+  const H = I.horasNoLote(v, qq, 6, 0.5), cel = (x, y) => H.horas[Math.floor((y - H.y0) / H.passo) * H.nx + Math.floor((x - H.x0) / H.passo)];
+  const xs = v.pav.find(p => p.nome === 'Térreo').salas, ymax = Math.max(...xs.map(s => s.y1));
+  ok(H.max >= 11 && H.max <= 12.5, 'máximo de horas em junho: ' + H.max);
+  igual(cel(v.W / 2, v.D / 2), null, 'dentro da casa:');
+  ok(cel(v.W / 2, ymax + 0.3) < H.max, 'atrás da casa (sul, em junho) há sombra: ' + cel(v.W / 2, ymax + 0.3));
 });
 
 t('vento na variante: janelas de entrada e saída, linhas de corrente e camada da planta', () => {
