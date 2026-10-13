@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="../assets/logo.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual · Modulus</title>
+<meta name="description" content="Manual do Modulus: como usar o gerador, como ele decide, métodos, fontes e glossário.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/base.css">
+<script src="../assets/base.js"></script>
+<script src="../assets/limpeza.js"></script>
+<style>
+.man-toc{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 0;padding:0;list-style:none}
+.man-toc a{display:inline-block;font:500 13px/1 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);text-decoration:none;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2)}
+.man-toc a:hover{border-color:var(--ink-3)}
+.man-toc a:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+.man h2{scroll-margin-top:90px}
+.man section{padding-top:6px}
+.man section+section{border-top:1px solid var(--line);margin-top:26px;padding-top:22px}
+.man dl{display:grid;grid-template-columns:minmax(120px,190px) minmax(0,1fr);gap:8px 18px;margin:10px 0 0}
+.man dt{font-weight:600}
+.man dd{margin:0;color:var(--ink-2)}
+@media (max-width:620px){.man dl{grid-template-columns:minmax(0,1fr)}.man dd{margin-bottom:6px}}
+.man code{font:500 13px/1 ui-monospace,Consolas,monospace;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 5px}
+.man ol,.man ul.lista{padding-left:22px;display:grid;gap:6px;max-width:72ch}
+</style>
+</head>
+<body data-nav="manual" data-root="../">
+<header class="bar">
+  <div class="bar-in">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+    </div>
+    <button class="btn" id="themeBtn" type="button" data-tip="Alterna entre o tema claro e o escuro. A escolha fica guardada neste navegador">Tema escuro</button>
+  </div>
+</header>
+
+<main class="page man">
+  <section class="panel" style="--c:var(--steel)">
+    <div class="panel-head">
+      <p class="eyebrow">Manual</p>
+      <h1 style="font-size:clamp(26px,4vw,36px)">Como o Modulus funciona</h1>
+      <p>As telas mostram só o que serve para decidir. Aqui ficam as explicações completas: como usar, como o gerador decide, os métodos e as fontes. Cada "?" do gerador leva à seção certa.</p>
+    </div>
+    <ul class="man-toc" aria-label="Seções do manual">
+      <li><a href="#usar">Como usar</a></li><li><a href="#como-decide">Como o gerador decide</a></li><li><a href="#terreno">Terreno</a></li>
+      <li><a href="#tipo">Tipo da casa</a></li><li><a href="#rooftop">Rooftop</a></li><li><a href="#subsolo">Subsolo</a></li>
+      <li><a href="#dimensoes">Dimensões</a></li><li><a href="#anexos">Anexos</a></li><li><a href="#estrutura">Estrutura</a></li>
+      <li><a href="#custo">Custo</a></li><li><a href="#solar">Energia solar</a></li><li><a href="#conforto">Conforto passivo</a></li>
+      <li><a href="#sol-vento">Sol e vento</a></li><li><a href="#planta">A planta</a></li><li><a href="#quadro">Quadro de áreas</a></li>
+      <li><a href="#implantacao">Implantação</a></li><li><a href="#glossario">Glossário</a></li><li><a href="#fontes">Fontes</a></li>
+    </ul>
+  </section>
+
+  <section class="panel" style="--c:var(--patina)">
+  <section id="usar">
+    <h2>Como usar</h2>
+    <ol>
+      <li><strong>Bloco 1, Dimensões:</strong> diga para onde a frente do terreno está voltada (clique no rumo da rosa), informe o terreno, o tipo da casa e o programa, e toque em "Concluir bloco". Só então aparecem a planta, os números e as análises.</li>
+      <li><strong>Blocos 2 a 4:</strong> estrutura e padrão de custo, energia solar e estilo. Cada bloco só vale depois de "Concluir bloco".</li>
+      <li><strong>Escolha a variante:</strong> o gerador mostra as três melhores. As abas trocam a variante e o pavimento.</li>
+      <li><strong>Vistas:</strong> Humanizada (pisos, móveis e paredes em escala), Técnica (cores por zona e medidas) e Apresentação (só a casa, para mostrar).</li>
+      <li><strong>Guarde:</strong> "Salvar" grava no banco deste navegador ou baixa o arquivo do projeto, que pode ser aberto em outro computador.</li>
+    </ol>
+  </section>
+
+  <section id="como-decide">
+    <h2>Como o gerador decide</h2>
+    <p>Ordem das decisões: primeiro o que torna a planta inválida, depois as regras que você escolheu, por fim a nota. Uma regra de cima sempre vence a de baixo.</p>
+    <div class="grid2">
+      <div class="card tint" style="--c:var(--patina)">
+        <h3>1. Zoneamento (onde fica cada parte)</h3>
+        <ul class="clean" style="--c:var(--patina)">
+          <li><strong>Bloco único:</strong> social na frente (garagem, salas), apoio no meio (cozinha, serviço, banhos) e íntimo no fundo, com corredor central (quartos dos dois lados) ou lateral (quartos de um lado só).</li>
+          <li><strong>Em L:</strong> social e apoio na frente; ala íntima numa tira lateral, liberando quintal.</li>
+          <li><strong>Em U:</strong> salas e cozinha na frente; ala íntima e ala de apoio em volta de um pátio aberto para o fundo.</li>
+          <li><strong>Em H</strong> (só térrea): ala íntima e ala social paralelas, ligadas por cozinha, serviço e galeria.</li>
+          <li><strong>Sobrado:</strong> bloco, L ou U; master e suítes sobem primeiro; o superior ocupa a projeção toda ou só as seções escolhidas.</li>
+          <li><strong>O íntimo nunca fica no poente.</strong> Quando o fundo dá para oeste (frente para leste), a casa térrea inverte o zoneamento: quartos na frente, voltados para o nascente, salas e varanda no fundo, entrada pelo corredor dos quartos e vagas descobertas no recuo. Quarto encostado numa fachada a oeste só aparece se nenhuma variante escapar (hoje acontece no sobrado e com subsolo, que ainda não invertem), e o aviso diz isso.</li>
+        </ul>
+      </div>
+      <div class="card tint" style="--c:var(--rust)">
+        <h3>2. O que elimina uma variante</h3>
+        <ul class="clean" style="--c:var(--rust)">
+          <li>Cômodo fora do lote ou dentro dos recuos (o subsolo pode ocupá-los se você marcar; jardim e rampa sempre podem).</li>
+          <li>Cômodo sem ligação com o resto da casa.</li>
+          <li>Quarto com janela a oeste: a variante só aparece se nenhuma outra escapar, e então o aviso diz isso. Com corredor central e frente para norte ou sul, um lado dos quartos fica a oeste; por isso o corredor lateral, com os quartos a leste, costuma vencer.</li>
+          <li>Sem nenhuma variante válida, o gerador mostra o motivo e o terreno mínimo.</li>
+        </ul>
+        <h3>3. Regras fixas</h3>
+        <ul class="clean" style="--c:var(--rust)">
+          <li>Nenhuma janela a menos de 1,50 m da divisa lateral ou de fundo (Código Civil, art. 1.301; texto ainda a confirmar no Planalto). Varanda ou terraço nessa faixa gera aviso.</li>
+          <li>Rooftop nunca aberto para o poente: a opção a oeste fica indisponível e as bordas a oeste recebem parede ou brise.</li>
+          <li>Janelas de cada cômodo em pontos distantes (ventilação cruzada), com área de 1/8 do piso para a luz.</li>
+          <li>Escada reta com 2 × espelho + piso entre 0,63 e 0,65 m (Blondel); espelho até 0,18 m.</li>
+          <li>Subsolo com o máximo de vagas (3,00 × 5,00 m), manobra contínua de 5 m, rampa em escala e jardim de inverno oposto à rampa; ventilação cruzada obrigatória.</li>
+          <li>Varanda de fundos (opcional): faixa aberta no trecho mais longo da fachada de fundos, com a profundidade e a largura escolhidas; a porta sai das salas (quando ficam no fundo), da suíte master, de uma suíte ou da circulação. Quando a casa mais a varanda passam do recuo de fundo, o gerador primeiro tenta uma casa mais curta (salas e apoio um pouco menores); se ainda faltar, reduz a varanda até 1,50 m, com aviso; abaixo disso, a variante fica sem varanda, com aviso, e vai para o fim da lista.</li>
+          <li>Escritório ampliado (opcional): 14 m² e lado de 3,00 m (preferência de projeto), na frente, com porta para dentro e porta própria para a varanda frontal ou para a rua; o caminho do portão social ganha um ramal até ele, sem cruzar a faixa dos carros. Com o fundo a oeste (quartos na frente), ele vai para a frente junto da entrada; no sobrado, fica no térreo.</li>
+          <li>Pé-direito: o piso a piso define a escada, o elevador e o subsolo; o pé-direito livre (do piso ao forro) tem um valor para as salas (estar, jantar, TV, sala íntima, escritório e varanda gourmet) e outro para os demais cômodos (preferência de projeto; o mínimo legal será conferido na E3). Com pavimento em cima, o livre fica no máximo no piso a piso menos 0,15 m de laje e forro; sem pavimento em cima, a cobertura sobe sobre os cômodos mais altos. A parede a mais acima de 2,60 m aparece como estimativa no card de custo, fora do total. Pé-direito duplo (opcional) só no estar: dois pisos a piso menos a laje, na térrea ou no último pavimento.</li>
+          <li>Planta humanizada: móvel só onde cabe com folga. Nada na faixa de 0,60 m em frente às portas nem no arco da folha; cama com a cabeceira longe da porta; mesa de jantar com 0,75 m livres atrás das cadeiras (0,45 m no aperto); sofá de 1,60 a 3,20 m da TV; armário e geladeira nunca na frente de janela. Paredes desenhadas com 10 cm (internas) e 15 cm (externas).</li>
+        </ul>
+      </div>
+      <div class="card tint" style="--c:var(--steel)">
+        <h3>4. A nota (de 0 a 100)</h3>
+        <ul class="clean" style="--c:var(--steel)">
+          <li>Começa em 100 e perde pontos: cômodo abaixo do mínimo ou alongado, cômodo sem janela ou porta, falta de aberturas do lado do vento (leste/sudeste) ou do lado oposto, quarto a sudoeste ou noroeste, ocupação ou permeabilidade fora do limite, corredores acima de 14 % da área.</li>
+          <li>Entre a planta e a espelhada, fica a que recebe melhor o vento e o sol (você pode trocar no botão Espelhar).</li>
+          <li>As três melhores aparecem, de preferência com formatos diferentes.</li>
+        </ul>
+      </div>
+      <div class="card tint" style="--c:var(--brass)">
+        <h3>5. O que não está verificado</h3>
+        <ul class="clean" style="--c:var(--brass)">
+          <li>Áreas e lados mínimos dos cômodos (quarto 8 m² e 2,60 m; suíte 9 m² e 2,80 m; banho 2,4 m² e 1,20 m), recuos, ocupação e permeabilidade padrão são referências de projeto, <strong>não</strong> a lei do seu município. Confira na lei de uso do solo e no Código da Cidade (Fortaleza: LC 236/2017 e LC 270/2019).</li>
+          <li>Vento e sol são indicadores simplificados, não simulação.</li>
+          <li>Estudo automático: confira acessibilidade, estrutura e legislação com um responsável técnico.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="terreno">
+    <h2>Terreno</h2>
+    <ul class="lista">
+      <li><strong>Orientação:</strong> o rumo para onde a frente (a rua) está voltada, em 8 rumos. A rosa dos ventos aparece sempre com o norte para cima; é a planta que gira.</li>
+      <li><strong>Recuos e taxa de ocupação</strong> variam por município: confira a lei de uso do solo. Os recuos laterais são o esquerdo e o direito de quem olha da rua.</li>
+      <li><strong>Janelas perto da divisa:</strong> nenhuma janela a menos de 1,50 m da divisa lateral ou de fundo (Código Civil, art. 1.301).</li>
+    </ul>
+  </section>
+
+  <section id="tipo">
+    <h2>Tipo da casa</h2>
+    <ul class="lista">
+      <li><strong>Sobrado por seções:</strong> escolha as seções com dois pavimentos; a parte com a escada sempre sobe.</li>
+      <li><strong>Levar para o superior:</strong> os quartos sobem na ordem master, suítes e quartos; escritório, sala de TV e lavanderia sobem se marcados.</li>
+      <li><strong>Escada e elevador:</strong> o elevador fica sempre no mesmo prumo; o lance do subsolo fica na lateral ou no fundo, o do superior onde for melhor.</li>
+    </ul>
+  </section>
+
+  <section id="rooftop">
+    <h2>Rooftop</h2>
+    <ul class="lista">
+      <li>O rooftop parte da caixa de escada e vai até onde você escolher: centralizado, até a fachada frontal ou até a de fundo. Clique na casa ou escolha na lista.</li>
+      <li>Ele nunca se abre para o poente (oeste): a opção a oeste fica indisponível, e as bordas a oeste recebem parede ou brise.</li>
+      <li>As áreas saem do desenho: o terraço é o que sobra da laje. Banho e área técnica ficam ao lado da caixa de escada, do lado do poente quando houver um. O spa ocupa 2,40 m do terraço.</li>
+    </ul>
+  </section>
+
+  <section id="subsolo">
+    <h2>Subsolo</h2>
+    <ul class="lista">
+      <li><strong>Vagas:</strong> o máximo que cabe (3,00 × 5,00 m cada), de preferência perpendiculares ao comprimento do lote, dos dois lados de um corredor de manobra. A quantidade de vagas só é pedida quando não há subsolo.</li>
+      <li><strong>Teto de vagas:</strong> 0 = sem limite, cabem quantas vagas o lote comportar. Com um teto, o subsolo fica do menor tamanho que acomoda essas vagas, e o custo cai.</li>
+      <li><strong>Recuos:</strong> muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</li>
+      <li><strong>Vão sem pilar:</strong> pilares só no perímetro e entre vagas; a faixa de manobra fica sempre livre.</li>
+      <li>O desenho do subsolo mostra só rampa, manobra, vagas, escada, elevador e jardim de inverno, cada um com sua cor; a rampa de 3,50 m sempre em escala.</li>
+    </ul>
+  </section>
+
+  <section id="dimensoes">
+    <h2>Dimensões dos cômodos</h2>
+    <p>Opcional. Informe largura × comprimento em metros, ou só a área. Em branco, o gerador decide. A nota mostra quanto cada variante se afasta do pedido.</p>
+  </section>
+
+  <section id="anexos">
+    <h2>Anexos no quintal</h2>
+    <ul class="lista">
+      <li><strong>Edícula de 2 pavimentos:</strong> gourmet, banho e depósito embaixo; quarto de hóspedes em cima, com o banho exatamente sobre o banho de baixo. A edícula não tem hall.</li>
+      <li><strong>Garagem:</strong> as vagas ficam no térreo, só no subsolo ou nos dois. As opções com subsolo aparecem quando o subsolo está marcado.</li>
+    </ul>
+  </section>
+
+  <section id="estrutura">
+    <h2>Sistema estrutural</h2>
+    <ul class="lista">
+      <li>Cada sistema traz a norma, o vão econômico e o vão máximo. "Vãos maiores" tira o pilar intermediário das salas.</li>
+      <li><strong>Balanço das varandas:</strong> 0 = sem balanço. O limite usual depende do sistema.</li>
+    </ul>
+  </section>
+
+  <section id="custo">
+    <h2>Padrão e custo da obra</h2>
+    <ul class="lista">
+      <li>O custo parte do CUB do Sinduscon-CE do padrão escolhido (R1-B, R1-N ou R1-A) e soma fatores de local, mar, condomínio e estrutura. Os fatores são estimativa.</li>
+      <li><strong>CUB desonerado:</strong> vale só para construtoras das CNAE 412, 432, 433 e 439 (Lei 12.546/2011).</li>
+      <li><strong>Empreitada:</strong> inclui o BDI da construtora. <strong>INCC-M:</strong> projeta o valor do mês do CUB até hoje.</li>
+      <li>Os valores ficam neste navegador e podem ser atualizados, ajustados ou exportados no bloco "Valores e atualização".</li>
+    </ul>
+  </section>
+
+  <section id="solar">
+    <h2>Energia solar básica</h2>
+    <p>Projeção de custo do sistema básico: portão automático, iluminação interna e externa, câmeras de segurança, geladeira, um ar-condicionado e ventiladores, com bateria para seguirem ligados quando a rede cai. A geração usa a irradiação da NASA POWER; a compensação segue a Lei 14.300/2022.</p>
+  </section>
+
+  <section id="conforto">
+    <h2>Conforto passivo: torre de ar e brises</h2>
+    <ul class="lista">
+      <li><strong>Torre de ar:</strong> na zona bioclimática 8, o vento rende mais que o efeito chaminé. Vazão por efeito chaminé Q = Cd · A · √(2 · g · H · ΔT / T) e por vento Q = Cd · A · v · √ΔCp, com Cd = 0,6. Os tipos, as medidas e as referências estão no <a href="../torre/">dossiê das torres</a>.</li>
+      <li><strong>Brises:</strong> o tipo e o ângulo saem da geometria solar de Fortaleza. O estudo procura a maior vista livre a até 3 pontos do melhor sombreamento, e a planta mostra o brise em linha tracejada.</li>
+    </ul>
+  </section>
+
+  <section id="sol-vento">
+    <h2>Sol e vento ao longo do ano</h2>
+    <ul class="lista">
+      <li><strong>Sol:</strong> geometria solar de Fortaleza (3,73° S) no dia 21 de cada mês, pela hora solar, só a radiação direta. Sombras da casa no lote; faixas nas fachadas ao sol; manchas de sol no piso pelas janelas, do peitoril à verga.</li>
+      <li><strong>Vento:</strong> média de 2015 a 2024 do ERA5 (Open-Meteo, CC BY 4.0), por mês, com a rosa dos ventos e a velocidade por hora. As linhas de corrente são ilustrativas: não é simulação (CFD).</li>
+      <li><strong>Janelas de entrada e de saída:</strong> entrada é a janela cuja face recebe o vento (até 67,5° da direção dele); saída é a da face oposta.</li>
+    </ul>
+  </section>
+
+  <section id="planta">
+    <h2>A planta</h2>
+    <ul class="lista">
+      <li><strong>Humanizada:</strong> pisos com textura, móveis em escala e paredes de 10 cm (internas) e 15 cm (externas).</li>
+      <li><strong>Técnica:</strong> cores por zona (íntimo, banhos e molhados, social, apoio e serviço, circulação, garagem, varandas e terraços, pátios e jardins), medidas de cada cômodo e cama mínima.</li>
+      <li><strong>Apresentação:</strong> só a casa, humanizada, sem lote, cotas, rosa e setas de vento.</li>
+      <li><strong>Espelhar</strong> inverte a planta da esquerda para a direita. <strong>Baixar</strong> gera o pavimento atual em SVG ou PNG (2×).</li>
+    </ul>
+  </section>
+
+  <section id="quadro">
+    <h2>Quadro de áreas</h2>
+    <ul class="lista">
+      <li>Medidas pelo eixo das paredes. Área fechada por pavimento e total, varandas e terraços à parte, pé-direito e volume.</li>
+      <li><strong>Janela:</strong> área obtida e exigida. Iluminação de 1/8 da área do piso; ventilação de 1/16 (metade de uma janela de correr).</li>
+    </ul>
+  </section>
+
+  <section id="implantacao">
+    <h2>Implantação e terreno mínimo</h2>
+    <p>O terreno mínimo é calculado com os mesmos recuos e a mesma taxa de ocupação, procurando a menor área em que alguma variante cabe sem violar o terreno.</p>
+  </section>
+
+  <section id="glossario">
+    <h2>Glossário</h2>
+    <dl>
+      <dt>Barlavento</dt><dd>O lado de onde vem o vento. Em Fortaleza, leste e sudeste.</dd>
+      <dt>Sotavento</dt><dd>O lado para onde o vento vai, oposto ao barlavento.</dd>
+      <dt>Ventilação cruzada</dt><dd>Ar que entra por uma janela e sai por outra, em faces diferentes da casa.</dd>
+      <dt>Poente e nascente</dt><dd>Oeste e leste. O sol do poente esquenta mais, por isso os quartos nunca ficam a oeste.</dd>
+      <dt>Brise</dt><dd>Lâminas fixas ou móveis na frente da janela que barram o sol direto e deixam passar luz e vento.</dd>
+      <dt>Torre de ar</dt><dd>Volume alto que puxa o ar quente para fora (efeito chaminé) ou capta o vento do alto.</dd>
+      <dt>Pé-direito</dt><dd>Altura livre do piso ao forro. Piso a piso é do piso de um pavimento ao piso do outro.</dd>
+      <dt>Recuo</dt><dd>Distância obrigatória entre a casa e a divisa do lote.</dd>
+      <dt>Taxa de ocupação</dt><dd>Projeção da casa dividida pela área do lote.</dd>
+      <dt>Permeabilidade</dt><dd>Parte do lote sem piso impermeável, onde a chuva infiltra.</dd>
+      <dt>Peitoril e verga</dt><dd>Altura da base e do topo da janela, medidas do piso.</dd>
+      <dt>CUB</dt><dd>Custo unitário básico da construção por m², publicado todo mês pelo Sinduscon.</dd>
+      <dt>Rooftop</dt><dd>Terraço de uso na cobertura.</dd>
+    </dl>
+  </section>
+
+  <section id="fontes">
+    <h2>Fontes</h2>
+    <ul class="lista">
+      <li>Código Civil, art. 1.301 (janela a 1,50 m da divisa).</li>
+      <li>Fortaleza: LC 236/2017 e LC 270/2019 (uso do solo e Código da Cidade); conferir a lei do seu município.</li>
+      <li>ABNT NBR 9050 (acessibilidade), na opção de casa acessível.</li>
+      <li>Sinduscon-CE (CUB), FGV (INCC-M) e Lei 12.546/2011 (desoneração).</li>
+      <li>NASA POWER (irradiação solar) e Lei 14.300/2022 (geração distribuída).</li>
+      <li>Open-Meteo Historical Weather API (reanálise ERA5, ECMWF/Copernicus), dados horários a 10 m de 2015 a 2024, CC BY 4.0. Weather data by Open-Meteo.com.</li>
+    </ul>
+  </section>
+  </section>
+</main>
+<footer><div>Estudos conceituais, sem valor de projeto executivo.</div></footer>
+</body>
+</html>

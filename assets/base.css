@@ -169,6 +169,15 @@ footer{border-top:1px solid var(--line);color:var(--ink-3);font-size:13px;paddin
 
 #tip{position:fixed;z-index:60;max-width:300px;white-space:pre-line;background:var(--ink);color:var(--bg);font:400 12.5px/1.45 'IBM Plex Sans',system-ui,sans-serif;padding:8px 11px;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.22);pointer-events:none;opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s;left:0;top:0}
 #tip.on{opacity:1;transform:none}
+/* ajuda "?" (V1 tela limpa): ícone pequeno no lugar das notas longas */
+.ajuda{width:18px;height:18px;padding:0;border-radius:50%;border:1px solid var(--ink-3);background:transparent;color:var(--ink-3);font:600 11px/1 'IBM Plex Sans',system-ui,sans-serif;display:inline-grid;place-items:center;vertical-align:middle;cursor:help;flex:none;margin-left:4px;transition:color .12s,border-color .12s}
+.ajuda:hover,.ajuda[aria-expanded="true"]{color:var(--ink);border-color:var(--ink)}
+.ajuda:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+#ajudaPop{position:fixed;z-index:61;max-width:320px;background:var(--ink);color:var(--bg);font:400 12.5px/1.5 'IBM Plex Sans',system-ui,sans-serif;padding:9px 12px;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.22);opacity:0;pointer-events:none;transform:translateY(3px);transition:opacity .12s,transform .12s;left:0;top:0}
+#ajudaPop.on{opacity:1;pointer-events:auto;transform:none}
+#ajudaPop p{margin:0}
+#ajudaPop a{display:inline-block;margin-top:6px;color:var(--bg);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+@media (prefers-reduced-motion:reduce){#ajudaPop,.ajuda{transition:none}}
 
 svg .z-suite{fill:var(--suite-f);stroke:var(--suite-s);stroke-width:.6}
 svg .z-social{fill:var(--social-f);stroke:var(--social-s);stroke-width:.6}
@@ -348,7 +357,7 @@ header.bar .crumb{color:var(--hdr-ink-2)}
 header.bar .crumb .chip{background:var(--hdr-btn);border-color:var(--hdr-line);color:var(--hdr-ink)}
 header.bar .btn,header.bar .back{background:var(--hdr-btn);border-color:var(--hdr-line);color:var(--hdr-ink)}
 header.bar .btn:hover,header.bar .back:hover{border-color:var(--hdr-ink-2)}
-:root{--nav-inicio:#A9D98A;--nav-gerador:#6BC7B6;--nav-banco:#C7A8F0;--nav-tema:#F2BE5C}
+:root{--nav-inicio:#A9D98A;--nav-gerador:#6BC7B6;--nav-banco:#C7A8F0;--nav-manual:#7EC9F2;--nav-tema:#F2BE5C}
 header.bar .nav-b{color:var(--hdr-ink-2)}
 header.bar .nav-b:hover,header.bar .nav-b[aria-current="page"]{color:var(--hdr-ink)}
 /* V3: no tema escuro, cards e indicadores levemente tingidos pela cor da seção (--c) */
