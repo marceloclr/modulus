@@ -123,3 +123,13 @@ A opção B da casa simétrica fica parada até o usuário escolher entre a vers
 - Taxa de quadros da animação medida no CDP: meta de ≥ 50 fps com 600 partículas.
 - Firefox headless na J6.
 - Relatório curto em português ao fim de cada etapa e prompt de continuidade em `~/.claude/continuidade/` e `docs/CONTINUIDADE.md`.
+
+## Decisões de 13/10/2026 (depois da V0)
+- **V0:** protótipo publicado em https://claude.ai/artifact/Mtxj5tp2NLonLdp7ZPG5Ci (versão 2).
+- **Sol e vento dentro da casa (pedido do usuário, viável e demonstrado no protótipo):**
+  - **V2:** manchas de sol no piso por janela, do peitoril à verga (`Insolacao.luzPavimento` já calcula; com `ALTURAS` e o fator de brise), mais o feixe da janela até a mancha e a área de sol por cômodo no painel. Melhorias: espessura da parede (vão) e a mancha que sobe na parede oposta quando passa do cômodo.
+  - **V3:** caminho do ar da janela de entrada, pelas portas (`p.portas`, largura × 2,10 m; vãos × 2,40 m), até a de saída (menor caminho no grafo de portas); vazão por aberturas em série, Q = Cd · A_ef · U · √ΔCp (BS 5925, ASHRAE Fundamentals cap. 16), Cd = 0,6, Cp +0,6·cos(incidência) / −0,3, U do ERA5 pelo perfil suburbano do ASHRAE (≈ 0,55 × U10) com fator de abrigo 0,5; cômodos de uma face só por 0,025·A·U; renovações por hora com faixas (forte ≥ 30, bom 10–30, fraco 3–10). Função pura `Vento.interno(v, q, p, dirDe, U10)` com testes; as partículas dentro da casa ficam mais rápidas nas aberturas estreitas.
+- **Casa simétrica (etapa M, depois da V3 e antes da J2):**
+  - **A, C e D:** cozinha **integrada** à sala, com vão livre e bancada no eixo; modelo com vãos sem folha (`roomsACD`), humanizada, técnica, corte, textos e imagens.
+  - **B:** proposta principal, com **hall só ao sul** (sala única longitudinal a leste com 29,9 m², cozinha de 17,0 m², hall de 4,7 m²); também ligar a circulação oeste ao jantar e à despensa e tirar as portas dos quartos de dentro do estar e do jantar.
+  - Conferir com `node tools/percurso-manual.mjs` (achados altos em zero).
