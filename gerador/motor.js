@@ -61,7 +61,7 @@ const DIMENSIONAVEIS = ['quarto','suite','master','banhoSuite','closet','banhoSo
 const PADRAO = {
   frente:12, fundo:30, recFrente:5, recLatE:1.5, recLatD:1.5, recFundo:3, taxa:60, orientacao:'',
   tipo:'terrea', formato:'auto', peDireito:3.0, pdSalas:2.8, pdDemais:2.6, estarDuplo:false,
-  quartos:3, suites:1, master:true, tamanho:'medio', poenteLimite:'amplo',
+  quartos:3, suites:1, master:true, tamanho:'medio', poenteLimite:'amplo', bp1:'auto', bp2:'auto', bp3:'auto', bp4:'auto', bp5:'auto', bp6:'auto',
   banhosSociais:1, lavabo:false,
   estar:true, estarTipo:'tradicional', jantar:true, tv:false, escritorio:false, escritorioAmpliado:false,
   cozinha:'aberta', servico:true, despensa:false,
@@ -94,6 +94,7 @@ function normaliza(p){
   q.vaoMax = clamp(q.vaoMax || 10, 5, 20);
   if(!['frente','centro','fundo'].includes(q.rtPos)) q.rtPos = 'centro';
   if(!['amplo','oeste'].includes(q.poenteLimite)) q.poenteLimite = 'amplo';
+  for(let i = 1; i <= 6; i++) if(!['auto','N','S','L','O'].includes(q['bp' + i])) q['bp' + i] = 'auto';
   // rooftop (E2.1): as áreas em m² deram lugar a itens marcados; links e arquivos antigos com m² viram "marcado se > 0"
   for(const [k, a] of [['rtTecnica','rtTecnicaA'], ['rtGourmet','rtGourmetA'], ['rtVaranda','rtVarandaA']]) if(p && p[k] === undefined && p[a] !== undefined) q[k] = +p[a] > 0;
   for(const a of ['rtTecnicaA','rtGourmetA','rtVarandaA','rtTerracoA','rtArea']) delete q[a];
@@ -179,7 +180,7 @@ function programa(q){
   for(let i=0;i<nS;i++){
     const m = q.master && i===0;
     mods.push({tipo: m?'master':'suite', id: ++id, fixo: !!(q.dims && q.dims[m?'master':'suite'] && q.dims[m?'master':'suite'].w),
-      aq: alvo(m?'master':'suite', q), ab: alvo(m?'banhoMaster':'banhoSuite', q), ac: alvo(m?'closetMaster':'closet', q)});
+      aq: alvo(m?'master':'suite', q), ab: alvo(m?'banhoMaster':'banhoSuite', q), ac: alvo(m?'closetMaster':'closet', q), bp: q['bp' + (i+1)] || 'auto'});
   }
   for(let i=0;i<nQ;i++) mods.push({tipo:'quarto', id: ++id, aq: alvo('quarto', q), fixo: !!(q.dims && q.dims.quarto && q.dims.quarto.w), acess: q.acessivel});
   let bs = q.banhosSociais;
@@ -1530,6 +1531,75 @@ function quartosNoPoente(v, q, espelho, lim){
   }
   return out;
 }
+/* Banho de cada suíte no rumo pedido (13/10/2026). O módulo (quarto + banho + closet) é espelhado dentro do próprio
+   retângulo, no sentido do comprimento, quando isso põe o banho mais perto do rumo; o lado leste/oeste fica a cargo da escolha
+   do espelhamento (avaliaBanhos). Roda antes das aberturas, para portas e janelas saírem do desenho final. */
+const AZ_BP = {N:0, L:90, S:180, O:270};
+/* Quanto o banho está deslocado, a partir do centro do quarto, no rumo A (m). +x da casa aponta para F + 90° (F + 270° espelhada)
+   e +y para F + 180°; em (leste, norte), um rumo a vale (sen a, cos a). */
+function avancoBanho(B, Q, A, F, esp){
+  const dx = (B.x0 + B.x1)/2 - (Q.x0 + Q.x1)/2, dy = (B.y0 + B.y1)/2 - (Q.y0 + Q.y1)/2, r = g => g * Math.PI / 180;
+  const ax = r(esp ? F + 270 : F + 90), ay = r(F + 180), e = dx*Math.sin(ax) + dy*Math.sin(ay), n = dx*Math.cos(ax) + dy*Math.cos(ay);
+  return e*Math.sin(r(A)) + n*Math.cos(r(A));
+}
+/* Área de serviço para o poente (13/10/2026): se ela não toca o poente e um cômodo de apoio que toca pode trocar de lugar com
+   ela, os dois trocam de retângulo. Vale só se os dois continuam com área e lado mínimos, o serviço encostado na cozinha ou numa
+   circulação e o outro cômodo com acesso (PREF). O espelhamento considerado é o que tira mais quartos do poente. */
+const TROCA_SERVICO = ['despensa','deposito','rouparia','lavabo','banhoSocial','cozinha'];
+function ajustaServico(v, q){
+  const F = RUMOS[q.orientacao]; if(F === undefined || q.invCozinhaServico) return;   // a inversão pedida pelo usuário vence
+  const esp = quartosNoPoente(v, q, true).length < quartosNoPoente(v, q, false).length;
+  const cabe = (tipo, r) => { const T = TIPOS[tipo], w = r.x1 - r.x0, h = r.y1 - r.y0; return (!T.min || w*h >= T.min - 0.01) && (!T.lado || Math.min(w, h) >= T.lado - 0.01); };
+  for(const p of v.pav){ if(p.anexo || p.nome === 'Subsolo' || p.nome === 'Rooftop') continue;
+    const fe = p.salas.filter(s => !TIPOS[s.tipo].aberto), poente = s => trechosExternos(s, fe).some(e => noPoenteQ(rumoFace(e.lado, F, esp), q, 67.5));
+    for(const S of p.salas.filter(s => s.tipo === 'servico')){
+      if(poente(S) || !fe.some(poente)) continue;
+      const ligado = (r, tipos, menos) => p.salas.some(o => o !== menos && tipos.includes(o.tipo) && (() => { const sh = compartilhado(r, o); return sh && sh.t1 - sh.t0 >= 0.85; })());
+      const R = p.salas.filter(o => TROCA_SERVICO.includes(o.tipo) && !o.nucleo && poente(o) && cabe('servico', o) && cabe(o.tipo, S)).find(o => {
+        const rS = {x0:o.x0, y0:o.y0, x1:o.x1, y1:o.y1}, rO = {x0:S.x0, y0:S.y0, x1:S.x1, y1:S.y1};
+        const okS = o.tipo === 'cozinha' ? ligado(rS, ['circ','hall','galeria','jantar'], o) : ligado(rS, ['cozinha','hall','circ','galeria'], o);
+        const okO = o.tipo === 'cozinha' ? ligado(rO, ['jantar','estar','hall','galeria'], S) : ligado(rO, (PREF[o.tipo] || []).concat(o.tipo === 'despensa' ? ['cozinha'] : []), S);
+        return okS && okO; });
+      if(R){
+        // troca em teste: as portas do pavimento são refeitas; se algum cômodo ficar solto, desfaz
+        const soltos = () => aberturas(p, q, p.nome==='Térreo', esp, v.W).avisos.filter(x => /não se liga ao resto da casa|não tem porta de entrada/.test(x)).length;
+        const antes = soltos(), a = {x0:S.x0, y0:S.y0, x1:S.x1, y1:S.y1}, b = {x0:R.x0, y0:R.y0, x1:R.x1, y1:R.y1};
+        Object.assign(S, b); Object.assign(R, a);
+        if(soltos() > antes){ Object.assign(S, a); Object.assign(R, b); } else v.servicoPoente = true;
+      }
+    }
+  }
+}
+function ajustaBanhos(v, q){
+  const F = RUMOS[q.orientacao]; if(F === undefined) return;
+  for(const p of v.pav){ if(p.anexo || p.nome === 'Subsolo' || p.nome === 'Rooftop') continue;
+    for(let k = 1; k <= 6; k++){ const bp = q['bp' + k]; if(!bp || bp === 'auto') continue;
+      const mod = p.salas.filter(s => s.mod === k), Q = mod.find(s => s.tipo === 'suite' || s.tipo === 'master'), B = mod.find(s => s.tipo === 'banhoSuite' || s.tipo === 'banhoMaster');
+      if(!Q || !B) continue;
+      // espelha o módulo no sentido do comprimento (o lado do corredor não muda) se isso levar o banho para o rumo pedido
+      const eixoY = B.y0 >= Q.y1 - 1e-6 || B.y1 <= Q.y0 + 1e-6;
+      const bx0 = Math.min(...mod.map(s => s.x0)), bx1 = Math.max(...mod.map(s => s.x1)), by0 = Math.min(...mod.map(s => s.y0)), by1 = Math.max(...mod.map(s => s.y1));
+      const vira = s => eixoY ? {y0:r2(by0 + by1 - s.y1), y1:r2(by0 + by1 - s.y0)} : {x0:r2(bx0 + bx1 - s.x1), x1:r2(bx0 + bx1 - s.x0)};
+      const A = AZ_BP[bp], antes = avancoBanho(B, Q, A, F, false), depois = avancoBanho(Object.assign({}, B, vira(B)), Object.assign({}, Q, vira(Q)), A, F, false);
+      if(depois > antes + 0.05) for(const s of mod) Object.assign(s, vira(s));
+    }
+  }
+}
+function avaliaBanhos(v, q, esp){
+  const F = RUMOS[q.orientacao], out = {pen:0, av:[]}; if(F === undefined) return out;
+  for(const p of v.pav){ if(p.anexo || p.nome === 'Subsolo' || p.nome === 'Rooftop') continue;
+    for(let k = 1; k <= 6; k++){ const bp = q['bp' + k]; if(!bp || bp === 'auto') continue;
+      const B = p.salas.find(s => s.mod === k && (s.tipo === 'banhoSuite' || s.tipo === 'banhoMaster')), Q = p.salas.find(s => s.mod === k && (s.tipo === 'suite' || s.tipo === 'master'));
+      if(!B || !Q) continue;
+      const a = avancoBanho(B, Q, AZ_BP[bp], F, esp);
+      if(a < 0.25){ out.pen += 5;
+        const melhor = ['N','L','S','O'].sort((x, y) => avancoBanho(B, Q, AZ_BP[y], F, esp) - avancoBanho(B, Q, AZ_BP[x], F, esp))[0];
+        out.av.push(`${p.nome}: o banho da ${rotulo(Q).toLowerCase()} ficou a ${NOMES_RUMO[melhor].toLowerCase()} do quarto; o rumo pedido (${NOMES_RUMO[bp].toLowerCase()}) não coube.`); }
+    }
+  }
+  return out;
+}
+
 function avaliaSol(v, q, espelho){
   const F = RUMOS[q.orientacao]; if(F === undefined) return {pen:0, av:[]};
   let pen = 0; const av = [];
@@ -1546,6 +1616,12 @@ function avaliaSol(v, q, espelho){
       else if(cls.includes(2)){ const az = azs[cls.indexOf(2)]; pen += 6; av.push(`${nome} com janela voltada para ${NOMES_RUMO[rumoDe(az)].toLowerCase()}: sol da tarde em parte do ano.`); }
       if(!cls.includes(0)) pen += 3;   // prioridade ao nascente
     }
+  }
+  // área de serviço para o poente, total ou parcialmente (13/10/2026): é ela que recebe o sol da tarde, no lugar de um cômodo de permanência
+  for(const p of v.pav){ if(p.anexo || p.nome === 'Subsolo' || p.nome === 'Rooftop') continue;
+    const srv = p.salas.filter(s => s.tipo === 'servico'); if(!srv.length) continue;
+    const fe = p.salas.filter(s => !TIPOS[s.tipo].aberto), poente = s => trechosExternos(s, fe).some(e => noPoenteQ(rumoFace(e.lado, F, espelho), q, 67.5));
+    if(fe.some(poente) && !srv.some(poente)){ pen += 4; av.push(`${p.nome}: área de serviço fora do poente; ela protegeria os cômodos de permanência do sol da tarde.`); }
   }
   return {pen, av};
 }
@@ -1653,6 +1729,7 @@ function avalia(v, q){
   const abrir = esp => { const avs = []; for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo', esp, v.W); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas;
     p.aberturasPor = Object.assign(p.aberturasPor || {}, {[esp ? 'espelhada' : 'normal']: {portas:ab.portas, vaos:ab.vaos, janelas:ab.janelas}}); avs.push(...ab.avisos); } return avs; };
   for(const p of v.pav) delete p.aberturasPor;
+  ajustaServico(v, q); ajustaBanhos(v, q);
   let ori = null;
   if(RUMOS[q.orientacao] === undefined){
     // sem orientação, o sol não conta; com recuos iguais as janelas não dependem do espelho: abre uma vez e compara só o vento
@@ -1662,8 +1739,8 @@ function avalia(v, q){
     else for(const p of v.pav) if(p.aberturasPor) p.aberturasPor.espelhada = p.aberturasPor.normal;
   } else {
     for(const esp of [false, true]){
-      const avAb = abrir(esp), vt = avaliaVento(v, q, esp), sl = avaliaSol(v, q, esp), pn = 6*avAb.length + vt.pen + sl.pen + 25*quartosNoPoente(v, q, esp).length;
-      if(!ori || pn < ori.pn) ori = {esp, avAb, vt, sl, pn};
+      const avAb = abrir(esp), vt = avaliaVento(v, q, esp), sl = avaliaSol(v, q, esp), bn = avaliaBanhos(v, q, esp), pn = 6*avAb.length + vt.pen + sl.pen + bn.pen + 25*quartosNoPoente(v, q, esp).length;
+      if(!ori || pn < ori.pn) ori = {esp, avAb, vt, sl, bn, pn};
     }
     if(!ori.esp){ abrir(false); avaliaSol(v, q, false); }   // a última rodada foi a espelhada: refaz a escolhida
   }   // a última rodada foi a espelhada: refaz as aberturas da escolhida
@@ -1705,7 +1782,7 @@ function avalia(v, q){
   if(circ/tot > 0.14) pen += 60*(circ/tot-0.14);
   // vento de L/SE: compara a planta normal com a espelhada e sugere a melhor
   v.espelharVento = ori.esp;
-  pen += ori.vt.pen + ori.sl.pen; av.push(...ori.vt.av, ...ori.sl.av);
+  pen += ori.vt.pen + ori.sl.pen + (ori.bn ? ori.bn.pen : 0); av.push(...ori.vt.av, ...ori.sl.av, ...(ori.bn ? ori.bn.av : []));
   if(v.espelharVento) av.push(RUMOS[q.orientacao] !== undefined ? 'A versão espelhada recebe melhor o vento de leste/sudeste e o sol; ela já aparece espelhada.' : 'A versão espelhada recebe melhor o vento de leste/sudeste; ela já aparece espelhada.');
   v.score = Math.max(0, Math.round(100 - pen));
   v.avisos = (v.avisos||[]).concat(av);

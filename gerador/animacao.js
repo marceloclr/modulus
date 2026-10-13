@@ -34,9 +34,11 @@ function casca(){
       <button type="button" class="btn" id="svAno" aria-pressed="false">Percorrer o ano</button>
     </div>
   </div>
+  <div class="sv-regua-mes">
+    <div class="sv-meses" role="group" aria-label="Mês">${CURTO.map((c, i) => `<button type="button" class="sv-mes" data-mes="${i+1}" aria-label="${MESES[i]}">${c}</button>`).join('')}</div>
+  </div>
   <div class="sv-corpo"><div class="sv-palco"><div class="sv-planta" id="svPlanta"></div><canvas class="sv-cv" id="svCv" aria-hidden="true"></canvas></div><div class="sv-painel" id="svPainel" aria-live="polite"></div></div>
   <div class="sv-regua2">
-    <div class="sv-meses" role="group" aria-label="Mês">${CURTO.map((c, i) => `<button type="button" class="sv-mes" data-mes="${i+1}" aria-label="${MESES[i]}">${c}</button>`).join('')}</div>
     <div class="sv-horas2">
       <button type="button" class="btn sv-play" id="svPlay" aria-label="Animar o dia" aria-pressed="false">▶</button>
       <div class="sv-trilho2"><svg id="svCurva" viewBox="0 0 600 46" preserveAspectRatio="none" aria-hidden="true"></svg>
