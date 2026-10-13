@@ -1091,16 +1091,17 @@ function pImplA(){
 
 /* ---------- Opção B: geometria ----------
    x a partir da fachada oeste, d a partir da frente sul. Suítes: banho 2,40 × 2,50 e closet 2,40 × 2,20.
-   Social: faixa oeste de 1,65 m (circulação, WC acessível, lavanderia) e estar, cozinha e jantar com 5,35 m. */
+   Social (13/10/2026, miolo longitudinal): faixa oeste de 1,65 m (circulação, WC acessível, lavanderia); hall e cozinha integrada
+   com 2,25 m; sala única de estar e jantar com 3,10 m a leste. A visita vai do vestíbulo ao hall e à sala sem passar pela cozinha. */
 var BG={L:22.65,s1:6.5,c0:9.45,c1:13.2,fb:1.65,wc0:7.5,wc1:9.95,ax:11.325,t0:10.575,t1:12.075};
 var B2={id:'B2',nome:'Opção B · simetria transversal',o:ORI.S,Wb:7,L:BG.L,vseD:1.8,vnoD:1.8,
   amb:[['Quarto','3,40 × 4,70 m',2,15.98,'suite','Suíte'],['Banho acessível','2,40 × 2,50 m',2,6.00,'suite','Suíte'],['Closet','2,40 × 2,20 m',2,5.28,'suite','Suíte'],
-       ['Vestíbulo','1,20 × 4,70 m',1,5.64,'social','Social'],['Estar','5,35 × 2,95 m',1,15.7825,'social','Social'],['Cozinha','5,35 × 3,75 m',1,20.0625,'social','Social'],['Jantar','5,35 × 2,95 m',1,15.7825,'social','Social'],
+       ['Vestíbulo','1,20 × 4,70 m',1,5.64,'social','Social'],['Estar e jantar','3,10 × 9,65 m',1,29.915,'social','Social'],['Cozinha integrada','2,25 × 7,55 m',1,16.9875,'social','Social'],['Hall','2,25 × 2,10 m',1,4.725,'social','Social'],
        ['Circulações','1,65 × 1,00 + 1,65 × 2,95 m',1,6.5175,'social','Social'],
        ['WC social acessível','1,65 × 2,45 m',1,4.0425,'apoio','Apoio'],['Lavanderia','1,65 × 3,25 m',1,5.3625,'apoio','Apoio'],['Despensa e depósito','1,20 × 4,70 m',1,5.64,'apoio','Apoio']]};
 (function(){var z={suite:0,social:0,apoio:0}; B2.amb.forEach(function(r){z[r[4]]+=r[2]*r[3];});
   B2.vse=7*1.8; B2.vno=7*1.8; B2.nucleo=z.suite+z.social+z.apoio; B2.nucD=BG.L-3.6; B2.cob=7*BG.L;
-  B2.zonas=[z.suite,z.social,z.apoio,B2.vse+B2.vno]; B2.suiteTot=15.98+6.00+5.28; B2.sala=2*15.7825; B2.coz=20.0625;})();
+  B2.zonas=[z.suite,z.social,z.apoio,B2.vse+B2.vno]; B2.suiteTot=15.98+6.00+5.28; B2.sala=29.915; B2.coz=16.9875;})();
 function bMap(m){return {a0:1.275,su:1,d0:m?BG.L-4.225:4.225,sv:m?1:-1};}
 var BWC={a0:0.075,su:1,d0:7.575,sv:1};
 
@@ -1119,9 +1120,9 @@ function planB(){
   R(0,L-1.8,7,L,'z-var','Varanda norte, 7,00 × 1,80 m = 12,60 m², com churrasqueira, varal e mesa');
   R(0,1.8,1.2,6.5,'z-social','Vestíbulo de entrada, 1,20 × 4,70 m = 5,64 m², sapateira embutida');
   R(0,L-6.5,1.2,L-1.8,'z-apoio','Despensa e depósito, 1,20 × 4,70 m = 5,64 m², com prateleiras');
-  R(fb,6.5,7,9.45,'z-social','Estar, 5,35 × 2,95 m = 15,78 m²');
-  R(fb,9.45,7,13.2,'z-social','Cozinha, 5,35 × 3,75 m = 20,06 m²');
-  R(fb,13.2,7,16.15,'z-social','Jantar, 5,35 × 2,95 m = 15,78 m²');
+  R(fb,6.5,3.9,8.6,'z-social','Hall, 2,25 × 2,10 m = 4,73 m²');
+  R(3.9,6.5,7,16.15,'z-social','Sala de estar e jantar, 3,10 × 9,65 m = 29,91 m²');
+  R(fb,8.6,3.9,16.15,'z-social','Cozinha integrada, 2,25 × 7,55 m = 16,99 m², bancada de 3,00 m voltada para a sala');
   R(0,6.5,fb,7.5,'z-social','Circulação, 1,65 × 1,00 m');
   R(0,7.5,fb,9.95,'z-apoio','WC social acessível, 1,65 × 2,45 m = 4,04 m²');
   R(0,9.95,fb,13.2,'z-apoio','Lavanderia, 1,65 × 3,25 m = 5,36 m², com máquina e tanque');
@@ -1140,7 +1141,7 @@ function planB(){
     Ln(1.45,D(1.8),2.05,D(1.8),'win','J3, maxim-ar de 0,60 × 0,60 m sobre a bacia'); Ln(2.4,D(1.8),3.4,D(1.8),'hi','J4, basculante alto do banho');
     Ln(0.15,D(1.8),1.15,D(1.8),'dr');
     Ln(0.2,D(6.5),1.0,D(6.5),'dr');
-    Ln(3.9,D(6.5),4.7,D(6.5),'dr');
+    Ln(5.6,D(6.5),6.4,D(6.5),'dr');
     Ln(3.6,D(5.0),3.6,D(5.8),'dr');
     Ln(7,D(6.975),7,D(8.975),'win'); Ln(-0.23,D(7.0),-0.23,D(8.6),'hi');
     var tc=D(5.4); R(2.0,tc-0.4,2.8,tc+0.4,'z-torre','Torre T'+(m?'3':'2')+', 0,80 × 0,80 m, sobre o closet, abertura a oeste'); Tx(2.4,tc,m?'T3':'T2'); Ln(2.0,tc-0.4,2.0,tc+0.4,'op');
@@ -1148,20 +1149,21 @@ function planB(){
   });
   emitFix(BLY.B_wc,BWC,false,E);
   Ln(0,9.15,0,9.75,'win','J3, maxim-ar de 0,60 × 0,60 m sobre a bacia');
-  Ln(fb,11.0,fb,11.8,'dr'); Ln(0,10.8,0,12.0,'win'); Ln(0,L-4.5,0,L-3.9,'win');
+  Ln(fb,11.0,fb,11.8,'dr'); Ln(fb,14.35,fb,15.15,'dr','Cozinha → circulação de serviço, 0,80 m');
+  Ln(fb,6.5,fb,7.5,'vl','Vão livre de 1,00 m, circulação → hall'); Ln(3.9,6.7,3.9,8.4,'vl','Vão livre de 1,70 m, hall → sala'); Ln(3.9,10.4,3.9,15.4,'vl','Vão livre de 5,00 m entre a cozinha e a sala, com a bancada de 3,00 m'); Ln(0,10.8,0,12.0,'win'); Ln(0,L-4.5,0,L-3.9,'win');
   Ln(7,10.325,7,12.325,'win');
-  R(3.575,BG.t0,5.075,BG.t1,'z-torre','Torre T1, 1,50 × 1,50 m, sobre a cozinha, abertura a oeste'); Tx(4.325,BG.ax,'T1'); Ln(3.575,BG.t0,3.575,BG.t1,'op');
+  R(3.15,BG.t0,4.65,BG.t1,'z-torre','Torre T1, 1,50 × 1,50 m, sobre a divisa aberta entre a cozinha e a sala, abertura a oeste'); Tx(3.9,BG.ax,'T1'); Ln(3.15,BG.t0,3.15,BG.t1,'op');
   o.push('<line class="axis" x1="'+X(7.4)+'" y1="'+Y(BG.ax)+'" x2="'+X(-0.4)+'" y2="'+Y(BG.ax)+'"><title>Eixo de simetria transversal</title></line>');
   Pth([[8.4,5.0],[6.0,5.0],[4.4,2.6],[4.4,0.9]]);
   Pth([[8.4,mir(5.0)],[6.0,mir(5.0)],[4.4,mir(2.6)],[4.4,mir(0.9)]]);
-  Pth([[8.4,7.3],[-1.0,7.3]]); Pth([[8.4,mir(7.3)],[-1.0,mir(7.3)]]); Pth([[8.4,BG.ax],[5.2,BG.ax]]);
+  Pth([[8.4,7.3],[-1.0,7.3]]); Pth([[8.4,14.75],[-1.0,14.75]]); Pth([[8.4,BG.ax],[4.8,BG.ax]]);
   o.push('<text class="tx" x="'+X(3.5)+'" y="16" text-anchor="middle">Rua, sul</text>');
   Tx(5.8,0.9,'Var. S'); Tx(5.6,L-0.9,'Varanda N');
   T2(5.0,4.9,'Quarto','16,0 m²'); T2(5.0,mir(4.9),'Quarto','16,0 m²');
   Tx(2.4,6.15,'Closet'); Tx(2.4,mir(6.15),'Closet');
   Tx(0.6,3.2,'Vest.'); Tx(0.6,mir(3.2),'Desp.');
-  T2(5.0,7.975,'Estar','15,8 m²'); T2(5.0,mir(7.975),'Jantar','15,8 m²');
-  T2(6.0,10.4,'Cozinha','20,1 m²'); Tx(0.82,12.7,'Lav.');
+  Tx(5.75,8.0,'Estar'); T2(5.75,13.0,'Sala','29,9 m²'); Tx(5.75,15.6,'Jantar');
+  T2(2.6,9.9,'Cozinha','17,0 m²'); Tx(2.775,7.6,'Hall'); Tx(0.82,12.7,'Lav.');
   return northUp(o.join(''),X(-1.3)+10,Y(L)+36,180,'Planta técnica, opção B','Casa de 7 por 22,65 metros com eixo de simetria transversal, desenhada com o norte para cima; a rua fica ao sul.');
 }
 function implB(){
@@ -1178,7 +1180,7 @@ function implB(){
   R(1.5,f,8.5,f+1.8,'z-var','Varanda sul'); R(1.5,n1,8.5,f+L,'z-var','Varanda norte');
   R(1.5,f+1.8,2.7,f+6.5,'z-social','Vestíbulo'); R(2.7,f+1.8,5.1,f+6.5,'z-suite','Banho acessível e closet'); R(5.1,f+1.8,8.5,f+6.5,'z-suite','Quarto da suíte sul');
   R(1.5,n0,2.7,n1,'z-apoio','Despensa e depósito'); R(2.7,n0,5.1,n1,'z-suite','Banho acessível e closet'); R(5.1,n0,8.5,n1,'z-suite','Quarto da suíte norte');
-  R(1.5,f+6.5,3.15,n0,'z-apoio','Faixa oeste: circulação, WC acessível e lavanderia'); R(3.15,f+6.5,8.5,n0,'z-social','Estar, cozinha e jantar');
+  R(1.5,f+6.5,3.15,n0,'z-apoio','Faixa oeste: circulação, WC acessível e lavanderia'); R(3.15,f+6.5,5.4,n0,'z-social','Hall e cozinha integrada'); R(5.4,f+6.5,8.5,n0,'z-social','Sala de estar e jantar');
   T(X(6.8),Y(f+4.2)+4,'Suíte','middle'); T(X(5.8),Y(f+BG.ax)+4,'Social','middle'); T(X(6.8),Y(n0+2.4)+4,'Suíte','middle'); T(X(5),Y(f+L+rear/2)+4,'Quintal','middle');
   o.push('<rect class="lot" x="'+X(10)+'" y="'+Y(0)+'" width="120" height="360"><title>Lote de 10,00 × 30,00 m</title></rect>');
   o.push('<line class="axis" x1="'+(X(10)-6)+'" y1="'+Y(f+BG.ax)+'" x2="'+(X(0)+6)+'" y2="'+Y(f+BG.ax)+'"><title>Eixo de simetria transversal</title></line>');
@@ -1197,7 +1199,7 @@ function longB(){
   o.push('<text class="tx" x="18" y="24">S</text><text class="tx" x="364" y="24" text-anchor="end">N</text>');
   RB(0,1.8,3.0,'z-var','Varanda sul, laje a 3,00 m');
   RB(1.8,6.5,3.0,'z-suite','Quarto da suíte sul, 3,00 m');
-  RB(6.5,L-6.5,4.2,'z-social','Estar, cozinha e jantar, 4,20 m junto às paredes');
+  RB(6.5,L-6.5,4.2,'z-social','Sala, cozinha e hall, 4,20 m junto às paredes');
   RB(L-6.5,L-1.8,3.0,'z-suite','Quarto da suíte norte, 3,00 m');
   RB(L-1.8,L,3.0,'z-var','Varanda norte, laje a 3,00 m');
   Ln(X(0),Y(3.15),X(6.5),Y(3.15),'slab'); Ln(X(L-6.5),Y(3.15),X(L),Y(3.15),'slab');
@@ -1215,11 +1217,11 @@ function longB(){
   o.push('<path class="flow" d="M'+X(7.6)+' '+Y(1.2)+' Q'+X(9.8)+' '+Y(1.5)+' '+X(sm-0.3)+' '+Y(5.0)+' L'+X(sm-0.3)+' '+Y(7.6)+'" marker-end="url(#arw)"/>');
   o.push('<path class="flow" d="M'+X(L-7.6)+' '+Y(1.2)+' Q'+X(L-9.8)+' '+Y(1.5)+' '+X(sm+0.3)+' '+Y(5.0)+' L'+X(sm+0.3)+' '+Y(7.6)+'" marker-end="url(#arw)"/>');
   function B(d,t,y){o.push('<text class="tx" x="'+X(d)+'" y="'+(y||G+18)+'" text-anchor="middle">'+t+'</text>');}
-  B(0.9,'Var.'); B(4.15,'Suíte'); B(8.0,'Estar'); B(sm,'Cozinha'); B(sm,'4,2 a 5,0 m',G+34); B(L-8.0,'Jantar'); B(L-4.15,'Suíte'); B(L-0.9,'Var.');
-  return svgOpen(380,G+46,'Corte longitudinal, opção B','Sul à esquerda, norte à direita. Suítes nas extremidades, social no centro e torre T1 sobre a cozinha.')+o.join('')+'</svg>';
+  B(0.9,'Var.'); B(4.15,'Suíte'); B(sm,'Estar e jantar'); B(sm,'4,2 a 5,0 m',G+34); B(L-4.15,'Suíte'); B(L-0.9,'Var.');
+  return svgOpen(380,G+46,'Corte longitudinal, opção B','Sul à esquerda, norte à direita. Suítes nas extremidades, social no centro e torre T1 entre a cozinha e a sala.')+o.join('')+'</svg>';
 }
 function transB(){
-  var s=22,cx=170,G=Math.round(64+8.3*s),o=[],m=5,w0=-1.85,t0=0.075,t1=1.575;
+  var s=22,cx=170,G=Math.round(64+8.3*s),o=[],m=5,w0=-1.85,t0=-0.35,t1=1.15;
   function U(u){return +(cx+u*s).toFixed(1);} function H(h){return +(G-h*s).toFixed(1);}
   function RU(u1,h1,u2,h2,c,t){o.push('<rect class="'+c+'" x="'+U(u1)+'" y="'+H(h2)+'" width="'+(U(u2)-U(u1)).toFixed(1)+'" height="'+(H(h1)-H(h2)).toFixed(1)+'">'+(t?'<title>'+t+'</title>':'')+'</rect>');}
   function Ln(x1,y1,x2,y2,c){o.push('<line class="'+c+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>');}
@@ -1229,7 +1231,7 @@ function transB(){
   RU(-3.5,0,w0,3.0,'z-apoio','Lavanderia, 1,65 m de largura, laje a 3,00 m');
   Ln(U(-3.5),H(3.15),U(w0),H(3.15),'slab');
   RU(w0+0.15,3.2,3.35,4.2,'warm','Camada de ar quente acima de 3,20 m');
-  RU(t0,5.3,t1,8.3,'z-torre','Torre T1, 1,50 m de lado, sobre a cozinha');
+  RU(t0,5.3,t1,8.3,'z-torre','Torre T1, 1,50 m de lado, sobre a divisa aberta entre a cozinha e a sala');
   Ln(U(t0),H(8.1),U(t0),H(6.9),'op');
   [7.2,7.5,7.8].forEach(function(h){Ln(U(t0+0.25),H(h),U(t1-0.25),H(h),'vz');});
   o.push('<polyline class="ceil" points="'+U(w0+0.15)+','+H(4.2)+' '+U(t0)+','+H(5.0)+' '+U(t1)+','+H(5.0)+' '+U(3.35)+','+H(4.2)+'"/>');
@@ -1251,8 +1253,8 @@ function transB(){
   function Dm(h,x0,t){Ln(x0,H(h),350,H(h),'ld'); o.push('<text class="tx" x="354" y="'+(H(h)+4)+'">'+t+'</text>');}
   Dm(8.3,U(t1),'8,30'); Dm(5.3,U(3.5),'5,30'); Dm(3.0,U(4.0),'3,00'); o.push('<text class="tx" x="354" y="'+(G+4)+'">0,00</text>');
   var yb=G+18;
-  o.push('<text class="tx" x="14" y="'+yb+'">O</text><text class="tx" x="'+U(-4.25)+'" y="'+yb+'" text-anchor="middle">1,50</text><text class="tx" x="'+U(-2.675)+'" y="'+yb+'" text-anchor="middle">Lav.</text><text class="tx" x="'+U(0.9)+'" y="'+yb+'" text-anchor="middle">Cozinha, 5,35 m</text><text class="tx" x="'+U(4.25)+'" y="'+yb+'" text-anchor="middle">1,50</text><text class="tx" x="360" y="'+yb+'" text-anchor="end">L</text>');
-  return svgOpen(380,G+30,'Corte transversal pela cozinha, opção B','Oeste à esquerda, leste à direita. Lavanderia baixa a oeste, cozinha com forro em funil até a torre T1 e janelas altas acima da faixa de apoio.')+o.join('')+'</svg>';
+  o.push('<text class="tx" x="14" y="'+yb+'">O</text><text class="tx" x="'+U(-4.25)+'" y="'+yb+'" text-anchor="middle">1,50</text><text class="tx" x="'+U(-2.675)+'" y="'+yb+'" text-anchor="middle">Lav.</text><text class="tx" x="'+U(-0.72)+'" y="'+yb+'" text-anchor="middle">Cozinha</text><text class="tx" x="'+U(1.95)+'" y="'+yb+'" text-anchor="middle">Sala</text><text class="tx" x="'+U(4.25)+'" y="'+yb+'" text-anchor="middle">1,50</text><text class="tx" x="360" y="'+yb+'" text-anchor="end">L</text>');
+  return svgOpen(380,G+30,'Corte transversal pela cozinha, opção B','Oeste à esquerda, leste à direita. Lavanderia baixa a oeste, cozinha e sala integradas com forro em funil até a torre T1 e janelas altas acima da faixa de apoio.')+o.join('')+'</svg>';
 }
 function facadeB(){
   var s=22,cx=190,G=Math.round(66+8.3*s),o=[],m=5;
@@ -1261,7 +1263,7 @@ function facadeB(){
   function Ln(x1,y1,x2,y2,c){o.push('<line class="'+c+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>');}
   o.push('<text class="tx" x="20" y="30">Vista da rua, olhando para norte</text>');
   RU(-1.85,3.3,3.5,5.3,'z-social','Volume social, recuado, platibanda a 5,30 m');
-  RU(0.075,5.3,1.575,8.3,'z-torre','Torre T1, sobre a cozinha');
+  RU(-0.35,5.3,1.15,8.3,'z-torre','Torre T1, entre a cozinha e a sala');
   RU(-1.5,3.3,-0.7,5.8,'z-torre','Torre T2, sobre o closet da suíte sul');
   RU(-3.5,0,3.5,3.0,'z-suite','Plano da fachada sul');
   RU(-3.62,3.0,3.62,3.3,'z-struct','Laje da varanda, 3,00 a 3,30 m');
@@ -1278,7 +1280,7 @@ function facadeB(){
   RU(-m-0.15,0,-m,2.5,'z-struct','Muro de divisa oeste, 2,50 m'); RU(m,0,m+0.15,2.5,'z-struct','Muro de divisa leste, 2,50 m');
   Ln(20,G,360,G,'gnd');
   function Dm(h,x0,t,dy){Ln(x0,H(h),352,H(h),'ld'); o.push('<text class="tx" x="354" y="'+(H(h)+(dy||4))+'">'+t+'</text>');}
-  Dm(8.3,U(1.575),'8,30'); Dm(5.3,U(3.5),'5,30'); Dm(3.3,U(3.62),'3,30'); Dm(2.65,U(1.5),'2,65');
+  Dm(8.3,U(1.15),'8,30'); Dm(5.3,U(3.5),'5,30'); Dm(3.3,U(3.62),'3,30'); Dm(2.65,U(1.5),'2,65');
   o.push('<text class="tx" x="354" y="'+(G+4)+'">0,00</text>');
   var yb=G+20;
   o.push('<text class="tx" x="'+U(-m)+'" y="'+yb+'" text-anchor="middle">O</text><text class="tx" x="'+U(-2.85)+'" y="'+yb+'" text-anchor="middle">Entrada</text><text class="tx" x="'+U(-0.9)+'" y="'+yb+'" text-anchor="middle">Banho</text><text class="tx" x="'+U(1.9)+'" y="'+yb+'" text-anchor="middle">Suíte sul</text><text class="tx" x="'+U(m)+'" y="'+yb+'" text-anchor="middle">L</text>');
@@ -1302,14 +1304,14 @@ function elevB(){
     V(j[2],j[2]+0.12,0.4,2.72,'z-struct','Aleta no batente do lado da cama');
   });
   V(6.975,8.975,0.9,2.3,'z-glass','J5, correr com veneziana, 2,00 × 1,40 m'); V(L-8.975,L-6.975,0.9,2.3,'z-glass','J5, correr com veneziana, 2,00 × 1,40 m');
-  V(10.325,12.325,1.1,2.3,'z-glass','J7, cozinha, 2,00 × 1,20 m');
+  V(10.325,12.325,1.1,2.3,'z-glass','J7, sala, no eixo, 2,00 × 1,20 m');
   Ln(X(6.5),Y(4.5),X(L-6.5),Y(4.5),'fin');
   o.push('<line class="axis" x1="'+X(BG.ax)+'" y1="34" x2="'+X(BG.ax)+'" y2="'+(G+6)+'"><title>Eixo de simetria transversal</title></line>');
   Ln(20,G,348,G,'gnd');
   function Dm(h,x0,t){Ln(x0,Y(h),350,Y(h),'ld'); o.push('<text class="tx" x="354" y="'+(Y(h)+4)+'">'+t+'</text>');}
   Dm(8.3,X(tB),'8,30'); Dm(5.3,X(L-6.5),'5,30'); Dm(3.3,X(L-1.8),'3,30');
   var yb=G+18;
-  [[0,'S'],[4.15,'Suíte sul'],[8.0,'Estar'],[BG.ax,'Cozinha'],[L-8.0,'Jantar'],[L-4.15,'Suíte norte'],[L,'N']].forEach(function(p){o.push('<text class="tx" x="'+X(p[0])+'" y="'+yb+'" text-anchor="middle">'+p[1]+'</text>');});
+  [[0,'S'],[4.15,'Suíte sul'],[8.0,'Estar'],[BG.ax,'Sala'],[L-8.0,'Jantar'],[L-4.15,'Suíte norte'],[L,'N']].forEach(function(p){o.push('<text class="tx" x="'+X(p[0])+'" y="'+yb+'" text-anchor="middle">'+p[1]+'</text>');});
   return svgOpen(380,G+30,'Elevação leste, opção B','Sul à esquerda, norte à direita. Fachada simétrica em relação ao eixo transversal, com as janelas-banco dos quartos a nascente.')+o.join('')+'</svg>';
 }
 
@@ -1320,18 +1322,18 @@ function sinteseB(){
   '<div class="hero" style="align-items:start"><div><p class="lede">Com a frente para sul, a rua deixa de receber o sol da manhã. O eixo de simetria passa a ser transversal: as suítes ocupam as duas extremidades e abrem para a lateral leste, e o lado oeste concentra circulações, lavanderia e áreas molhadas como barreira térmica.</p>'+
   '<div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))">'+
   stat('Suíte completa',calc(f2(v.suiteTot)+' m²','15,98 (quarto) + 6,00 (banho) + 5,28 (closet) = '+f2(v.suiteTot)+' m²'),'--patina')+
-  stat('Estar e jantar',calc(f2(v.sala)+' m²','15,78 (estar) + 15,78 (jantar); com a cozinha central integrada, '+f2(v.sala+v.coz)+' m²'),'--slate')+
-  stat('Cozinha',calc(f2(v.coz)+' m²','5,35 × 3,75 = '+f2(v.coz)+' m² (mínimo exigido: 20)'),'--slate')+
+  stat('Estar e jantar',calc(f2(v.sala)+' m²','sala única de 3,10 × 9,65 m; com a cozinha integrada, '+f2(v.sala+v.coz)+' m²'),'--slate')+
+  stat('Cozinha',calc(f2(v.coz)+' m²','2,25 × 7,55 = '+f2(v.coz)+' m², integrada à sala (premissa: 20)'),'--slate')+
   stat('Área coberta',calc(f2(v.cob)+' m²',f2(v.nucleo)+' (fechada) + 25,20 (varandas) = '+f2(v.cob)+' m²'))+
   '</div></div>'+
   '<div class="carimbo"><div class="title">Frente sul</div>'+
   '<div class="row">'+cell('Quarto','3,40 × 4,70 m (15,98 m²)')+cell('Casa','7,00 × '+f2(BG.L)+' m')+'</div>'+
   '<div class="row">'+cell('Lote','10,00 × 30,00 m')+cell('Ocupação',calc(pct(v.cob/300),f2(v.cob)+' ÷ 300,00 = '+pct(v.cob/300)))+'</div>'+
-  '<div class="row">'+cell('Eixo de simetria','Transversal, y = '+f2(BG.ax))+cell('Torre T1','1,50 m, sobre a cozinha')+'</div>'+
+  '<div class="row">'+cell('Eixo de simetria','Transversal, y = '+f2(BG.ax))+cell('Torre T1','1,50 m, entre a cozinha e a sala')+'</div>'+
   '<div class="row">'+cell('Iluminação do quarto',calc('6,16 m²','(1,60 + 1,20) × 2,20 = 6,16 m², contra o mínimo usual de 15,98 ÷ 6 = 2,66 m²'))+cell('Recuo de fundo',calc(f2(30-5-BG.L)+' m','30,00 − 5,00 − '+f2(BG.L)+' = '+f2(30-5-BG.L)+' m'))+'</div>'+
   '</div></div>'+
   '<div class="grid2"><div class="card tint" style="--c:var(--patina)"><h3>O que a frente sul preserva</h3><ul class="clean" style="--c:var(--patina)"><li>Simetria perfeita, agora entre a metade sul e a metade norte.</li><li>Quartos com janela principal para leste e sol exclusivamente matinal.</li><li>Banho acessível com entrada exclusiva pela suíte, via closet.</li><li>Lado oeste ocupado por vestíbulo, despensa, WC, lavanderia e banhos: o colchão térmico da premissa original.</li></ul></div>'+
-  '<div class="card tint" style="--c:var(--rust)"><h3>Concessões</h3><ul class="clean" style="--c:var(--rust)"><li>Estar e jantar somam '+f2(v.sala)+' m², abaixo dos 40 m² das premissas; com a cozinha central integrada, o espaço social contínuo chega a '+f2(v.sala+v.coz)+' m².</li><li>As janelas leste dos quartos ficam a 1,50 m do muro: o peitoril só recebe sol a partir de cerca de 54° de altura solar.</li><li>O vento chega à lateral leste depois de passar pela casa vizinha; as torres T1, T2 e T3 passam a ser essenciais.</li><li>A entrada fica fora do eixo, junto à lateral oeste, e a fachada da rua não é simétrica.</li></ul></div></div>'+
+  '<div class="card tint" style="--c:var(--rust)"><h3>Concessões</h3><ul class="clean" style="--c:var(--rust)"><li>Estar e jantar somam '+f2(v.sala)+' m², abaixo dos 40 m² das premissas; com a cozinha integrada, o espaço social contínuo chega a '+f2(v.sala+v.coz)+' m².</li><li>A cozinha tem '+f2(v.coz)+' m², abaixo dos 20 m² das premissas, e não tem janela externa: recebe luz e ar pela sala e pela torre T1, sobre a divisa aberta.</li><li>As janelas leste dos quartos ficam a 1,50 m do muro: o peitoril só recebe sol a partir de cerca de 54° de altura solar.</li><li>O vento chega à lateral leste depois de passar pela casa vizinha; as torres T1, T2 e T3 passam a ser essenciais.</li><li>A entrada fica fora do eixo, junto à lateral oeste, e a fachada da rua não é simétrica.</li></ul></div></div>'+
   '<div class="card tint" style="--c:var(--steel)"><h3>Adaptação de acessibilidade</h3><ul class="clean" style="--c:var(--steel)"><li>Banhos de 2,20 para 2,50 m de profundidade, com giro de 1,50 m, transferência lateral à bacia e boxe sem desnível; os quartos passam a 4,70 m.</li><li>Faixa oeste de 1,50 para 1,65 m, para o WC social acessível de 1,65 × 2,45 m, com porta para o estar.</li><li>Cozinha com 3,75 m de profundidade, para manter os 20 m² com a nova largura de 5,35 m.</li><li>A casa passa de 22,00 para '+f2(BG.L)+' m de comprimento, e o quintal fica com '+f2(30-5-BG.L)+' m.</li></ul></div>';
 }
 function pImplB(){
@@ -1346,19 +1348,19 @@ function pImplB(){
   '<tr class="total"><td>Área livre</td><td class="n">'+calc(f2(300-B2.cob)+' m²','300,00 − '+f2(B2.cob)+' = '+f2(300-B2.cob)+' m² ('+pct(1-B2.cob/300)+')')+'</td><td>Permeabilidade depende dos pisos</td></tr></tbody></table></div>';
 }
 function pPlantaB(){
-  return head(B2,'Planta técnica','Suítes nas duas extremidades, com quartos abertos para leste; estar, cozinha e jantar no centro; circulação, WC acessível e lavanderia na faixa oeste.','--patina')+
+  return head(B2,'Planta técnica','Suítes nas duas extremidades, com quartos abertos para leste; no centro, sala única de estar e jantar a leste, cozinha integrada e hall; circulação, WC acessível e lavanderia na faixa oeste.','--patina')+
   '<figure class="figure">'+planB()+LEG_PLAN+LEG_ACC+'<figcaption>Desenho esquemático gerado a partir das medidas, a 26 px por metro, com o norte para cima. O mobiliário está na planta humanizada e na planta de circulação.</figcaption></figure>'+
   '<div class="grid2"><div class="card tint" style="--c:var(--patina)"><h3>Suítes</h3><p style="margin-bottom:0">Cada quarto, de 3,40 × 4,70 m, tem a cabeceira na parede leste, ao lado de uma janela-banco de 1,60 m. O banho acessível, de 2,40 × 2,50 m, é alcançado pelo closet, que tem 2,20 m de profundidade e armário de 0,55 m, deixando livre um giro de 1,50 m.</p></div>'+
-  '<div class="card tint" style="--c:var(--slate)"><h3>Social e apoio</h3><p style="margin-bottom:0">Estar e jantar, com 15,78 m² cada, ladeiam a cozinha central de 20,06 m², sob a torre T1. A faixa oeste, agora com 1,65 m, leva do vestíbulo ao WC acessível, que abre para o estar, abriga a lavanderia ao lado da cozinha e chega à despensa, com saída para a varanda norte.</p></div></div>';
+  '<div class="card tint" style="--c:var(--slate)"><h3>Social e apoio</h3><p style="margin-bottom:0">Quem chega vai do vestíbulo à circulação, ao hall e à sala, sem passar pela cozinha. A sala única de estar e jantar, com 29,91 m², ocupa a faixa leste, com três janelas para o nascente; a cozinha de 16,99 m² se abre para ela num vão de 5,00 m, com a bancada voltada para a sala, sob a torre T1. As suítes se abrem para o estar e para o jantar. A faixa oeste, com 1,65 m, leva ao WC acessível, que abre para o hall, e à lavanderia, ao lado da cozinha; a circulação de serviço liga a cozinha à despensa e à varanda norte.</p></div></div>';
 }
 function pCortesB(){
-  return head(B2,'Cortes','Social alto e simétrico entre duas suítes baixas: o forro em funil sobe dos dois lados até a torre T1, sobre a cozinha.','--slate')+
+  return head(B2,'Cortes','Social alto entre duas suítes baixas: o forro em funil sobe dos dois lados até a torre T1, entre a cozinha e a sala.','--slate')+
   '<figure class="figure">'+longB()+'<figcaption>Corte longitudinal sul–norte pela torre T1. Escala gráfica: 14 px por metro.</figcaption></figure>'+
   '<figure class="figure">'+transB()+'<figcaption>Corte transversal pela cozinha e pela T1, com os muros de divisa a 1,50 m das paredes.</figcaption></figure>'+
   '<div class="tbl-wrap"><table><thead><tr><th>Elemento</th><th class="n">Altura</th><th>Observação</th></tr></thead><tbody>'+
   '<tr><td>Quartos, banhos, closets e faixa oeste</td><td class="n">3,00 m</td><td>Laje a 3,00 m; cobertura a 3,30 m</td></tr>'+
-  '<tr><td>Estar, cozinha e jantar, junto às paredes</td><td class="n">4,20 m</td><td>Faixa recomendada: 4,00 a 4,50 m</td></tr>'+
-  '<tr><td>Cozinha, sob a torre</td><td class="n">'+calc('5,00 m','4,20 + 0,80 de funil = 5,00 m; 1,93 m de cada lado da torre no sentido leste–oeste e 4,08 m no sentido sul–norte')+'</td><td>Forro em funil conduz o ar quente à T1</td></tr>'+
+  '<tr><td>Sala, cozinha e hall, junto às paredes</td><td class="n">4,20 m</td><td>Faixa recomendada: 4,00 a 4,50 m</td></tr>'+
+  '<tr><td>Cozinha e sala, sob a torre</td><td class="n">'+calc('5,00 m','4,20 + 0,80 de funil = 5,00 m; 1,50 m a oeste e 2,35 m a leste da torre, e 4,08 m no sentido sul–norte')+'</td><td>Forro em funil conduz o ar quente à T1</td></tr>'+
   '<tr><td>Platibanda</td><td class="n">5,30 m</td><td>Esconde o funil; calhas atrás da platibanda</td></tr>'+
   '<tr><td>Janelas altas a oeste</td><td class="n">3,40 a 4,10 m</td><td>'+calc('Acima da cobertura da faixa de apoio','Cobertura da faixa oeste a 3,30 m; peitoril das janelas a 3,40 m')+'</td></tr>'+
   '<tr><td>Topo das torres T2 e T3</td><td class="n">'+calc('5,80 m','3,30 + 2,50 = 5,80 m')+'</td><td>Sobre os closets, abertura a oeste</td></tr>'+
@@ -1369,7 +1371,7 @@ function pFachadaB(){
   return head(B2,'Fachadas','A fachada da rua não é simétrica: mostra a entrada, o banho e a suíte sul. A composição simétrica aparece na elevação leste, voltada para o recuo lateral.','--graphite')+
   '<figure class="figure">'+facadeB()+'<figcaption>Fachada sul, vista da rua. Vergas e bandeira alinhadas a 2,65 m.</figcaption></figure>'+
   '<figure class="figure">'+elevB()+'<figcaption>Elevação leste. Escala gráfica: 13,5 px por metro; as torres aparecem recuadas.</figcaption></figure>'+
-  '<div class="grid2"><div class="card tint" style="--c:var(--graphite)"><h3>Alinhamentos</h3><ul class="clean" style="--c:var(--graphite)"><li>Vergas das janelas-banco e bandeira da porta a 2,65 m.</li><li>Na elevação leste, janelas-banco dos quartos, janelas do estar e do jantar e a janela da cozinha espelhadas em relação ao eixo transversal.</li><li>Torre T1 no centro do volume social, T2 e T3 sobre os closets.</li><li>Pilares apenas nas quinas das varandas.</li></ul></div>'+
+  '<div class="grid2"><div class="card tint" style="--c:var(--graphite)"><h3>Alinhamentos</h3><ul class="clean" style="--c:var(--graphite)"><li>Vergas das janelas-banco e bandeira da porta a 2,65 m.</li><li>Na elevação leste, janelas-banco dos quartos, janelas da sala espelhadas em relação ao eixo transversal.</li><li>Torre T1 no centro do volume social, T2 e T3 sobre os closets.</li><li>Pilares apenas nas quinas das varandas.</li></ul></div>'+
   '<div class="card tint" style="--c:var(--brass)"><h3>Materiais sugeridos</h3><ul class="clean" style="--c:var(--brass)"><li>Reboco claro de textura fina ou tijolo aparente, de boa inércia térmica.</li><li>Porta pivotante e venezianas em madeira certificada.</li><li>Brises verticais na faixa oeste, protegendo lavanderia e WC do sol da tarde.</li><li>Divisa leste em gradil ou muro vazado, para não barrar o sol da manhã e o vento nos quartos.</li></ul></div></div>';
 }
 function pEsqB(){
@@ -1377,20 +1379,22 @@ function pEsqB(){
     ['J2 (2)','Quartos, frente sul e fundo norte','1,20 × 2,20 m','0,45 m','Janela-banco em três registros, sob a varanda; saída do ar.'],
     ['J3 (3)','Banhos e WC, sobre a bacia','0,60 × 0,60 m','1,60 m','Maxim-ar com vidro mini-boreal.'],
     ['J4 (2)','Banhos, fachadas sul e norte','1,00 × 0,60 m','1,60 m','Basculante alto com vidro fosco.'],
-    ['J5 (2)','Estar e jantar, lateral leste','2,00 × 1,40 m','0,90 m','Correr com veneziana; entrada do ar.'],
-    ['J6 (2)','Estar e jantar, lateral oeste, altas','1,60 × 0,70 m','3,40 m','Basculantes acima da faixa de apoio, com brise; saída do ar a sotavento.'],
-    ['J7 (1)','Cozinha, lateral leste','2,00 × 1,20 m','1,10 m','Correr, sobre a bancada.'],
+    ['J5 (2)','Sala (estar e jantar), lateral leste','2,00 × 1,40 m','0,90 m','Correr com veneziana; entrada do ar.'],
+    ['J6 (2)','Hall e cozinha, lateral oeste, altas','1,60 × 0,70 m','3,40 m','Basculantes acima da faixa de apoio, com brise; saída do ar a sotavento.'],
+    ['J7 (1)','Sala, lateral leste, no eixo','2,00 × 1,20 m','1,10 m','Correr com veneziana; entrada do ar no meio da sala.'],
     ['J8 (1)','Despensa, lateral oeste','0,60 × 0,60 m','1,60 m','Basculante com vidro fosco.'],
     ['J9 (1)','Lavanderia, lateral oeste','1,20 × 1,00 m','1,10 m','Veneziana basculante com brise vertical externo.']];
   var P=[['P1 (1)','Entrada, varanda sul → vestíbulo','1,00 m','Pivotante com veneziana.'],
     ['P2 (1)','Vestíbulo → circulação','1,00 m','Vão livre.'],
-    ['P3 (2)','Estar ou jantar → quarto','0,90 m','Giro, com bandeira ventilada; vão livre de 0,80 m.'],
+    ['P3 (2)','Sala (estar ou jantar) → quarto','0,90 m','Giro, com bandeira ventilada; vão livre de 0,80 m.'],
     ['P4 (2)','Quarto → closet','0,90 m','Correr embutida, vão livre de 0,80 m.'],
     ['P5 (2)','Closet → banho acessível','0,90 m','Correr, vão livre de 0,80 m, puxador horizontal na face interna.'],
-    ['P6 (1)','Estar → WC social acessível','0,90 m','Correr ou giro abrindo para o estar, vão livre de 0,80 m.'],
+    ['P6 (1)','Hall → WC social acessível','0,90 m','Correr ou giro abrindo para o hall, vão livre de 0,80 m.'],
     ['P7 (1)','Cozinha → lavanderia','0,80 m','Giro.'],
     ['P8 (1)','Circulação → despensa e depósito','0,80 m','Giro.'],
-    ['P9 (1)','Despensa → varanda norte','1,00 m','Veneziana, para ventilação permanente e saída para o quintal.']];
+    ['P9 (1)','Despensa → varanda norte','1,00 m','Veneziana, para ventilação permanente e saída para o quintal.'],
+    ['P10 (1)','Cozinha → circulação de serviço','0,80 m','Giro.'],
+    ['V1 (1)','Circulação → hall','1,00 m','Vão livre, sem folha.'],['V2 (1)','Hall → sala','1,70 m','Vão livre, sem folha.'],['V3 (1)','Cozinha ↔ sala','5,00 m','Vão livre, com a bancada de 3,00 m voltada para a sala.']];
   return head(B2,'Esquadrias','As esquadrias se repetem em pares espelhados em relação ao eixo transversal, exceto as da faixa oeste e da cozinha.','--steel')+
   '<h3>Janelas</h3><div class="tbl-wrap"><table><thead><tr><th>Código</th><th>Local</th><th class="n">L × A</th><th class="n">Peitoril</th><th>Tipo e proteção</th></tr></thead><tbody>'+
   J.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td class="n">'+r[2]+'</td><td class="n">'+r[3]+'</td><td>'+r[4]+'</td></tr>';}).join('')+'</tbody></table></div>'+
@@ -1457,9 +1461,9 @@ function roomsB(){
     {n:'Closet, suíte norte',s:'Closet',r:m([1.2,4.3,3.6,6.5]),f:clf.map(m),giro:1},
     {n:'Vestíbulo',s:'Vest.',r:[0,1.8,1.2,6.5],f:[]},
     {n:'Circulação de entrada',s:'Circ.',r:[0,6.5,fb,7.5],f:[]},
-    {n:'Estar',s:'Estar',r:[fb,6.5,7,9.45],f:[[6.05,6.85,6.95,9.05,'Sofá de 3 lugares'],[5.15,7.45,5.65,8.45,'Mesa de centro']],giro:1},
-    {n:'Cozinha',s:'Cozinha',r:[fb,9.45,7,13.2],f:[[6.4,9.8,7,12.85,'Bancada sob a janela'],[1.7,12.4,2.45,13.15,'Geladeira']],giro:1},
-    {n:'Jantar',s:'Jantar',r:[fb,13.2,7,16.15],f:[[3.5,13.82,5.7,15.52,'Mesa de jantar de 6 lugares, com as cadeiras']],giro:1},
+    {n:'Hall',s:'Hall',r:[fb,6.5,3.9,8.6],f:[]},
+    {n:'Estar e jantar',s:'Sala',r:[3.9,6.5,7,16.15],f:[[3.95,8.45,4.85,10.35,'Sofá de 3 lugares'],[5.15,8.9,5.65,9.9,'Mesa de centro'],[3.98,12.3,5.68,14.5,'Mesa de jantar de 6 lugares, com as cadeiras']],giro:1},
+    {n:'Cozinha',s:'Cozinha',r:[fb,8.6,3.9,16.15],f:[[3.3,10.6,3.9,13.6,'Bancada de 0,60 m voltada para a sala, com pia e cooktop'],[1.7,8.75,2.45,9.5,'Geladeira'],[1.65,12.0,2.25,14.15,'Armário de 0,60 m']],giro:1},
     {n:'Circulação oeste',s:'Circ.',r:[0,13.2,fb,16.15],f:[],giro:1},
     {n:'WC social acessível',s:'WC',r:[0,7.5,fb,9.95],bath:{Ly:BLY.B_wc,M:BWC,sh:false}},
     {n:'Lavanderia',s:'Lav.',r:[0,9.95,fb,13.2],f:[[0,10.4,0.65,11.65,'Tanque e máquina']]},
@@ -1467,12 +1471,12 @@ function roomsB(){
   ];
   var bs=bMap(false),bn=bMap(true),Lb=BLY.B_banho,dx=1.275+(Lb.door.u1+Lb.door.u2)/2;
   function bc(M,Ly){return [M.a0+M.su*Ly.c[0],M.d0+M.sv*Ly.c[1]];}
-  var r1=[[0.65,0.9],[0.65,7.0],[4.3,7.0],[4.3,5.4],[dx,5.4],[dx,4.3],bc(bs,Lb)];
-  var r2=[[4.3,7.0],[4.3,L-7.0],[4.3,L-5.4],[dx,L-5.4],[dx,L-4.3],bc(bn,Lb)];
+  var r1=[[0.65,0.9],[0.65,7.0],[6.0,7.0],[6.0,5.4],[dx,5.4],[dx,4.3],bc(bs,Lb)];
+  var r2=[[6.0,7.0],[6.0,L-7.0],[6.0,L-5.4],[dx,L-5.4],[dx,L-4.3],bc(bn,Lb)];
   var r3=[[2.6,7.0],[2.6,8.025],[1.65,8.025],bc(BWC,BLY.B_wc)];
-  var r4=[[4.3,7.0],[3.2,BG.ax]];
+  var r4=[[6.0,7.0],[6.0,14.9],[2.9,14.9]];
   return {R:R,routes:[r1,r2,r3,r4],ext:[[0,0,7,1.8],[0,L-1.8,7,L]],W:7,L:L,up:180,flip:true,
-    faixas:[['Vestíbulo, entre paredes',1.05,1],['Faixa oeste, circulação',fb-0.15,1],['Quarto, ao lado da cama',4.9-3.675,1],['Closet, em frente ao armário',2.2-0.15-0.55,1],['Cozinha, entre a bancada e a geladeira',6.4-2.45,1]]};
+    faixas:[['Vestíbulo, entre paredes',1.05,1],['Faixa oeste, circulação',fb-0.15,1],['Quarto, ao lado da cama',4.9-3.675,1],['Closet, em frente ao armário',2.2-0.15-0.55,1],['Hall, entre paredes',3.9-fb-0.15,1],['Sala, entre a mesa de centro e a parede leste',7-0.075-5.65,1],['Sala, entre a mesa de jantar e a parede leste',7-0.075-5.68,1],['Cozinha, entre o armário e a bancada',3.3-2.25,1]]};
 }
 function giroSearch(r,F){
   var x1=r[0]+0.075,y1=r[1]+0.075,x2=r[2]-0.075,y2=r[3]-0.075,best=null,cx=(x1+x2)/2,cy=(y1+y2)/2;
@@ -1580,7 +1584,7 @@ function pComparativo(){
   row('Quarto',[q(A),'3,40 × 4,70 m (15,98 m²)',q(C),q(D)])+
   row('Banho acessível',[f2(A.bath)+' × '+f2(A.cs)+' m','2,40 × 2,50 m',f2(C.bath)+' × '+f2(C.cs)+' m',f2(D.bath)+' × '+f2(D.cs)+' m'])+
   row('Suíte completa',X.map(function(v){return m2(v.suiteTot);}))+
-  row('Estar e jantar',[m2(A.a.sala),calc(m2(B.sala),'15,78 (estar) + 15,78 (jantar)'),m2(C.a.sala),m2(D.a.sala)])+
+  row('Estar e jantar',[m2(A.a.sala),calc(m2(B.sala),'sala única de 3,10 × 9,65 m'),m2(C.a.sala),m2(D.a.sala)])+
   row('Cozinha',[m2(A.a.coz),m2(B.coz),m2(C.a.coz),m2(D.a.coz)])+
   row('Apoios',X.map(function(v){return m2(v.zonas[2]);}))+
   row('Varandas',X.map(function(v){return m2(v.vse+v.vno);}))+
@@ -1592,9 +1596,9 @@ function pComparativo(){
   row('Ocupação no mínimo',[calc(pct(A.cob/300),f2(A.cob)+' ÷ 300,00'),calc(pct(B.cob/300),f2(B.cob)+' ÷ 300,00'),calc(pct(C.lots.min.ocup),f2(C.cob)+' ÷ '+f2(C.lots.min.area)),calc(pct(D.lots.min.ocup),f2(D.cob)+' ÷ '+f2(D.lots.min.area))])+
   row('Recuo de fundo no mínimo',[f2(A.lots.min.rear)+' m',f2(30-5-BG.L)+' m',f2(C.lots.min.rear)+' m',f2(D.lots.min.rear)+' m'])+
   row('Lote ideal',['Não se aplica','Não se aplica',f2(C.lots.ideal.w)+' × '+f2(C.lots.ideal.d)+' m',f2(D.lots.ideal.w)+' × '+f2(D.lots.ideal.d)+' m'])+
-  row('Torre T1',['1,50 m, sobre a sala','1,50 m, sobre a cozinha',f2(C.t1)+' m, sobre a sala',f2(D.t1)+' m, sobre a sala'])+
+  row('Torre T1',['1,50 m, sobre a sala','1,50 m, entre a cozinha e a sala',f2(C.t1)+' m, sobre a sala',f2(D.t1)+' m, sobre a sala'])+
   '</tbody></table></div>'+
-  '<div class="grid2"><div class="card tint" style="--c:var(--steel)"><h3>Quando o lote é de 10 × 30</h3><p style="margin-bottom:0">A casa ocupa toda a largura edificável de 7 m, e os banheiros acessíveis só cabem alongando a casa. Com a frente a leste ou sudeste, a opção A chega a '+f2(A.L)+' m de comprimento, com quartos de '+f2(A.a.quarto)+' m² e sala de 42 m². Com a frente sul, a opção B chega a '+f2(B.L)+' m, com quartos de 15,98 m² e lavanderia, mas divide a sala em estar e jantar e depende mais das torres.</p></div>'+
+  '<div class="grid2"><div class="card tint" style="--c:var(--steel)"><h3>Quando o lote é de 10 × 30</h3><p style="margin-bottom:0">A casa ocupa toda a largura edificável de 7 m, e os banheiros acessíveis só cabem alongando a casa. Com a frente a leste ou sudeste, a opção A chega a '+f2(A.L)+' m de comprimento, com quartos de '+f2(A.a.quarto)+' m² e sala de 42 m². Com a frente sul, a opção B chega a '+f2(B.L)+' m, com quartos de 15,98 m² e lavanderia, com sala única longitudinal e cozinha integrada de 17 m², mas depende mais das torres.</p></div>'+
   '<div class="card tint" style="--c:var(--brass)"><h3>Quando há lote mais largo</h3><p style="margin-bottom:0">As opções C e D já tinham banhos de 2,20 e 2,60 m de largura: recebem o arranjo acessível sem mudar de tamanho. Com 12,5 m ou mais de frente, a opção C oferece quartos de 20 m² e sala de '+f1(C.a.sala)+' m²; a partir de 14,5 m, a opção D chega a quartos de 25 m² e sala acima de 60 m².</p></div></div>';
 }
 
