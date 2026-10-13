@@ -23,7 +23,7 @@ function casaSimetrica(){
   for(const g of ['A', 'B', 'C', 'D']){
     const M = ctx.API.circModel(g), T = ctx.API.hzTecnica(g), v = g === 'B' ? ctx.API.B2 : ctx.API.vFor(g);
     const salas = M.R.map(r => ({nome: r.n, x0: r.r[0], y0: r.r[1], x1: r.r[2], y1: r.r[3], area: r.area, gOk: r.gOk, gc: r.gc, g18: r.g18, g180: r.g180}));
-    const vaos = T.dr.map(p => ({a1: Math.min(p.a1, p.a2), a2: Math.max(p.a1, p.a2), d1: Math.min(p.d1, p.d2), d2: Math.max(p.d1, p.d2), t: p.t}));
+    const vaos = T.dr.concat(T.vl || []).map(p => ({a1: Math.min(p.a1, p.a2), a2: Math.max(p.a1, p.a2), d1: Math.min(p.d1, p.d2), d2: Math.max(p.d1, p.d2), t: p.t}));
     const fora = (x, y) => y <= 1.8 + 0.31 ? 'Varanda frontal' : y >= M.L - 1.8 - 0.31 ? 'Varanda de fundos' : 'Exterior lateral';
     out.push({id: g, nome: v.nome, salas, vaos, fora, entrada: 'Varanda frontal', faixas: M.faixas, nucleo: v.nucleo, rotas: M.routes});
   }
