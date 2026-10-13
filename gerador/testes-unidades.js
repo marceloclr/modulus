@@ -366,6 +366,7 @@ t('vento dentro da casa (V3): aberturas em série, torre e escoamento em volta (
   // torre de sucção sobre A: soma vento e chaminé (CIBSE AM10)
   const It = VE.interno({torre:{tipo:'succao', x0:1, y0:1, x1:2, y1:2}}, q, p, 90, 5);
   ok(It.torre && It.torre.saida && !It.torre.entrada && It.caminhos.some(x => x.tipo === 'torre' && x.de === 2 && x.para === 1), 'caminho até a torre');
+  { const T = It.torre, lim = Math.hypot(0.6 * 1.0 * 5 * VE.fatorU * Math.sqrt(0.6 + T.dCp), 0.6 * 1.0 * Math.sqrt(2 * 9.81 * T.H * T.dT / 301)); ok(T.Q <= lim + 1e-9, 'a torre não passa do que cabe na saída de 1 m²: ' + T.Q + ' ≤ ' + lim); }
   // escoamento em volta: longe da casa ≈ vento livre; atrás dela (esteira) mais lento; simétrico dos dois lados
   const cx = {x0:0, y0:0, x1:8, y1:16}, Uw = {x:-1, y:0};
   const vel = (x, y) => Math.hypot(...VE.campo(x, y, Uw, cx, 0));

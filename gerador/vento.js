@@ -70,7 +70,8 @@ function campo(x, y, U, cx, t){
    - Janelas: área livre = largura × altura × 0,5 (de correr) ou 0,7 (alta, maxim-ar).
    - U: o vento a 10 m levado à altura das janelas pelo perfil suburbano do ASHRAE (≈ 0,55 × U10), com fator de abrigo 0,5.
    - Cômodo com janela numa face só: Q = 0,025 · A · U (BS 5925).
-   Devolve {U, caminhos:[{pts, vel, Q, tipo, de, para, salas}], comodos:[{id, nome, tipo, ach, Q, umaFace}], torre, janelas}. */
+   - Caminhos que dividem a mesma saída (ou a torre) dividem a vazão: entradas em paralelo, em série com a saída.
+   Devolve {U, caminhos:[{pts, As, vel, Q, tipo, de, para, salas}], comodos:[{id, nome, tipo, ach, Q, umaFace}], torre, janelas}. */
 const CD = 0.6, G = 9.81, T_AR = 301;
 const fatorU = Math.pow(270/10, 0.14) * Math.pow(3/370, 0.22) * 0.5;
 function alturas(j){ return j.vidro ? [0, 2.2] : j.alta ? [2.2 - (j.h || 0.6), 2.2] : [1.0, 1.0 + (j.h || 1.2)]; }
@@ -105,14 +106,26 @@ function interno(v, q, p, dirDe, U10){
   for(const e of jan.filter(x => x.papel === 'entrada')){
     const r = busca(e.sala, u => saidas.some(s => s.sala === u));
     if(r){ const s = saidas.filter(x => x.sala === r.fim).sort((a, b) => b.A - a.A)[0], As = [e.A, ...r.pas.map(x => x.A), s.A], Q = fluxo(As, e.cp - s.cp);
-      caminhos.push({tipo:'cruzada', pts:[e.pt, ...r.pas.map(x => x.pt), s.pt], vel:As.map(a => Q / a), Q, de:e.sala, para:s.sala, salas:[e.sala, ...r.pas.map(x => x.para)]}); }
+      caminhos.push({tipo:'cruzada', pts:[e.pt, ...r.pas.map(x => x.pt), s.pt], As, Q, de:e.sala, para:s.sala, salas:[e.sala, ...r.pas.map(x => x.para)], g:{ent:e, sai:s, dCp:e.cp - s.cp}}); }
     if(torre && torre.saida){ const rt = busca(e.sala, u => u === torre.sala);
-      if(rt){ const As = [e.A, ...rt.pas.map(x => x.A), torre.A], Q = fluxo(As, e.cp + torre.dCp, torre.H, torre.dT); torre.Q += Q;
-        caminhos.push({tipo:'torre', pts:[e.pt, ...rt.pas.map(x => x.pt), torre.pt], vel:As.map(a => Q / a), Q, de:e.sala, para:torre.sala, salas:[e.sala, ...rt.pas.map(x => x.para)]}); } }
+      if(rt){ const As = [e.A, ...rt.pas.map(x => x.A), torre.A], Q = fluxo(As, e.cp + torre.dCp, torre.H, torre.dT);
+        caminhos.push({tipo:'torre', pts:[e.pt, ...rt.pas.map(x => x.pt), torre.pt], As, Q, de:e.sala, para:torre.sala, salas:[e.sala, ...rt.pas.map(x => x.para)], g:{ent:e, sai:torre, dCp:e.cp + torre.dCp, chamine:true}}); } }
   }
   if(torre && torre.entrada) for(const s of saidas){ const rt = busca(torre.sala, u => u === s.sala);
-    if(rt){ const As = [torre.A, ...rt.pas.map(x => x.A), s.A], Q = fluxo(As, torre.dCp + 0.3); torre.Q += Q;
-      caminhos.push({tipo:'torre', pts:[torre.pt, ...rt.pas.map(x => x.pt), s.pt], vel:As.map(a => Q / a), Q, de:torre.sala, para:s.sala, salas:[torre.sala, ...rt.pas.map(x => x.para)]}); } }
+    if(rt){ const As = [torre.A, ...rt.pas.map(x => x.A), s.A], Q = fluxo(As, torre.dCp + 0.3);
+      caminhos.push({tipo:'torre', pts:[torre.pt, ...rt.pas.map(x => x.pt), s.pt], As, Q, de:torre.sala, para:s.sala, salas:[torre.sala, ...rt.pas.map(x => x.para)], g:{ent:torre, sai:s, dCp:torre.dCp + 0.3, captador:true}}); } }
+  // caminhos que dividem a mesma abertura (a janela de saída, a torre, ou a torre como entrada) dividem a vazão:
+  // entradas em paralelo (áreas somadas) em série com a saída, mais a resistência média das portas no meio
+  const grupos = new Map(); for(const c of caminhos){ const k = c.g.captador ? c.g.ent : c.g.sai; if(!grupos.has(k)) grupos.set(k, []); grupos.get(k).push(c); }
+  for(const [, gs] of grupos){
+    const ents = [...new Set(gs.map(c => c.g.ent))], sais = [...new Set(gs.map(c => c.g.sai))], Ain = ents.reduce((s, x) => s + x.A, 0), Aout = sais.reduce((s, x) => s + x.A, 0);
+    const Rint = gs.reduce((s, c) => s + c.As.slice(1, -1).reduce((u, a) => u + 1/(a*a), 0), 0) / gs.length;
+    const Aef = 1 / Math.sqrt(1/(Ain*Ain) + 1/(Aout*Aout) + Rint), dCp = gs.reduce((s, c) => s + c.g.dCp * c.g.ent.A, 0) / gs.reduce((s, c) => s + c.g.ent.A, 0);
+    const qv = CD * Aef * U * Math.sqrt(Math.max(0.05, dCp)), qc = gs[0].g.chamine && torre ? CD * Aef * Math.sqrt(2*G*torre.H*torre.dT/T_AR) : 0, Qg = Math.sqrt(qv*qv + qc*qc);
+    const soma = gs.reduce((s, c) => s + c.Q, 0); for(const c of gs) c.Q = Qg * c.Q / soma;
+    if(gs[0].tipo === 'torre') torre.Q = Qg;
+  }
+  for(const c of caminhos){ c.vel = c.As.map(a => c.Q / a); delete c.g; }
   const Qs = new Map(); for(const c of caminhos) for(const id of new Set(c.salas)) Qs.set(id, (Qs.get(id) || 0) + c.Q);
   const comodos = salas.filter(fechado).map(s => { let Q = Qs.get(s.id) || 0, umaFace = false;
     if(!Q){ const js = jan.filter(x => x.sala === s.id); if(js.length){ Q = js.reduce((t, x) => t + 0.025 * x.A / 0.5 * U, 0); umaFace = true; } }
