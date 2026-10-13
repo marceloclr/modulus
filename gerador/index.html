@@ -311,6 +311,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
           <label style="--a:315deg" data-tip="Frente voltada para noroeste"><input type="radio" name="orientacao" value="NO"><span>NO</span></label>
         </div>
         <p class="rosa-txt" id="rosaTxt">Frente ainda não informada</p>
+        <label class="fld wide">Quartos fora do poente<select name="poenteLimite"><option value="amplo">Oeste, sudoeste e noroeste</option><option value="oeste">Só o oeste</option></select><button type="button" class="ajuda" data-ajuda="Faces da casa onde nenhum quarto deve ficar, por causa do sol da tarde. Oeste, sudoeste e noroeste (O ± 67,5°) é o mais protegido; só o oeste (O ± 22,5°) libera mais variantes. Quando nada escapa, o gerador compacta a casa e, por fim, avisa." data-manual="terreno" aria-label="Ajuda: quartos fora do poente" aria-expanded="false">?</button></label>
         <label class="fld">Frente (m)<input type="number" name="frente" min="5" max="60" step="0.5"></label>
         <label class="fld">Fundo (m)<input type="number" name="fundo" min="10" max="80" step="0.5"></label>
         <label class="fld">Recuo frontal (m)<input type="number" name="recFrente" min="0" max="15" step="0.25"></label>
