@@ -60,6 +60,41 @@
 .sv-eixo{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3);margin:2px 0 8px}
 .sv-leg{display:inline-block;width:14px;height:4px;background:var(--c);vertical-align:middle;margin-right:4px;border-radius:2px}
 @keyframes svFluxo{to{stroke-dashoffset:-48}}
+/* V2: régua única, painel enxuto */
+.sv-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin:2px 0 10px}
+.sv-seg{display:inline-flex}.sv-seg .btn{border-radius:0}.sv-seg .btn:first-child{border-radius:10px 0 0 10px}.sv-seg .btn+.btn{margin-left:-1px}.sv-seg .btn:last-child{border-radius:0 10px 10px 0}
+.sv-acoes{display:flex;flex-wrap:wrap;gap:8px}
+.sv-regua2{display:grid;gap:8px;margin-top:12px}
+.sv-meses{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px}
+.sv-mes{font:500 12px/1 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink-2);background:none;border:1px solid transparent;border-radius:8px;padding:8px 0;cursor:pointer;text-transform:capitalize}
+.sv-mes[aria-current=true]{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.sv-mes:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
+.sv-horas2{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center}
+.sv-horas2 .sv-play{width:40px;height:40px;border-radius:50%;justify-content:center;padding:0}
+.sv-trilho2{position:relative;height:46px}
+.sv-trilho2 svg{position:absolute;inset:0;width:100%;height:100%}
+.sv-trilho2 input{position:absolute;left:0;right:0;bottom:0;width:100%;margin:0;accent-color:#F59E0B}
+.sv-leitura{display:grid;gap:2px;margin-bottom:6px}
+.sv-big{font:500 32px/1.05 'IBM Plex Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.sv-sub{color:var(--ink-2);font-size:13px;font-variant-numeric:tabular-nums}
+.sv-painel h4{display:flex;align-items:center;gap:2px;margin:12px 0 6px;font:600 11.5px/1.2 'IBM Plex Sans',system-ui,sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.sv-barras .sv-barra i{background:linear-gradient(90deg,#FDE68A,#F59E0B)}
+.sv-lista li b{font-weight:600;font-variant-numeric:tabular-nums}
+.sv-lista li b small{width:auto;font-weight:400}
+.sv-leg-mapa{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3)}
+.sv-rampa{width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,#6B83A8,#E9D8A6,#F5B02E)}
+.sv-cab{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.sv-dial{width:150px;height:150px;flex:none}
+.sv-dial text{font:500 9.5px 'IBM Plex Sans',system-ui,sans-serif;fill:var(--ink-3)}
+.sv-dial .sv-d-n{fill:var(--rust);font-weight:600}
+.sv-d-hor{fill:color-mix(in srgb,var(--steel) 7%,transparent);stroke:var(--ink-3);stroke-opacity:.6}
+.sv-d-alt{fill:none;stroke:var(--line);stroke-dasharray:2 3}
+.sv-d-arco{fill:none;stroke:#F59E0B;stroke-width:2.2;stroke-linecap:round}
+.sv-d-ponto{fill:var(--ink-2)}
+.sv-d-nasc{fill:#CA8A04}.sv-d-poe{fill:#C2410C}
+.sv-d-sol{fill:#FFE2A0;stroke:#D97706;stroke-width:1.6}
+.sv-un{font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-3);margin-left:4px}
+@media (max-width:520px){.sv-mes{font-size:10.5px;padding:7px 0}}
 .sv-fluxo{animation:svFluxo linear infinite}
 @media (prefers-reduced-motion:reduce){.sv-fluxo{animation:none}}
 .sub-nota{color:var(--ink-3);font-size:12px;margin:2px 0 8px;line-height:1.45}
