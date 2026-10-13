@@ -77,6 +77,26 @@
 .score{display:inline-block;min-width:34px;text-align:center;font-size:12px;padding:3px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);margin-left:6px}
 .btn[aria-pressed="true"] .score{background:transparent;color:inherit;border-color:currentColor}
 .salvar-banco{display:inline-flex;gap:6px;flex-wrap:wrap}
+/* V1: menus da barra da planta */
+details.menu{position:relative}
+details.menu>summary{list-style:none}
+details.menu>summary::-webkit-details-marker{display:none}
+details.menu[open]>summary{border-color:var(--ink-3)}
+.menu-p{position:absolute;z-index:20;top:calc(100% + 6px);left:0;min-width:240px;display:grid;gap:6px;padding:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.menu-p .btn{justify-content:flex-start}
+.menu-n{margin:2px 0 0;font-size:12px;color:var(--ink-3);max-width:32ch}
+@media (max-width:520px){.menu-p{left:auto;right:0}}
+/* V1: quadro de áreas resumido */
+details.quadro-det>summary{list-style:none;cursor:pointer;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+details.quadro-det>summary::-webkit-details-marker{display:none}
+details.quadro-det>summary:focus-visible{outline:2px solid var(--steel);outline-offset:2px}
+details.quadro-det[open]>summary{border-radius:12px 12px 0 0;border-bottom-color:transparent}
+.qr-n{font:600 20px/1.1 'IBM Plex Sans',system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.qr-s{color:var(--ink-2);font-size:13.5px;font-variant-numeric:tabular-nums}
+.qr-v{margin-left:auto;font-size:13px;color:var(--steel);font-weight:500}
+details.quadro-det[open] .qr-v::after{content:' (ocultar)'}
+details.quadro-det>.tbl-wrap{margin-top:0;border-top-left-radius:0;border-top-right-radius:0}
+.decide-link{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:22px 0 0;color:var(--ink-3);font-size:13.5px}
 .salvar-banco input{font:500 13px 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:180px}
 .salvar-banco input:focus-visible{outline:2px solid var(--steel);outline-offset:1px}
 .rosa-sel{position:relative;width:200px;height:200px;margin:4px auto 2px;color:var(--ink-2)}
@@ -257,7 +277,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="fld" data-tip="Direito de quem olha da rua para o lote">Recuo lateral direito (m)<input type="number" name="recLatD" min="0" max="20" step="0.25"></label>
         <label class="fld">Recuo de fundo (m)<input type="number" name="recFundo" min="0" max="15" step="0.25"></label>
         <label class="fld">Permeabilidade mínima (%)<input type="number" name="permeab" min="0" max="80" step="5"></label>
-        <label class="fld">Taxa de ocupação máx. (%)<input type="number" name="taxa" min="20" max="100" step="5"><small>Recuos e taxa variam por município: confira a lei de uso do solo.</small></label>
+        <label class="fld">Taxa de ocupação máx. (%)<input type="number" name="taxa" min="20" max="100" step="5"><button type="button" class="ajuda" data-ajuda="Recuos e taxa variam por município: confira a lei de uso do solo." data-manual="terreno" aria-label="Ajuda: taxa de ocupação" aria-expanded="false">?</button></label>
       </fieldset>
 
       <fieldset class="fs" data-secao="tipo"><legend>Tipo da casa</legend>
@@ -280,12 +300,12 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
             <label class="chk sec-U"><input type="checkbox" name="secAlaD">Ala direita (apoio)</label>
           </div>
           <p class="fld wide"><small>Levar para o superior:</small></p>
-          <label class="fld">Quartos no superior<input type="number" name="supQuartos" min="0" max="8" step="1"><small>Sobem primeiro a master e as suítes.</small></label>
+          <label class="fld">Quartos no superior<input type="number" name="supQuartos" min="0" max="8" step="1"><button type="button" class="ajuda" data-ajuda="Sobem primeiro a master e as suítes." data-manual="tipo" aria-label="Ajuda: quartos no superior" aria-expanded="false">?</button></label>
           <label class="chk"><input type="checkbox" name="supEscritorio">Escritório</label>
           <label class="chk"><input type="checkbox" name="supTv">Sala de TV / sala íntima</label>
           <label class="chk"><input type="checkbox" name="supServico">Lavanderia</label>
         </div>
-        <label class="fld">Torre de ar<select name="torreTipo"><option value="nenhuma">Nenhuma</option><option value="auto">Recomendada para esta casa</option><option value="chamine">Chaminé (efeito chaminé)</option><option value="succao">Coroamento de sucção</option><option value="solar">Chaminé solar</option><option value="captador">Captador de vento</option><option value="combinado">Captador e exaustão combinados</option><option value="hibrida">Híbrida (sucção, chaminé solar e exaustor EC)</option><option value="shed">Captador com shed</option></select><small>Na zona bioclimática 8 o vento rende mais que o efeito chaminé. <a href="../torre/" target="_blank" rel="noopener">Veja o dossiê das torres</a>.</small></label>
+        <label class="fld">Torre de ar<select name="torreTipo"><option value="nenhuma">Nenhuma</option><option value="auto">Recomendada para esta casa</option><option value="chamine">Chaminé (efeito chaminé)</option><option value="succao">Coroamento de sucção</option><option value="solar">Chaminé solar</option><option value="captador">Captador de vento</option><option value="combinado">Captador e exaustão combinados</option><option value="hibrida">Híbrida (sucção, chaminé solar e exaustor EC)</option><option value="shed">Captador com shed</option></select><button type="button" class="ajuda" data-ajuda="Na zona bioclimática 8 o vento rende mais que o efeito chaminé. O dossiê das torres está no manual." data-manual="conforto" aria-label="Ajuda: torre de ar" aria-expanded="false">?</button></label>
         <div id="brisesOps">
           <label class="chk"><input type="checkbox" name="brises">Brises (estudo do tipo e do ângulo pela geometria solar)</label>
           <div id="brisesDet">
@@ -296,7 +316,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         </div>
         <label class="chk"><input type="checkbox" name="rooftop">Rooftop (cobertura usável)</label>
         <div id="rtOps">
-          <p class="fld wide"><small><strong>Até onde vai o rooftop, a partir da escada?</strong> Clique na casa ou escolha abaixo. Ele nunca se abre para o poente (oeste).</small></p>
+          <p class="fld wide"><small><strong>Até onde vai o rooftop, a partir da escada?</strong> <button type="button" class="ajuda" data-ajuda="Clique na casa ou escolha abaixo. Ele nunca se abre para o poente (oeste). As áreas saem do desenho: o terraço é o que sobra da laje; banho e área técnica ficam ao lado da escada." data-manual="rooftop" aria-label="Ajuda: rooftop" aria-expanded="false">?</button></small></p>
           <div id="rtRosa" class="rt-rosa"></div>
           <div class="rt-ops" role="radiogroup" aria-label="Posição do rooftop">
             <label class="chk"><input type="radio" name="rtPos" value="centro">Centralizado <small></small></label>
@@ -308,17 +328,16 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
           <label class="chk"><input type="checkbox" name="rtVaranda">Varanda coberta</label>
           <label class="chk"><input type="checkbox" name="rtBanho">Banho</label>
           <label class="chk"><input type="checkbox" name="rtSpa">Spa (no terraço, 2,40 m)</label>
-          <p class="sub-nota">As áreas saem do desenho: o terraço é o que sobra da laje. Banho e área técnica ficam ao lado da caixa de escada, do lado do poente quando houver um.</p>
         </div>
         <label class="chk"><input type="checkbox" name="subsolo">Com subsolo</label>
         <label class="chk"><input type="checkbox" name="elevador">Prever elevador (poço de 1,60 × 1,60 m)</label>
         <div id="subOps">
-          <p class="sub-nota" id="subVagasNota">Vagas no subsolo: o máximo que cabe (3,00 × 5,00 m cada), de preferência perpendiculares ao comprimento do lote, dos dois lados de um corredor de manobra. A quantidade de vagas só é pedida quando não há subsolo; para limitar o tamanho do subsolo, use o teto abaixo.</p>
-          <label class="fld">Teto de vagas no subsolo<input type="number" name="subVagasMax" min="0" max="40" step="1"><small>0 = sem limite: cabem quantas vagas o lote comportar. Com um teto, o subsolo fica do menor tamanho que acomoda essas vagas, e o custo cai.</small></label>
+          <p class="sub-nota" id="subVagasNota">Vagas no subsolo: o máximo que cabe. <button type="button" class="ajuda" data-ajuda="Vagas de 3,00 × 5,00 m, de preferência perpendiculares ao comprimento do lote, dos dois lados de um corredor de manobra. Para limitar o tamanho do subsolo, use o teto abaixo." data-manual="subsolo" aria-label="Ajuda: vagas no subsolo" aria-expanded="false">?</button></p>
+          <label class="fld">Teto de vagas no subsolo<input type="number" name="subVagasMax" min="0" max="40" step="1"><button type="button" class="ajuda" data-ajuda="0 = sem limite: cabem quantas vagas o lote comportar. Com um teto, o subsolo fica do menor tamanho que acomoda essas vagas, e o custo cai." data-manual="subsolo" aria-label="Ajuda: teto de vagas" aria-expanded="false">?</button></label>
           <label class="fld">Nível do subsolo<select name="subNivel"><option value="meio">Semienterrado (1,40 m)</option><option value="inteiro">Enterrado</option></select></label>
-          <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><small>Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo.</small></label>
+          <label class="fld">O subsolo pode ocupar os recuos<select name="subRecuos"><option value="nenhum">Não (fica dentro dos recuos)</option><option value="lateraisFundo">Laterais e fundo</option><option value="todos">Todos, inclusive o frontal</option></select><button type="button" class="ajuda" data-ajuda="Muitas cidades liberam os recuos para subsolo enterrado; confirme na lei de uso do solo." data-manual="subsolo" aria-label="Ajuda: subsolo nos recuos" aria-expanded="false">?</button></label>
           <label class="fld">Inclinação da rampa (%)<input type="number" name="inclinacao" min="8" max="25" step="1"></label>
-          <label class="fld">Vão máximo sem pilar (m)<input type="number" name="vaoMax" min="5" max="20" step="0.5"><small>Pilares só no perímetro e entre vagas; a faixa de manobra fica sempre livre.</small></label>
+          <label class="fld">Vão máximo sem pilar (m)<input type="number" name="vaoMax" min="5" max="20" step="0.5"><button type="button" class="ajuda" data-ajuda="Pilares só no perímetro e entre vagas; a faixa de manobra fica sempre livre." data-manual="subsolo" aria-label="Ajuda: vão sem pilar" aria-expanded="false">?</button></label>
         </div>
       </fieldset>
 
@@ -347,7 +366,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
       </fieldset>
 
       <fieldset class="fs" data-secao="dimensoes"><legend>Dimensões dos cômodos (opcional)</legend>
-          <p class="fld wide"><small>Largura × comprimento em metros, ou só a área. Em branco, o gerador decide. A nota mostra quanto cada variante se afasta do pedido.</small></p>
+          <p class="fld wide"><small>Largura × comprimento (m) ou só a área. <button type="button" class="ajuda" data-ajuda="Em branco, o gerador decide. A nota mostra quanto cada variante se afasta do pedido." data-manual="dimensoes" aria-label="Ajuda: dimensões" aria-expanded="false">?</button></small></p>
           <div class="dimrow" data-t="quarto"><span>Quarto</span><input type="number" name="d_quarto_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Quarto: largura (m)"><i>×</i><input type="number" name="d_quarto_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Quarto: comprimento (m)"><i>ou</i><input type="number" name="d_quarto_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Quarto: área (m²)"></div>
           <div class="dimrow" data-t="suite"><span>Suíte (quarto)</span><input type="number" name="d_suite_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Suíte (quarto): largura (m)"><i>×</i><input type="number" name="d_suite_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Suíte (quarto): comprimento (m)"><i>ou</i><input type="number" name="d_suite_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Suíte (quarto): área (m²)"></div>
           <div class="dimrow" data-t="master"><span>Suíte master (quarto)</span><input type="number" name="d_master_w" min="0" max="20" step="0.05" placeholder="larg." aria-label="Suíte master (quarto): largura (m)"><i>×</i><input type="number" name="d_master_l" min="0" max="20" step="0.05" placeholder="compr." aria-label="Suíte master (quarto): comprimento (m)"><i>ou</i><input type="number" name="d_master_a" min="0" max="200" step="0.5" placeholder="m²" aria-label="Suíte master (quarto): área (m²)"></div>
@@ -388,7 +407,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
           <label class="chk"><input type="checkbox" name="edBanho">Banho</label>
           <label class="chk"><input type="checkbox" name="edDeposito">Depósito / lavanderia</label>
           <label class="chk"><input type="checkbox" name="edQuarto">Quarto / estúdio</label>
-          <p class="fld wide"><small id="edNota">Com 2 pavimentos: gourmet, banho e depósito embaixo; quarto de hóspedes em cima, com o banho exatamente sobre o banho de baixo.</small></p>
+          <p class="fld wide"><small id="edNota">Hóspedes em cima, gourmet embaixo. <button type="button" class="ajuda" data-ajuda="Com 2 pavimentos: gourmet, banho e depósito embaixo; quarto de hóspedes em cima, com o banho exatamente sobre o banho de baixo." data-manual="anexos" aria-label="Ajuda: edícula de 2 pavimentos" aria-expanded="false">?</button></small></p>
         </div>
         <label class="chk"><input type="checkbox" name="piscina">Piscina</label>
         <div id="pisOps">
@@ -413,7 +432,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
           <option value="madeira">Madeira engenheirada (referência)</option>
         </select><small id="estInfo"></small></label>
         <label class="fld">Vãos<select name="estVaos"><option value="padrao">Vão econômico do sistema</option><option value="maiores">Vãos maiores (salas sem pilar intermediário)</option></select></label>
-        <label class="fld">Balanço das varandas (m)<input type="number" name="estBalanco" min="0" max="6" step="0.25"><small>0 = sem balanço. O limite usual depende do sistema.</small></label>
+        <label class="fld">Balanço das varandas (m)<input type="number" name="estBalanco" min="0" max="6" step="0.25"><button type="button" class="ajuda" data-ajuda="0 = sem balanço. O limite usual depende do sistema." data-manual="estrutura" aria-label="Ajuda: balanço" aria-expanded="false">?</button></label>
       </fieldset>
 
       <fieldset class="fs" data-secao="custo"><legend>Padrão e local da obra</legend>
@@ -421,13 +440,13 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="chk"><input type="checkbox" name="condominio">Casa em condomínio (regras e taxas de obra)</label>
         <label class="fld">Distância do mar<select name="distMar"><option value="acima2000">Mais de 2 km</option><option value="de500a2000">De 500 m a 2 km</option><option value="ate500">Até 500 m (agressividade marinha)</option></select></label>
         <label class="fld">Padrão de acabamento<select name="padrao"><option value="simples">Simples (CUB R1-B)</option><option value="intermediario">Intermediário (CUB R1-N)</option><option value="alto">Alto (CUB R1-A)</option></select></label>
-        <label class="fld">CUB<select name="cubTipo"><option value="onerado">Não desonerado</option><option value="desonerado">Desonerado</option></select><small>O desonerado vale só para construtoras das CNAE 412, 432, 433 e 439 (Lei 12.546/2011).</small></label>
+        <label class="fld">CUB<select name="cubTipo"><option value="onerado">Não desonerado</option><option value="desonerado">Desonerado</option></select><button type="button" class="ajuda" data-ajuda="O desonerado vale só para construtoras das CNAE 412, 432, 433 e 439 (Lei 12.546/2011)." data-manual="custo" aria-label="Ajuda: CUB" aria-expanded="false">?</button></label>
         <label class="chk"><input type="checkbox" name="empreitada">Obra por empreitada (inclui o BDI)</label>
         <label class="chk"><input type="checkbox" name="custoIncc">Projetar pelo INCC-M até hoje (estimado)</label>
       </fieldset>
 
       <fieldset class="fs" data-secao="solar"><legend>Energia solar básica</legend>
-        <p class="fld wide"><small>Projeção de custo do sistema básico: portão automático, iluminação interna e externa, câmeras de segurança, geladeira, um ar-condicionado e ventiladores, com bateria para seguirem ligados quando a rede cai.</small></p>
+        <p class="fld wide"><small>Sistema básico com bateria. <button type="button" class="ajuda" data-ajuda="Projeção de custo do sistema básico: portão automático, iluminação interna e externa, câmeras de segurança, geladeira, um ar-condicionado e ventiladores, com bateria para seguirem ligados quando a rede cai." data-manual="solar" aria-label="Ajuda: energia solar básica" aria-expanded="false">?</button></small></p>
         <label class="fld">Autonomia da bateria<select name="solAutonomia"><option value="4">4 horas</option><option value="8">8 horas</option><option value="12">12 horas</option><option value="24">24 horas</option></select></label>
       </fieldset>
 
@@ -446,8 +465,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
     <section class="panel" style="--c:var(--brass)">
       <div class="panel-head">
         <p class="eyebrow">Gerador de plantas · estudo preliminar automático</p>
-        <h1 style="font-size:clamp(26px,4vw,34px)">Plantas a partir do programa</h1>
-        <p>Preencha o terreno e o programa no formulário. O gerador monta variantes por regras (zoneamento social, serviço e íntimo, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores.</p>
+        <h1 style="font-size:clamp(26px,4vw,34px)">Plantas a partir do programa <button type="button" class="ajuda" data-ajuda="O gerador monta variantes por regras (zoneamento, áreas e lados mínimos, ventilação e acessos) e mostra as três melhores." data-manual="como-decide" aria-label="Ajuda: como o gerador funciona" aria-expanded="false">?</button></h1>
       </div>
 
       <div class="vazio-res" id="resultadoVazio">
@@ -463,9 +481,10 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
       <div class="fig-tools" style="justify-content:flex-start">
         <span class="seg-vista" role="group" aria-label="Vista da planta"><button class="btn" type="button" id="vistaHum" data-vista="humanizada" aria-pressed="true" data-tip="Planta com pisos, móveis e paredes em escala: a casa como ela vai ficar">Humanizada</button><button class="btn" type="button" id="vistaTec" data-vista="tecnica" aria-pressed="false" data-tip="Planta técnica: cores por zona, medidas de cada cômodo e cama mínima">Técnica</button><button class="btn" type="button" id="vistaApr" data-vista="apresentacao" aria-pressed="false" data-tip="Só a casa, humanizada, sem lote, cotas, rosa dos ventos e setas de vento: para apresentar">Apresentação</button></span>
         <button class="btn" type="button" id="espelhar" aria-pressed="false" data-tip="Inverte a planta da esquerda para a direita">Espelhar</button>
-        <button class="btn" type="button" id="baixarSvg" data-tip="Baixa o pavimento atual em SVG">Baixar SVG</button>
-        <button class="btn" type="button" id="baixarPng" data-tip="Baixa o pavimento atual em PNG (2×)">Baixar PNG</button>
-        <span class="salvar-banco"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto para o banco" maxlength="80"><button class="btn prim" type="button" id="salvarBanco" data-tip="Guarda esta variante no banco de projetos deste navegador">Salvar no banco</button><button class="btn" type="button" id="salvarArquivo" data-tip="Baixa o arquivo do projeto (programa, variante, resumo e custo) para guardar onde quiser">Salvar arquivo</button></span>
+        <details class="menu" id="menuBaixar"><summary class="btn">Baixar <span aria-hidden="true">▾</span></summary>
+          <div class="menu-p" role="group" aria-label="Baixar o pavimento atual"><button class="btn" type="button" id="baixarSvg">Pavimento em SVG</button><button class="btn" type="button" id="baixarPng">Pavimento em PNG (2×)</button></div></details>
+        <details class="menu" id="menuSalvar"><summary class="btn prim">Salvar <span aria-hidden="true">▾</span></summary>
+          <div class="menu-p salvar-banco" role="group" aria-label="Salvar o projeto"><input type="text" id="nomeBanco" placeholder="Nome do projeto" aria-label="Nome do projeto" maxlength="80"><button class="btn prim" type="button" id="salvarBanco">No banco deste navegador</button><button class="btn" type="button" id="salvarArquivo">Baixar o arquivo do projeto</button><p class="menu-n">O banco fica só neste navegador; o arquivo abre em qualquer computador.</p></div></details>
       </div>
       <div class="plan-box" id="plan"></div>
       <div class="legenda-zonas" id="legendaZonas" aria-label="Legenda de cores">
@@ -473,71 +492,19 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
       </div>
       <div id="avisos"></div>
 
-      <h2 style="margin-top:18px">Quadro de áreas</h2>
-      <div class="tbl-wrap"><table id="quadro"></table></div>
+      <h2 style="margin-top:18px">Quadro de áreas <button type="button" class="ajuda" data-ajuda="Medidas pelo eixo das paredes. A tabela completa traz cada cômodo, a janela obtida e exigida (1/8 do piso), o pé-direito e o volume." data-manual="quadro" aria-label="Ajuda: quadro de áreas" aria-expanded="false">?</button></h2>
+      <details class="quadro-det"><summary id="quadroResumo"></summary><div class="tbl-wrap"><table id="quadro"></table></div></details>
 
-      <h2>Implantação e terreno</h2>
+      <h2>Implantação e terreno <button type="button" class="ajuda" data-ajuda="O terreno mínimo é calculado com os mesmos recuos e a mesma taxa de ocupação, procurando a menor área em que alguma variante cabe sem violar o terreno." data-manual="implantacao" aria-label="Ajuda: terreno mínimo" aria-expanded="false">?</button></h2>
       <div class="lote-wrap">
         <div class="lote-col"><div id="lote"></div></div>
         <div>
           <div class="tbl-wrap"><table id="terreno"></table></div>
-          <p class="note">O terreno mínimo é calculado com os mesmos recuos e a mesma taxa de ocupação, procurando a menor área em que alguma variante cabe sem violar o terreno.</p>
         </div>
       </div>
 
       </div><!-- #resultado -->
-      <h2>Como o gerador decide</h2>
-      <p class="note">Ordem das decisões: primeiro o que torna a planta inválida, depois as regras que você escolheu, por fim a nota. Uma regra de cima sempre vence a de baixo.</p>
-      <div class="grid2">
-        <div class="card tint" style="--c:var(--patina)">
-          <h3>1. Zoneamento (onde fica cada parte)</h3>
-          <ul class="clean" style="--c:var(--patina)">
-            <li><strong>Bloco único:</strong> social na frente (garagem, salas), apoio no meio (cozinha, serviço, banhos) e íntimo no fundo, com corredor central (quartos dos dois lados) ou lateral (quartos de um lado só).</li>
-            <li><strong>Em L:</strong> social e apoio na frente; ala íntima numa tira lateral, liberando quintal.</li>
-            <li><strong>Em U:</strong> salas e cozinha na frente; ala íntima e ala de apoio em volta de um pátio aberto para o fundo.</li>
-            <li><strong>Em H</strong> (só térrea): ala íntima e ala social paralelas, ligadas por cozinha, serviço e galeria.</li>
-            <li><strong>Sobrado:</strong> bloco, L ou U; master e suítes sobem primeiro; o superior ocupa a projeção toda ou só as seções escolhidas.</li>
-            <li><strong>O íntimo nunca fica no poente.</strong> Quando o fundo dá para oeste (frente para leste), a casa térrea inverte o zoneamento: quartos na frente, voltados para o nascente, salas e varanda no fundo, entrada pelo corredor dos quartos e vagas descobertas no recuo. Quarto encostado numa fachada a oeste só aparece se nenhuma variante escapar (hoje acontece no sobrado e com subsolo, que ainda não invertem), e o aviso diz isso.</li>
-          </ul>
-        </div>
-        <div class="card tint" style="--c:var(--rust)">
-          <h3>2. O que elimina uma variante</h3>
-          <ul class="clean" style="--c:var(--rust)">
-            <li>Cômodo fora do lote ou dentro dos recuos (o subsolo pode ocupá-los se você marcar; jardim e rampa sempre podem).</li>
-            <li>Cômodo sem ligação com o resto da casa.</li>
-            <li>Quarto com janela a oeste: a variante só aparece se nenhuma outra escapar, e então o aviso diz isso. Com corredor central e frente para norte ou sul, um lado dos quartos fica a oeste; por isso o corredor lateral, com os quartos a leste, costuma vencer.</li>
-            <li>Sem nenhuma variante válida, o gerador mostra o motivo e o terreno mínimo.</li>
-          </ul>
-          <h3>3. Regras fixas</h3>
-          <ul class="clean" style="--c:var(--rust)">
-            <li>Nenhuma janela a menos de 1,50 m da divisa lateral ou de fundo (Código Civil, art. 1.301; texto ainda a confirmar no Planalto). Varanda ou terraço nessa faixa gera aviso.</li>
-            <li>Rooftop nunca aberto para o poente: a opção a oeste fica indisponível e as bordas a oeste recebem parede ou brise.</li>
-            <li>Janelas de cada cômodo em pontos distantes (ventilação cruzada), com área de 1/8 do piso para a luz.</li>
-            <li>Escada reta com 2 × espelho + piso entre 0,63 e 0,65 m (Blondel); espelho até 0,18 m.</li>
-            <li>Subsolo com o máximo de vagas (3,00 × 5,00 m), manobra contínua de 5 m, rampa em escala e jardim de inverno oposto à rampa; ventilação cruzada obrigatória.</li>
-            <li>Varanda de fundos (opcional): faixa aberta no trecho mais longo da fachada de fundos, com a profundidade e a largura escolhidas; a porta sai das salas (quando ficam no fundo), da suíte master, de uma suíte ou da circulação. Quando a casa mais a varanda passam do recuo de fundo, o gerador primeiro tenta uma casa mais curta (salas e apoio um pouco menores); se ainda faltar, reduz a varanda até 1,50 m, com aviso; abaixo disso, a variante fica sem varanda, com aviso, e vai para o fim da lista.</li>
-            <li>Escritório ampliado (opcional): 14 m² e lado de 3,00 m (preferência de projeto), na frente, com porta para dentro e porta própria para a varanda frontal ou para a rua; o caminho do portão social ganha um ramal até ele, sem cruzar a faixa dos carros. Com o fundo a oeste (quartos na frente), ele vai para a frente junto da entrada; no sobrado, fica no térreo.</li>
-            <li>Pé-direito: o piso a piso define a escada, o elevador e o subsolo; o pé-direito livre (do piso ao forro) tem um valor para as salas (estar, jantar, TV, sala íntima, escritório e varanda gourmet) e outro para os demais cômodos (preferência de projeto; o mínimo legal será conferido na E3). Com pavimento em cima, o livre fica no máximo no piso a piso menos 0,15 m de laje e forro; sem pavimento em cima, a cobertura sobe sobre os cômodos mais altos. A parede a mais acima de 2,60 m aparece como estimativa no card de custo, fora do total. Pé-direito duplo (opcional) só no estar: dois pisos a piso menos a laje, na térrea ou no último pavimento.</li>
-            <li>Planta humanizada: móvel só onde cabe com folga. Nada na faixa de 0,60 m em frente às portas nem no arco da folha; cama com a cabeceira longe da porta; mesa de jantar com 0,75 m livres atrás das cadeiras (0,45 m no aperto); sofá de 1,60 a 3,20 m da TV; armário e geladeira nunca na frente de janela. Paredes desenhadas com 10 cm (internas) e 15 cm (externas).</li>
-          </ul>
-        </div>
-        <div class="card tint" style="--c:var(--steel)">
-          <h3>4. A nota (de 0 a 100)</h3>
-          <ul class="clean" style="--c:var(--steel)">
-            <li>Começa em 100 e perde pontos: cômodo abaixo do mínimo ou alongado, cômodo sem janela ou porta, falta de aberturas do lado do vento (leste/sudeste) ou do lado oposto, quarto a sudoeste ou noroeste, ocupação ou permeabilidade fora do limite, corredores acima de 14 % da área.</li>
-            <li>Entre a planta e a espelhada, fica a que recebe melhor o vento e o sol (você pode trocar no botão Espelhar).</li>
-            <li>As três melhores aparecem, de preferência com formatos diferentes.</li>
-          </ul>
-        </div>
-        <div class="card tint" style="--c:var(--brass)">
-          <h3>5. O que não está verificado</h3>
-          <ul class="clean" style="--c:var(--brass)">
-            <li>Áreas e lados mínimos dos cômodos (quarto 8 m² e 2,60 m; suíte 9 m² e 2,80 m; banho 2,4 m² e 1,20 m), recuos, ocupação e permeabilidade padrão são referências de projeto, <strong>não</strong> a lei do seu município. Confira na lei de uso do solo e no Código da Cidade (Fortaleza: LC 236/2017 e LC 270/2019).</li>
-            <li>Vento e sol são indicadores simplificados, não simulação.</li>
-            <li>Estudo automático: confira acessibilidade, estrutura e legislação com um responsável técnico.</li>
-          </ul>
-        </div>
-      </div>
+      <p class="decide-link"><a class="btn" href="../manual/#como-decide">Como o gerador decide <span aria-hidden="true">→</span></a> <span>Zoneamento, o que elimina uma variante, regras fixas, a nota e o que não está verificado, no manual.</span></p>
     </section>
     <section class="panel" id="analises" style="--c:var(--card-custo)" aria-labelledby="tAnalises">
       <div class="panel-head"><p class="eyebrow">Análises da variante escolhida</p><h2 id="tAnalises">Custo, estrutura e acessibilidade</h2></div>
@@ -750,6 +717,7 @@ function render(){
   }
   h += '</tbody>';
   document.getElementById('quadro').innerHTML = h;
+  document.getElementById('quadroResumo').innerHTML = `<span class="qr-n">${f2(v.quadro.fechada)} m²</span><span class="qr-s">fechados${v.quadro.pavimentos.length > 1 ? ' · ' + v.quadro.pavimentos.map(pv => `${esc(pv.pav.toLowerCase())} ${f2(pv.fechada)} m²`).join(' · ') : ''}${v.quadro.aberta ? ` · varandas e terraços ${f2(v.quadro.aberta)} m²` : ''}</span><span class="qr-v">Tabela completa</span>`;
   // terreno
   document.getElementById('lote').innerHTML = Desenho.lote(v, q, res);
   const lm = res.loteMinimo;
@@ -841,6 +809,10 @@ function salvarArquivo(){
 }
 document.getElementById('salvar').addEventListener('click', salvarArquivo);
 document.getElementById('salvarArquivo').addEventListener('click', salvarArquivo);
+// menus da barra: Baixar fecha depois da ação; Salvar fica aberto para mostrar "Salvo no banco"; Esc ou clique fora fecham
+for(const m of document.querySelectorAll('#menuBaixar')) m.addEventListener('click', e => { if(e.target.closest('.menu-p button')) setTimeout(() => m.open = false, 0); });
+document.addEventListener('click', e => { for(const m of document.querySelectorAll('details.menu[open]')) if(!m.contains(e.target)) m.open = false; });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') for(const m of document.querySelectorAll('details.menu[open]')) m.open = false; });
 document.getElementById('carregar').addEventListener('change', e => {
   const f = e.target.files[0]; if(!f) return;
   f.text().then(t => {
@@ -871,7 +843,7 @@ document.getElementById('salvarBanco').addEventListener('click', function(){
   lista.unshift(item);
   try{ localStorage.setItem('plantas-banco', JSON.stringify(lista)); this.textContent = 'Salvo no banco'; campo.value = ''; }
   catch(e){ this.textContent = 'Não foi possível salvar'; }
-  setTimeout(() => this.textContent = 'Salvar no banco', 2000);
+  setTimeout(() => this.textContent = 'No banco deste navegador', 2000);
 });
 document.querySelectorAll('.seg-vista .btn').forEach(b => b.addEventListener('click', () => {
   vistaPlanta = b.dataset.vista; try{ localStorage.setItem('plantas-vista', vistaPlanta); }catch(e){}

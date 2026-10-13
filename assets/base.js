@@ -1,4 +1,5 @@
-/* Comportamentos comuns às páginas da coleção: tema claro/escuro, dicas (data-tip) e menu lateral móvel. */
+/* Comportamentos comuns às páginas da coleção: tema claro/escuro, dicas (data-tip), ajuda "?" com "Saiba mais" no manual
+   (.ajuda com data-ajuda e data-manual) e menu lateral móvel. */
 (function(){
 'use strict';
 var root=document.documentElement;
@@ -7,20 +8,23 @@ try{var sv=localStorage.getItem('plantas-tema'); if(sv==='dark'||sv==='light') r
 try{localStorage.removeItem('plantas-beta');}catch(e){}
 function currentTheme(){var t=root.getAttribute('data-theme'); if(t) return t; return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
 window.plantasTema=currentTheme;
+function escA(t){return String(t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+window.plantasAjuda=function(texto,ancora,rotulo){return '<button type="button" class="ajuda" data-ajuda="'+escA(texto)+'"'+(ancora?' data-manual="'+escA(ancora)+'"':'')+' aria-label="Ajuda'+(rotulo?': '+escA(rotulo):'')+'" aria-expanded="false">?</button>';};
 document.addEventListener('DOMContentLoaded',function(){
   // marca Modulus no lugar do quadradinho
   var bm=document.querySelector('.brand-mark');
   if(bm){ var rz=document.body.getAttribute('data-root')||''; var lk=document.createElement('a'); lk.className='brand-logo'; lk.href=rz||'./'; lk.setAttribute('aria-label','Modulus, página inicial');
     lk.innerHTML='<img src="'+rz+'assets/logo.svg" alt=""><span class="wordmark">Modulus</span>'; bm.replaceWith(lk); }
-  // menu geral: <body data-nav="inicio|gerador|banco" data-root="../">
+  // menu geral: <body data-nav="inicio|gerador|banco|manual" data-root="../">
   var nav=document.body.getAttribute('data-nav'), barIn=document.querySelector('.bar-in');
   if(nav!==null && barIn){
     var raiz=document.body.getAttribute('data-root')||'';
     var ic={inicio:'<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
       gerador:'<rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 12h9M13 4v16M13 15h7" stroke="currentColor" stroke-width="1.8"/>',
-      banco:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'};
+      banco:'<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>',
+      manual:'<path d="M12 6.5C10 5 7 4.5 4 5v13c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V5c-3-.5-6 0-8 1.5zM12 6.5v13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>'};
     // [chave, rótulo, rótulo curto (celular), endereço]
-    var itens=[['inicio','Início','Início',raiz||'./'],['gerador','Gerador','Gerador',raiz+'gerador/'],['banco','Banco de projetos','Banco',raiz+'banco/']];
+    var itens=[['inicio','Início','Início',raiz||'./'],['gerador','Gerador','Gerador',raiz+'gerador/'],['banco','Banco de projetos','Banco',raiz+'banco/'],['manual','Manual','Manual',raiz+'manual/']];
     var el=document.createElement('nav'); el.className='topnav'; el.id='topnav'; el.setAttribute('aria-label','Seções');
     el.innerHTML=itens.map(function(i){return '<a class="nav-b" style="--c:var(--nav-'+i[0]+')" href="'+i[3]+'"'+(i[0]===nav?' aria-current="page"':'')+'><svg viewBox="0 0 24 24" aria-hidden="true">'+ic[i[0]]+'</svg><span class="ll">'+i[1]+'</span><span class="ls" aria-hidden="true">'+i[2]+'</span></a>';}).join('');
     var tb=document.getElementById('themeBtn'); barIn.insertBefore(el,tb);
@@ -58,5 +62,26 @@ document.addEventListener('DOMContentLoaded',function(){
   document.addEventListener('focusout',hideTip);
   document.addEventListener('touchstart',function(e){var el=e.target.closest&&e.target.closest('[data-tip]'); if(!el){hideTip(); return;} showTip(el); clearTimeout(hideT); hideT=setTimeout(hideTip,2800);},{passive:true});
   window.addEventListener('scroll',hideTip,{passive:true});
+
+  // ajuda "?": dica curta ao passar ou focar; um toque ou clique fixa a dica (para seguir o "Saiba mais"); Esc ou clique fora fecha
+  var pop=document.createElement('div'), fixo=null, raizM=document.body.getAttribute('data-root')||'';
+  pop.id='ajudaPop'; pop.setAttribute('role','tooltip'); body.appendChild(pop);
+  function abreAjuda(el){var t=el.getAttribute('data-ajuda'); if(!t) return; var m=el.getAttribute('data-manual');
+    pop.innerHTML=''; var p=document.createElement('p'); p.textContent=t; pop.appendChild(p);
+    if(m){var a=document.createElement('a'); a.href=(document.body.getAttribute('data-nav')==='manual'?'':raizM+'manual/')+'#'+m; a.textContent='Saiba mais no manual →'; pop.appendChild(a);}
+    pop.classList.add('on'); el.setAttribute('aria-expanded','true');
+    var r=el.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight,l=Math.max(8,Math.min(window.innerWidth-w-8,r.left+r.width/2-w/2)),tp=r.bottom+8;
+    if(tp+h>window.innerHeight-8) tp=r.top-h-8; pop.style.left=l+'px'; pop.style.top=tp+'px';}
+  function fechaAjuda(){pop.classList.remove('on'); document.querySelectorAll('.ajuda[aria-expanded="true"]').forEach(function(b){b.setAttribute('aria-expanded','false');}); fixo=null;}
+  document.addEventListener('mouseover',function(e){var el=e.target.closest&&e.target.closest('.ajuda'); if(el&&!fixo) abreAjuda(el);});
+  document.addEventListener('mouseout',function(e){var el=e.target.closest&&e.target.closest('.ajuda'); if(el&&!fixo&&!(e.relatedTarget&&pop.contains(e.relatedTarget))) fechaAjuda();});
+  pop.addEventListener('mouseleave',function(){if(!fixo) fechaAjuda();});
+  document.addEventListener('focusin',function(e){var el=e.target.closest&&e.target.closest('.ajuda'); if(el&&!fixo) abreAjuda(el);});
+  document.addEventListener('focusout',function(e){if(!fixo&&e.target.closest&&e.target.closest('.ajuda')&&!(e.relatedTarget&&pop.contains(e.relatedTarget))) fechaAjuda();});
+  document.addEventListener('click',function(e){var el=e.target.closest&&e.target.closest('.ajuda');
+    if(el){e.preventDefault(); if(fixo===el){fechaAjuda(); return;} fechaAjuda(); abreAjuda(el); fixo=el; return;}
+    if(fixo&&!pop.contains(e.target)) fechaAjuda();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape') fechaAjuda();});
+  window.addEventListener('scroll',function(){if(!fixo) fechaAjuda();},{passive:true});
 });
 })();

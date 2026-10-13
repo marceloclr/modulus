@@ -17,7 +17,7 @@ const E = {el:null, raiz:'../', aba:'sol', mes:new Date().getMonth() + 1, hora:9
 function casca(){
   const marcas = CURTO.map((c, i) => `<button type="button" class="sv-marca" data-mes="${i+1}" aria-label="${MESES[i]}"><b>${i+1}</b>${c}</button>`).join('');
   return `<div class="card res sv" style="--c:var(--card-torre)">
-  <div class="res-head"><h3>Sol e vento ao longo do ano</h3><p class="selo">Fortaleza (3,73° S) · dia 21 de cada mês · vento: média de 2015 a 2024 (ERA5)</p></div>
+  <div class="res-head"><h3>Sol e vento ao longo do ano <button type="button" class="ajuda" id="svAjuda" data-ajuda="" data-manual="sol-vento" aria-label="Ajuda: sol e vento" aria-expanded="false">?</button></h3><p class="selo">Fortaleza (3,73° S) · dia 21 de cada mês · vento: média de 2015 a 2024 (ERA5)</p></div>
   <div class="sv-abas" role="tablist" aria-label="O que animar">
     <button type="button" role="tab" class="btn" data-aba="sol" aria-selected="true">Sol</button>
     <button type="button" role="tab" class="btn" data-aba="vento" aria-selected="false">Vento</button>
@@ -36,7 +36,6 @@ function casca(){
     <output id="svHoraTxt" for="svHora"></output>
   </div>
   <div class="sv-corpo"><div class="sv-planta" id="svPlanta"></div><div class="sv-painel" id="svPainel" aria-live="polite"></div></div>
-  <p class="note" id="svNota"></p>
 </div>`;
 }
 
@@ -159,7 +158,7 @@ function desenhar(tudo){
   el.querySelectorAll('[data-aba]').forEach(b => b.setAttribute('aria-selected', b.dataset.aba === E.aba ? 'true' : 'false'));
   el.querySelector('.sv-horas').hidden = E.aba !== 'sol';
   el.querySelector('#svHoraTxt').textContent = hhmm(E.hora);
-  const pl = el.querySelector('#svPlanta'), pa = el.querySelector('#svPainel'), nota = el.querySelector('#svNota');
+  const pl = el.querySelector('#svPlanta'), pa = el.querySelector('#svPainel'), nota = {set textContent(x){ el.querySelector('#svAjuda').setAttribute('data-ajuda', x); }};
   if(!v || !q){ pl.innerHTML = ''; pa.innerHTML = '<p class="note">Gere uma planta para ver a animação.</p>'; return; }
   if(Motor.RUMOS[q.orientacao] === undefined){ pl.innerHTML = ''; pa.innerHTML = '<p class="note">Informe para onde a frente do terreno está voltada (bloco 1, Terreno) para animar o sol e o vento sobre a casa.</p>'; return; }
   // a planta só é redesenhada quando muda a variante, o pavimento ou a aba

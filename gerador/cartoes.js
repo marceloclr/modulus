@@ -6,6 +6,7 @@
 })(this, function(Graficos, Custos, Motor){
 'use strict';
 const f2 = Motor.f2, brl = Custos.brl, esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+const aj = (t, a, r) => `<button type="button" class="ajuda" data-ajuda="${esc(t)}" data-manual="${a}" aria-label="Ajuda: ${esc(r)}" aria-expanded="false">?</button>`;
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 const mesTxt = m => { const [a, b] = m.split('-'); return `${MESES[+b - 1]}/${a}`; };
 const dataBr = d => d.split('-').reverse().join('/');
@@ -26,7 +27,7 @@ const VISTAS = [['parcelas', 'Parcelas', 'Mostra o custo de cada parcela, com a 
 function cartaoCusto(r, extra){
   const sl = selo(extra.dados, extra.hoje), vista = extra.vista || 'parcelas';
   const tot = r.total;
-  let h = `<div class="card res" style="--c:var(--card-custo)"><div class="res-head"><h3>Estimativa de custo</h3>`;
+  let h = `<div class="card res" style="--c:var(--card-custo)"><div class="res-head"><h3>Estimativa de custo ${aj(r.aviso, 'custo', 'estimativa de custo')}</h3>`;
   h += `<p class="selo${sl.velho ? ' velho' : ''}" tabindex="0" data-tip="${esc(sl.dica)}">${sl.velho ? '⚠ ' : ''}${esc(sl.texto)}</p></div>`;
   h += `<div class="stats s3">`;
   h += `<div class="stat" style="--c:var(--card-custo)" tabindex="0" data-tip="${esc(r.formulaTotal)}"><div class="k">Custo estimado</div><div class="v">${brl(tot.med)}</div></div>`;
@@ -51,7 +52,7 @@ function cartaoCusto(r, extra){
   h += `<div class="tbl-wrap"><table><thead><tr><th>Área</th><th class="n">m² reais</th><th class="n">Coeficiente</th><th class="n">m² equivalentes</th></tr></thead><tbody>`;
   for(const l of r.linhasAeq) h += `<tr><td><span class="calc" data-tip="${esc(l.origem || '')}">${esc(l.nome)}</span></td><td class="n">${f2(l.area)}</td><td class="n">${f2(l.coef.med)} (${f2(l.coef.min)}–${f2(l.coef.max)})</td><td class="n">${f2(l.eq.med)}</td></tr>`;
   h += `<tr class="total"><td>Área equivalente</td><td></td><td></td><td class="n">${f2(r.Aeq.med)}</td></tr></tbody></table></div></details>`;
-  h += `<p class="note">${esc(r.aviso)}</p></div>`;
+  h += `</div>`;
   return h;
 }
 
@@ -100,7 +101,7 @@ const f1 = n => (Math.round(n*10)/10).toFixed(1).replace('.', ',');
 const MES_CURTO = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
 function cartaoSolar(r, extra){
   const vista = (extra && extra.vista) || 'mensal', F = r.formulas, kwh = n => `${Math.round(n).toLocaleString('pt-BR')} kWh`;
-  let h = `<div class="card res" style="--c:var(--card-solar)"><div class="res-head"><h3>Projeção de custo · energia solar básica</h3>`;
+  let h = `<div class="card res" style="--c:var(--card-solar)"><div class="res-head"><h3>Projeção de custo · energia solar básica ${aj(`Investimento de ${brl(r.custo.min)} a ${brl(r.custo.max)}. Irradiação: NASA POWER (2001–2020). Preços: Greener (1º sem. 2026) e estimativas de bateria e inversor a confirmar. Normas: ${r.normas.join('; ')}. Projeto e instalação exigem responsável técnico com ART e parecer de acesso da Enel Ceará.`, 'solar', 'energia solar')}</h3>`;
   h += `<p class="selo"><span tabindex="0" data-tip="${esc(r.pacote)}">Portão, luzes, câmeras, geladeira, um ar-condicionado e ventiladores</span> · com bateria${r.provisorio ? ' · <span tabindex="0" data-tip="Até o estilo ser escolhido (bloco 4), a cobertura é tratada como laje com platibanda; o tipo de telhado do estilo muda a área útil e a inclinação">cobertura provisória</span>' : ''}</p></div>`;
   h += `<div class="stats s3">`;
   h += `<div class="stat" style="--c:var(--card-solar)" tabindex="0" data-tip="${esc(F.custo)}"><div class="k">Investimento estimado</div><div class="v">${brl(r.custo.med)}</div></div>`;
@@ -124,16 +125,16 @@ function cartaoSolar(r, extra){
   h += `<details class="tabela-custo"><summary>Ver a tabela mês a mês</summary><div class="tbl-wrap"><table><thead><tr><th>Mês</th><th class="n">Geração</th><th class="n">Consumo</th><th class="n">Na hora/bateria</th><th class="n">Compensado</th><th class="n">Economia</th></tr></thead><tbody>`;
   r.meses.forEach((m, i) => { h += `<tr><td>${MESES[i]}</td><td class="n">${kwh(m.geracao)}</td><td class="n">${kwh(m.consumo)}</td><td class="n">${kwh(m.autoconsumo)}</td><td class="n">${kwh(m.compensado)}</td><td class="n">${brl(m.economia)}</td></tr>`; });
   h += `<tr class="total"><td>Ano</td><td class="n">${kwh(r.meses.reduce((t, m) => t + m.geracao, 0))}</td><td class="n">${kwh(r.meses.reduce((t, m) => t + m.consumo, 0))}</td><td></td><td></td><td class="n">${brl(r.economiaAno)}</td></tr></tbody></table></div>`;
-  h += `<p class="note">Investimento de ${brl(r.custo.min)} a ${brl(r.custo.max)}. Irradiação: NASA POWER (2001–2020). Preços: Greener (1º sem. 2026) e estimativas de bateria e inversor a confirmar.</p></details>`;
+  h += `</details>`;
   if(r.avisos.length) h += `<div class="warn"><ul>${r.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`;
-  h += `<p class="note">Normas: ${esc(r.normas.join('; '))}. Projeto e instalação exigem responsável técnico com ART e parecer de acesso da Enel Ceará.</p></div>`;
+  h += `</div>`;
   return h;
 }
 
 /* Card da torre de ar (r de Torre.calcular; null quando a variante não tem torre). */
 function cartaoTorre(r, raiz){
   const m3h = n => Math.round(n).toLocaleString('pt-BR') + ' m³/h', f1 = n => (Math.round(n*10)/10).toFixed(1).replace('.', ',');
-  let h = `<div class="card res" style="--c:var(--card-torre)"><div class="res-head"><h3>Torre de ar</h3><p class="selo">${esc(r.nome)} sobre ${r.sobre === 'escada' ? 'a escada' : 'o estar'}${r.auto ? ' · recomendada para esta casa' : ''}</p></div>`;
+  let h = `<div class="card res" style="--c:var(--card-torre)"><div class="res-head"><h3>Torre de ar ${aj('Na zona bioclimática 8 (Fortaleza) a diferença de temperatura entre dentro e fora é de 1 a 3 K: o vento de leste/sudeste rende várias vezes mais que o efeito chaminé. Estimativa para estudo preliminar; confirme com simulação. O dossiê das torres está no manual.', 'conforto', 'torre de ar')}</h3><p class="selo">${esc(r.nome)} sobre ${r.sobre === 'escada' ? 'a escada' : 'o estar'}${r.auto ? ' · recomendada para esta casa' : ''}</p></div>`;
   h += `<div class="tbl-wrap"><table><tbody>`;
   if(!r.auto && r.recomendada !== r.tipo) h += `<tr><td>Recomendada para esta tipologia</td><td class="n">${esc(r.nomeRecomendada)}</td></tr>`;
   h += `<tr><td>Altura de tiragem</td><td class="n"><span class="calc" data-tip="Da entrada de ar (1 m acima do piso) até a saída da torre, 1,5 m acima da cobertura">${f2(r.H)} m</span></td></tr>`;
@@ -144,7 +145,7 @@ function cartaoTorre(r, raiz){
   h += `<tr><td>Volume ventilado</td><td class="n">${f2(r.volume)} m³</td></tr>`;
   h += `<tr class="total"><td>Trocas de ar por hora</td><td class="n"><span class="calc" data-tip="${esc(r.formulas.trocas)}">${f1(r.trocas)}</span> · mínimo ${f1(r.trocasMin)}</td></tr>`;
   h += `</tbody></table></div>`;
-  h += `<p class="note">Na zona bioclimática 8 (Fortaleza) a diferença de temperatura entre dentro e fora é de 1 a 3 K: o vento de leste/sudeste rende várias vezes mais que o efeito chaminé. Estimativa para estudo preliminar; confirme com simulação. <a href="${raiz || '../'}torre/" target="_blank" rel="noopener">Dossiê das torres</a>.</p>`;
+  h += `<p class="note"><a href="${raiz || '../'}torre/" target="_blank" rel="noopener">Dossiê das torres →</a></p>`;
   return h + '</div>';
 }
 
@@ -181,7 +182,7 @@ function cartaSolar(fc, B, tam){
 }
 /* Card "Brises" (r de Brises.estudar). */
 function cartaoBrises(r, B, dados){
-  let h = `<div class="card res" style="--c:var(--card-brises)"><div class="res-head"><h3>Brises</h3><p class="selo">Sol de Fortaleza (${f2(Math.abs(B.LAT))}° S), dia 21 de cada mês, das 7h às 17h · radiação direta</p></div>`;
+  let h = `<div class="card res" style="--c:var(--card-brises)"><div class="res-head"><h3>Brises ${aj('Só a radiação direta: difusa e reflexos do entorno ficam fora. Não substitui simulação (Apolux, EnergyPlus). Linhas tracejadas azuis na planta marcam as janelas com brise.', 'conforto', 'brises')}</h3><p class="selo">Sol de Fortaleza (${f2(Math.abs(B.LAT))}° S), dia 21 de cada mês, das 7h às 17h · radiação direta</p></div>`;
   if(r.semOrientacao) return h + '<p class="note">Informe para onde a frente do terreno está voltada (bloco 1, Terreno) para estudar os brises.</p></div>';
   if(r.semFaces) return h + '<p class="note">Nenhuma face com janelas recebe sol crítico nesta variante, ou nenhuma face foi escolhida.</p></div>';
   const pct = n => f2(n).replace(/,00$/, '') + ' %';
@@ -196,16 +197,14 @@ function cartaoBrises(r, B, dados){
   h += `</tbody></table></div>`;
   const ad = dados && dados.adicionais && dados.adicionais.brises;
   if(ad) h += `<p class="note">Área protegida ≈ 1,5 × ${f2(r.area)} m² de janelas = ${f2(1.5*r.area)} m²; custo no card de custo (${Custos.brl(ad.min)} a ${Custos.brl(ad.max)}/m², estimativa).</p>`;
-  h += `<p class="note">Só a radiação direta: difusa e reflexos do entorno ficam fora. Não substitui simulação (Apolux, EnergyPlus). Linhas tracejadas azuis na planta marcam as janelas com brise.</p>`;
   return h + '</div>';
 }
 
 /* Card de acessibilidade (v.acessibilidade, com a opção marcada). */
 function cartaoAcessibilidade(v){
   const it = v.acessibilidade, n = it.filter(i => i.ok).length;
-  let h = `<div class="card res" style="--c:var(--steel)"><div class="res-head"><h3>Acessibilidade</h3><p class="selo">NBR 9050:2020 · ${n} de ${it.length} itens atendidos</p></div>`;
+  let h = `<div class="card res" style="--c:var(--steel)"><div class="res-head"><h3>Acessibilidade ${aj('Verificação do estudo preliminar pela geometria: o círculo tracejado marca o giro de 1,50 m no banho acessível. Barras, alturas de peças e maçanetas ficam para o projeto executivo.', 'fontes', 'acessibilidade')}</h3><p class="selo">NBR 9050:2020 · ${n} de ${it.length} itens atendidos</p></div>`;
   h += '<div class="tbl-wrap"><table><tbody>' + it.map(i => `<tr><td>${esc(i.item)}</td><td>${i.ok ? '<span class="tag-ok">Atende</span>' : '<span class="tag-nao">Não atende</span>'}</td><td>${esc(i.detalhe)}</td></tr>`).join('') + '</tbody></table></div>';
-  h += '<p class="note">Verificação do estudo preliminar pela geometria: o círculo tracejado marca o giro de 1,50 m no banho acessível. Barras, alturas de peças e maçanetas ficam para o projeto executivo.</p>';
   return h + '</div>';
 }
 
