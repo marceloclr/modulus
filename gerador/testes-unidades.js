@@ -347,6 +347,34 @@ t('insolação: sombra de um cubo, mancha de sol pela janela e incidência por f
   ok(cel(v.W / 2, ymax + 0.3) < H.max, 'atrás da casa (sul, em junho) há sombra: ' + cel(v.W / 2, ymax + 0.3));
 });
 
+t('vento dentro da casa (V3): aberturas em série, torre e escoamento em volta (contas à mão)', () => {
+  const VE = require('./vento.js');
+  // dois cômodos 4 × 4 lado a lado, porta de 0,80 m entre eles; janela de 1,00 × 1,20 m a oeste (A) e a leste (B); frente norte
+  const A = {id:1, tipo:'estar', nome:'A', x0:0, y0:0, x1:4, y1:4, pd:2.8}, B = {id:2, tipo:'jantar', nome:'B', x0:4, y0:0, x1:8, y1:4, pd:2.8};
+  const p = {salas:[A, B], portas:[{o:'v', c:4, t0:1, t1:1.8, sala:1, viz:2}], vaos:[], janelas:[{o:'v', c:0, t0:1, t1:2, h:1.2}, {o:'v', c:8, t0:1, t1:2, h:1.2}]};
+  const q = {orientacao:'N', peDireito:3}, I = VE.interno({}, q, p, 90, 5);
+  igual(I.caminhos.length, 1); const c = I.caminhos[0];
+  igual([c.de, c.para], [2, 1], 'vento de leste: entra por B e sai por A:');
+  const Aj = 1 * 1.2 * 0.5, Ap = 0.8 * 2.1, Aef = 1 / Math.sqrt(2/(Aj*Aj) + 1/(Ap*Ap)), U = 5 * VE.fatorU, Q = 0.6 * Aef * U * Math.sqrt(0.6 + 0.3);
+  ok(Math.abs(c.Q - Q) < 1e-9, 'Q = Cd·A_ef·U·√ΔCp: ' + c.Q + ' × ' + Q);
+  ok(c.vel[1] < c.vel[0], 'mais lento na porta (maior) que na janela');
+  const rA = I.comodos.find(x => x.id === 1); ok(Math.abs(rA.ach - Q * 3600 / (16 * 2.8)) < 1e-9 && !rA.umaFace, 'renovações de A: ' + rA.ach);
+  igual(VE.faixa(35), 'forte'); igual(VE.faixa(12), 'bom'); igual(VE.faixa(5), 'fraco');
+  // sem porta: cada um vira cômodo de uma face só (0,025·A·U)
+  const I2 = VE.interno({}, q, Object.assign({}, p, {portas:[]}), 90, 5);
+  ok(!I2.caminhos.length && I2.comodos.every(x => x.umaFace), 'sem porta: ventilação de uma face');
+  // torre de sucção sobre A: soma vento e chaminé (CIBSE AM10)
+  const It = VE.interno({torre:{tipo:'succao', x0:1, y0:1, x1:2, y1:2}}, q, p, 90, 5);
+  ok(It.torre && It.torre.saida && !It.torre.entrada && It.caminhos.some(x => x.tipo === 'torre' && x.de === 2 && x.para === 1), 'caminho até a torre');
+  // escoamento em volta: longe da casa ≈ vento livre; atrás dela (esteira) mais lento; simétrico dos dois lados
+  const cx = {x0:0, y0:0, x1:8, y1:16}, Uw = {x:-1, y:0};
+  const vel = (x, y) => Math.hypot(...VE.campo(x, y, Uw, cx, 0));
+  ok(Math.abs(vel(60, 8) - 1) < 0.05, 'longe: ' + vel(60, 8));
+  ok(vel(-3, 8) < 0.7, 'esteira a sotavento: ' + vel(-3, 8));
+  ok(Math.abs(VE.campo(4, -3, Uw, cx, 0)[0] - VE.campo(4, 19, Uw, cx, 0)[0]) < 1e-9, 'simétrico dos dois lados');
+  ok(vel(4, -1.5) > 1, 'acelera na lateral');
+});
+
 t('vento na variante: janelas de entrada e saída, linhas de corrente e camada da planta', () => {
   const VE = require('./vento.js'), D = require('./desenho.js'), VT = require('../dados/vento.json');
   // casa com frente para o norte e vento de leste (90°): a face x1 (leste) é entrada e a x0 (oeste) é saída
