@@ -34,10 +34,10 @@ function casca(){
       <button type="button" class="btn" id="svAno" aria-pressed="false">Percorrer o ano</button>
     </div>
   </div>
-  <div class="sv-corpo"><div class="sv-planta" id="svPlanta"></div><div class="sv-painel" id="svPainel" aria-live="polite"></div></div>
+  <div class="sv-corpo"><div class="sv-palco"><div class="sv-planta" id="svPlanta"></div><canvas class="sv-cv" id="svCv" aria-hidden="true"></canvas></div><div class="sv-painel" id="svPainel" aria-live="polite"></div></div>
   <div class="sv-regua2">
     <div class="sv-meses" role="group" aria-label="Mês">${CURTO.map((c, i) => `<button type="button" class="sv-mes" data-mes="${i+1}" aria-label="${MESES[i]}">${c}</button>`).join('')}</div>
-    <div class="sv-horas2" data-so="sol">
+    <div class="sv-horas2">
       <button type="button" class="btn sv-play" id="svPlay" aria-label="Animar o dia" aria-pressed="false">▶</button>
       <div class="sv-trilho2"><svg id="svCurva" viewBox="0 0 600 46" preserveAspectRatio="none" aria-hidden="true"></svg>
         <input type="range" id="svHora" min="${H0}" max="${H1}" step="0.05" aria-label="Hora solar"></div>
@@ -53,13 +53,14 @@ function iniciar(el, opc){
   hora.addEventListener('input', () => { E.hora = +hora.value; E.dia = false; botoes(); acorda(); });
   el.addEventListener('click', e => {
     const m = e.target.closest('[data-mes]'); if(m){ E.mes = +m.dataset.mes; E.ano = false; botoes(); acorda(); return; }
-    const a = e.target.closest('[data-aba]'); if(a){ E.aba = a.dataset.aba; E.chave = ''; desenhar(true); return; }
+    const a = e.target.closest('[data-aba]'); if(a){ E.aba = a.dataset.aba; E.chave = ''; E.painelChave = ''; E.part = []; E.pi2 = null; desenhar(true); acorda(); return; }
     if(e.target.closest('#svPlay')){ E.dia = !E.dia; botoes(); acorda(); return; }
     if(e.target.closest('#svAno')){ E.ano = !E.ano; botoes(); acorda(); return; }
     if(e.target.closest('#svMapa')){ E.mapa = !E.mapa; E.mapaChave = ''; botoes(); desenhar(false); }
   });
   if(root.IntersectionObserver) new IntersectionObserver(es => { E.visivel = es[0].isIntersecting; if(E.visivel) acorda(); }).observe(el);
-  fetch(E.raiz + 'dados/vento.json').then(r => r.json()).then(d => { E.vento = d; if(E.aba === 'vento') desenhar(true); }).catch(() => { E.vento = {erro:true}; });
+  if(root.ResizeObserver) new ResizeObserver(() => { E.cvOk = false; }).observe(el.querySelector('.sv-palco'));
+  fetch(E.raiz + 'dados/vento.json').then(r => r.json()).then(d => { E.vento = d; if(E.aba === 'vento'){ desenhar(true); acorda(); } }).catch(() => { E.vento = {erro:true}; });
   if(reduz()){ el.querySelector('#svPlay').hidden = true; el.querySelector('#svAno').hidden = true; }
   botoes();
 }
@@ -91,7 +92,8 @@ function passo(t){
   E.mesV = E.ano ? E.mes : E.mesV + dm * f; if(E.mesV >= 13) E.mesV -= 12; if(E.mesV < 1) E.mesV += 12;
   E.horaV = E.dia ? E.hora : E.horaV + (E.hora - E.horaV) * f;
   desenhar(false);
-  const parado = !E.dia && !E.ano && Math.abs(dm) < 0.002 && Math.abs(E.hora - E.horaV) < 0.002;
+  E.dt = dt; E.tempo = (E.tempo || 0) + dt;
+  const parado = !E.dia && !E.ano && Math.abs(dm) < 0.002 && Math.abs(E.hora - E.horaV) < 0.002 && (E.aba !== 'vento' || reduz());
   if(parado){ E.mesV = E.mes; E.horaV = E.hora; desenhar(false); E.rodando = false; return; }
   requestAnimationFrame(passo);
 }
@@ -218,41 +220,128 @@ function curva(dia){
     + [6, 9, 12, 15, 18].map(h => `<text x="${((h - H0)/(H1 - H0)*600).toFixed(0)}" y="9" text-anchor="middle" style="font-size:9px;fill:var(--ink-3)">${h}h</text>`).join('');
 }
 
-// ---------- vento (primeira versão; a V3 reescreve) ----------
-function camadaVento(T, rs){
-  const X = m => (T.ox + m*T.k).toFixed(1), Y = m => (T.oy + m*T.k).toFixed(1);
-  const v = E.v, q = E.q, F = Motor.RUMOS[q.orientacao] || 0, c = caixaLote(v), dur = (8 / Math.max(1, rs.velMedia)).toFixed(2);
-  let o = '';
-  for(const l of Vento.linhas(c, rs.dirPredominante, F, 11))
-    o += `<line class="sv-fluxo" x1="${X(l.a[0])}" y1="${Y(l.a[1])}" x2="${X(l.b[0])}" y2="${Y(l.b[1])}" stroke="#2F6FB0" stroke-opacity=".55" stroke-width="2" stroke-dasharray="14 10" style="animation-duration:${dur}s" marker-end="url(#svSeta)"/>`;
-  o += `<defs><marker id="svSeta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" fill="#2F6FB0"/></marker></defs>`;
-  const p = v.pav[E.pi];
-  for(const j of Vento.janelas(v, q, p, rs.dirPredominante)){
-    if(j.papel === 'lateral') continue;
-    const [x0, y0, x1, y1] = j.o === 'h' ? [j.t0, j.c, j.t1, j.c] : [j.c, j.t0, j.c, j.t1];
-    o += `<line x1="${X(x0)}" y1="${Y(y0)}" x2="${X(x1)}" y2="${Y(y1)}" stroke="${j.papel === 'entrada' ? '#15803D' : '#C2410C'}" stroke-width="6" stroke-linecap="round"/>`;
+// ---------- vento (V3): partículas em volta da casa, ar por dentro (janelas → portas → saída ou torre) ----------
+// cômodos de permanência, os que importam na lista de renovações (banhos, closets e circulação ficam de fora)
+const PERMANENCIA = ["quarto", "suite", "master", "estar", "jantar", "tv", "escritorio", "cozinha", "salaIntima", "lazer", "gourmet"];
+const RUMO16 = ['N','NNE','NE','ENE','L','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+const nomeRumo = d => RUMO16[Math.round(((d % 360) + 360) % 360 / 22.5) % 16];
+// vento do instante: velocidade e direção da hora (interpoladas; a direção pelo menor arco)
+function ventoAgora(m, hora){
+  const M = E.vento.meses[m - 1], a = Math.floor(hora) % 24, b = (a + 1) % 24, fr = hora - Math.floor(hora);
+  const vel = M.velHora[a] * (1 - fr) + M.velHora[b] * fr;
+  let dir = M.dirPredominante; if(M.dirHora){ let da = M.dirHora[a], db = M.dirHora[b], dd = ((db - da) % 360 + 540) % 360 - 180; dir = (da + dd * fr + 360) % 360; }
+  return {vel, dir};
+}
+// canvas: as coordenadas da casa passam pela matriz de tela da camada (a planta gira e escala)
+function prepararCanvas(){
+  const cv = E.el.querySelector('#svCv'), g = E.el.querySelector('#svCamada'); if(!cv || !g) return null;
+  const pr = Math.min(2, root.devicePixelRatio || 1), r = cv.getBoundingClientRect();
+  if(!E.cvOk || cv.width !== Math.round(r.width * pr)){ cv.width = Math.round(r.width * pr); cv.height = Math.round(r.height * pr); E.cvOk = true; E.part = []; }
+  const m = g.getScreenCTM(); if(!m) return null;
+  const T = {ox:+g.dataset.ox, oy:+g.dataset.oy, k:+g.dataset.k};
+  const P = (x, y) => { const px = T.ox + x * T.k, py = T.oy + y * T.k; return [(m.a*px + m.c*py + m.e - r.left) * pr, (m.b*px + m.d*py + m.f - r.top) * pr]; };
+  return {cv, g2: cv.getContext('2d'), P, pr, escala: Math.hypot(m.a, m.b) * T.k * pr};
+}
+function quadPath(g2, P, s){ const a = P(s.x0, s.y0), b = P(s.x1, s.y0), c = P(s.x1, s.y1), d = P(s.x0, s.y1); g2.moveTo(a[0], a[1]); g2.lineTo(b[0], b[1]); g2.lineTo(c[0], c[1]); g2.lineTo(d[0], d[1]); g2.closePath(); }
+// nasce num ponto qualquer da área (no começo) ou na borda de onde vem o vento: sorteia um ponto e recua contra o vento até a borda
+function nasce(U, caixa, todo){
+  const x = caixa.x0 + Math.random()*(caixa.x1 - caixa.x0), y = caixa.y0 + Math.random()*(caixa.y1 - caixa.y0);
+  if(todo) return {x, y, vida:1 + Math.random()*4};
+  const tx = U.x > 1e-6 ? (x - caixa.x0) / U.x : U.x < -1e-6 ? (x - caixa.x1) / U.x : Infinity;
+  const ty = U.y > 1e-6 ? (y - caixa.y0) / U.y : U.y < -1e-6 ? (y - caixa.y1) / U.y : Infinity, r = Math.max(0, Math.min(tx, ty) - 0.05);
+  return {x:x - U.x*r, y:y - U.y*r, vida:3 + Math.random()*5};
+}
+function ptCam(c, s){ let r = s; for(let i = 1; i < c.pts.length; i++){ const a = c.pts[i-1], b = c.pts[i], L = Math.hypot(b[0]-a[0], b[1]-a[1]) || 1e-6;
+  if(r <= L) return {p:[a[0] + (b[0]-a[0])*r/L, a[1] + (b[1]-a[1])*r/L], v:c.vel[i-1] + (c.vel[i] - c.vel[i-1]) * r / L}; r -= L; } return null; }
+function animaVento(m, hora){
+  const C = prepararCanvas(); if(!C || !E.vento || E.vento.erro) return null;
+  const {g2, P, pr} = C, v = E.v, q = E.q, F = Motor.RUMOS[q.orientacao] || 0, p = v.pav[E.pi], dt = E.dt || 0;
+  const va = ventoAgora(m, hora), d = Vento.direcao(va.dir + 180, F), U = {x:d.x, y:d.y};
+  const lote = caixaLote(v), casa = Vento.caixaCasa(v), dom = {x0:lote.x0 - 2, y0:lote.y0 - 2, x1:lote.x1 + 2, y1:lote.y1 + 2};
+  const chave = [m, Math.round(hora * 4), v.nome, v.espelhada, E.pi].join('|');
+  if(E.viChave !== chave){ E.viChave = chave; E.vi = Vento.interno(v, q, p, va.dir, va.vel); }
+  const VI = E.vi, fechadas = p.salas.filter(s => !(Motor.TIPOS[s.tipo] || {}).aberto), estatico = reduz();
+  // rastro: apaga um pouco do quadro anterior
+  g2.save(); g2.globalCompositeOperation = 'destination-out'; g2.fillStyle = `rgba(0,0,0,${estatico ? 1 : 0.12})`; g2.fillRect(0, 0, C.cv.width, C.cv.height); g2.restore();
+  // fora da casa: partículas que contornam o volume (recorte par-ímpar tira os cômodos)
+  const N = Math.round(160 + va.vel * 45); if(!E.part) E.part = [];
+  while(E.part.length < N) E.part.push(nasce(U, dom, true)); if(E.part.length > N) E.part.length = N;
+  g2.save(); g2.beginPath(); g2.rect(0, 0, C.cv.width, C.cv.height); for(const s of fechadas) quadPath(g2, P, s); g2.clip('evenodd');
+  g2.lineCap = 'round';
+  if(estatico){
+    // movimento reduzido: linhas de corrente fixas, saindo da borda de onde vem o vento, em vez de partículas
+    const cxm = (dom.x0 + dom.x1)/2, cym = (dom.y0 + dom.y1)/2, R = Math.hypot(dom.x1 - dom.x0, dom.y1 - dom.y0)/2, n = 22;
+    g2.strokeStyle = '#2F6FB0'; g2.globalAlpha = 0.5; g2.lineWidth = 1.3 * pr;
+    for(let i = 0; i < n; i++){ const s = -R + 2*R*(i + 0.5)/n, x0 = cxm - U.y*s, y0 = cym + U.x*s;
+      const tx = U.x > 1e-6 ? (x0 - dom.x0)/U.x : U.x < -1e-6 ? (x0 - dom.x1)/U.x : Infinity, ty = U.y > 1e-6 ? (y0 - dom.y0)/U.y : U.y < -1e-6 ? (y0 - dom.y1)/U.y : Infinity, r = Math.min(tx, ty);
+      let x = x0 - U.x*r, y = y0 - U.y*r; if(x < dom.x0 - 0.1 || x > dom.x1 + 0.1 || y < dom.y0 - 0.1 || y > dom.y1 + 0.1) continue;
+      g2.beginPath(); let a0 = P(x, y); g2.moveTo(a0[0], a0[1]);
+      for(let k = 0; k < 500; k++){ const [vx0, vy0] = Vento.campo(x, y, U, casa, 0), sp0 = Math.hypot(vx0, vy0) || 1, lim = Math.min(1, 1.8/sp0); x += vx0*lim*0.25; y += vy0*lim*0.25;
+        if(x < dom.x0 - 1 || x > dom.x1 + 1 || y < dom.y0 - 1 || y > dom.y1 + 1 || (x > casa.x0 && x < casa.x1 && y > casa.y0 && y < casa.y1)) break; const b = P(x, y); g2.lineTo(b[0], b[1]); }
+      g2.stroke(); }
+    g2.globalAlpha = 1;
   }
-  return o;
+  const passos = estatico ? 0 : 1, h = dt;
+  for(let it = 0; it < passos; it++) for(const pt of E.part){
+    const [vx0, vy0] = Vento.campo(pt.x, pt.y, U, casa, E.tempo || 0), sp0 = Math.hypot(vx0, vy0), lim = Math.min(1, 1.8 / (sp0 || 1)), vx = vx0 * lim, vy = vy0 * lim, sp = sp0 * lim, nx = pt.x + vx * va.vel * 0.9 * h, ny = pt.y + vy * va.vel * 0.9 * h;
+    const fora = nx < dom.x0 - 3 || nx > dom.x1 + 3 || ny < dom.y0 - 3 || ny > dom.y1 + 3, dentro = nx > casa.x0 && nx < casa.x1 && ny > casa.y0 && ny < casa.y1;
+    if(fora || dentro || pt.vida <= 0){ Object.assign(pt, nasce(U, dom, false)); continue; }
+    const a = P(pt.x, pt.y), b = P(nx, ny);
+    g2.beginPath(); g2.moveTo(a[0], a[1]); g2.lineTo(b[0], b[1]); g2.strokeStyle = sp > 0.95 ? '#1E40AF' : '#2F6FB0';
+    g2.globalAlpha = Math.min(0.6, 0.18 + sp * 0.35) * Math.min(1, pt.vida / 1.2); g2.lineWidth = (0.9 + sp * 0.7) * pr; g2.stroke();
+    pt.x = nx; pt.y = ny; pt.vida -= h;
+  }
+  g2.restore(); g2.globalAlpha = 1;
+  // dentro da casa: o ar das janelas de entrada, pelas portas, até a saída ou a torre; mais rápido nas aberturas estreitas
+  if(!E.pi2 || E.pi2.chave !== E.viChave){ E.pi2 = {chave:E.viChave, l:[]}; VI.caminhos.forEach((c, i) => { for(let k = 0; k < 18; k++) E.pi2.l.push({c:i, s:Math.random() * 6}); }); }
+  for(const pt of E.pi2.l){ const c = VI.caminhos[pt.c]; if(!c) continue;
+    for(let it = 0; it < (estatico ? 40 : 1); it++){
+      const a = ptCam(c, pt.s); if(!a){ pt.s = Math.random() * 0.3; continue; }
+      const ds = (0.6 + Math.min(2.6, a.v * 1.1)) * (estatico ? 0.08 : dt), b = ptCam(c, pt.s + ds); pt.s += ds; if(!b) continue;
+      const A = P(a.p[0], a.p[1]), B = P(b.p[0], b.p[1]);
+      g2.beginPath(); g2.moveTo(A[0], A[1]); g2.lineTo(B[0], B[1]); g2.strokeStyle = c.tipo === 'torre' ? '#7C3AED' : (a.v > 0.8 ? '#0E7490' : '#0891B2');
+      g2.globalAlpha = 0.95; g2.lineWidth = (2 + Math.min(2.4, a.v * 1.4)) * pr; g2.lineCap = 'round'; g2.stroke(); }
+  }
+  g2.globalAlpha = 1;
+  // janelas de entrada (verde) e de saída (laranja) pulsando; a torre como anéis que sobem
+  const pulso = estatico ? 1 : 0.55 + 0.45 * Math.sin((E.tempo || 0) * 3.2);
+  for(const j of VI.janelas){ if(j.papel === 'lateral') continue; const jj = j.j, [x0, y0, x1, y1] = jj.o === 'h' ? [jj.t0, jj.c, jj.t1, jj.c] : [jj.c, jj.t0, jj.c, jj.t1], A = P(x0, y0), B = P(x1, y1);
+    g2.beginPath(); g2.moveTo(A[0], A[1]); g2.lineTo(B[0], B[1]); g2.strokeStyle = j.papel === 'entrada' ? '#15803D' : '#C2410C'; g2.globalAlpha = pulso; g2.lineWidth = 6 * pr; g2.lineCap = 'round'; g2.stroke(); }
+  if(VI.torre){ const c = P(VI.torre.pt[0], VI.torre.pt[1]), r0 = 0.5 * C.escala;
+    for(let i = 0; i < 3; i++){ const fase = ((E.tempo || 0) * 0.6 + i / 3) % 1; g2.beginPath(); g2.arc(c[0], c[1], r0 * (0.4 + fase * 1.2), 0, 2*Math.PI); g2.strokeStyle = '#7C3AED'; g2.globalAlpha = (1 - fase) * 0.8; g2.lineWidth = 2 * pr; g2.stroke(); } }
+  g2.globalAlpha = 1;
+  return {va, VI};
 }
-function rosaSVG(rs, m){
-  const R = 70, c = 90, maxF = Math.max(...rs.rosa.map(r => r.freq), 1), rd = g => g*Math.PI/180;
-  let o = `<svg class="sv-rosa" viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="Rosa dos ventos de ${MESES[m-1]}">`;
+function rosaSVG(rs, m, dirAgora){
+  const R = 62, c = 80, alvo = rs.rosa.map(r => r.freq);
+  if(!E.rosaV || E.rosaV.length !== alvo.length) E.rosaV = alvo.slice(); E.rosaV = E.rosaV.map((x, i) => x + (alvo[i] - x) * (reduz() ? 1 : 0.15));
+  const maxF = Math.max(...E.rosaV, 1), rd = g => g*Math.PI/180;
+  let o = '';
   for(const r of [0.33, 0.66, 1]) o += `<circle cx="${c}" cy="${c}" r="${(R*r).toFixed(1)}" fill="none" stroke="var(--line)"/>`;
-  for(const x of rs.rosa){ if(!x.freq) continue; const r = R * x.freq / maxF, a0 = rd(x.dir - 10), a1 = rd(x.dir + 10);
-    const cor = x.vel >= 6 ? '#1E40AF' : x.vel >= 4 ? '#2F6FB0' : '#7FA9D6';
-    o += `<path d="M${c},${c}L${(c + r*Math.sin(a0)).toFixed(1)},${(c - r*Math.cos(a0)).toFixed(1)}L${(c + r*Math.sin(a1)).toFixed(1)},${(c - r*Math.cos(a1)).toFixed(1)}Z" fill="${cor}"><title>${x.dir}°: ${f1(x.freq)} % do tempo, ${f1(x.vel)} m/s</title></path>`; }
-  for(const [kk, a] of [['N', 0], ['L', 90], ['S', 180], ['O', 270]]) o += `<text x="${(c + (R+12)*Math.sin(rd(a))).toFixed(1)}" y="${(c - (R+12)*Math.cos(rd(a)) + 3).toFixed(1)}" text-anchor="middle" style="font-size:10px;fill:var(--ink-3)">${kk}</text>`;
-  return o + '</svg>';
+  rs.rosa.forEach((x, i) => { const fr = E.rosaV[i]; if(fr < 0.05) return; const r = R * fr / maxF, a0 = rd(x.dir - 9), a1 = rd(x.dir + 9), cor = x.vel >= 5.5 ? '#1E40AF' : x.vel >= 4 ? '#2F6FB0' : '#7FA9D6';
+    o += `<path d="M${c},${c}L${(c + r*Math.sin(a0)).toFixed(1)},${(c - r*Math.cos(a0)).toFixed(1)}A${r.toFixed(1)},${r.toFixed(1)} 0 0 1 ${(c + r*Math.sin(a1)).toFixed(1)},${(c - r*Math.cos(a1)).toFixed(1)}Z" fill="${cor}"><title>${x.dir}°: ${f1(x.freq)} % do tempo, ${f1(x.vel)} m/s</title></path>`; });
+  if(dirAgora !== undefined){ const a = rd(dirAgora); o += `<line x1="${(c + (R+6)*Math.sin(a)).toFixed(1)}" y1="${(c - (R+6)*Math.cos(a)).toFixed(1)}" x2="${(c + 18*Math.sin(a)).toFixed(1)}" y2="${(c - 18*Math.cos(a)).toFixed(1)}" stroke="#C2410C" stroke-width="2.4" marker-end="url(#svRSeta)"/>`; }
+  for(const [kk, a] of [['N', 0], ['L', 90], ['S', 180], ['O', 270]]) o += `<text x="${(c + (R+11)*Math.sin(rd(a))).toFixed(1)}" y="${(c - (R+11)*Math.cos(rd(a)) + 3.5).toFixed(1)}" text-anchor="middle" style="font-size:10px;fill:${kk === 'N' ? 'var(--rust)' : 'var(--ink-3)'}">${kk}</text>`;
+  return `<defs><marker id="svRSeta" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" fill="#C2410C"/></marker></defs>` + o;
 }
-function painelVento(rs, m){
-  if(!rs) return `<p class="note">${E.vento && E.vento.erro ? 'Não foi possível carregar os dados de vento.' : 'Carregando os dados de vento…'}</p>`;
-  const maxH = Math.max(...rs.velHora), lat = E.vento.local.lat, lon = E.vento.local.lon;
-  let h = `<div class="sv-rosa-box">${rosaSVG(rs, m)}<div><p class="sv-sol"><b>${MESES[m-1]}</b> · de ${rs.nomePredominante} (${rs.dirPredominante}°)</p>
-    <p>Velocidade média <b>${f1(rs.velMedia)} m/s</b> · calmaria ${f1(rs.calmaria)} %</p><p>${rs.principais.map(x => `${x.nome} ${f1(x.freq)} %`).join(' · ')}</p></div></div>`;
-  h += `<h4>Velocidade ao longo do dia</h4><div class="sv-dia" role="img" aria-label="Velocidade média por hora em ${MESES[m-1]}">${rs.velHora.map((x, i) => `<i style="height:${(100*x/maxH).toFixed(0)}%" title="${i}h: ${f1(x)} m/s"></i>`).join('')}</div><p class="sv-eixo"><span>0h</span><span>12h</span><span>23h</span></p>`;
-  h += `<p><span class="sv-leg" style="--c:#15803D"></span>janelas de entrada (barlavento) · <span class="sv-leg" style="--c:#C2410C"></span>janelas de saída (sotavento)</p>`;
-  h += `<p><a class="btn" href="https://www.windy.com/${lat}/${lon}?wind,${lat},${lon},12" target="_blank" rel="noopener">Vento agora no Windy ↗</a></p>`;
-  return h;
+function painelVento(m, hora, A){
+  const pa = E.el.querySelector('#svPainel');
+  if(!E.vento || E.vento.erro || !A){ pa.innerHTML = `<p class="note">${E.vento && E.vento.erro ? 'Não foi possível carregar os dados de vento.' : 'Carregando os dados de vento…'}</p>`; E.painelChave = ''; return; }
+  const rs = Vento.resumo(E.vento, m), hInt = Math.floor(hora), chave = ['vento', m, hInt, E.v.nome, E.v.espelhada, E.pi].join('|');
+  if(E.painelChave !== chave){ E.painelChave = chave;
+    const VI = A.VI, maxH = Math.max(...rs.velHora), lat = E.vento.local.lat, lon = E.vento.local.lon;
+    pa.innerHTML = `<div class="sv-cab"><div class="sv-leitura"><span class="sv-big" id="svHoraG"></span><span class="sv-sub" id="svSub"></span><span class="sv-sub">média do mês ${f1(rs.velMedia)} m/s · calmaria ${f1(rs.calmaria)} %</span></div><svg class="sv-dial" id="svRosa" viewBox="0 0 160 160" role="img" aria-label="Rosa dos ventos de ${MESES[m-1]}, com a direção da hora"></svg></div>
+      <h4>Renovações de ar por hora ${ajuda('Ar que entra pelas janelas a barlavento, passa pelas portas abertas e sai a sotavento ou pela torre: Q = 0,6 · A_ef · U · √ΔCp, com as aberturas em série (BS 5925, ASHRAE); a chaminé da torre soma por √(Qv² + Qc²) (CIBSE AM10). U é o vento da hora a 10 m levado à altura das janelas, com o abrigo dos vizinhos. Faixas: forte ≥ 30/h, bom 10–30/h, fraco 3–10/h; a lista mostra os cômodos de permanência. Estimativa, não simulação.', 'sol-vento', 'renovações de ar')}</h4>
+      <ul class="sv-lista">${VI.comodos.filter(x => PERMANENCIA.includes(x.tipo)).slice(0, 7).map(x => `<li><span>${esc(x.nome)}${x.umaFace ? ' <small>uma face</small>' : ''}</span><b><small>${Vento.faixa(x.ach)}</small> ${Math.round(x.ach)}/h</b></li>`).join('') || '<li><span>Nenhum cômodo com janela neste pavimento.</span></li>'}</ul>
+      ${VI.torre ? `<p class="sv-torre"><span class="sv-leg" style="--c:#7C3AED"></span>${esc(VI.torre.nome)}: ${f0(VI.torre.Q * 3600)} m³/h ${VI.torre.entrada && !VI.torre.saida ? 'captados' : 'pela torre'}</p>` : ''}
+      <h4>Velocidade ao longo do dia <span class="sv-un">m/s a 10 m</span></h4>
+      <div class="sv-dia" role="img" aria-label="Velocidade média por hora em ${MESES[m-1]}">${rs.velHora.map((x, i) => `<i style="height:${(100*x/maxH).toFixed(0)}%"${i === hInt ? ' class="agora"' : ''} title="${i}h: ${f1(x)} m/s"></i>`).join('')}</div><p class="sv-eixo"><span>0h</span><span>12h</span><span>23h</span></p>
+      <p class="sv-chips"><span><span class="sv-leg" style="--c:#15803D"></span>entrada</span><span><span class="sv-leg" style="--c:#C2410C"></span>saída</span><span><span class="sv-leg" style="--c:#0891B2"></span>ar dentro</span>${VI.torre ? '<span><span class="sv-leg" style="--c:#7C3AED"></span>torre</span>' : ''}</p>
+      <p><a class="sv-link" href="https://www.windy.com/${lat}/${lon}?wind,${lat},${lon},12" target="_blank" rel="noopener">Vento agora no Windy ↗</a></p>`;
+  }
+  pa.querySelector('#svHoraG').textContent = hhmm(hora);
+  pa.querySelector('#svSub').textContent = `21 de ${MESES[m-1]} · de ${nomeRumo(A.va.dir)} (${Math.round(A.va.dir)}°) · ${f1(A.va.vel)} m/s`;
+  pa.querySelector('#svRosa').innerHTML = rosaSVG(rs, m, A.va.dir);
 }
 
 // ---------- desenho ----------
@@ -276,14 +365,15 @@ function desenhar(tudo){
   const g = pl.querySelector('#svCamada'); if(!g) return;
   const T = {ox:+g.dataset.ox, oy:+g.dataset.oy, k:+g.dataset.k};
   if(E.aba === 'sol'){
+    const cv = el.querySelector('#svCv'); if(cv && cv.width) cv.getContext('2d').clearRect(0, 0, cv.width, cv.height);
     const r = camadaSol(T, dia, E.horaV);
     g.innerHTML = r.svg;
     painelSol(m, r.s, r.L); curva(dia);
     aj.setAttribute('data-ajuda', 'Geometria solar de Fortaleza (3,73° S) no dia 21 de cada mês, pela hora solar, só a radiação direta. Sombras da casa no lote; laranja: fachadas ao sol; amarelo: feixes e manchas de sol pelas janelas. No mostrador, a borda é o horizonte e o centro é o ponto mais alto do céu: o sol corre no arco do dia; na planta, ele aparece na direção verdadeira, mais perto da casa quanto mais alto está.');
   } else {
-    const rs = E.vento && !E.vento.erro ? Vento.resumo(E.vento, m) : null;
-    if(tudo || pa.dataset.aba !== 'vento' || +pa.dataset.mes !== m){ g.innerHTML = rs ? camadaVento(T, rs) : ''; pa.innerHTML = painelVento(rs, m); pa.dataset.aba = 'vento'; pa.dataset.mes = m; E.painelChave = ''; }
-    aj.setAttribute('data-ajuda', E.vento && E.vento.licenca ? `Linhas de corrente ilustrativas (não é simulação). Dados: ${E.vento.fonte}, ${E.vento.periodo.inicio.slice(0,4)}–${E.vento.periodo.fim.slice(0,4)}; ${E.vento.licenca}.` : 'Vento médio do mês.');
+    if(g.innerHTML) g.innerHTML = '';
+    const A = animaVento(m, E.horaV); painelVento(m, E.horaV, A); curva(dia); pa.dataset.aba = 'vento';
+    aj.setAttribute('data-ajuda', E.vento && E.vento.licenca ? `Fora da casa, o vento da hora contorna o volume e forma a esteira a sotavento (ilustrativo, não é simulação). Dentro, o ar segue das janelas de entrada, pelas portas, até as de saída ou a torre. Dados: ${E.vento.fonte}, ${E.vento.periodo.inicio.slice(0,4)}–${E.vento.periodo.fim.slice(0,4)}; ${E.vento.licenca}.` : 'Vento médio do mês.');
   }
   if(E.aba === 'sol' && pa.dataset.aba === 'vento'){ pa.dataset.aba = 'sol'; }
 }

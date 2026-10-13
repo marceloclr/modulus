@@ -15,13 +15,14 @@ const MESES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'O
 const j = await (await fetch(API)).json();
 if(!j.hourly) throw new Error('resposta inesperada do Open-Meteo: ' + JSON.stringify(j).slice(0, 200));
 const {time, wind_speed_10m: vel, wind_direction_10m: dir} = j.hourly;
-const meses = Array.from({length:12}, (_, i) => ({mes:i + 1, n:0, calmas:0, soma:0, u:0, v:0, rosa:Array.from({length:SETORES}, () => ({n:0, soma:0})), hora:Array.from({length:24}, () => ({n:0, soma:0}))}));
+const meses = Array.from({length:12}, (_, i) => ({mes:i + 1, n:0, calmas:0, soma:0, u:0, v:0, rosa:Array.from({length:SETORES}, () => ({n:0, soma:0})), hora:Array.from({length:24}, () => ({n:0, soma:0, u:0, v:0}))}));
 for(let i = 0; i < time.length; i++){
   const s = vel[i], d = dir[i]; if(s == null || d == null) continue;
   const m = meses[+time[i].slice(5, 7) - 1], h = +time[i].slice(11, 13);
   m.n++; m.soma += s; m.hora[h].n++; m.hora[h].soma += s;
   // vetor de onde o vento vem (direção meteorológica), para a direção média
   m.u += s * Math.sin(d * Math.PI / 180); m.v += s * Math.cos(d * Math.PI / 180);
+  m.hora[h].u += s * Math.sin(d * Math.PI / 180); m.hora[h].v += s * Math.cos(d * Math.PI / 180);   // V3: direção média de cada hora
   if(s < CALMA){ m.calmas++; continue; }
   const k = Math.round(d / (360 / SETORES)) % SETORES; m.rosa[k].n++; m.rosa[k].soma += s;
 }
@@ -29,7 +30,7 @@ let power = null;
 try{ const p = await (await fetch(POWER)).json(); const ws = p.properties.parameter.WS10M; power = MESES.map(k => r2(ws[k])); }catch(e){ console.warn('NASA POWER indisponível:', e.message); }
 
 const saida = {
-  versao:1,
+  versao:2,
   fonte:'Open-Meteo Historical Weather API (reanálise ERA5, ECMWF/Copernicus), dados horários a 10 m',
   url:'https://open-meteo.com/en/docs/historical-weather-api',
   licenca:'CC BY 4.0 · uso não comercial gratuito; atribuição: Weather data by Open-Meteo.com',
@@ -43,7 +44,7 @@ const saida = {
     const top = rosa.reduce((a, b) => b.freq > a.freq ? b : a);
     return {mes:i + 1, horas:m.n, velMedia:r2(m.soma / m.n), calmaria:r1(100 * m.calmas / m.n),
       dirMedia:Math.round((Math.atan2(m.u, m.v) * 180 / Math.PI + 360) % 360), dirPredominante:top.dir,
-      rosa, velHora:m.hora.map(x => r2(x.soma / x.n))};
+      rosa, velHora:m.hora.map(x => r2(x.soma / x.n)), dirHora:m.hora.map(x => Math.round((Math.atan2(x.u, x.v) * 180 / Math.PI + 360) % 360))};
   }),
 };
 fs.writeFileSync(new URL('../dados/vento.json', import.meta.url), JSON.stringify(saida, null, 1) + '\n');

@@ -211,7 +211,9 @@
       <li><strong>Mostrador do sol:</strong> a borda é o horizonte e o centro é o ponto mais alto do céu, com o norte para cima, como a planta. O arco é o caminho do sol no dia; os pontos marcam o nascente e o poente.</li>
       <li><strong>Mapa de horas de sol:</strong> o lote pintado pelas horas de sol direto no dia 21 do mês, de 30 em 30 minutos: azul-acinzentado com pouco sol, âmbar com sol o dia todo.</li>
       <li><strong>Régua:</strong> toque num mês ou arraste a hora; "Percorrer o ano" e o botão de tocar animam sem saltos. Com o movimento reduzido do sistema ligado, não há animação automática.</li>
-      <li><strong>Vento:</strong> média de 2015 a 2024 do ERA5 (Open-Meteo, CC BY 4.0), por mês, com a rosa dos ventos e a velocidade por hora. As linhas de corrente são ilustrativas: não é simulação (CFD).</li>
+      <li><strong>Vento:</strong> média de 2015 a 2024 do ERA5 (Open-Meteo, CC BY 4.0), por mês e por hora: a velocidade e a direção mudam ao longo do dia (de madrugada o vento vem mais de sudeste; à tarde, de leste). Fora da casa, as partículas contornam o volume e formam a esteira a sotavento; é ilustrativo, não é simulação (CFD).</li>
+      <li><strong>Ar dentro da casa:</strong> de cada janela de entrada, pelas portas e vãos, até a janela de saída ou a torre. A vazão sai das dimensões das aberturas em série, Q = 0,6 · A_ef · U · √ΔCp (BS 5925, ASHRAE): a abertura mais estreita do caminho é a que mais limita. U é o vento da hora a 10 m levado à altura das janelas, com o abrigo dos vizinhos. Caminhos que dividem a mesma saída dividem a vazão. Cômodo com janela numa face só: 0,025 · A · U. Renovações por hora: forte a partir de 30, bom de 10 a 30, fraco de 3 a 10.</li>
+      <li><strong>Torre de ar:</strong> entra no caminho do ar como saída no alto (sucção do vento e efeito chaminé, somados por √(Qv² + Qc²), CIBSE AM10) ou, no captador, como entrada. Na planta, aparece como anéis que sobem.</li>
       <li><strong>Janelas de entrada e de saída:</strong> entrada é a janela cuja face recebe o vento (até 67,5° da direção dele); saída é a da face oposta.</li>
     </ul>
   </section>
