@@ -65,6 +65,7 @@
 .sv-seg{display:inline-flex}.sv-seg .btn{border-radius:0}.sv-seg .btn:first-child{border-radius:10px 0 0 10px}.sv-seg .btn+.btn{margin-left:-1px}.sv-seg .btn:last-child{border-radius:0 10px 10px 0}
 .sv-acoes{display:flex;flex-wrap:wrap;gap:8px}
 .sv-regua2{display:grid;gap:8px;margin-top:12px}
+.sv-regua-mes{margin:0 0 10px}
 .sv-meses{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px}
 .sv-mes{font:500 12px/1 'IBM Plex Sans',system-ui,sans-serif;color:var(--ink-2);background:none;border:1px solid transparent;border-radius:8px;padding:8px 0;cursor:pointer;text-transform:capitalize}
 .sv-mes[aria-current=true]{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
@@ -118,6 +119,9 @@
 .score{display:inline-block;min-width:34px;text-align:center;font-size:12px;padding:3px 7px;border-radius:999px;background:var(--surface);border:1px solid var(--line);margin-left:6px}
 .btn[aria-pressed="true"] .score{background:transparent;color:inherit;border-color:currentColor}
 .salvar-banco{display:inline-flex;gap:6px;flex-wrap:wrap}
+.bp-ops{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}
+.bp-ops>small{grid-column:1/-1}
+.bp-ops .fld{margin:0}
 /* V1: menus da barra da planta */
 details.menu{position:relative}
 details.menu>summary{list-style:none}
@@ -311,6 +315,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
           <label style="--a:315deg" data-tip="Frente voltada para noroeste"><input type="radio" name="orientacao" value="NO"><span>NO</span></label>
         </div>
         <p class="rosa-txt" id="rosaTxt">Frente ainda não informada</p>
+        <label class="fld wide">Quartos fora do poente<select name="poenteLimite"><option value="amplo">Oeste, sudoeste e noroeste</option><option value="oeste">Só o oeste</option></select><button type="button" class="ajuda" data-ajuda="Faces da casa onde nenhum quarto deve ficar, por causa do sol da tarde. Oeste, sudoeste e noroeste (O ± 67,5°) é o mais protegido; só o oeste (O ± 22,5°) libera mais variantes. Quando nada escapa, o gerador compacta a casa e, por fim, avisa." data-manual="terreno" aria-label="Ajuda: quartos fora do poente" aria-expanded="false">?</button></label>
         <label class="fld">Frente (m)<input type="number" name="frente" min="5" max="60" step="0.5"></label>
         <label class="fld">Fundo (m)<input type="number" name="fundo" min="10" max="80" step="0.5"></label>
         <label class="fld">Recuo frontal (m)<input type="number" name="recFrente" min="0" max="15" step="0.25"></label>
@@ -386,6 +391,7 @@ section.panel:not(#analises):not(#energia):not(#conforto){--c:var(--card-variant
         <label class="fld">Quartos (total)<input type="number" name="quartos" min="1" max="8" step="1"></label>
         <label class="fld">Dos quais suítes<input type="number" name="suites" min="0" max="8" step="1"></label>
         <label class="chk"><input type="checkbox" name="master">Uma das suítes é master</label>
+        <div class="fld wide bp-ops" id="bpOps"><small>Banho de cada suíte, na ponta voltada para: <button type="button" class="ajuda" data-ajuda="Automático deixa o gerador decidir. Com um rumo, o banho e o closet vão para a ponta do quarto voltada para ele; se não couber (por exemplo, a parede encosta no vizinho), o banho fica no rumo mais próximo e a planta avisa." data-manual="tipo" aria-label="Ajuda: banho de cada suíte" aria-expanded="false">?</button></small><label class="fld" id="bpL1"><span id="bpR1">Suíte 1</span><select name="bp1"><option value="auto">Automático</option><option value="N">Norte</option><option value="S">Sul</option><option value="L">Leste</option><option value="O">Oeste</option></select></label><label class="fld" id="bpL2"><span id="bpR2">Suíte 2</span><select name="bp2"><option value="auto">Automático</option><option value="N">Norte</option><option value="S">Sul</option><option value="L">Leste</option><option value="O">Oeste</option></select></label><label class="fld" id="bpL3"><span id="bpR3">Suíte 3</span><select name="bp3"><option value="auto">Automático</option><option value="N">Norte</option><option value="S">Sul</option><option value="L">Leste</option><option value="O">Oeste</option></select></label><label class="fld" id="bpL4"><span id="bpR4">Suíte 4</span><select name="bp4"><option value="auto">Automático</option><option value="N">Norte</option><option value="S">Sul</option><option value="L">Leste</option><option value="O">Oeste</option></select></label><label class="fld" id="bpL5"><span id="bpR5">Suíte 5</span><select name="bp5"><option value="auto">Automático</option><option value="N">Norte</option><option value="S">Sul</option><option value="L">Leste</option><option value="O">Oeste</option></select></label><label class="fld" id="bpL6"><span id="bpR6">Suíte 6</span><select name="bp6"><option value="auto">Automático</option><option value="N">Norte</option><option value="S">Sul</option><option value="L">Leste</option><option value="O">Oeste</option></select></label></div>
         <label class="fld">Tamanho dos cômodos<select name="tamanho"><option value="compacto">Compacto</option><option value="medio">Médio</option><option value="amplo">Amplo</option></select></label>
         <label class="fld">Banheiros sociais<input type="number" name="banhosSociais" min="0" max="4" step="1"></label>
         <label class="chk" data-tip="NBR 9050: portas com vão livre de 0,80 m (folha de 0,90 m), um banho acessível de 2,40 × 2,50 m por pavimento com quarto, quartos com lado de 2,80 m, corredores de 1,20 m e rota sem degraus. A pontuação passa a cobrar esses itens"><input type="checkbox" name="acessivel">Acessibilidade (NBR 9050)</label>
@@ -628,6 +634,10 @@ function preencher(d){
   if(blocos) blocos.pintar();
 }
 function sincroniza(){
+  // banho de cada suíte: um seletor por suíte, a master primeiro
+  { const ns = Math.max(0, Math.min(6, +form.elements.suites.value || 0)), ms = form.elements.master.checked;
+    document.getElementById('bpOps').hidden = !ns;
+    for(let i = 1; i <= 6; i++){ document.getElementById('bpL' + i).hidden = i > ns; document.getElementById('bpR' + i).textContent = ms && i === 1 ? 'Suíte master' : 'Suíte ' + (ms ? i - 1 : i); } }
   document.getElementById('subOps').hidden = !form.elements.subsolo.checked;
   const sob = (form.querySelector('input[name=tipo]:checked')||{}).value === 'sobrado';
   const fmt = form.elements.formato.value, chave = fmt==='U' ? 'U' : fmt==='L' ? 'L' : 'b';

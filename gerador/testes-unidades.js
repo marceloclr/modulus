@@ -589,13 +589,19 @@ t('íntimo nunca no poente: frente a leste inverte o zoneamento; nos 8 rumos nen
   const yq = Math.max(...ter.salas.filter(s => ['quarto','suite','master'].includes(s.tipo)).map(s => s.y1)), ys = Math.min(...ter.salas.filter(s => ['estar','jantar'].includes(s.tipo)).map(s => s.y0));
   ok(yq <= ys + 0.01, 'quartos na frente, salas no fundo');
   for(const o of Object.keys(M.RUMOS)) for(const fr of [10, 12, 15]){
-    const x = M.gerar({frente:fr, fundo:32, quartos:3, suites:1, orientacao:o}).variantes[0];
-    ok(x && !x.intimoPoente && !x.quartosPoente, `${o}, ${fr} m: quarto encostado a oeste (${x && x.tipologia})`);
-    ok(!AU.auditar(x, M.normaliza({frente:fr, fundo:32, orientacao:o})).some(a => a.regra === 'G19'), `${o}, ${fr} m: auditoria G19`);
+    const e = {frente:fr, fundo:32, quartos:3, suites:1, orientacao:o, poenteLimite:'oeste'}, x = M.gerar(e).variantes[0];
+    ok(x && !x.intimoPoente && !x.quartosPoente, `${o}, ${fr} m (limite oeste): quarto encostado a oeste (${x && x.tipologia})`);
+    ok(!AU.auditar(x, M.normaliza(e)).some(a => a.regra === 'G19'), `${o}, ${fr} m: auditoria G19`);
+    // limite amplo (padrão): as variantes mostradas nunca têm quarto no oeste puro
+    for(const y of M.gerar({frente:fr, fundo:32, quartos:3, suites:1, orientacao:o}).variantes) ok(!y.intimoOeste && !y.quartosOeste, `${o}, ${fr} m (limite amplo): quarto no oeste puro (${y.tipologia})`);
   }
+  // limite amplo nas frentes norte, sul, leste e oeste, em lote de 12 e 15 m: nenhum quarto a O, SO ou NO
+  for(const o of ['N','S','L','O']) for(const fr of [12, 15]){ const x = M.gerar({frente:fr, fundo:32, quartos:3, suites:1, orientacao:o}).variantes[0];
+    ok(x && !x.intimoPoente && !x.quartosPoente, `${o}, ${fr} m (limite amplo): quarto a O, SO ou NO (${x && x.tipologia})`); }
+  igual(M.normaliza({}).poenteLimite, 'amplo', 'limite do poente padrão:'); igual(M.normaliza({poenteLimite:'x'}).poenteLimite, 'amplo', 'limite inválido volta ao padrão:');
   igual(M.gerar({frente:12, fundo:30, quartos:3, suites:1, orientacao:'O'}).variantes.some(x => x.zoneamento === 'invertido'), false, 'frente a oeste não inverte:');
   const sub = M.gerar({frente:12, fundo:30, quartos:3, suites:1, subsolo:true, orientacao:'L'});
-  ok(sub.variantes.length && sub.avisos.some(a => /fachada a oeste/.test(a)), 'com subsolo: recurso com aviso');
+  ok(sub.variantes.length && sub.avisos.some(a => /fachada no poente/.test(a)), 'com subsolo: recurso com aviso');
 });
 
 // ---------- mobília da planta humanizada (etapa F1) ----------
@@ -705,7 +711,7 @@ const escAmp = c => M.gerar(Object.assign({quartos:3, suites:2, escritorio:true,
 const escDe = v => { const T = v.pav.find(p => p.nome==='Térreo'), e = T.salas.find(s => s.tipo==='escritorio');
   return {T, e, ext: T.portas.filter(d => d.escritorio && d.externa), int: T.portas.filter(d => (d.sala === e.id || d.viz === e.id) && !d.externa)}; };
 t('escritório ampliado: 14 m², na frente, com porta externa e porta interna', () => {
-  for(const c of [{frente:15, fundo:30, orientacao:'SE'}, {frente:15, fundo:30, orientacao:'SE', varanda:false}, {frente:22, fundo:30, formato:'U', orientacao:'SE'}]){
+  for(const c of [{frente:15, fundo:30, orientacao:'SE', poenteLimite:'oeste'}, {frente:15, fundo:30, orientacao:'SE', varanda:false, poenteLimite:'oeste'}, {frente:22, fundo:30, formato:'U', orientacao:'SE', poenteLimite:'oeste'}]){
     const r = escAmp(c); ok(r.variantes.length, JSON.stringify(c) + ': sem variantes');
     const {T, e, ext, int} = escDe(r.variantes[0]);
     ok(e && (e.x1 - e.x0) * (e.y1 - e.y0) >= 11, 'escritório com área perto de 14 m²');
@@ -725,13 +731,13 @@ t('escritório ampliado: no zoneamento invertido fica na frente; no sobrado, no 
 });
 t('escritório ampliado: ramal do portão social até a porta, sem cruzar os carros', () => {
   const D = require('./desenho.js');
-  const v = escAmp({frente:15, fundo:30, orientacao:'SE', varanda:false}).variantes[0], a = v.acessos, {ext} = escDe(v);
+  const v = escAmp({frente:15, fundo:30, orientacao:'SE', varanda:false, poenteLimite:'oeste'}).variantes[0], a = v.acessos, {ext} = escDe(v);
   ok(a.ramal, 'sem ramal');
   const fim = a.ramal.pontos[a.ramal.pontos.length - 1], d = ext[0];
   ok(Math.abs(fim[0] - (d.t0 + d.t1)/2) < 0.01 && Math.abs(fim[1] - d.c) < 0.01, 'o ramal termina na porta do escritório');
   igual(a.ramal.pontos[0], a.caminho.pontos[0], 'o ramal sai do portão social:');
   ok(/Caminho até o escritório/.test(D.planta(v, 0)) && /ESCRITÓRIO</.test(D.planta(v, 0)), 'ramal e marca da porta desenhados');
-  const comVar = escAmp({frente:15, fundo:30, orientacao:'SE'}).variantes[0].acessos;
+  const comVar = escAmp({frente:15, fundo:30, orientacao:'SE', poenteLimite:'oeste'}).variantes[0].acessos;
   ok(!comVar.ramal && comVar.ramalMotivo === 'varanda', 'com a varanda frontal, o acesso é pela varanda');
   const h = escAmp({frente:22, fundo:32, formato:'H', orientacao:'N'}).variantes[0].acessos;
   ok(h.ramal, 'H: ramal pela lateral');

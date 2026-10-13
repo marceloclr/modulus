@@ -35,6 +35,7 @@ const REGRAS = {
   G17: {nome:'Rooftop aberto para o poente sem fechamento', limite:0},
   G18: {nome:'Janela a menos de 1,50 m da divisa (Código Civil, art. 1.301)', limite:0},
   G19: {nome:'Quarto encostado em fachada a oeste (íntimo nunca no poente)', limite:11},
+  G25: {nome:'Quarto em fachada a sudoeste ou noroeste com o limite amplo do poente (O ± 67,5°)', limite:18},
   G20: {nome:'Porta externa do escritório fora da fachada (ou da parede com a varanda frontal)', limite:0},
   G21: {nome:'Caminho até o escritório cruzando a faixa de veículos ou as vagas', limite:0},
   G22: {nome:'Escritório ampliado sem as duas portas (interna e externa)', limite:0},
@@ -235,7 +236,8 @@ function auditar(v, q){
   // G19: na orientação recomendada, nenhum quarto encosta numa fachada a oeste (o motor só mostra isso quando nada escapa)
   if(M.RUMOS[q.orientacao] !== undefined){ const F = M.RUMOS[q.orientacao], w = v.espelharVento ? M.espelharCasa(v) : M.semEspelho(v);
     for(const p of w.pav){ if(p.anexo || p.nome === 'Subsolo' || p.nome === 'Rooftop') continue; const fe = p.salas.filter(s => !ABERTO(s));
-      for(const s of p.salas.filter(x => ['quarto','suite','master'].includes(x.tipo))) if(trechosExternos(s, fe).some(e => { const d = Math.abs(((M.rumoFace(e.lado, F, false) - 270) % 360 + 540) % 360 - 180); return d <= 22.5; })) add('G19', p.nome, s.nome + ' encostado na fachada a oeste'); } }
+      for(const s of p.salas.filter(x => ['quarto','suite','master'].includes(x.tipo))) if(trechosExternos(s, fe).some(e => { const d = Math.abs(((M.rumoFace(e.lado, F, false) - 270) % 360 + 540) % 360 - 180); return d <= 22.5; })) add('G19', p.nome, s.nome + ' encostado na fachada a oeste');
+        else if(q.poenteLimite !== 'oeste' && trechosExternos(s, fe).some(e => { const d = Math.abs(((M.rumoFace(e.lado, F, false) - 270) % 360 + 540) % 360 - 180); return d <= 67.5 + 1e-9; })) add('G25', p.nome, s.nome + ' em fachada a sudoeste ou noroeste'); } }
   // M03, M04: projeção e ocupação recalculadas (térreo ∪ superior ∪ rooftop coberto, sem o subsolo e sem a edícula)
   const ter = v.pav.find(p => p.nome === 'Térreo'), loteA = L.frente * L.fundo;
   const anexosCasa = (v.anexos || []).map(a => ({tipo:a.tipo, x0:a.x0 - v.x0, y0:a.y0 - v.y0, x1:a.x1 - v.x0, y1:a.y1 - v.y0}));
