@@ -58,3 +58,8 @@ Causas:
 
 ## Ordem proposta (um branch por etapa, um commit por passo)
 P → S → T, depois o rooftop (etapa R, já planejada) e por fim a edição direta (J2 a J6).
+
+## Decisões do usuário (13/10/2026)
+- **Limite do poente selecionável:** campo novo `poenteLimite` no bloco Terreno, com as opções "Oeste, sudoeste e noroeste (O ± 67,5°)" (padrão) e "Só o oeste (O ± 22,5°)". A ordem de escolha das variantes, o aviso, a nota e a G19 seguem o limite escolhido.
+- **Ao vivo depois de concluir Dimensões,** com interruptor (como no item T1).
+- **Etapa M mesclada na main.**
