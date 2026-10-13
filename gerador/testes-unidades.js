@@ -249,7 +249,7 @@ t('cards: card solar com as três vistas, fórmulas e normas', () => {
 // ---------- circulação enxuta (05/10/2026) ----------
 t('circulação: a ponta do corredor vai para o quarto do fim e o hall de apoio para a cozinha', () => {
   const v = M.gerar({}).variantes.find(x => x.tipologia.includes('corredor lateral')), T = v.pav[0].salas;
-  const c = T.find(s => s.tipo==='circ'), m = T.find(s => s.tipo==='master'), k = T.find(s => s.tipo==='cozinha');
+  const c = T.filter(s => s.tipo==='circ' && s.nome !== 'Hall do banho').sort((a, b) => (b.y1-b.y0)*(b.x1-b.x0) - (a.y1-a.y0)*(a.x1-a.x0))[0], m = T.find(s => s.tipo==='master'), k = T.find(s => s.tipo==='cozinha');
   ok(!T.some(s => s.tipo==='hall'), 'hall integrado à cozinha');
   igual(c.y1, m.y0, 'o corredor termina na porta da suíte:'); igual([m.x0, m.x1], [0, v.W], 'a suíte ocupa a largura toda:');
   ok(k.integra && m.integra && k.x1 === c.x1, 'cozinha encosta no corredor');
@@ -562,21 +562,26 @@ t('recuos: menos de 1,50 m da divisa não recebe janela (art. 1.301), e o link a
 });
 
 // ---------- inversões (etapa E2.3) ----------
-t('inversões: estar ↔ jantar e cozinha ↔ serviço trocam de lugar; cozinha aberta fica encostada no jantar', () => {
+t('inversões no lugar: só os dois cômodos trocam; os outros e o espelhamento ficam como na planta normal', () => {
   const base = {frente:12, fundo:30, quartos:3, suites:1, orientacao:'N'};
   const ter = v => v.pav.find(p => p.nome === 'Térreo').salas, de = (v, t) => ter(v).find(s => s.tipo === t);
+  const pos = (v, tipos) => ter(v).filter(s => !tipos.includes(s.tipo)).map(s => `${s.tipo}:${s.x0},${s.y0},${s.x1},${s.y1}`).sort().join('|');
   const encosta = v => { const sh = M._interno.compartilhado(de(v, 'cozinha'), de(v, 'jantar')); return !!sh && sh.t1 - sh.t0 >= 1.0; };
   const n = M.gerar(base).variantes[0];
   ok(de(n, 'estar').x0 < de(n, 'jantar').x0 && !n.invertido, 'normal: estar à esquerda do jantar');
-  const ej = M.gerar(Object.assign({invEstarJantar:true}, base));
-  ok(ej.variantes.length && ej.variantes.every(v => v.invertido && de(v, 'jantar').x0 < de(v, 'estar').x0 && encosta(v)), 'estar ↔ jantar: jantar à esquerda e cozinha encostada nele');
-  const dois = M.gerar(Object.assign({invEstarJantar:true, invCozinhaServico:true}, base)).variantes;
-  ok(dois.length && dois.every(v => v.invertido.length === 2 && de(v, 'cozinha').x0 < de(v, 'servico').x0 && encosta(v)), 'as duas inversões juntas');
-  const cs = M.gerar(Object.assign({invCozinhaServico:true}, base));
-  ok(cs.variantes.every(v => !v.invertido || encosta(v)) && (cs.variantes.some(v => v.invertido) || cs.avisos.some(a => /não coube/.test(a))), 'cozinha ↔ serviço com cozinha aberta: aplica ou avisa');
-  const fe = M.gerar(Object.assign({invCozinhaServico:true, cozinha:'fechada'}, base)).variantes[0];
-  ok(fe.invertido && de(fe, 'cozinha').x0 < de(fe, 'servico').x0, 'cozinha fechada: a troca vale');
-  ok(M.gerar(Object.assign({invEstarJantar:true, jantar:false}, base)).avisos.some(a => /sem efeito/.test(a)), 'sem jantar: aviso de inversão sem efeito');
+  // cozinha fechada: estar ↔ jantar vale; nada mais se mexe e o espelhamento é o mesmo
+  const nf = M.gerar(Object.assign({cozinha:'fechada'}, base)).variantes[0], ef = M.gerar(Object.assign({cozinha:'fechada', invEstarJantar:true}, base)).variantes[0];
+  ok(ef.invertido && ef.invertido.includes('estar e jantar') && de(ef, 'jantar').x0 < de(ef, 'estar').x0, 'estar ↔ jantar: jantar à esquerda');
+  igual(pos(ef, ['estar','jantar']), pos(nf, ['estar','jantar']), 'estar ↔ jantar: os outros cômodos no mesmo lugar:');
+  igual(ef.espelharVento, nf.espelharVento, 'estar ↔ jantar: mesmo espelhamento:');
+  // cozinha ↔ serviço
+  const cs = M.gerar(Object.assign({cozinha:'fechada', invCozinhaServico:true}, base)).variantes[0];
+  ok(cs.invertido && de(cs, 'cozinha').x0 < de(cs, 'servico').x0, 'cozinha ↔ serviço: a troca vale');
+  igual(pos(cs, ['cozinha','servico']), pos(nf, ['cozinha','servico']), 'cozinha ↔ serviço: os outros cômodos no mesmo lugar:');
+  // cozinha aberta: estar ↔ jantar só vale se a cozinha continuar encostada no jantar; senão, a variante avisa
+  const ej = M.gerar(Object.assign({invEstarJantar:true}, base)).variantes;
+  ok(ej.length && ej.every(v => (v.invertido && encosta(v)) || v.avisos.some(a => /não coube/.test(a))), 'cozinha aberta: aplica ou avisa');
+  ok(M.gerar(Object.assign({invEstarJantar:true, jantar:false}, base)).variantes.some(v => v.avisos.some(a => /sem efeito/.test(a))), 'sem jantar: aviso de inversão sem efeito');
 });
 
 // ---------- íntimo nunca no poente (etapa E2.8) ----------

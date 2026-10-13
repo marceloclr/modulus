@@ -279,7 +279,13 @@ function compModulo(m, ws){
 function desenhaModulo(m, x0, y0, x1, y1, ladoCorr, inv){
   const ws = x1-x0, out = [];
   if(m.a){ out.push(sala(m.tipo, x0,y0,x1,y1,{mod:m.id, nome:m.nome || TIPOS[m.tipo].nome})); return out; }
-  if(m.tipo==='banhoSocial'){ out.push(sala('banhoSocial', x0,y0,x1,y1,{mod:m.id})); return out; }
+  if(m.tipo==='banhoSocial'){
+    // 13/10/2026: o banho social ocupava a largura toda da faixa (8,5 m² para um alvo de 3,4). Com sobra, o banho fica na fachada,
+    // no tamanho pedido, e o resto vira o hall do banho, aberto para o corredor (é por ele que se entra)
+    const L = y1 - y0, wb = Math.max(TIPOS.banhoSocial.lado + 0.3, (m.ab || TIPOS.banhoSocial.alvo) * 1.2 / L), ext = ladoCorr === 'x1';
+    if(!m.acess && ws - wb >= 1.0){ const bx0 = ext ? x0 : x1 - wb, bx1 = ext ? x0 + wb : x1, hx0 = ext ? bx1 : x0, hx1 = ext ? x1 : bx0;
+      out.push(sala('banhoSocial', bx0, y0, bx1, y1, {mod:m.id})); out.push(sala('circ', hx0, y0, hx1, y1, {nome:'Hall do banho'})); return out; }
+    out.push(sala('banhoSocial', x0,y0,x1,y1,{mod:m.id})); return out; }
   if(m.tipo==='quarto'){ out.push(sala('quarto', x0,y0,x1,y1,{mod:m.id})); return out; }
   const tb = m.tipo==='master'?'banhoMaster':'banhoSuite', tc = m.tipo==='master'?'closetMaster':'closet';
   const db = clamp((m.ab+m.ac)/ws, TIPOS[tb].lado+0.3, 3.2);
@@ -1546,6 +1552,51 @@ function avancoBanho(B, Q, A, F, esp){
    ela, os dois trocam de retângulo. Vale só se os dois continuam com área e lado mínimos, o serviço encostado na cozinha ou numa
    circulação e o outro cômodo com acesso (PREF). O espelhamento considerado é o que tira mais quartos do poente. */
 const TROCA_SERVICO = ['despensa','deposito','rouparia','lavabo','banhoSocial','cozinha'];
+/* Troca dois cômodos de lugar sem mexer nos outros (13/10/2026). Vizinhos na mesma faixa (mesma altura, ou mesma largura):
+   trocam a ordem, cada um com o seu tamanho. Senão, trocam de retângulo, se cada um couber no do outro. Devolve false se não deu. */
+function trocaNoLugar(a, b){
+  const E = 0.001, cabe = (tipo, r) => { const T = TIPOS[tipo], w = r.x1 - r.x0, h = r.y1 - r.y0; return (!T.min || w*h >= T.min - 0.01) && (!T.lado || Math.min(w, h) >= T.lado - 0.01); };
+  if(Math.abs(a.y0 - b.y0) < E && Math.abs(a.y1 - b.y1) < E && (Math.abs(a.x1 - b.x0) < E || Math.abs(b.x1 - a.x0) < E)){
+    const [e, d] = a.x0 < b.x0 ? [a, b] : [b, a], x0 = e.x0, we = e.x1 - e.x0, wd = d.x1 - d.x0;
+    Object.assign(d, {x0:r2(x0), x1:r2(x0 + wd)}); Object.assign(e, {x0:r2(x0 + wd), x1:r2(x0 + wd + we)}); return true; }
+  if(Math.abs(a.x0 - b.x0) < E && Math.abs(a.x1 - b.x1) < E && (Math.abs(a.y1 - b.y0) < E || Math.abs(b.y1 - a.y0) < E)){
+    const [s, n] = a.y0 < b.y0 ? [a, b] : [b, a], y0 = s.y0, hs = s.y1 - s.y0, hn = n.y1 - n.y0;
+    Object.assign(n, {y0:r2(y0), y1:r2(y0 + hn)}); Object.assign(s, {y0:r2(y0 + hn), y1:r2(y0 + hn + hs)}); return true; }
+  if(!cabe(a.tipo, b) || !cabe(b.tipo, a)) return false;
+  const ra = {x0:a.x0, y0:a.y0, x1:a.x1, y1:a.y1}; Object.assign(a, {x0:b.x0, y0:b.y0, x1:b.x1, y1:b.y1}); Object.assign(b, ra); return true;
+}
+// troca em teste: refaz as portas do pavimento e desfaz se algum cômodo ficar solto (ou se "ok" falhar)
+function trocaSegura(v, q, p, a, b, ok){
+  const soltos = () => aberturas(p, q, p.nome==='Térreo', false, v.W).avisos.filter(x => /não se liga ao resto da casa|não tem porta de entrada/.test(x)).length;
+  const antes = soltos(), ga = {x0:a.x0, y0:a.y0, x1:a.x1, y1:a.y1}, gb = {x0:b.x0, y0:b.y0, x1:b.x1, y1:b.y1};
+  if(!trocaNoLugar(a, b)) return false;
+  if(soltos() > antes || (ok && !ok())){ Object.assign(a, ga); Object.assign(b, gb); return false; }
+  return true;
+}
+function inverteNoLugar(v, q, av){
+  const pedidos = [[q.invEstarJantar, 'estar', 'jantar', 'estar e jantar'], [q.invCozinhaServico, 'cozinha', 'servico', 'cozinha e serviço']].filter(x => x[0]);
+  if(!pedidos.length) return;
+  const p = v.pav.find(x => x.nome === 'Térreo'); if(!p) return;
+  const okCoz = () => q.cozinha !== 'aberta' || cozinhaNoJantar(v);
+  v.invertido = [];
+  for(const [, ta, tb, nome] of pedidos){ const a = p.salas.find(s => s.tipo === ta), b = p.salas.find(s => s.tipo === tb);
+    if(!a || !b){ av.push(`Inversão de ${nome} sem efeito: o programa não tem os dois cômodos.`); continue; }
+    if(trocaSegura(v, q, p, a, b, okCoz)) v.invertido.push(nome);
+    else av.push(`A inversão de ${nome} não coube nesta variante${q.cozinha === 'aberta' ? ' com a cozinha aberta encostada no jantar' : ''}; ficou a ordem normal.`); }
+  if(!v.invertido.length) delete v.invertido;
+}
+/* Em L e em U, as salas vão para o nascente, total ou parcialmente (13/10/2026): se nenhuma sala toca uma face entre NE e SE
+   e um cômodo de apoio toca, eles trocam de lugar (troca segura). O espelhamento considerado é o que tira mais quartos do poente. */
+function salasNoNascente(v, q, av){
+  const F = RUMOS[q.orientacao]; if(F === undefined || !/^Em [LU]/.test(v.tipologia)) return;
+  const esp = quartosNoPoente(v, q, true).length < quartosNoPoente(v, q, false).length, p = v.pav.find(x => x.nome === 'Térreo'); if(!p) return;
+  const fe = p.salas.filter(s => !TIPOS[s.tipo].aberto), nasc = s => trechosExternos(s, fe).some(e => difAng(rumoFace(e.lado, F, esp), 90) <= 67.5 + 1e-9);
+  const salas = p.salas.filter(s => ['estar','jantar','tv'].includes(s.tipo)); if(!salas.length || salas.some(nasc)) return;
+  const okCoz = () => q.cozinha !== 'aberta' || cozinhaNoJantar(v);
+  for(const c of p.salas.filter(s => ['cozinha','servico','despensa','deposito','lavabo','banhoSocial'].includes(s.tipo) && nasc(s)).sort((a, b) => (b.x1-b.x0)*(b.y1-b.y0) - (a.x1-a.x0)*(a.y1-a.y0)))
+    for(const s of salas.slice().sort((a, b) => (b.x1-b.x0)*(b.y1-b.y0) - (a.x1-a.x0)*(a.y1-a.y0)))
+      if(trocaSegura(v, q, p, s, c, okCoz)){ v.salasNascente = true; av.push(`${rotulo(s)} levado para o nascente (troca com ${rotulo(c).toLowerCase()}).`); return; }
+}
 function ajustaServico(v, q){
   const F = RUMOS[q.orientacao]; if(F === undefined || q.invCozinhaServico) return;   // a inversão pedida pelo usuário vence
   const esp = quartosNoPoente(v, q, true).length < quartosNoPoente(v, q, false).length;
@@ -1729,7 +1780,7 @@ function avalia(v, q){
   const abrir = esp => { const avs = []; for(const p of v.pav){ if(p.fixo) continue; const ab = aberturas(p, q, p.nome==='Térreo', esp, v.W); p.portas = ab.portas; p.vaos = ab.vaos; p.janelas = ab.janelas;
     p.aberturasPor = Object.assign(p.aberturasPor || {}, {[esp ? 'espelhada' : 'normal']: {portas:ab.portas, vaos:ab.vaos, janelas:ab.janelas}}); avs.push(...ab.avisos); } return avs; };
   for(const p of v.pav) delete p.aberturasPor;
-  ajustaServico(v, q); ajustaBanhos(v, q);
+  inverteNoLugar(v, q, av); salasNoNascente(v, q, av); ajustaServico(v, q); ajustaBanhos(v, q);
   let ori = null;
   if(RUMOS[q.orientacao] === undefined){
     // sem orientação, o sol não conta; com recuos iguais as janelas não dependem do espelho: abre uma vez e compara só o vento
@@ -2236,14 +2287,7 @@ function gerar(entrada, opts){
   // opts.posAvalia: avaliações extras (estrutura etc.), aplicadas antes da ordenação; sem elas o resultado não muda
   const monta = P0 => geraTodas(q, P0, Ws).map(v => avalia(comAnexos(v, q), q)).map(v => { for(const fn of ((opts && opts.posAvalia) || [])) fn(v, q); return v; });
   let todas;
-  if(q.invEstarJantar || q.invCozinhaServico){
-    const {Pi, feitas} = invertido(P, q);
-    if(!feitas.length) avisos.push('Inversão pedida sem efeito: o programa não tem os dois cômodos de cada par.');
-    const inv = feitas.length ? monta(Pi).map(v => Object.assign(v, {invertido:feitas})) : [];
-    const ok = v => q.cozinha!=='aberta' || cozinhaNoJantar(v);          // cozinha aberta continua encostada no jantar
-    if(inv.some(v => ok(v) && !v.invalida.length)){ todas = inv.filter(ok); P = Pi; }
-    else { todas = monta(P); if(feitas.length) avisos.push(`A inversão de ${feitas.join(' e de ')} não coube neste terreno${q.cozinha==='aberta' ? ' com a cozinha aberta encostada no jantar' : ''}; as variantes mostram a ordem normal.`); }
-  } else todas = monta(P);
+  todas = monta(P);   // inversões pedidas: feitas no lugar, em cada variante (inverteNoLugar, em avalia)
   if(!todas.length && q.formato!=='auto') avisos.push(`O formato ${NOMES[q.formato]} não cabe na área edificável de ${f2(B)} m de largura. Veja o terreno mínimo para este formato ou escolha outro.`);
   todas.sort((a,b) => (a.vfFalta ? 1 : 0) - (b.vfFalta ? 1 : 0) || b.score-a.score || a.W*a.D-b.W*b.D);
   // até 3 variantes, preferindo tipologias diferentes

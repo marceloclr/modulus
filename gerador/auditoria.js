@@ -35,7 +35,7 @@ const REGRAS = {
   G17: {nome:'Rooftop aberto para o poente sem fechamento', limite:0},
   G18: {nome:'Janela a menos de 1,50 m da divisa (Código Civil, art. 1.301)', limite:0},
   G19: {nome:'Quarto encostado em fachada a oeste (íntimo nunca no poente)', limite:11},
-  G25: {nome:'Quarto em fachada a sudoeste ou noroeste com o limite amplo do poente (O ± 67,5°)', limite:18},
+  G25: {nome:'Quarto em fachada a sudoeste ou noroeste com o limite amplo do poente (O ± 67,5°)', limite:19},
   G20: {nome:'Porta externa do escritório fora da fachada (ou da parede com a varanda frontal)', limite:0},
   G21: {nome:'Caminho até o escritório cruzando a faixa de veículos ou as vagas', limite:0},
   G22: {nome:'Escritório ampliado sem as duas portas (interna e externa)', limite:0},
